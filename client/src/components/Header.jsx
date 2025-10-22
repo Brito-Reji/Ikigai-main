@@ -33,7 +33,7 @@ export default function Header() {
             <button className="p-2 hover:bg-gray-100 rounded-lg">
               <ShoppingCart className="w-5 h-5 text-gray-700" />
             </button>
-            <Button variant="ghost" size="sm" className="text-gray-700">
+            <Button variant="ghost" size="sm" className="text-gray-700 border-2">
               Log In
             </Button>
             <Button
