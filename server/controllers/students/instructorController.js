@@ -5,7 +5,7 @@ import { User } from '../../models/User.js'
 import jwt from 'jsonwebtoken'
 // import { User } from './model/'
 
-export const studentRegister = asyncHandler(async (req, res) => {
+export const instructorRegister = asyncHandler(async (req, res) => {
   let { email, username, firstname, lastname, password,role } = req.body;
 
   if (!email || !username || !firstname || !lastname || !password || !role) {
@@ -80,16 +80,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
     
 })
 
-const studentLogin = asyncHandler(async (req, res) => { });
 
-const studentForgetPassword = asyncHandler(async (req, res) => { });
-
-
-const studentAddToCart = asyncHandler(async (req, res) => { });
-
-const verifyOtp = asyncHandler((req, res) => {
-    
-})
 
 
 
