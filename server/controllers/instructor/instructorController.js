@@ -83,3 +83,73 @@ export const instructorRegister = asyncHandler(async (req, res) => {
 
 
 
+export const instructorSignin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate required fields
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide email and password",
+    });
+  }
+
+  // Find user by email
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  // Check if user is an instructor
+  if (user.role !== "instructor") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Instructor account required",
+    });
+  }
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  // Generate JWT token
+  const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: 86400, // 24 hours
+    }
+  );
+
+  return res.json({
+    success: true,
+    message: "Sign in successful",
+    data: {
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        role: user.role,
+        profileImageUrl: user.profileImageUrl || null,
+      },
+      token,
+    },
+  });
+});
