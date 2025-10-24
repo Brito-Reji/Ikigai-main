@@ -64,14 +64,12 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     message: "Account created successfully",
     data: {
       user: {
-
         email,
         username,
         firstname,
         lastname,
         role,
         profileImageUrl: null,
-        
       },
   token
     },

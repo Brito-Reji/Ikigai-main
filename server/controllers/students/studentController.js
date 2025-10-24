@@ -14,7 +14,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Please provide all requird fields" });
   }
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-  console.log(existingUser)
+  console.log(existingUser," student")
   if (existingUser)
     return res
       .status(400)
