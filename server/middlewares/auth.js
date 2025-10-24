@@ -1,4 +1,4 @@
-// middleware/auth.js
+
 import jwt from "jsonwebtoken";
 
 export const verifyAdmin = (req, res, next) => {
@@ -42,6 +42,6 @@ export const verifyInstructor = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Invalid token" })
   }
 };
