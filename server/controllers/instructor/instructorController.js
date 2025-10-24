@@ -6,9 +6,10 @@ import jwt from 'jsonwebtoken'
 
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-  let { email, username, firstname, lastname, password, role } = req.body;
+  let { email, username, firstname, lastname, password } = req.body;
+  let role = "instructor"
 
-  if (!email || !username || !firstname || !lastname || !password || !role) {
+if (!email || !username || !firstname || !lastname || !password ) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all requird fields" });
@@ -46,7 +47,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     username,
     firstname,
     lastname,
-    role,
+    role
   });
 
   let token = jwt.sign(

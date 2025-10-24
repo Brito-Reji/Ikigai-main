@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler'
 
-const getInstructorCourse = asyncHandler(async (req, res) => {
-    
+export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
+    console.log(req.user)
+    res.end()
 })

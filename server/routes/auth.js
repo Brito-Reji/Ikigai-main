@@ -7,8 +7,8 @@ import { instructorRegister, instructorSignin } from '../controllers/instructor/
 
 const router = express.Router()
 // Instrucotr Route
-router.get('/instructor/register', instructorRegister)
-router.get('/instructor/signin',instructorSignin)
+router.post('/instructor/register', instructorRegister)
+router.post('/instructor/signin',instructorSignin)
 
 router.post('/student/register', studentRegister)
 

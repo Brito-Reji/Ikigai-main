@@ -46,7 +46,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
         username,
         firstname,
         lastname,
-        role,
+        role:'student'
     })
   
   let token = jwt.sign(
