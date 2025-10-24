@@ -1,12 +1,15 @@
 import express from 'express'
 import { studentRegister } from '../controllers/students/studentController.js'
 import { instructorRegister } from '../controllers/students/instructorController.js'
+import { adminLogin } from '../controllers/admin/adminController.js'
 
 
 const router = express.Router()
 
 router.get('/instructor/register',instructorRegister)
 
-router.post('/student/register',studentRegister)
+router.post('/student/register', studentRegister)
+
+router.post('/admin/login',adminLogin)
 
 export default router
