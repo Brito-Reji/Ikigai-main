@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 // import { User } from './model/'
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-  let { email, username, firstname, lastname, password,role } = req.body;
+  let { email, username, firstname, lastname, password } = req.body;
 
   if (!email || !username || !firstname || !lastname || !password || !role) {
     return res
@@ -45,7 +45,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
         username,
         firstname,
         lastname,
-        role,
+        role:'instructor'
     })
   
   let token = jwt.sign(
