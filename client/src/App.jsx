@@ -4,6 +4,7 @@ import Footer from './components/Footer'
 import Hero from './components/Hero'
 import { Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/LandingPage.jsx';
+import SignupPage from './pages/SignupPage.jsx';
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
           <Route path="contact" element={<Contact />} />
         </Route>
       </Routes> */}
-      <LandingPage/>
+      {/* <LandingPage/> */}
+      <SignupPage/>
     </div>
   );
 }
