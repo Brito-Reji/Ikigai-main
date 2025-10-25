@@ -4,6 +4,8 @@ import { verifyInstructor } from '../middlewares/auth.js'
 
 const router = Router()
 
-router.get('/course', verifyInstructor,getAllCourseByInstructor)
+router.get('/course', getAllCourseByInstructor)
+
+// router.post('/course/create')
 
 export default router

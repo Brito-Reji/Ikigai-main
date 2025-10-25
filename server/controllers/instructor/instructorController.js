@@ -41,17 +41,19 @@ if (!email || !username || !firstname || !lastname || !password ) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  User.create({
+ let user= await User.create({
     email: email.toLowerCase(),
     password: hashedPassword,
     username,
     firstname,
     lastname,
     role
-  });
+ });
+  
 
   let token = jwt.sign(
     {
+      id :user.id,
       email,
       username,
       role,
