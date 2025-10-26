@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Header({
   isAuthenticated = false,
@@ -92,10 +93,14 @@ export default function Header({
               </>
             ) : (
               <>
-                {/* Unauthenticated User Actions - Always visible on desktop */}
+                  {/* Unauthenticated User Actions - Always visible on desktop */}
+                  <Link to={'/login'}>
+                  
                 <button className="hidden md:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm border border-gray-300 rounded-lg">
                   Log In
                 </button>
+                  </Link>
+                  <
                 <button className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
                   Sign Up
                 </button>
