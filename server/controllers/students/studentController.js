@@ -6,9 +6,9 @@ import jwt from 'jsonwebtoken'
 // import { User } from './model/'
 
 export const studentRegister = asyncHandler(async (req, res) => {
-  let { email, username, firstname, lastname, password,role } = req.body;
-
-  if (!email || !username || !firstname || !lastname || !password || !role) {
+  let { email, username, firstName, lastName, password } = req.body;
+console.log(req.body)
+  if (!email || !username || !firstName || !lastName || !password) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all requird fields" });
@@ -38,22 +38,22 @@ export const studentRegister = asyncHandler(async (req, res) => {
   }
     
      const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
+  const hashedPassword = await bcrypt.hash(password, salt);
+  let role = "student"
     User.create({
         email: email.toLowerCase(),
       password: hashedPassword,
         username,
-        firstname,
-        lastname,
-        role:'student'
+        firstName,
+        lastName,
+        role
     })
   
   let token = jwt.sign(
     {
       email,
       username,
-      role,
+      role
     },
     process.env.JWT_SECRET
     , {
@@ -67,8 +67,8 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
         email,
         username,
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         role,
         profileImageUrl: null,
         

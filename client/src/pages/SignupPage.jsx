@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import axios from 'axios'
+import api from '../api/axiosConfig.js'
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
+import { data } from "react-router-dom";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -90,9 +91,14 @@ export default function SignUpPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-     axios.post("http://localhost:3000/api/auth/student/register",);
+      //  axios.post("http://localhost:3000/api/auth/student/register",);
+      api.post('/auth/student/register', formData).then((data) => {
+        console.log(data)
+      }).catch(err => {
+        console.log(err)
+      })
     }
-  };
+  }
 
   const handleGoogleSignUp = () => {
     console.log("Sign up with Google");
@@ -100,7 +106,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+  
 
       {/* Main Content */}
       <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">

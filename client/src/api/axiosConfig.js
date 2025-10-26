@@ -1,22 +1,26 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000",
-    withCredentials:true
-})
-
+  baseURL: "http://localhost:3000/api",
+  withCredentials: true, 
+});
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+
+    // Check if error.response exists to avoid crashes
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
       try {
         await api.post("/refresh"); // server sets new access token in cookie
         return api(originalRequest); // retry the original request
       } catch (err) {
         console.log("Refresh failed, user must login again");
+        // Optional: redirect to login or dispatch logout action
+        // window.location.href = '/login';
         return Promise.reject(err);
       }
     }
