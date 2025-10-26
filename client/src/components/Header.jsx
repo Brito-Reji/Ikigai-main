@@ -1,22 +1,25 @@
 "use client";
+import { useState } from "react";
 import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function Header({
   isAuthenticated = false,
   onMenuToggle,
   menuOpen,
 }) {
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left Section - Logo & Menu */}
           <div className="flex items-center space-x-4 sm:space-x-8">
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Only on small screens */}
             <button
               onClick={onMenuToggle}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+              className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+              aria-label="Toggle menu"
             >
               {menuOpen ? (
                 <X className="w-5 h-5" />
@@ -38,13 +41,13 @@ export default function Header({
             {/* Desktop Categories Link */}
             <a
               href="#"
-              className="hidden sm:block text-gray-700 hover:text-gray-900 transition"
+              className="hidden md:block text-gray-700 hover:text-gray-900 transition"
             >
               Categories
             </a>
           </div>
 
-          {/* Center - Search Bar */}
+          {/* Center - Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-4 lg:mx-8">
             <div className="relative w-full">
               <input
@@ -58,16 +61,29 @@ export default function Header({
 
           {/* Right Section - Actions */}
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Mobile Search Icon - Only on small screens */}
+            <button
+              onClick={() => setShowMobileSearch(!showMobileSearch)}
+              className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              aria-label="Toggle search"
+            >
+              {showMobileSearch ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
+            </button>
+
             {isAuthenticated ? (
               <>
-                {/* Authenticated User Actions */}
-                <button className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                {/* Authenticated User Actions - Always visible on desktop */}
+                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <Heart className="w-5 h-5" />
                 </button>
-                <button className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <ShoppingCart className="w-5 h-5" />
                 </button>
-                <button className="hidden sm:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <Bell className="w-5 h-5" />
                 </button>
                 <button className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition">
@@ -76,22 +92,97 @@ export default function Header({
               </>
             ) : (
               <>
-                {/* Unauthenticated User Actions */}
-                <Link to={"/login"}>
-                  <button className="hidden sm:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm">
-                    Sign In
-                  </button>
-                </Link>
-                <Link to={"/signup"}>
-                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
-                    Sign Up
-                  </button>
-                </Link>
+                {/* Unauthenticated User Actions - Always visible on desktop */}
+                <button className="hidden md:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm border border-gray-300 rounded-lg">
+                  Log In
+                </button>
+                <button className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
+                  Sign Up
+                </button>
               </>
             )}
           </div>
         </div>
+
+        {/* Mobile Search Bar - Only shows on small screens when toggled */}
+        {showMobileSearch && (
+          <div className="md:hidden pb-4 pt-2 animate-in slide-in-from-top">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search courses"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                autoFocus
+              />
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Mobile Menu Overlay - Only on small screens */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 top-16 bg-white z-30 overflow-y-auto">
+          <nav className="px-4 py-6 space-y-4">
+            <a
+              href="#"
+              className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+            >
+              Categories
+            </a>
+            
+            {isAuthenticated ? (
+              <>
+                <a
+                  href="#"
+                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                >
+                  <Heart className="w-5 h-5" />
+                  <span>Wishlist</span>
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Cart</span>
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span>Notifications</span>
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Profile</span>
+                </a>
+              </>
+            ) : (
+              <>
+                <a
+                  href="#"
+                  className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium"
+                >
+                  Log In
+                </a>
+                <a
+                  href="#"
+                  className="block py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-4 transition font-medium text-center"
+                >
+                  Sign Up
+                </a>
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
+
+// Demo wrapper
