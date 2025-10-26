@@ -106,8 +106,6 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-white">
-  
-
       {/* Main Content */}
       <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
         {/* Left Side - Image */}

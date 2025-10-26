@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
+import { Link } from "react-router-dom";
 
 export default function LandingPage() {
   // const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -165,9 +166,12 @@ export default function LandingPage() {
                 professional growth, and we're here to guide you on your journey
                 to success.
               </p>
+              <Link to={'/signup'}>
               <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Start your learning journey
               </button>
+              </Link>
+              
             </div>
             <div className="relative h-96 hidden md:block">
               <div className="absolute top-0 right-0 w-48 h-48 bg-red-400 rounded-full"></div>
@@ -200,9 +204,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Top Categories</h2>
-            <a href="#" className="text-blue-600 hover:text-blue-700">
+            <Link to={"/courses"} className="text-blue-600 hover:text-blue-700">
               See All
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((cat, idx) => (
@@ -224,9 +228,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Top Courses</h2>
-            <a href="#" className="text-blue-600 hover:text-blue-700">
+            <Link to={"/courses"} className="text-blue-600 hover:text-blue-700">
               See All
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {courses.map((course, idx) => (
@@ -243,9 +247,9 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold text-gray-900">
               Top Instructors
             </h2>
-            <a href="#" className="text-blue-600 hover:text-blue-700">
+            <Link to={"/courses"} className="text-blue-600 hover:text-blue-700">
               See All
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {instructors.map((instructor, idx) => (

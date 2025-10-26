@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 // import img from "next/img";
 
 export default function Hero() {
@@ -18,9 +19,11 @@ export default function Hero() {
               is the key to personal and professional growth, and we're here to
               guide you on your journey to success.
             </p>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base">
-              Start your learning journey
-            </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base">
+            <Link to={'/signup'}>
+                Start your learning journey
+            </Link>
+              </Button>
           </div>
 
           {/* Right - Profile Circles */}
