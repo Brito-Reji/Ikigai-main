@@ -2,14 +2,13 @@ import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcrypt'
 import { User } from '../../models/User.js'
 import jwt from 'jsonwebtoken'
-// import { User } from './model/'
 
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-  let { email, username, firstname, lastname, password } = req.body;
+  let { email, username, firstName, lastName, password } = req.body;
   let role = "instructor"
 
-if (!email || !username || !firstname || !lastname || !password ) {
+if (!email || !username || !firstName || !lastName || !password ) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all requird fields" });
