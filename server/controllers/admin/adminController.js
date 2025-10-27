@@ -28,10 +28,14 @@ export const adminLogin = asyncHandler(async (req, res) => {
     }
 
     // Compare password
-      const isMatch = await bcrypt.compare(password, user.password, (err,value) => {
-        console.log(value)
-    });
-  
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
+    }
+
     // Generate token
     const token = jwt.sign(
       { id: user._id, role: user.role },

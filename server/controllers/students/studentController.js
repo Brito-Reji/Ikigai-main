@@ -40,7 +40,7 @@ console.log(req.body)
      const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "student"
-    User.create({
+   let user = await User.create({
         email: email.toLowerCase(),
       password: hashedPassword,
         username,
@@ -51,6 +51,7 @@ console.log(req.body)
   
   let token = jwt.sign(
     {
+      id :user.id,
       email,
       username,
       role
