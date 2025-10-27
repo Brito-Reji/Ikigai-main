@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import api from '../api/axiosConfig.js'
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
-import { data, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function SignUpPage() {
