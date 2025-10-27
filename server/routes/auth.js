@@ -3,7 +3,7 @@ import { studentRegister } from '../controllers/students/studentController.js'
 import jwt from 'jsonwebtoken'
 import { adminLogin } from '../controllers/admin/adminController.js'
 import { instructorRegister, instructorSignin } from '../controllers/instructor/instructorController.js'
-import { getMe } from '../middlewares/auth.js'
+
 import { User } from 'lucide-react'
 
 
@@ -39,8 +39,6 @@ try{
 }
 })
 
-// get me
-
-router.get('/me', getMe)
+ 
 
 export default router

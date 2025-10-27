@@ -49,17 +49,20 @@ console.log(req.body)
         role
     })
   
-  let token = jwt.sign(
+  let accessToken = jwt.sign(
     {
-      id :user.id,
+      id :user._id,
       email,
       username,
       role
     },
     process.env.JWT_SECRET
     , {
-    expiresIn:86400
+    expiresIn:60*1000
     });
+    let refreshToken = jwt.sign({
+
+    })
   res.cookie('authToken', token, {
     httpOnly: true,
     

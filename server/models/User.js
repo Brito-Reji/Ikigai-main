@@ -68,6 +68,10 @@ const userSchema = new Schema(
       github: { type: String, trim: true },
       youtube: { type: String, trim: true },
     },
+    isBlocked:{
+      type:Boolean,
+      default:false
+    }
   },
   {
     timestamps: true, 

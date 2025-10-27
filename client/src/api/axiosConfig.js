@@ -15,7 +15,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await api.post("/refresh"); // server sets new access token in cookie
+        await api.get("/auth/refresh"); // server sets new access token in cookie
         return api(originalRequest); // retry the original request
       } catch (err) {
         console.log("Refresh failed, user must login again");
