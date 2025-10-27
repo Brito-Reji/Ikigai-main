@@ -71,7 +71,8 @@ const userSchema = new Schema(
     isBlocked:{
       type:Boolean,
       default:false
-    }
+    },
+    refreshToken:String
   },
   {
     timestamps: true, 

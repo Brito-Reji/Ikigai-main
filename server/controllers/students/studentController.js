@@ -51,22 +51,29 @@ console.log(req.body)
   
   let accessToken = jwt.sign(
     {
-      id :user._id,
+      id: user._id,
       email,
       username,
-      role
+      role,
     },
-    process.env.JWT_SECRET
-    , {
-    expiresIn:60*1000
+    process.env.JWT_ACCESS_SECRET,
+    {
+      expiresIn: 60 * 1000,
+    }
+  );
+    let refreshToken = jwt.sign(
+      {
+        id: user._id,
+        email,
+        username,
+        role,
+      },
+      process.env.JWT_REFRESH_SECRET
+      , {
+      expiresIn:7*24*60*1000
     });
-    let refreshToken = jwt.sign({
-
-    })
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    
-  })
+  user.refreshToken = refreshToken;
+  await user.save()
   return res.json({
     success: true,
     message: "Account created successfully",
@@ -81,7 +88,7 @@ console.log(req.body)
         profileImageUrl: null,
         
       },
-  token
+  accessToken,
     },
   });
     

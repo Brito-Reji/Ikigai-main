@@ -52,12 +52,12 @@ if (!email || !username || !firstName || !lastName || !password ) {
 
   let token = jwt.sign(
     {
-      id :user.id,
+      id: user.id,
       email,
       username,
       role,
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_ACCESS_SECRET,
     {
       expiresIn: 86400,
     }
