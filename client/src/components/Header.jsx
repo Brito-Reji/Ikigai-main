@@ -1,13 +1,15 @@
 "use client";
 import { useState } from "react";
 import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useActionData } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function Header({
-  isAuthenticated = false,
   onMenuToggle,
   menuOpen,
 }) {
+  let { user } = useAuth()
+  let isAuthenticated = !!user
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   return (
@@ -100,10 +102,12 @@ export default function Header({
                   Log In
                 </button>
                   </Link>
-                  <
+                  <Link to={'signup'}>
+                  
                 <button className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
                   Sign Up
                 </button>
+                  </Link>
               </>
             )}
           </div>

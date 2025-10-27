@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import api from '../api/axiosConfig.js'
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
-import { data } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function SignUpPage() {
+  let navigate = useNavigate()
+  let { setUser, user } = useAuth()
+  if (user) {
+    navigate('/course')
+  }
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -92,8 +98,15 @@ export default function SignUpPage() {
     e.preventDefault();
     if (validateForm()) {
       //  axios.post("http://localhost:3000/api/auth/student/register",);
-      api.post('/auth/student/register', formData).then((data) => {
-        console.log(data)
+      api.post('/auth/student/register', formData).then((res) => {
+        let { data } = res;
+        console.log(data.data.user)
+        if (data.success) {
+          setUser(data.data.user)
+          navigate('/course')
+        }
+
+       
       }).catch(err => {
         console.log(err)
       })

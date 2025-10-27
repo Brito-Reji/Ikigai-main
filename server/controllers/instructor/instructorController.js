@@ -136,7 +136,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: 86400, // 24 hours
+      expiresIn: 86400, 
     }
   );
 

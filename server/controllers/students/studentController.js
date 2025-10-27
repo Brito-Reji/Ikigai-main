@@ -58,7 +58,11 @@ console.log(req.body)
     process.env.JWT_SECRET
     , {
     expiresIn:86400
-  });
+    });
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    
+  })
   return res.json({
     success: true,
     message: "Account created successfully",
