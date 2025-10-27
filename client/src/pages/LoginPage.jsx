@@ -38,7 +38,7 @@ function LoginPage() {
                 Email
               </label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 placeholder="Username or Email ID"
                 value={formData.email}
