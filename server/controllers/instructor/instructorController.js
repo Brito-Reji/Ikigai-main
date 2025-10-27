@@ -44,8 +44,8 @@ if (!email || !username || !firstName || !lastName || !password ) {
     email: email.toLowerCase(),
     password: hashedPassword,
     username,
-    firstname,
-    lastname,
+    firstName,
+    lastName,
     role
  });
   
@@ -69,8 +69,8 @@ if (!email || !username || !firstName || !lastName || !password ) {
       user: {
         email,
         username,
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         role,
         profileImageUrl: null,
       },

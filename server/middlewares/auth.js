@@ -58,11 +58,12 @@ export const getMe = asyncHandler(async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-   
     res.status(200).json({
       success: true,
       user: {
-        id: decoded.userId,
+        id: decoded.id,     
+        email: decoded.email,   
+        username: decoded.username, 
         role: decoded.role,
       },
     });
