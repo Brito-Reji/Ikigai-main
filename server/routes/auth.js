@@ -5,6 +5,7 @@ import { adminLogin } from '../controllers/admin/adminController.js'
 import { instructorRegister, instructorSignin } from '../controllers/instructor/instructorController.js'
 
 import { User } from 'lucide-react'
+import { sentOTP, verifyOTP } from '../utils/sendEmail.js'
 
 
 const router = express.Router()
@@ -15,6 +16,21 @@ router.post('/instructor/signin',instructorSignin)
 router.post('/student/register', studentRegister)
 
 router.post('/admin/login', adminLogin)
+
+
+// OTP
+
+router.post('/send-otp', sentOTP)
+router.post('/verify-otp',verifyOTP)
+
+
+
+
+
+
+
+
+
 
 router.get('/refresh',async (req,res)=>{
 try{

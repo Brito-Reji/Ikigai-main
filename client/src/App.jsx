@@ -9,6 +9,7 @@ import Layout from './components/Layout.jsx';
 // import CoursesPage from './pages/CourseListingPage.jsx';
 import CourseListingPage from './pages/CourseListingPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import OTPVerificationPage from './pages/OTPVerificationPage.jsx';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path='/login' element={<LoginPage/>} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/course" element={<CourseListingPage />} />
+          <Route path='/verify-otp' element={<OTPVerificationPage/>} />
           {/* <Route path="courses" element={<Courses />} /> */}
           {/* <Route path="cart" element={<Cart />} />
           <Route path="wishlist" element={<Wishlist />} /> */}
