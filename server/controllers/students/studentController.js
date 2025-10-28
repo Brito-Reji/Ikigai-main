@@ -46,53 +46,11 @@ console.log(req.body)
         username,
         firstName,
         lastName,
-        role
-    })
+     role,
+   })
   
-  let accessToken = jwt.sign(
-    {
-      id: user._id,
-      email,
-      username,
-      role,
-    },
-    process.env.JWT_ACCESS_SECRET,
-    {
-      expiresIn: 60 * 1000,
-    }
-  );
-    let refreshToken = jwt.sign(
-      {
-        id: user._id,
-        email,
-        username,
-        role,
-      },
-      process.env.JWT_REFRESH_SECRET
-      , {
-      expiresIn:7*24*60*1000
-    });
-  user.refreshToken = refreshToken;
-  await user.save()
-  return res.json({
-    success: true,
-    message: "Account created successfully",
-    data: {
-      user: {
-
-        email,
-        username,
-        firstName,
-        lastName,
-        role,
-        profileImageUrl: null,
-        
-      },
-  accessToken,
-    },
-  });
-    
-    
+ await user.save()
+      
 })
 
 const studentLogin = asyncHandler(async (req, res) => { });

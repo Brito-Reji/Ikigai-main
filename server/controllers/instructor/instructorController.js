@@ -46,7 +46,8 @@ if (!email || !username || !firstName || !lastName || !password ) {
     username,
     firstName,
     lastName,
-    role
+    role,
+
  });
   
 

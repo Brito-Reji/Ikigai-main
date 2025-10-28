@@ -113,7 +113,11 @@ export default function OTPVerificationPage() {
         // navigate('/dashboard') or navigate('/course')
       }, 1500);
     } catch (error) {
-      setError(error.message);
+       const errorMessage =
+         error.response?.data?.message ||
+         error.message ||
+         "Failed to verify OTP";
+      setError(errorMessage);
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
     } finally {

@@ -97,15 +97,13 @@ export default function SignUpPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      let res = api.post('/auth/send-otp', {
-        email:formData.email
-      })
-      console.log("res:",res)
-        navigate("/verify-otp", {
-          state: {
-            email: formData.email,
-          },
-        });
+    api.post('/auth/student/register',{
+      email:formData.email,
+      username:formData.username,
+      firstName:formData.firstName,
+   lastName:formData.lastName,
+   password:formData.password
+    })
      
     }
   }

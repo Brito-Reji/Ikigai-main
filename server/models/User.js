@@ -72,6 +72,10 @@ const userSchema = new Schema(
       type:Boolean,
       default:false
     },
+    isVerfied:{
+      type:Boolean,
+      default:false
+    },
     refreshToken:String
   },
   {
