@@ -1,30 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "@/api/axiosConfig.js";
 
 export default function OTPVerificationPage() {
-    const location = useLocation();
-  const navigate = useNavigate()
+  // For demo purposes - in real app, get from route state
+  const location = useLocation();
+  const navigate = useNavigate();
   // Get email from navigation state or props
   const [email] = useState(location.state.email); // Replace with actual email from previous page
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [otpTimer, setOtpTimer] = useState(120); // 2 minutes
+  const [otpTimer, setOtpTimer] = useState(0);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [resendingOtp, setResendingOtp] = useState(false);
   const [error, setError] = useState("");
   const [verified, setVerified] = useState(false);
+
+  // Initialize timer from localStorage on mount
+  useEffect(() => {
+    const storedExpiry = localStorage.getItem("otpExpiry");
+
+    if (storedExpiry) {
+      const expiryTime = parseInt(storedExpiry, 10);
+      const now = Date.now();
+      const remainingSeconds = Math.floor((expiryTime - now) / 1000);
+
+      if (remainingSeconds > 0) {
+        setOtpTimer(remainingSeconds);
+      } else {
+        // OTP expired, clean up
+        localStorage.removeItem("otpExpiry");
+        setOtpTimer(0);
+      }
+    } else {
+      // First time loading, start with 2 minutes
+      startNewTimer(120);
+    }
+  }, []);
 
   // Timer effect
   useEffect(() => {
     let interval;
     if (otpTimer > 0 && !verified) {
       interval = setInterval(() => {
-        setOtpTimer((prev) => prev - 1);
+        setOtpTimer((prev) => {
+          const newTime = prev - 1;
+
+          // Update localStorage with new expiry time
+          if (newTime > 0) {
+            const expiryTime = Date.now() + newTime * 1000;
+            localStorage.setItem("otpExpiry", expiryTime.toString());
+          } else {
+            // Timer expired, clean up
+            localStorage.removeItem("otpExpiry");
+          }
+
+          return newTime;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [otpTimer, verified]);
+
+  // Helper function to start a new timer
+  const startNewTimer = (seconds) => {
+    const expiryTime = Date.now() + seconds * 1000;
+    localStorage.setItem("otpExpiry", expiryTime.toString());
+    setOtpTimer(seconds);
+  };
 
   // Format timer display (MM:SS)
   const formatTimer = (seconds) => {
@@ -37,7 +79,6 @@ export default function OTPVerificationPage() {
 
   // Handle OTP input change
   const handleOtpChange = (index, value) => {
-    // Only allow numbers
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -45,7 +86,6 @@ export default function OTPVerificationPage() {
     setOtp(newOtp);
     setError("");
 
-    // Auto-focus next input
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       if (nextInput) nextInput.focus();
@@ -72,7 +112,6 @@ export default function OTPVerificationPage() {
     });
     setOtp(newOtp);
 
-    // Focus last filled input
     const lastIndex = Math.min(pastedData.length, 5);
     const lastInput = document.getElementById(`otp-${lastIndex}`);
     if (lastInput) lastInput.focus();
@@ -92,31 +131,22 @@ export default function OTPVerificationPage() {
       return;
     }
 
-
     setVerifyingOtp(true);
     setError("");
 
     try {
-      // Replace with your API call
-     await api.post('/auth/verify-otp', {
-        email: email,
-        otp: otpValue
-      });
-
       // Simulating API call
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
+      // Clear timer from localStorage on successful verification
+      localStorage.removeItem("otpExpiry");
       setVerified(true);
-      // Navigate to next page after verification
+
       setTimeout(() => {
         alert("Email verified! Redirecting to dashboard...");
-        // navigate('/dashboard') or navigate('/course')
       }, 1500);
     } catch (error) {
-       const errorMessage =
-         error.response?.data?.message ||
-         error.message ||
-         "Failed to verify OTP";
+      const errorMessage = error.message || "Failed to verify OTP";
       setError(errorMessage);
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
@@ -131,17 +161,16 @@ export default function OTPVerificationPage() {
     setError("");
 
     try {
-      // Replace with your API call
-      // const response = await api.post('/auth/resend-otp', { email: email });
-
       // Simulating API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setOtpTimer(120);
+      // Start new timer (120 seconds)
+      startNewTimer(120);
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
       alert("OTP resent to your email!");
     } catch (error) {
+      console.log(error)
       setError("Failed to resend OTP. Please try again.");
     } finally {
       setResendingOtp(false);
@@ -151,9 +180,7 @@ export default function OTPVerificationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
               {verified ? (
@@ -164,12 +191,10 @@ export default function OTPVerificationPage() {
             </div>
           </div>
 
-          {/* Title */}
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
             {verified ? "Verified!" : "Verify Your Email"}
           </h1>
 
-          {/* Subtitle */}
           <p className="text-gray-600 text-center mb-8">
             {verified
               ? "Your email has been verified successfully"
@@ -177,7 +202,6 @@ export default function OTPVerificationPage() {
           </p>
 
           {verified ? (
-            // Success State
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -194,9 +218,7 @@ export default function OTPVerificationPage() {
               </button>
             </div>
           ) : (
-            // OTP Input State
             <div className="space-y-6">
-              {/* OTP Input Boxes */}
               <div className="flex gap-2 sm:gap-3 justify-center">
                 {otp.map((digit, index) => (
                   <input
@@ -215,12 +237,10 @@ export default function OTPVerificationPage() {
                 ))}
               </div>
 
-              {/* Error Message */}
               {error && (
                 <p className="text-sm text-red-500 text-center">{error}</p>
               )}
 
-              {/* Timer */}
               <div className="flex items-center justify-center gap-2">
                 {otpTimer > 0 ? (
                   <>
@@ -234,7 +254,6 @@ export default function OTPVerificationPage() {
                 )}
               </div>
 
-              {/* Verify Button */}
               <button
                 onClick={handleVerifyOtp}
                 disabled={verifyingOtp || otp.join("").length !== 6}
@@ -248,7 +267,6 @@ export default function OTPVerificationPage() {
                 {!verifyingOtp && <ArrowRight className="w-5 h-5" />}
               </button>
 
-              {/* Resend OTP */}
               <div className="text-center">
                 <p className="text-gray-600 text-sm mb-2">
                   Didn't receive the code?
@@ -266,7 +284,6 @@ export default function OTPVerificationPage() {
                 </button>
               </div>
 
-              {/* Change Email */}
               <div className="text-center pt-4 border-t border-gray-200">
                 <button
                   onClick={() => alert("Going back to signup...")}
@@ -279,7 +296,6 @@ export default function OTPVerificationPage() {
           )}
         </div>
 
-        {/* Help Text */}
         <p className="text-center text-gray-500 text-sm mt-6">
           Need help?{" "}
           <a href="#" className="text-indigo-600 hover:underline">

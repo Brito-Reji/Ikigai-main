@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Hero from './components/Hero'
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 import Layout from './components/Layout.jsx';
@@ -12,6 +12,14 @@ import LoginPage from './pages/LoginPage.jsx';
 import OTPVerificationPage from './pages/OTPVerificationPage.jsx';
 
 function App() {
+    const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== "/verify-otp") {
+      localStorage.removeItem("otpExpiry");
+      console.log("LocalStorage cleared!");
+    }
+  }, [location.pathname]);
   return (
     <div>
       <Routes>

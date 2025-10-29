@@ -33,8 +33,14 @@ export const verifyOTP = asyncHandler(async(req, res) => {
     await User.findOneAndUpdate({ email }, { isVerfied: true })
     res.status(200).json({
       success: true,
-      message:"user verified succesfully"
+      message:
+        "user verified succesfully Email verified! Redirecting to dashboard...",
     })
+  } else {
+      res.status(400).json({
+        success: false,
+        message:"Incorrect Otp I guess",
+      });
   }
 
 })
