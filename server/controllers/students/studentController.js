@@ -58,7 +58,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
     let response =await api.post('/auth/send-otp', { email });
     if (response.data.success) {
       console.log("AFter sending the Otp",response.data)
-     res.status(200).json({succes:true,message:"otp "})
+     res.status(200).json({success:true,message:"otp "})
    }
   
 } catch (err) {

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 import { adminLogin } from '../controllers/admin/adminController.js'
 import { instructorRegister, instructorSignin } from '../controllers/instructor/instructorController.js'
 import { User } from '../models/User.js'
-import { sentOTP } from '../utils/OTPServices.js'
+import { sentOTP, verifyOTP } from '../utils/OTPServices.js'
 
 
 const router = express.Router()
@@ -20,6 +20,7 @@ router.post('/admin/login', adminLogin)
 // OTP
 
 router.post('/send-otp', sentOTP)
+router.post('/verify-otp',verifyOTP)
 // router.post('/verify-otp',verifyOTP)
 
 // router.get('/refresh',async (req,res)=>{
