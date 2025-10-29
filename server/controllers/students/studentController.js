@@ -71,16 +71,35 @@ export const studentRegister = asyncHandler(async (req, res) => {
       
 })
 
-const studentLogin = asyncHandler(async (req, res) => { });
+export const studentLogin = asyncHandler(async (req, res) => { 
+  let { email, password } = req.body
+  console.log('login response ->',email)
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message:"fields cannot be empty"
+    })
+  }
+  let user = await User.findOne({
+    $or: [{ email: email }, { username: email }],
+  }).exec();
+  
+  if (!user?.isVerfied) {
+   let response = await api.post("/auth/send-otp", { email:user.email });
+     if (response.data.success) {
+      console.log("AFter sending the Otp",response.data)
+     return  res.status(200).json({success:true,message:"otp ",isVerfied:false,email:user.email})
+   }
+}
+
+});
 
 const studentForgetPassword = asyncHandler(async (req, res) => { });
 
 
 const studentAddToCart = asyncHandler(async (req, res) => { });
 
-const verifyOtp = asyncHandler((req, res) => {
-    
-})
+
 
 
 

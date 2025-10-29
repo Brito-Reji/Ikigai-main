@@ -25,10 +25,11 @@ export const sentOTP = asyncHandler(async (req, res) => {
 export const verifyOTP = asyncHandler(async(req, res) => {
   let { email, otp } = req.body
   console.log("req.body->",req.body)
-  let data = await Otp.findOne({ email })
-  console.log(email, ":", data.email, "    ", otp, ":", data.otp)
+  let data = await Otp.findOne({otp,email})
+  console.log(data)
+  console.log(email, ":", data?.email, "    ", otp, ":", data?.otp)
   console.log("data from the db ->",data)
-  if (data.email == email && data.otp == otp) {
+  if (data?.email == email && data?.otp == otp) {
     console.log("User verfied");
     await User.findOneAndUpdate({ email }, { isVerfied: true })
     res.status(200).json({

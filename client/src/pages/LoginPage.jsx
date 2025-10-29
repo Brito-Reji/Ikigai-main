@@ -1,27 +1,128 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
+import api from "@/api/axiosConfig.js";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
-     const [formData, setFormData] = useState({
-       email: "",
-       password: "",
-     });
-     const [showPassword, setShowPassword] = useState(false);
+  let navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "Admin@123",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
 
-     const handleChange = (e) => {
-       setFormData({
-         ...formData,
-         [e.target.name]: e.target.value,
-       });
-     };
+  const validateEmail = (email) => {
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if (!email) {
+    //   return "Email is required";
+    // }
+    // if (!emailRegex.test(email)) {
+    //   return "Please enter a valid email address";
+    // }
+    // return "";
+  };
 
-     const handleSubmit = () => {
-       console.log("Login submitted:", formData);
-     };
+  const validatePassword = (password) => {
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    return "";
+  };
 
-     const handleGoogleSignIn = () => {
-       console.log("Sign in with Google");
-     };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    // Real-time validation
+    if (touched[name]) {
+      if (name === "email") {
+        setErrors({
+          ...errors,
+          email: validateEmail(value),
+        });
+      } else if (name === "password") {
+        setErrors({
+          ...errors,
+          password: validatePassword(value),
+        });
+      }
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched({
+      ...touched,
+      [name]: true,
+    });
+
+    // Validate on blur
+    if (name === "email") {
+      setErrors({
+        ...errors,
+        email: validateEmail(formData.email),
+      });
+    } else if (name === "password") {
+      setErrors({
+        ...errors,
+        password: validatePassword(formData.password),
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Mark all fields as touched
+    setTouched({
+      email: true,
+      password: true,
+    });
+
+    // Validate all fields
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    setErrors({
+      email: emailError,
+      password: passwordError,
+    });
+
+    // Only submit if no errors
+    if (!emailError && !passwordError) {
+      console.log("Login submitted:", formData);
+     let response = await api.post('/auth/student/login', {
+        email: formData.email,
+        password:formData.password
+     })
+      let { data } = response
+      console.log(data)
+      if (!data.isVerified) {
+           navigate("/verify-otp", {
+             state: {
+               email: data.email,
+             },
+           });
+      }
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    console.log("Sign in with Google");
+  };
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
       {/* Left Side - Form */}
@@ -35,7 +136,7 @@ function LoginPage() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Email
+                {/* Email */}
               </label>
               <input
                 type="email"
@@ -43,14 +144,22 @@ function LoginPage() {
                 placeholder="Username or Email ID"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onBlur={handleBlur}
+                className={`w-full px-4 py-3 border ${
+                  errors.email && touched.email
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                } rounded-lg focus:outline-none focus:ring-2`}
               />
+              {errors.email && touched.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Password
+                {/* Password */}
               </label>
               <div className="relative">
                 <input
@@ -59,7 +168,12 @@ function LoginPage() {
                   placeholder="Enter Password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12"
+                  onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border ${
+                    errors.password && touched.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-indigo-500"
+                  } rounded-lg focus:outline-none focus:ring-2 pr-12`}
                 />
                 <button
                   type="button"
@@ -73,6 +187,9 @@ function LoginPage() {
                   )}
                 </button>
               </div>
+              {errors.password && touched.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
             </div>
 
             {/* Sign In Button */}
@@ -147,4 +264,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage
+export default LoginPage;

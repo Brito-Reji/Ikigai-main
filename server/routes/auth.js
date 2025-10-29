@@ -1,5 +1,5 @@
 import express from 'express'
-import { studentRegister } from '../controllers/students/studentController.js'
+import { studentLogin, studentRegister } from '../controllers/students/studentController.js'
 import jwt from 'jsonwebtoken'
 import { adminLogin } from '../controllers/admin/adminController.js'
 import { instructorRegister, instructorSignin } from '../controllers/instructor/instructorController.js'
@@ -12,7 +12,8 @@ const router = express.Router()
 router.post('/instructor/register', instructorRegister)
 router.post('/instructor/signin',instructorSignin)
 
-router.post('/student/register', studentRegister)
+router.post('/student/register', studentRegister);
+router.post('/student/login',studentLogin)
 
 router.post('/admin/login', adminLogin)
 

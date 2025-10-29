@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "@/api/axiosConfig.js";
 
 export default function OTPVerificationPage() {
   // For demo purposes - in real app, get from route state
@@ -136,7 +137,11 @@ export default function OTPVerificationPage() {
 
     try {
       // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      await api.post('/auth/verify-otp', {
+        otp: otpValue,
+        email:email
+      })
 
       // Clear timer from localStorage on successful verification
       localStorage.removeItem("otpExpiry");

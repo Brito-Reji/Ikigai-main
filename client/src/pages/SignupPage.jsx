@@ -4,7 +4,7 @@ import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
 import {   useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
-
+import Swal from 'sweetalert2'
 export default function SignUpPage() {
   let navigate = useNavigate();
   // let { setUser, user } = useAuth();
@@ -135,7 +135,13 @@ export default function SignUpPage() {
      
   
       } catch (err) {
-        console.error('Registration failed', err);
+        console.error('Registration failed', err.response.data.message);
+        Swal.fire({
+          icon: "error",
+          title: "Registration failed",
+          text: err.response.data.message,
+         
+        });
       }
 
       
