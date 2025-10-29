@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from '../api/axiosConfig.js'
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
-import {  data, useNavigate } from "react-router-dom";
+import {   useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function SignUpPage() {
-  let navigate = useNavigate()
-  let { setUser, user } = useAuth()
-  if (user) {
-    navigate('/course')
-  }
+  let navigate = useNavigate();
+  // let { setUser, user } = useAuth();
+
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -94,20 +93,55 @@ export default function SignUpPage() {
     });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (validateForm()) {
+  //   await api.post('/auth/student/register',{
+  //     email:formData.email,
+  //     username:formData.username,
+  //     firstName:formData.firstName,
+  //  lastName:formData.lastName,
+  //  password:formData.password
+  //   })
+  //   navigate('/verify-otp',{
+  //     state:{
+  //       email:formData.email
+  //     }
+  //   }) 
+  //   }
+  // }
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-    api.post('/auth/student/register',{
-      email:formData.email,
-      username:formData.username,
-      firstName:formData.firstName,
-   lastName:formData.lastName,
-   password:formData.password
-    })
-     
-    }
-  }
 
+      try {
+        
+       let res= await  api.post('/auth/student/register', {
+          email: formData.email,
+          username: formData.username,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          password: formData.password,
+        })
+        console.log(res)
+        if (res.data.success) {
+            navigate("/verify-otp", {
+              state: {
+                email: formData.email,
+              },
+            });
+        }
+
+     
+  
+      } catch (err) {
+        console.error('Registration failed', err);
+      }
+
+      
+    }
+  };
+  
   const handleGoogleSignUp = () => {
     console.log("Sign up with Google");
   };

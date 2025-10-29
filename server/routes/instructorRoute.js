@@ -4,7 +4,9 @@ import { verifyInstructor } from '../middlewares/auth.js'
 
 const router = Router()
 
-router.get('/course', getAllCourseByInstructor)
+router.get('/course', (req,res)=>{
+    res.send('helloo')
+})
 
 // router.post('/course/create')
 
