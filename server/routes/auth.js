@@ -11,7 +11,7 @@ const router = express.Router()
 // Instructor Routes
 router.post('/instructor/register', instructorRegister)
 router.post('/instructor/signin',instructorSignin)
-
+// Student 
 router.post('/student/register', studentRegister);
 router.post('/student/login',studentLogin)
 
@@ -56,17 +56,7 @@ router.post('/verify-otp',verifyOTP)
 //     await user.save({ validateBeforeSave:false })
 
 //     // Issue new access token
-//     const accessToken = jwt.sign(
-//       { id: user._id, email: user.email, username: user.username, role: user.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: '15m' }
-//     )
-
-//     return res.json({ success:true, data: { accessToken, refreshToken: newRefreshToken } })
-//   }catch(err){
-//     return res.status(500).json({ success:false, message: "Server error", error: err.message });
-//   }
-// })
+//  
 
 // Get current user from access token
 router.get('/me', (req, res) => {

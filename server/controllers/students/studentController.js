@@ -9,15 +9,19 @@ import axios from 'axios'
 // import { User } from './model/'
 
 export const studentRegister = asyncHandler(async (req, res) => {
+  console.log("Student registration endpoint hit!");
+  console.log("Request body:", req.body);
+
   let { email, username, firstName, lastName, password } = req.body;
 
   if (!email || !username || !firstName || !lastName || !password) {
+    console.log("Missing required fields");
     return res
       .status(400)
-      .json({ success: false, message: "Please provide all requird fields" });
+      .json({ success: false, message: "Please provide all required fields" });
   }
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-  console.log(existingUser," existing user student")
+  console.log(existingUser, " existing user student")
   if (existingUser)
     return res
       .status(400)
@@ -39,58 +43,58 @@ export const studentRegister = asyncHandler(async (req, res) => {
       message: "Password must be at least 6 characters long",
     });
   }
-    
-     const salt = await bcrypt.genSalt(10);
+
+  const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "student"
-   let user = await User.create({
-        email: email.toLowerCase(),
-      password: hashedPassword,
-        username,
-        firstName,
-        lastName,
-     role,
-   })
-  
- await user.save()
+  let user = await User.create({
+    email: email.toLowerCase(),
+    password: hashedPassword,
+    username,
+    firstName,
+    lastName,
+    role,
+  })
+
+  await user.save()
   try {
-   
-    let response =await api.post('/auth/send-otp', { email });
+
+    let response = await api.post('/auth/send-otp', { email });
     if (response.data.success) {
-      console.log("AFter sending the Otp",response.data)
-     res.status(200).json({success:true,message:"otp "})
-   }
-  
-} catch (err) {
-  console.error("OTP API failed:", err.message);
-  return res
-    .status(500)
-    .json({ success: false, message: "Failed to send OTP. Try again." });
-}
- 
-      
+      console.log("AFter sending the Otp", response.data)
+      res.status(200).json({ success: true, message: "otp " })
+    }
+
+  } catch (err) {
+    console.error("OTP API failed:", err.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to send OTP. Try again." });
+  }
+
+
 })
 
-export const studentLogin = asyncHandler(async (req, res) => { 
+export const studentLogin = asyncHandler(async (req, res) => {
   let { email, password } = req.body
-  console.log('login response ->',email)
+  console.log('login response ->', email)
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message:"fields cannot be empty"
+      message: "fields cannot be empty"
     })
   }
   let user = await User.findOne({
     $or: [{ email: email }, { username: email }],
   }).exec();
-  
+
   if (!user?.isVerfied) {
-   let response = await api.post("/auth/send-otp", { email:user.email });
-     if (response.data.success) {
-      console.log("AFter sending the Otp",response.data)
-     return  res.status(200).json({success:true,message:"otp ",isVerfied:false,email:user.email})
-   }
-}
+    let response = await api.post("/auth/send-otp", { email: user.email });
+    if (response.data.success) {
+      console.log("AFter sending the Otp", response.data)
+      return res.status(200).json({ success: true, message: "otp ", isVerfied: false, email: user.email })
+    }
+  }
 
 });
 

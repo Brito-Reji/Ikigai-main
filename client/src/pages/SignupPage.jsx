@@ -112,39 +112,46 @@ export default function SignUpPage() {
   // }
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submitted, validation starting...");
+    
     if (validateForm()) {
-
+      console.log("Validation passed, making API call...");
+      console.log("Form data:", formData);
+      
       try {
-        
-       let res= await  api.post('/auth/student/register', {
+        console.log("Making POST request to /auth/student/register");
+        const res = await api.post('/auth/student/register', {
           email: formData.email,
           username: formData.username,
           firstName: formData.firstName,
           lastName: formData.lastName,
           password: formData.password,
-        })
-        console.log(res)
+        });
+        
+        console.log("API Response:", res);
+        
         if (res.data.success) {
-            navigate("/verify-otp", {
-              state: {
-                email: formData.email,
-              },
-            });
+          console.log("Registration successful, navigating to OTP page");
+          navigate("/verify-otp", {
+            state: {
+              email: formData.email,
+            },
+          });
         }
-
-     
-  
       } catch (err) {
-        console.error('Registration failed', err.response.data.message);
+        console.error('Registration failed - Full error:', err);
+        console.error('Error response:', err.response);
+        
+        const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
+        
         Swal.fire({
           icon: "error",
           title: "Registration failed",
-          text: err.response.data.message,
-         
+          text: errorMessage,
         });
       }
-
-      
+    } else {
+      console.log("Form validation failed:", errors);
     }
   };
   
