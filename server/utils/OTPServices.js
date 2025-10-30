@@ -6,7 +6,8 @@ function generateOTP() {
   }
 export const sentOTP = asyncHandler(async (req, res) => {
     try {
-        console.log("jfhjhh")
+      console.log("jfhjhh")
+     
       const { email } = req.body;
       if (!email) return res.status(400).json({ message: "email is required" });
   
@@ -18,6 +19,8 @@ export const sentOTP = asyncHandler(async (req, res) => {
      console.log("hello")
       res.status(200).json({ message: "OTP generated", otp ,success:true}); // ⚠️ Don't send OTP in production!
     } catch (err) {
+      console.log(err.message," buhahahahahah");
+      
       res.status(500).json({ message: err.message });
     }
 })

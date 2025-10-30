@@ -1,18 +1,23 @@
-import React, { useEffect } from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import Hero from './components/Hero'
-import { Route, Routes, useLocation } from 'react-router-dom';
-import LandingPage from './pages/LandingPage.jsx';
-import SignupPage from './pages/SignupPage.jsx';
-import Layout from './components/Layout.jsx';
+import React, { useEffect } from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Hero from "./components/Hero";
+import { Route, Routes, useLocation } from "react-router-dom";
+import LandingPage from "./pages/user/LandingPage.jsx";
+import UserSignupPage from "./pages/user/SignupPage.jsx";
+import Layout from "./components/Layout.jsx";
 // import CoursesPage from './pages/CourseListingPage.jsx';
-import CourseListingPage from './pages/CourseListingPage.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import OTPVerificationPage from './pages/OTPVerificationPage.jsx';
+import UserCourseListingPage from "./pages/user/CourseListingPage.jsx";
+import UserLoginPage from "./pages/user/LoginPage.jsx";
+import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
+// Instructor Import 
+import InstructorLoginPage from './pages/instructor/LoginPage.jsx'
+import InstructorSignupPage from './pages/instructor/SignupPage.jsx'
+
+
 
 function App() {
-    const location = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     if (location.pathname !== "/verify-otp") {
@@ -25,13 +30,19 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
-          <Route path='/login' element={<LoginPage/>} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/course" element={<CourseListingPage />} />
-          <Route path='/verify-otp' element={<OTPVerificationPage/>} />
+          <Route path="login" element={<UserLoginPage />} />
+          <Route path="signup" element={<UserSignupPage />} />
+          <Route path="course" element={<UserCourseListingPage />} />
+          <Route path="verify-otp" element={<UserOTPVerificationPage />} />
           {/* <Route path="courses" element={<Courses />} /> */}
           {/* <Route path="cart" element={<Cart />} />
           <Route path="wishlist" element={<Wishlist />} /> */}
+        </Route>
+        <Route path="/instructor" element={<Layout/>}>
+          
+          <Route path="login" element={<InstructorLoginPage />} />
+          <Route path="signup" element={<InstructorSignupPage />} />
+
         </Route>
       </Routes>
 
@@ -40,4 +51,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

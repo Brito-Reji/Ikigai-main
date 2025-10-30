@@ -9,8 +9,8 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import Header from "../components/Header.jsx";
-import CourseCard from "../components/CourseCard.jsx";
+import Header from "../../components/Header.jsx";
+import CourseCard from "../../components/CourseCard.jsx";
 
 export default function CoursesPage() {
   const [selectedChapters, setSelectedChapters] = useState(["15-20"]);
@@ -50,7 +50,6 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-    
       {/* Main Content - Removed max-w-7xl to use full width */}
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}

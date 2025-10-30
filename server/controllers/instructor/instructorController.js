@@ -2,24 +2,29 @@ import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcrypt'
 import { User } from '../../models/User.js'
 import jwt from 'jsonwebtoken'
+import api from '../../config/axiosConfig.js';
 
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-  let { email, username, firstName, lastName, password } = req.body;
-  let role = "instructor"
+  console.log("Student registration endpoint hit!");
+  console.log("Request body:", req.body);
 
-if (!email || !username || !firstName || !lastName || !password ) {
+  let { email, username, firstName, lastName, password } = req.body;
+
+  if (!email || !username || !firstName || !lastName || !password) {
+    console.log("Missing required fields");
     return res
       .status(400)
-      .json({ success: false, message: "Please provide all requird fields" });
+      .json({ success: false, message: "Please provide all required fields" });
   }
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-  console.log(existingUser);
-  if (existingUser)
+  console.log(existingUser, " existing user student");
+  if (existingUser) {
+    console.log('user already exist')
     return res
       .status(400)
       .json({ success: false, message: "email or username  already exist" });
-
+  }
   // Validate email format
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
@@ -39,45 +44,29 @@ if (!email || !username || !firstName || !lastName || !password ) {
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-
- let user= await User.create({
+  let role = "instructor";
+  let user = await User.create({
     email: email.toLowerCase(),
     password: hashedPassword,
     username,
     firstName,
     lastName,
     role,
-
- });
-  
-
-  let token = jwt.sign(
-    {
-      id: user.id,
-      email,
-      username,
-      role,
-    },
-    process.env.JWT_ACCESS_SECRET,
-    {
-      expiresIn: 86400,
-    }
-  );
-  return res.json({
-    success: true,
-    message: "Account created successfully",
-    data: {
-      user: {
-        email,
-        username,
-        firstName,
-        lastName,
-        role,
-        profileImageUrl: null,
-      },
-      token,
-    },
   });
+
+  await user.save();
+  try {
+    let response = await api.post("/auth/send-otp", { email });
+    if (response.data.success) {
+      console.log("AFter sending the Otp", response.data);
+      res.status(200).json({ success: true, message: "otp " });
+    }
+  } catch (err) {
+    console.error("OTP API failed:", err.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to send OTP. Try again." });
+  }
 });
 
 

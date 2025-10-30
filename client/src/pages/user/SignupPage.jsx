@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import api from '../api/axiosConfig.js'
+import api from "../../api/axiosConfig.js";
+
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
-import {   useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 export default function SignUpPage() {
   let navigate = useNavigate();
   // let { setUser, user } = useAuth();
-
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -107,29 +107,29 @@ export default function SignUpPage() {
   //     state:{
   //       email:formData.email
   //     }
-  //   }) 
+  //   })
   //   }
   // }
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted, validation starting...");
-    
+
     if (validateForm()) {
       console.log("Validation passed, making API call...");
       console.log("Form data:", formData);
-      
+
       try {
         console.log("Making POST request to /auth/student/register");
-        const res = await api.post('/auth/student/register', {
+        const res = await api.post("/auth/student/register", {
           email: formData.email,
           username: formData.username,
           firstName: formData.firstName,
           lastName: formData.lastName,
           password: formData.password,
         });
-        
+
         console.log("API Response:", res);
-        
+
         if (res.data.success) {
           console.log("Registration successful, navigating to OTP page");
           navigate("/verify-otp", {
@@ -139,11 +139,13 @@ export default function SignUpPage() {
           });
         }
       } catch (err) {
-        console.error('Registration failed - Full error:', err);
-        console.error('Error response:', err.response);
-        
-        const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
-        
+        console.error("Registration failed - Full error:", err);
+        console.error("Error response:", err.response);
+
+        const errorMessage =
+          err.response?.data?.message ||
+          "Registration failed. Please try again.";
+
         Swal.fire({
           icon: "error",
           title: "Registration failed",
@@ -154,7 +156,7 @@ export default function SignUpPage() {
       console.log("Form validation failed:", errors);
     }
   };
-  
+
   const handleGoogleSignUp = () => {
     console.log("Sign up with Google");
   };

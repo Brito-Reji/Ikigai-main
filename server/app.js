@@ -19,7 +19,7 @@ app.use('/api/auth', authRoute)
 
 // Instructor Route
 
-app.use('/api/instructor',verifyInstructor,instructorRoute)
+// app.use('/api/instructor',instructorRoute)
 
 
 
