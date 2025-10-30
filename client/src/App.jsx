@@ -14,6 +14,9 @@ import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
 import InstructorLoginPage from './pages/instructor/LoginPage.jsx'
 import InstructorSignupPage from './pages/instructor/SignupPage.jsx'
 
+// Admin import
+import AdminLoginPage from './pages/admin/LoginPage.jsx'
+
 
 
 function App() {
@@ -38,11 +41,14 @@ function App() {
           {/* <Route path="cart" element={<Cart />} />
           <Route path="wishlist" element={<Wishlist />} /> */}
         </Route>
-        <Route path="/instructor" element={<Layout/>}>
-          
+        <Route path="/instructor" element={<Layout />}>
           <Route path="login" element={<InstructorLoginPage />} />
           <Route path="signup" element={<InstructorSignupPage />} />
-
+        </Route>
+        <Route path="/admin" >
+          <Route path="login" element={<AdminLoginPage />} />
+          <Route path="dashboard" />
+          
         </Route>
       </Routes>
 

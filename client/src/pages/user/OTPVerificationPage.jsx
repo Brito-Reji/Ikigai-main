@@ -167,7 +167,7 @@ export default function OTPVerificationPage() {
 
     try {
       // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await api.post("/auth/send-otp", { email });
 
       // Start new timer (120 seconds)
       startNewTimer(120);
