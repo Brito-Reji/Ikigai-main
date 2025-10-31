@@ -6,6 +6,7 @@ import Header from "@/components/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 import Swal from "sweetalert2";
+import GoogleAuth from "@/components/GoogleAuth.jsx";
 export default function SignUpPage() {
   let navigate = useNavigate();
   // let { setUser, user } = useAuth();
@@ -333,7 +334,7 @@ export default function SignUpPage() {
               </div>
 
               {/* Google Sign Up */}
-              <button
+              {/* <button
                 onClick={handleGoogleSignUp}
                 type="button"
                 className="w-full px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center justify-center space-x-3"
@@ -357,7 +358,8 @@ export default function SignUpPage() {
                   />
                 </svg>
                 <span className="text-gray-700 font-medium">Google</span>
-              </button>
+              </button> */}
+              <GoogleAuth/>
             </form>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import api from "@/api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
+import GoogleAuth from "@/components/GoogleAuth.jsx";
 
 function LoginPage() {
   let navigate = useNavigate()
@@ -224,7 +225,7 @@ function LoginPage() {
             </div>
 
             {/* Google Sign In */}
-            <button
+            {/* <button
               onClick={handleGoogleSignIn}
               className="w-full px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center justify-center space-x-3"
             >
@@ -247,7 +248,8 @@ function LoginPage() {
                 />
               </svg>
               <span className="text-gray-700 font-medium">Google</span>
-            </button>
+            </button> */}
+            <GoogleAuth/>
           </div>
         </div>
       </div>

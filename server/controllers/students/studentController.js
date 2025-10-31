@@ -98,6 +98,13 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
 });
 
+export const googleAuth = asyncHandler((req, res) => {
+  const { credential, client_id } = req.body;
+  
+
+})
+
+
 const studentForgetPassword = asyncHandler(async (req, res) => { });
 
 
