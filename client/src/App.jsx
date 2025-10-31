@@ -31,7 +31,7 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/" >
           <Route index element={<LandingPage />} />
           <Route path="login" element={<UserLoginPage />} />
           <Route path="signup" element={<UserSignupPage />} />

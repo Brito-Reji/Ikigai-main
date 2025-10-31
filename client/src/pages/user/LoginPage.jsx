@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import api from "@/api/axiosConfig.js";
-import { useNavigate } from "react-router-dom";
-import GoogleAuth from "@/components/GoogleAuth.jsx";
+import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
   let navigate = useNavigate()
@@ -203,12 +202,26 @@ function LoginPage() {
             </button>
 
             {/* Forgot Password */}
-            <div className="text-left">
+            <div className="text-left flex justify-between">
               <a
                 href="#"
                 className="text-gray-900 hover:text-gray-700 font-medium"
               >
                 forgot password?
+              </a>
+            </div>
+            <div>
+              <a
+                href="#"
+                className="text-gray-900  font-medium text-xs flex justify-center"
+              >
+                Don't have an account?
+                <a href="" className=" text-blue-500 underline">
+                  <Link to={'/signup'}>
+                   Sign up 
+                  
+                  </Link>
+                </a>
               </a>
             </div>
 
@@ -249,7 +262,6 @@ function LoginPage() {
               </svg>
               <span className="text-gray-700 font-medium">Google</span>
             </button> */}
-            <GoogleAuth/>
           </div>
         </div>
       </div>
