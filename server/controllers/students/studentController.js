@@ -90,16 +90,25 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }
   let user = await User.findOne({
     $or: [{ email: email }, { username: email }],
-  }).exec();
+  }).select('+password').exec()
 
   if (!user?.isVerfied) {
     let response = await api.post("/auth/send-otp", { email: user.email });
     if (response.data.success) {
       console.log("AFter sending the Otp", response.data)
-      return res.status(200).json({ success: true, message: "otp ", isVerfied: false, email: user.email })
+      return res.status(200).json({ success: true, message: "otp ", isVerified: false, email: user.email })
     }
   }
-  
+  console.log(user)
+  console.log(password,user?.password)
+  bcrypt.compare(password, user.password, (err, result) => {
+    if (err) {
+      console.log(err)
+      return
+    }
+   return res.status(200).json({ success: true, message: "otp ", isVerified: true, email: user.email })
+
+})
 
 });
 

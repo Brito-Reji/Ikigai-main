@@ -111,13 +111,16 @@ function LoginPage() {
         password:formData.password
      })
       let { data } = response
-      console.log(data)
+      console.log(data.isVerified);
       if (!data.isVerified) {
            navigate("/verify-otp", {
              state: {
                email: data.email,
              },
            });
+      }
+      if (data.isVerified) {
+        navigate('/course')
       }
     }
   };
