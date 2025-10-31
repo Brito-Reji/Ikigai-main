@@ -22,7 +22,7 @@ router.post("/student/register", studentRegister);
 router.post("/student/login", studentLogin);
 router.route("/student/google")
   .post(googleAuth)
-  .get(passport.authenticate('google'));
+  .get(() =>{});
 
 router.post("/admin/login", adminLogin);
 

@@ -6,6 +6,10 @@ import jwt from 'jsonwebtoken'
 
 import api from '../../config/axiosConfig.js'
 import axios from 'axios'
+
+import {OAuth2Client} from 'google-auth-library'
+
+
 // import { User } from './model/'
 
 export const studentRegister = asyncHandler(async (req, res) => {
@@ -98,9 +102,11 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
 });
 
-export const googleAuth = asyncHandler((req, res) => {
-  const { credential, client_id } = req.body;
-  
+export const googleAuth = asyncHandler(async (req, res) => {
+  const client = new OAuth2Client()
+  const{token}  = req.body;
+console.log(token)
+    
 
 })
 

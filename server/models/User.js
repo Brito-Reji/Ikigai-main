@@ -30,6 +30,7 @@ const userSchema = new Schema(
       required: [true, "Last name is required"],
       trim: true,
     },
+   
     password: {
       type: String,
       required: [true, "Password is required"],

@@ -6,6 +6,7 @@ import Header from "@/components/Header.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
 import Swal from "sweetalert2";
+import GoogleAuth from "@/components/GoogleAuth.jsx";
 export default function SignUpPage() {
   let navigate = useNavigate();
   // let { setUser, user } = useAuth();
@@ -346,16 +347,7 @@ export default function SignUpPage() {
 
               {/* Google Sign Up */}
 
-              <GoogleLogin
-                onSuccess={(credientialResponse) => {
-                  console.log(credientialResponse);
-                  navigate("/");
-                }}
-                onError={() => {
-                  console.log("login failed");
-                }}
-                auto_select={true}
-              />
+            <GoogleAuth/>
             </form>
           </div>
         </div>
