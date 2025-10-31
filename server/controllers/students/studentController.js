@@ -99,6 +99,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
       return res.status(200).json({ success: true, message: "otp ", isVerfied: false, email: user.email })
     }
   }
+  
 
 });
 
@@ -106,7 +107,13 @@ export const googleAuth = asyncHandler(async (req, res) => {
   const client = new OAuth2Client()
   const{token}  = req.body;
 console.log(token)
-    
+    const ticket = await client.verifyIdToken({
+      idToken: token, // The credential from your frontend
+      audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
+    });
+  console.log(ticket)
+  let { email, name, picture, } = ticket
+  let user = await User.find(email)
 
 })
 
