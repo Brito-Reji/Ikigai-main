@@ -1,14 +1,9 @@
 import asyncHandler from 'express-async-handler'
-import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 import { User } from '../../models/User.js'
-import jwt from 'jsonwebtoken'
-
-import api from '../../config/axiosConfig.js'
-import axios from 'axios'
-
-import {OAuth2Client} from 'google-auth-library'
+import { OAuth2Client } from 'google-auth-library'
 import { generateTokens } from '../../utils/generateTokens.js'
+import { sentOTP } from '../../utils/OTPServices.js'
 
 
 // import { User } from './model/'
@@ -63,22 +58,35 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
   await user.save()
   try {
+    // Create a mock request object for the OTP service
+    const mockReq = { body: { email } };
+    const mockRes = {
+      status: (code) => ({
+        json: (data) => {
+          if (code === 200 && data.success) {
+            console.log("After sending the OTP", data);
 
-    let response = await api.post('/auth/send-otp', { email });
-    if (response.data.success) {
-      console.log("AFter sending the Otp", response.data)
-        let { accessToken, refreshToken } = generateTokens({
-          userId: user._id,
-          role: user.role,
-        });
-      res.status(200).json({ success: true, message: "otp ",accessToken })
-    }
+            let { accessToken, refreshToken } = generateTokens({
+              userId: user._id,
+              role: user.role,
+            });
+            res.cookie('refreshToken', refreshToken);
+            res.status(200).json({ success: true, message: "OTP sent successfully", accessToken });
+          } else {
+            throw new Error(data.message || "Failed to send OTP");
+          }
+        }
+      })
+    };
+
+    // Call the OTP service directly
+    await sentOTP(mockReq, mockRes);
 
   } catch (err) {
-    console.error("OTP API failed:", err.message);
+    console.error("OTP service failed:", err.message);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to send OTP. Try again.", });
+      .json({ success: false, message: "Failed to send OTP. Try again." });
   }
 
 
@@ -98,34 +106,52 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }).select('+password').exec()
 
   if (!user?.isVerfied) {
-    let response = await api.post("/auth/send-otp", { email: user.email });
-    if (response.data.success) {
-      console.log("AFter sending the Otp", response.data)
-      return res.status(200).json({ success: true,})
+    try {
+      // Create a mock request object for the OTP service
+      const mockReq = { body: { email: user.email } };
+      const mockRes = {
+        status: (code) => ({
+          json: (data) => {
+            if (code === 200 && data.success) {
+              console.log("After sending the OTP", data);
+              return res.status(200).json({ success: true, message: "OTP sent for verification" });
+            } else {
+              throw new Error(data.message || "Failed to send OTP");
+            }
+          }
+        })
+      };
+
+      // Call the OTP service directly
+      await sentOTP(mockReq, mockRes);
+      return; // Exit early since response is handled above
+    } catch (err) {
+      console.error("OTP service failed:", err.message);
+      return res.status(500).json({ success: false, message: "Failed to send OTP. Try again." });
     }
   }
   console.log(user)
-  console.log(password,user?.password)
+  console.log(password, user?.password)
   bcrypt.compare(password, user.password, (err, result) => {
     if (err) {
       console.log(err)
       return
     }
-    let {accessToken,refreshToken} = generateTokens({userId:user._id,role:user.role})
-   return res.status(200).json({accessToken})
+    let { accessToken, refreshToken } = generateTokens({ userId: user._id, role: user.role })
+    return res.status(200).json({ accessToken })
 
-})
+  })
 
 });
 
 export const googleAuth = asyncHandler(async (req, res) => {
   const client = new OAuth2Client()
-  const{token}  = req.body;
-console.log(token)
-    const ticket = await client.verifyIdToken({
-      idToken: token, // The credential from your frontend
-      audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
-    });
+  const { token } = req.body;
+  console.log(token)
+  const ticket = await client.verifyIdToken({
+    idToken: token, // The credential from your frontend
+    audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
+  });
   console.log(ticket)
   let { email, name, picture, } = ticket.payload
   let [firstName, ...lastName] = name.split(' ')
@@ -133,22 +159,22 @@ console.log(token)
   let user = await User.findOne({ email })
   console.log(!!user)
   if (user) {
-    let {accessToken,refreshToken}= generateTokens({userId:user._id,role:user.role})
-      return res
-        .status(200)
-        .json({
-          accessToken: accessToken,
-          success:true
-          });
+    let { accessToken, refreshToken } = generateTokens({ userId: user._id, role: user.role })
+    return res
+      .status(200)
+      .json({
+        accessToken: accessToken,
+        success: true
+      });
 
   }
   if (!user) {
     // console.log(lastName.join())
     let user = await User.insertOne({ email, firstName, lastName, username: null })
-        let { accessToken, refreshToken } = generateTokens({
-          userId: user._id,
-          role: user.role,
-        });
+    let { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      role: user.role,
+    });
 
     return res.status(200).json({
       accessToken: accessToken,
@@ -158,7 +184,7 @@ console.log(token)
   }
 
 
-  
+
 
 })
 
