@@ -7,6 +7,7 @@ import {
 import jwt from "jsonwebtoken";
 import { adminLogin } from "../controllers/admin/adminController.js";
 import {
+  instructorGoogleAuth,
   instructorRegister,
   instructorSignin,
 } from "../controllers/instructor/instructorController.js";
@@ -17,6 +18,8 @@ const router = express.Router();
 // Instructor Routes
 router.post("/instructor/register", instructorRegister);
 router.post("/instructor/signin", instructorSignin);
+router.route('/instructor/google')
+.post(instructorGoogleAuth)
 // Student
 router.post("/student/register", studentRegister);
 router.post("/student/login", studentLogin);
@@ -27,6 +30,9 @@ router.route("/student/google")
 router.post("/admin/login", adminLogin);
 
 // OTP
+
+
+
 
 router.post("/send-otp", sentOTP);
 router.post("/verify-otp", verifyOTP);

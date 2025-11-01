@@ -8,6 +8,7 @@ import api from '../../config/axiosConfig.js'
 import axios from 'axios'
 
 import {OAuth2Client} from 'google-auth-library'
+import { generateTokens } from '../../utils/generateTokens.js'
 
 
 // import { User } from './model/'
@@ -66,14 +67,18 @@ export const studentRegister = asyncHandler(async (req, res) => {
     let response = await api.post('/auth/send-otp', { email });
     if (response.data.success) {
       console.log("AFter sending the Otp", response.data)
-      res.status(200).json({ success: true, message: "otp " })
+        let { accessToken, refreshToken } = generateTokens({
+          userId: user._id,
+          role: user.role,
+        });
+      res.status(200).json({ success: true, message: "otp ",accessToken })
     }
 
   } catch (err) {
     console.error("OTP API failed:", err.message);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to send OTP. Try again." });
+      .json({ success: false, message: "Failed to send OTP. Try again.", });
   }
 
 
@@ -96,7 +101,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
     let response = await api.post("/auth/send-otp", { email: user.email });
     if (response.data.success) {
       console.log("AFter sending the Otp", response.data)
-      return res.status(200).json({ success: true, message: "otp ", isVerified: false, email: user.email })
+      return res.status(200).json({ success: true,})
     }
   }
   console.log(user)
@@ -106,7 +111,8 @@ export const studentLogin = asyncHandler(async (req, res) => {
       console.log(err)
       return
     }
-   return res.status(200).json({ success: true, message: "otp ", isVerified: true, email: user.email })
+    let {accessToken,refreshToken} = generateTokens({userId:user._id,role:user.role})
+   return res.status(200).json({accessToken})
 
 })
 
@@ -121,8 +127,38 @@ console.log(token)
       audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
     });
   console.log(ticket)
-  let { email, name, picture, } = ticket
-  let user = await User.find(email)
+  let { email, name, picture, } = ticket.payload
+  let [firstName, ...lastName] = name.split(' ')
+  lastName = lastName.join()
+  let user = await User.findOne({ email })
+  console.log(!!user)
+  if (user) {
+    let {accessToken,refreshToken}= generateTokens({userId:user._id,role:user.role})
+      return res
+        .status(200)
+        .json({
+          accessToken: accessToken,
+          success:true
+          });
+
+  }
+  if (!user) {
+    // console.log(lastName.join())
+    let user = await User.insertOne({ email, firstName, lastName, username: null })
+        let { accessToken, refreshToken } = generateTokens({
+          userId: user._id,
+          role: user.role,
+        });
+
+    return res.status(200).json({
+      accessToken: accessToken,
+      success: true,
+    });
+
+  }
+
+
+  
 
 })
 

@@ -14,8 +14,8 @@ const userSchema = new Schema(
     },
     username: {
       type: String,
-      required: [true, "Username is required"],
       unique: true,
+      sparse: true,
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
       maxlength: [30, "Username cannot exceed 30 characters"],
@@ -27,15 +27,14 @@ const userSchema = new Schema(
     },
     lastName: {
       type: String,
-      required: [true, "Last name is required"],
       trim: true,
     },
    
     password: {
       type: String,
-      required: [true, "Password is required"],
+      
       minlength: [6, "Password must be at least 6 characters long"],
-      select: false, // Don't return password by default in queries
+      select: false, 
     },
     role: {
       type: String,

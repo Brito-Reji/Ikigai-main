@@ -1,8 +1,10 @@
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcrypt'
-import { User } from '../../models/User.js'
+import { Instructor } from '../../models/Instructor.js'
 import jwt from 'jsonwebtoken'
 import api from '../../config/axiosConfig.js';
+import { OAuth2Client } from 'google-auth-library';
+import { generateTokens } from '../../utils/generateTokens.js';
 
 
 export const instructorRegister = asyncHandler(async (req, res) => {
@@ -17,7 +19,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
       .status(400)
       .json({ success: false, message: "Please provide all required fields" });
   }
-  const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+  const existingUser = await Instructor.findOne({ $or: [{ email }, { username }] });
   console.log(existingUser, " existing user student");
   if (existingUser) {
     console.log('user already exist')
@@ -45,7 +47,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "instructor";
-  let user = await User.create({
+  let user = await Instructor.create({
     email: email.toLowerCase(),
     password: hashedPassword,
     username,
@@ -88,7 +90,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Find user by email
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await Instructor.findOne({ email: email.toLowerCase() });
 
   if (!user) {
     return res.status(401).json({
@@ -116,33 +118,32 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Generate JWT token
-  const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: 86400, 
-    }
-  );
+  let {accessToken,refreshToken} = generateTokens({userId:user._id,email,username,firstName,role})
 
   return res.json({
     success: true,
     message: "Sign in successful",
     data: {
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        role: user.role,
-        profileImageUrl: user.profileImageUrl || null,
-      },
-      token,
+     
+      token:accessToken
     },
   });
 });
+
+export const instructorGoogleAuth = asyncHandler(async (req, res) => {
+    const client = new OAuth2Client()
+    const{token}  = req.body;
+  console.log(token)
+      const ticket = await client.verifyIdToken({
+        idToken: token, // The credential from your frontend
+        audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
+      });
+    console.log(ticket)
+  let { email, name, picture, } = ticket.payload
+  console.log('name of the teacher is: ',name)
+    let [firstName, ...lastName] = name.split(' ')
+    let user = await Instructor.findOne({email})
+    if (user) {
+     
+   }
+})

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axiosConfig.js";
 import { GoogleLogin } from "@react-oauth/google";
-import { ShoppingCart, Search, ArrowRight } from "lucide-react";
+import { ShoppingCart, Search, ArrowRight, Rss } from "lucide-react";
 import Header from "@/components/Header.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -129,10 +129,12 @@ export default function SignUpPage() {
           password: formData.password,
         });
 
-        console.log("API Response:", res);
+        let { accessToken } = res.data
+       
 
         if (res.data.success) {
           console.log("Registration successful, navigating to OTP page");
+           localStorage.setItem("token", accessToken);
           navigate("/verify-otp", {
             state: {
               email: formData.email,
@@ -347,7 +349,7 @@ export default function SignUpPage() {
 
               {/* Google Sign Up */}
 
-            <GoogleAuth/>
+            <GoogleAuth role={'student'}/>
             </form>
           </div>
         </div>
