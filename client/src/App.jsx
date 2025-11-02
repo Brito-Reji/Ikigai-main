@@ -35,6 +35,7 @@ function App() {
   return (
     <div>
       <Routes>
+        <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/" >
           <Route index element={<LandingPage />} />
           <Route path="login" element={<UserLoginPage />} />
@@ -52,6 +53,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           
           <Route index element={<Navigate to="dashboard" replace />} />
+          
           
           
           <Route path="dashboard" element={<AdminDashboard />} />

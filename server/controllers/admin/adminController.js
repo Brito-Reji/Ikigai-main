@@ -13,7 +13,6 @@ export const adminLogin = asyncHandler(async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    // Find user
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res
@@ -21,14 +20,13 @@ export const adminLogin = asyncHandler(async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Check if user is admin
+ 
     if (user.role !== "admin") {
       return res
         .status(403)
         .json({ success: false, message: "Access denied. Not an admin." });
     }
 
-    // Compare password
     const isMatch =  bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
@@ -58,4 +56,10 @@ export const adminLogin = asyncHandler(async (req, res) => {
     console.error("Admin Login Error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
+})
+
+export const getStudents = asyncHandler(async (req, res) => {
+  console.log("getStudents controller called")
+  const students = await User.find({ role: 'student' })
+  res.status(200).json({ success: true, data: students })
 })

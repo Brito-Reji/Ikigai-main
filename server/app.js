@@ -3,7 +3,9 @@ import cors from 'cors'
 import authRoute from './routes/auth.js'
 import cookieParser from "cookie-parser";
 import instructorRoute  from  './routes/instructorRoute.js'
-import { verifyInstructor } from './middlewares/auth.js'
+// import { verifyInstructor } from './middlewares/auth.js'
+import adminRoute from './routes/adminRoute.js'
+import isAdmin from './middlewares/admin.js';
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -16,10 +18,7 @@ app.use(
   })
 );
 app.use('/api/auth', authRoute)
-
-// Instructor Route
-
-// app.use('/api/instructor',instructorRoute)
+app.use('/api/admin',isAdmin, adminRoute)
 
 
 

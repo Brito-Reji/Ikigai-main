@@ -108,6 +108,8 @@ function LoginPage() {
         email: formData.email,
         password:formData.password
      })
+     console.log("response",response)
+     localStorage.setItem('token', response.data.token)
       console.log(response)
       let { data } = response
       console.log(data)

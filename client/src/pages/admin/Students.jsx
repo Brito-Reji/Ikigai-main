@@ -1,115 +1,44 @@
-import React, { useState } from 'react';
+import api from '@/api/axiosConfig';
+import React, { useEffect, useState } from 'react';
 
 const Students = () => {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      fullName: 'Rajesh Kumar',
-      email: 'rajesh.kumar@example.com',
-      enrollmentDate: '15 Jan 2025',
-      coursesEnrolled: 3,
-      isBlocked: false,
-    },
-    {
-      id: 2,
-      fullName: 'Priya Sharma',
-      email: 'priya.sharma@example.com',
-      enrollmentDate: '20 Jan 2025',
-      coursesEnrolled: 5,
-      isBlocked: false,
-    },
-    {
-      id: 3,
-      fullName: 'Amit Patel',
-      email: 'amit.patel@example.com',
-      enrollmentDate: '12 Feb 2025',
-      coursesEnrolled: 2,
-      isBlocked: true,
-    },
-    {
-      id: 4,
-      fullName: 'Sneha Gupta',
-      email: 'sneha.gupta@example.com',
-      enrollmentDate: '05 Mar 2025',
-      coursesEnrolled: 4,
-      isBlocked: false,
-    },
-    {
-      id: 5,
-      fullName: 'Vikram Singh',
-      email: 'vikram.singh@example.com',
-      enrollmentDate: '18 Mar 2025',
-      coursesEnrolled: 6,
-      isBlocked: false,
-    },
-    {
-      id: 6,
-      fullName: 'Ananya Reddy',
-      email: 'ananya.reddy@example.com',
-      enrollmentDate: '22 Mar 2025',
-      coursesEnrolled: 3,
-      isBlocked: false,
-    },
-    {
-      id: 7,
-      fullName: 'Rahul Verma',
-      email: 'rahul.verma@example.com',
-      enrollmentDate: '28 Mar 2025',
-      coursesEnrolled: 7,
-      isBlocked: true,
-    },
-    {
-      id: 8,
-      fullName: 'Kavya Nair',
-      email: 'kavya.nair@example.com',
-      enrollmentDate: '01 Apr 2025',
-      coursesEnrolled: 2,
-      isBlocked: false,
-    },
-    {
-      id: 9,
-      fullName: 'Arjun Malhotra',
-      email: 'arjun.malhotra@example.com',
-      enrollmentDate: '05 Apr 2025',
-      coursesEnrolled: 4,
-      isBlocked: false,
-    },
-    {
-      id: 10,
-      fullName: 'Ishita Joshi',
-      email: 'ishita.joshi@example.com',
-      enrollmentDate: '10 Apr 2025',
-      coursesEnrolled: 5,
-      isBlocked: false,
-    },
-    {
-      id: 11,
-      fullName: 'Siddharth Rao',
-      email: 'siddharth.rao@example.com',
-      enrollmentDate: '15 Apr 2025',
-      coursesEnrolled: 3,
-      isBlocked: false,
-    },
-    {
-      id: 12,
-      fullName: 'Meera Kapoor',
-      email: 'meera.kapoor@example.com',
-      enrollmentDate: '20 Apr 2025',
-      coursesEnrolled: 6,
-      isBlocked: true,
-    },
-  ]);
-
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  const handleBlockToggle = (studentId) => {
-    setStudents(students.map(student => 
-      student.id === studentId 
-        ? { ...student, isBlocked: !student.isBlocked }
-        : student
-    ));
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/admin/students');
+        console.log(response.data.data);
+        setStudents(response.data.data);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
+
+  const handleBlockToggle = async (studentId) => {
+    try {
+      // Call your API to block/unblock the student
+      await api.patch(`/admin/students/${studentId}/toggle-block`);
+      
+      // Update local state
+      setStudents(students.map(student => 
+        student._id === studentId 
+          ? { ...student, isBlocked: !student.isBlocked }
+          : student
+      ));
+    } catch (error) {
+      console.error('Error toggling block status:', error);
+      alert('Failed to update student status');
+    }
   };
 
   const handleViewDetails = (studentId) => {
@@ -119,9 +48,10 @@ const Students = () => {
 
   // Filter students based on search
   const filteredStudents = students.filter(student =>
-    student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.id.toString().includes(searchQuery)
+    student.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student._id?.toString().includes(searchQuery)
   );
 
   // Calculate pagination
@@ -183,6 +113,25 @@ const Students = () => {
     return pageNumbers;
   };
 
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl text-gray-600">Loading students...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-800 mb-8">Students Management</h1>
@@ -213,11 +162,11 @@ const Students = () => {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search by name, email, or ID..."
+              placeholder="Search by name, email, username, or ID..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset to first page on search
+                setCurrentPage(1);
               }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
@@ -226,7 +175,7 @@ const Students = () => {
             value={itemsPerPage}
             onChange={(e) => {
               setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1); // Reset to first page
+              setCurrentPage(1);
             }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
@@ -243,7 +192,7 @@ const Students = () => {
         <div className="p-6 border-b flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">All Students</h2>
           <p className="text-sm text-gray-600">
-            Showing {indexOfFirstStudent + 1} to {Math.min(indexOfLastStudent, filteredStudents.length)} of {filteredStudents.length} students
+            Showing {filteredStudents.length > 0 ? indexOfFirstStudent + 1 : 0} to {Math.min(indexOfLastStudent, filteredStudents.length)} of {filteredStudents.length} students
           </p>
         </div>
         <div className="overflow-x-auto">
@@ -257,13 +206,13 @@ const Students = () => {
                   Full Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Username
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Enrollment Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Courses
+                  Joined Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -276,21 +225,21 @@ const Students = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentStudents.length > 0 ? (
                 currentStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50">
+                  <tr key={student._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{student.id}
+                      #{student._id.slice(-6)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {student.fullName}
+                      {student.fullName || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {student.email}
+                      {student.username || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {student.enrollmentDate}
+                      {student.email || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {student.coursesEnrolled}
+                      {formatDate(student.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -306,13 +255,13 @@ const Students = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleViewDetails(student.id)}
+                          onClick={() => handleViewDetails(student._id)}
                           className="px-4 py-1.5 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
                         >
                           View
                         </button>
                         <button
-                          onClick={() => handleBlockToggle(student.id)}
+                          onClick={() => handleBlockToggle(student._id)}
                           className={`px-4 py-1.5 rounded transition-colors ${
                             student.isBlocked
                               ? 'bg-green-500 text-white hover:bg-green-600'
