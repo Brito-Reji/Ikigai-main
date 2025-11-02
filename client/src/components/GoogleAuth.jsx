@@ -2,14 +2,19 @@ import api from '@/api/axiosConfig.js';
 import { GoogleLogin } from '@react-oauth/google';
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
-
+import Swal from 'sweetalert2';
 function GoogleAuth({role}) {
 let navigate = useNavigate()
   const handleGoogleSuccess = async (credentialResponse) => {
+  try{
+
     let res = await api.post(`/auth/${role}/google`, {
       token: credentialResponse.credential,
     });
-    let { success,accessToken } = res.data
+    let { success,accessToken,message } = res.data
+    if(!success){
+      console.log(message)
+    }
     console.log("sucess? ",success)
     if (success && role == "student") {
       localStorage.setItem('token',accessToken)
@@ -17,6 +22,18 @@ let navigate = useNavigate()
     } else if (success && role == "instructor") {
       navigate("/instructor/dashboard")
     }
+  }
+  catch(err){
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: err.response.data.message
+    })
+    console.log(err)
+  }
+   
+ 
+    
   };
 
   return (

@@ -159,6 +159,12 @@ export const googleAuth = asyncHandler(async (req, res) => {
   let user = await User.findOne({ email })
   console.log(!!user)
   if (user) {
+    if(user.isBlocked){
+      return res.status(403).json({
+        success:false,
+        message:"user is blocked by the admin "
+      })
+    }
     let { accessToken, refreshToken } = generateTokens({ userId: user._id, role: user.role })
     return res
       .status(200)
@@ -170,7 +176,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
   if (!user) {
     // console.log(lastName.join())
-    let user = await User.insertOne({ email, firstName, lastName, username: null })
+    let user = await User.insertOne({ email, firstName, lastName, username: null,isVerfied:true })
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
       role: user.role,

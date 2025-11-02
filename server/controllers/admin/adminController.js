@@ -75,3 +75,7 @@ export const blockStudent = asyncHandler(async(req,res)=>{
   res.status(200).json({success:true})
   console.log(student.username)
 })
+
+export const blockInstructor = asyncHandler((req,res)=>{
+  
+})
