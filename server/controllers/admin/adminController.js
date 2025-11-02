@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import asyncHandler from 'express-async-handler'
 import { User } from "../../models/User.js";
 export const adminLogin = asyncHandler(async (req, res) => {
+  console.log("adminLogin controller called")
   try {
     const { email, password } = req.body;
 
@@ -13,7 +14,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     }
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res
         .status(404)
@@ -28,7 +29,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     }
 
     // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch =  bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
         success: false, 

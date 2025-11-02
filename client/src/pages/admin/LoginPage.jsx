@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ShoppingCart, Search, ArrowRight, Eye, EyeOff, Coins } from "lucide-react";
 import axios from "axios";
 import api from "@/api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
@@ -108,21 +108,19 @@ function LoginPage() {
         email: formData.email,
         password:formData.password
      })
+      console.log(response)
       let { data } = response
       console.log(data)
-      if (!data.isVerified) {
-           navigate("/verify-otp", {
-             state: {
-               email: data.email,
-             },
-           });
+      if(data.success){
+        navigate("/admin/dashboard")
+      } else {
+        toast.error(data.message)
       }
+  
     }
   };
 
-  const handleGoogleSignIn = () => {
-    console.log("Sign in with Google");
-  };
+
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
       {/* Left Side - Form */}

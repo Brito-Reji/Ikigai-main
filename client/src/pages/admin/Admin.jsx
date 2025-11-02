@@ -18,7 +18,7 @@ const Sidebar = () => {
     { id: "category", label: "Category", path: "/category" },
     { id: "students", label: "Students", path: "/students" },
     { id: "orders", label: "Orders", path: "/orders" },
-    { id: "tutors", label: "Tutors", path: "/tutors" },
+    { id: "instructors", label: "Instructors", path: "/instructors" },
     { id: "coupons", label: "Coupons", path: "/coupons" },
     { id: "course", label: "Course", path: "/course" },
     { id: "report", label: "Report", path: "/report" },
@@ -335,12 +335,12 @@ const OrdersPage = () => {
   );
 };
 
-const TutorsPage = () => {
+const InstructorsPage = () => {
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Tutors</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Instructors</h1>
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-gray-600">Manage tutors here.</p>
+        <p className="text-gray-600">Manage instructors here.</p>
       </div>
     </div>
   );
@@ -408,7 +408,7 @@ const Layout = () => {
           <Route path="/category" element={<CategoryPage />} />
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/tutors" element={<TutorsPage />} />
+          <Route path="/instructors" element={<InstructorsPage />} />
           <Route path="/coupons" element={<CouponsPage />} />
           <Route path="/course" element={<CoursePage />} />
           <Route path="/report" element={<ReportPage />} />
