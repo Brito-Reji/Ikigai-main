@@ -42,9 +42,7 @@ function App() {
           <Route path="signup" element={<UserSignupPage />} />
           <Route path="course" element={<UserCourseListingPage />} />
           <Route path="verify-otp" element={<UserOTPVerificationPage />} />
-          {/* <Route path="courses" element={<Courses />} /> */}
-          {/* <Route path="cart" element={<Cart />} />
-          <Route path="wishlist" element={<Wishlist />} /> */}
+          
         </Route>
         <Route path="/instructor" element={<Layout />}>
           <Route path="login" element={<InstructorLoginPage />} />

@@ -60,6 +60,18 @@ export const adminLogin = asyncHandler(async (req, res) => {
 
 export const getStudents = asyncHandler(async (req, res) => {
   console.log("getStudents controller called")
-  const students = await User.find({ role: 'student' })
+  const students = await User.find({ role: 'student',isVerfied:true })
+  // console.log(students)
+  
   res.status(200).json({ success: true, data: students })
+})
+
+export const blockStudent = asyncHandler(async(req,res)=>{
+  console.log('block students')
+  let {studentId}= req.params
+  const student = await User.findOne({_id:studentId})
+  student.isBlocked = !student.isBlocked;
+  student.save()
+  res.status(200).json({success:true})
+  console.log(student.username)
 })

@@ -1,9 +1,10 @@
 import { Router } from 'express'
-import { getStudents } from '../controllers/admin/adminController.js'
+import { blockStudent, getStudents } from '../controllers/admin/adminController.js'
 
 const router = Router()
 
-router.get('/students', getStudents)
+router.get('/students', getStudents);
+router.patch('/students/:studentId/toggle-block',blockStudent)
 // router.get('/admin/instructors', getInstructors)
 // router.get('/admin/categories', getCategories)
 // router.get('/admin/courses', getCourses)
