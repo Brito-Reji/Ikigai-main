@@ -144,9 +144,16 @@ export default function OTPVerificationPage() {
       localStorage.removeItem("otpExpiry");
       setVerified(true);
 
-      // Redirect to course page after successful verification
+      // Redirect to login page after successful verification
+      // User needs to log in to get access token
       setTimeout(() => {
-        navigate("/course");
+        navigate("/login", {
+          replace: true,
+          state: {
+            message: "Email verified successfully! Please log in to continue.",
+            email: email,
+          },
+        });
       }, 1500);
     } catch {
       // Error is handled by Redux, but we still need to reset the form
@@ -172,7 +179,13 @@ export default function OTPVerificationPage() {
 
   // Handle continue after verification
   const handleContinue = () => {
-    navigate("/course");
+    navigate("/login", {
+      replace: true,
+      state: {
+        message: "Email verified successfully! Please log in to continue.",
+        email: email,
+      },
+    });
   };
 
   // Handle change email

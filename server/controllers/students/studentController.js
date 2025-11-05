@@ -121,7 +121,16 @@ export const studentLogin = asyncHandler(async (req, res) => {
     .select("+password")
     .exec();
 
-  if (!user?.isVerfied) {
+  // Check if user exists
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials",
+    });
+  }
+
+  // Check if user is verified
+  if (!user.isVerfied) {
     try {
       // Create a mock request object for the OTP service
       const mockReq = { body: { email: user.email } };

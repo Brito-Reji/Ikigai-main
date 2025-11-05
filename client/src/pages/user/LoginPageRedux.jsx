@@ -25,10 +25,17 @@ export default function LoginPageRedux() {
     dispatch(clearError());
   }, [dispatch]);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated || localStorage.getItem("accessToken")) {
+      navigate("/course", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   // Handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/course");
+      navigate("/course", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

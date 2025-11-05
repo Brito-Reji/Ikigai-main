@@ -24,3 +24,7 @@ Thumbs.db
 .github/instructions/snyk_rules.instructions.md
 *.md
 
+client/src/pages/admin/Instructors.jsx.save
+.gitignore
+client/src/pages/admin/Instructors.jsx.save.2
+client/src/pages/admin/Instructors.jsx.save.3

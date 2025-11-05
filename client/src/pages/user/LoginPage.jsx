@@ -1,17 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
-import { loginUser } from "@/store/slices/authSlice.js";
+import { loginUser, clearError } from "@/store/slices/authSlice.js";
 
 function LoginPage() {
   let navigate = useNavigate();
-  const { dispatch, loading } = useAuth();
+  const location = useLocation();
+  const { dispatch, loading, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated || localStorage.getItem("accessToken")) {
+      navigate("/course", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear any previous errors when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Pre-fill email if coming from OTP verification
+  useEffect(() => {
+    if (location.state?.email) {
+      setFormData(prev => ({
+        ...prev,
+        email: location.state.email,
+      }));
+    }
+  }, [location.state]);
+
   const [formData, setFormData] = useState({
-    email: "",
+    email: location.state?.email || "",
     password: "Admin@123",
   });
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || "");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
@@ -138,8 +163,13 @@ function LoginPage() {
               },
             });
           } else {
-            // Redirect to course page after successful login
-            navigate("/course");
+            // Clear success message
+            setSuccessMessage("");
+            // Small delay to ensure Redux state is fully updated
+            // Use replace: true to prevent going back to login page
+            setTimeout(() => {
+              navigate("/course", { replace: true });
+            }, 100);
           }
         } else if (loginUser.rejected.match(resultAction)) {
           // Handle login error
@@ -169,6 +199,12 @@ function LoginPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
               Sign in to your account
             </h1>
+
+            {successMessage && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+                {successMessage}
+              </div>
+            )}
 
             {errors.general && (
               <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">

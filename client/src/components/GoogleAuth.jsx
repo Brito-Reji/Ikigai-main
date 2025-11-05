@@ -17,10 +17,11 @@ let navigate = useNavigate()
     }
     console.log("sucess? ",success)
     if (success && role == "student") {
-      localStorage.setItem('token',accessToken)
-      navigate('/course')
+      localStorage.setItem('accessToken',accessToken)
+      navigate('/course', { replace: true })
     } else if (success && role == "instructor") {
-      navigate("/instructor/dashboard")
+      localStorage.setItem('accessToken',accessToken)
+      navigate("/instructor/dashboard", { replace: true })
     }
   }
   catch(err){

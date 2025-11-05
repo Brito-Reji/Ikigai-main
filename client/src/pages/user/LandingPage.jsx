@@ -108,7 +108,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <Header />
+    
       <div className="min-h-screen bg-white">
         {/* Navigation */}
         {/* <nav className="border-b border-gray-200">

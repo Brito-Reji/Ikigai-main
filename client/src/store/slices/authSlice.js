@@ -21,6 +21,11 @@ export const loginUser = createAsyncThunk(
           token,
           role,
         };
+      } else {
+        // If response is not successful but no error was thrown
+        return rejectWithValue({
+          message: response.data?.message || "Login failed",
+        });
       }
     } catch (error) {
       if (
@@ -91,7 +96,14 @@ export const fetchCurrentUser = createAsyncThunk(
     try {
       const response = await api.get("/auth/me");
       console.log("Current user fetched:", response.data);
-      return response.data.user;
+      if (response.data.success && response.data.user) {
+        return response.data.user;
+      } else {
+        localStorage.removeItem("accessToken");
+        return rejectWithValue({
+          message: "Failed to fetch user data",
+        });
+      }
     } catch (error) {
       console.log("Error fetching current user:", error);
       localStorage.removeItem("accessToken");

@@ -11,8 +11,15 @@ import Footer from "@/components/Footer.jsx";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const { loading, error, requiresVerification, verificationEmail, dispatch } =
+  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
     useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated || localStorage.getItem("accessToken")) {
+      navigate("/course", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -144,7 +151,7 @@ export default function SignUpPage() {
 
   return (
     <>
-      <Header />
+     
       <div className="min-h-screen bg-white">
         {/* Main Content */}
         <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
