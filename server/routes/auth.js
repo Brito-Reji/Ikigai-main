@@ -13,88 +13,150 @@ import {
 } from "../controllers/instructor/instructorController.js";
 import { User } from "../models/User.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
+import { generateTokens } from "../utils/generateTokens.js";
 import passport from "passport";
 const router = express.Router();
+
 // Instructor Routes
 router.post("/instructor/register", instructorRegister);
 router.post("/instructor/signin", instructorSignin);
-router.route('/instructor/google')
-.post(instructorGoogleAuth)
+router.route("/instructor/google").post(instructorGoogleAuth);
+
 // Student
 router.post("/student/register", studentRegister);
 router.post("/student/login", studentLogin);
-router.route("/student/google")
+router
+  .route("/student/google")
   .post(googleAuth)
-  .get(() =>{});
+  .get(() => {});
 
 router.post("/admin/login", adminLogin);
 
 // OTP
-
-
-
-
 router.post("/send-otp", sentOTP);
 router.post("/verify-otp", verifyOTP);
-// router.post('/verify-otp',verifyOTP)
 
-// router.get('/refresh',async (req,res)=>{
-//   try{
-//     const incomingToken = req.cookies?.refreshToken || req.headers['x-refresh-token'] || req.query.refreshToken
-//     if(!incomingToken){
-//       return res.status(403).json({ success:false, message:"No refresh token provided" })
-//     }
+// Refresh token endpoint
+router.post("/refresh", async (req, res) => {
+  try {
+    const incomingToken =
+      req.cookies?.refreshToken ||
+      req.headers["x-refresh-token"] ||
+      req.query.refreshToken;
+    console.log("Refresh token from request:", incomingToken);
 
-//     // Verify token
-//     let decoded
-//     try {
-//       decoded = jwt.verify(incomingToken, process.env.JWT_SECRET)
-//     } catch (e) {
-//       return res.status(403).json({ success:false, message:"Invalid refresh token" })
-//     }
+    if (!incomingToken) {
+      console.log("No refresh token provided");
+      return res
+        .status(403)
+        .json({ success: false, message: "No refresh token provided" });
+    }
 
-//     const user = await User.findById(decoded.id)
-//     if(!user){
-//       return res.status(403).json({ success:false, message:"User not found" })
-//     }
-//     if(user.isBlocked){
-//       return res.status(403).json({ success:false, message:"Account is blocked" })
-//     }
-//     if(user.refreshToken !== incomingToken){
-//       return res.status(403).json({ success:false, message:"Invalid refresh token" })
-//     }
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
+      console.log("Refresh token decoded:", decoded);
+    } catch (e) {
+      console.log("Invalid refresh token:", e);
+      return res
+        .status(403)
+        .json({ success: false, message: "Invalid refresh token" });
+    }
 
-//     // Rotate refresh token
-//     const newRefreshToken = jwt.sign({ id:user._id, role:user.role }, process.env.JWT_SECRET, { expiresIn:'7d' })
-//     user.refreshToken = newRefreshToken
-//     await user.save({ validateBeforeSave:false })
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      console.log("User not found for refresh token");
+      return res
+        .status(403)
+        .json({ success: false, message: "User not found" });
+    }
 
-//     // Issue new access token
-//
+    if (user.isBlocked) {
+      console.log("User is blocked");
+      return res
+        .status(403)
+        .json({ success: false, message: "Account is blocked" });
+    }
+
+    // Check if the refresh token matches the one stored in the database
+    if (user.refreshToken !== incomingToken) {
+      console.log("Refresh token mismatch");
+      return res
+        .status(403)
+        .json({ success: false, message: "Invalid refresh token" });
+    }
+
+    // Generate new tokens
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens({
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      role: user.role,
+      profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerfied,
+    });
+
+    // Update refresh token in database
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set refresh token in HttpOnly cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    console.log("New access token generated:", accessToken);
+    return res.status(200).json({ success: true, accessToken });
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+});
 
 // Get current user from access token
 router.get("/me", (req, res) => {
   try {
-    const token =
-      req.headers.authorization?.split(" ")[1] || req.cookies?.authToken;
+    // Extract token from Authorization header
+    let token = null;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    console.log("Token from header:", token);
+
     if (!token) {
+      console.log("No token provided in request");
       return res
         .status(401)
         .json({ success: false, message: "No token provided" });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return res
-      .status(200)
-      .json({
-        success: true,
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          username: decoded.username,
-          role: decoded.role,
-        },
-      });
+
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    console.log("Decoded token:", decoded);
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: decoded.id,
+        email: decoded.email,
+        username: decoded.username,
+        firstName: decoded.firstName,
+        role: decoded.role,
+        profileImageUrl: decoded.profileImageUrl,
+        isVerified: decoded.isVerified,
+      },
+    });
   } catch (err) {
+    console.log("Token verification error:", err);
     return res.status(401).json({ success: false, message: "Invalid token" });
   }
 });

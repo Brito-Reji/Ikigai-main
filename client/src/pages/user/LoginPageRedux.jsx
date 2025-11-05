@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useAuth } from "../../hooks/useRedux.js";
 import { loginUser, clearError } from "../../store/slices/authSlice.js";
 import GoogleAuth from "../../components/GoogleAuth.jsx";
+import Header from "@/components/Header.jsx";
 
 export default function LoginPageRedux() {
   const navigate = useNavigate();
@@ -97,6 +98,8 @@ export default function LoginPageRedux() {
   };
 
   return (
+    <>
+      <Header/>
     <div className="min-h-screen bg-white">
       <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
         {/* Left Side - Image */}
@@ -209,5 +212,6 @@ export default function LoginPageRedux() {
         </div>
       </div>
     </div>
+                  </>
   );
 }

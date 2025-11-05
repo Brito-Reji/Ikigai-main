@@ -1,16 +1,25 @@
 "use client";
 import { useState } from "react";
 import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
-import { Link, useActionData } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext.jsx";
+import { Link, useNavigate } from "react-router-dom";
+// Changed import to use Redux hook instead of Context
+import { useAuth } from "../hooks/useRedux.js";
+import { logout } from "../store/slices/authSlice.js";
+import { useDispatch } from "react-redux";
 
-export default function Header({
-  onMenuToggle,
-  menuOpen,
-}) {
-  let { user } = useAuth()
-  let isAuthenticated = !!user
+export default function Header({ onMenuToggle, menuOpen }) {
+  // Changed to use Redux hook instead of Context
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  console.log("Header auth state:", { isAuthenticated, user });
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -89,25 +98,33 @@ export default function Header({
                 <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <Bell className="w-5 h-5" />
                 </button>
-                <button className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition">
-                  <User className="w-5 h-5 text-white" />
-                </button>
+                <div className="relative group">
+                  <button className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition">
+                    <User className="w-5 h-5 text-white" />
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <>
-                  {/* Unauthenticated User Actions - Always visible on desktop */}
-                  <Link to={'/login'}>
-                  
-                <button className="hidden md:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm border border-gray-300 rounded-lg">
-                  Log In
-                </button>
-                  </Link>
-                  <Link to={'/signup'}>
-                  
-                <button className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
-                  Sign Up
-                </button>
-                  </Link>
+                {/* Unauthenticated User Actions - Always visible on desktop */}
+                <Link to={"/login"}>
+                  <button className="hidden md:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm border border-gray-300 rounded-lg">
+                    Log In
+                  </button>
+                </Link>
+                <Link to={"/signup"}>
+                  <button className="px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
+                    Sign Up
+                  </button>
+                </Link>
               </>
             )}
           </div>
@@ -139,7 +156,7 @@ export default function Header({
             >
               Categories
             </a>
-            
+
             {isAuthenticated ? (
               <>
                 <a
@@ -168,23 +185,27 @@ export default function Header({
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <User className="w-5 h-5" />
-                  <span>Profile</span>
+                  <span>{user?.firstName || user?.email || "Profile"}</span>
                 </a>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium"
+                >
+                  Logout
+                </button>
               </>
             ) : (
               <>
-                <a
-                  href="#"
-                  className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium"
-                >
-                  Log In
-                </a>
-                <a
-                  href="#"
-                  className="block py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-4 transition font-medium text-center"
-                >
-                  Sign Up
-                </a>
+                <Link to="/login">
+                  <a className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium">
+                    Log In
+                  </a>
+                </Link>
+                <Link to="/signup">
+                  <a className="block py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-4 transition font-medium text-center">
+                    Sign Up
+                  </a>
+                </Link>
               </>
             )}
           </nav>

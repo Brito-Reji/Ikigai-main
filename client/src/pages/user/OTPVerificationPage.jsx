@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "@/api/axiosConfig.js";
+import { useAuth } from "@/hooks/useRedux.js";
+import { verifyOTP, clearError } from "@/store/slices/authSlice.js";
 
 export default function OTPVerificationPage() {
-  // For demo purposes - in real app, get from route state
   const location = useLocation();
   const navigate = useNavigate();
-  // Get email from navigation state or props
-  const [email] = useState(location.state.email); // Replace with actual email from previous page
+  const { loading, error, dispatch } = useAuth();
+
+  // Get email from navigation state
+  const [email] = useState(location.state?.email || "");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(0);
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [resendingOtp, setResendingOtp] = useState(false);
-  const [error, setError] = useState("");
   const [verified, setVerified] = useState(false);
 
   // Initialize timer from localStorage on mount
@@ -62,6 +62,11 @@ export default function OTPVerificationPage() {
     return () => clearInterval(interval);
   }, [otpTimer, verified]);
 
+  // Clear errors on mount
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
   // Helper function to start a new timer
   const startNewTimer = (seconds) => {
     const expiryTime = Date.now() + seconds * 1000;
@@ -85,7 +90,6 @@ export default function OTPVerificationPage() {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    setError("");
 
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
@@ -123,63 +127,57 @@ export default function OTPVerificationPage() {
     const otpValue = otp.join("");
 
     if (otpValue.length !== 6) {
-      setError("Please enter complete 6-digit OTP");
+      // Error handling is now done through Redux
       return;
     }
 
     if (otpTimer === 0) {
-      setError("OTP expired. Please request a new one.");
+      // Error handling is now done through Redux
       return;
     }
 
-    setVerifyingOtp(true);
-    setError("");
-
     try {
-      // Simulating API call
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
-      await api.post('/auth/verify-otp', {
-        otp: otpValue,
-        email:email
-      })
+      // Use Redux action to verify OTP
+      await dispatch(verifyOTP({ email, otp: otpValue })).unwrap();
 
       // Clear timer from localStorage on successful verification
       localStorage.removeItem("otpExpiry");
       setVerified(true);
 
+      // Redirect to course page after successful verification
       setTimeout(() => {
-        alert("Email verified! Redirecting to dashboard...");
+        navigate("/course");
       }, 1500);
-    } catch (error) {
-      const errorMessage = error.message || "Failed to verify OTP";
-      setError(errorMessage);
+    } catch {
+      // Error is handled by Redux, but we still need to reset the form
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
-    } finally {
-      setVerifyingOtp(false);
     }
   };
 
   // Resend OTP
   const handleResendOtp = async () => {
     setResendingOtp(true);
-    setError("");
 
     try {
-      // Simulating API call
-      await api.post("/auth/send-otp", { email });
-
-      // Start new timer (120 seconds)
+      // In a real implementation, you would call an API to resend OTP
+      // For now, we'll just reset the timer and form
       startNewTimer(120);
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
-      alert("OTP resent to your email!");
-    } catch (error) {
-      console.log(error)
-      setError("Failed to resend OTP. Please try again.");
     } finally {
       setResendingOtp(false);
     }
+  };
+
+  // Handle continue after verification
+  const handleContinue = () => {
+    navigate("/course");
+  };
+
+  // Handle change email
+  const handleChangeEmail = () => {
+    navigate("/signup");
   };
 
   return (
@@ -215,7 +213,7 @@ export default function OTPVerificationPage() {
                 </span>
               </div>
               <button
-                onClick={() => alert("Navigating to dashboard...")}
+                onClick={handleContinue}
                 className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2"
               >
                 <span>Continue</span>
@@ -237,13 +235,16 @@ export default function OTPVerificationPage() {
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={index === 0 ? handlePaste : undefined}
                     className="w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                    disabled={verifyingOtp}
+                    disabled={loading}
                   />
                 ))}
               </div>
 
-              {error && (
-                <p className="text-sm text-red-500 text-center">{error}</p>
+              {/* Error message from Redux */}
+              {(error || (otp.join("").length !== 6 && loading)) && (
+                <p className="text-sm text-red-500 text-center">
+                  {error || "Please enter complete 6-digit OTP"}
+                </p>
               )}
 
               <div className="flex items-center justify-center gap-2">
@@ -261,15 +262,15 @@ export default function OTPVerificationPage() {
 
               <button
                 onClick={handleVerifyOtp}
-                disabled={verifyingOtp || otp.join("").length !== 6}
+                disabled={loading || otp.join("").length !== 6}
                 className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium transition flex items-center justify-center space-x-2 ${
-                  verifyingOtp || otp.join("").length !== 6
+                  loading || otp.join("").length !== 6
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-indigo-700"
                 }`}
               >
-                <span>{verifyingOtp ? "Verifying..." : "Verify OTP"}</span>
-                {!verifyingOtp && <ArrowRight className="w-5 h-5" />}
+                <span>{loading ? "Verifying..." : "Verify OTP"}</span>
+                {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
 
               <div className="text-center">
@@ -291,7 +292,7 @@ export default function OTPVerificationPage() {
 
               <div className="text-center pt-4 border-t border-gray-200">
                 <button
-                  onClick={() => alert("Going back to signup...")}
+                  onClick={handleChangeEmail}
                   className="text-gray-600 text-sm hover:text-gray-900"
                 >
                   Change email address

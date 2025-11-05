@@ -1,26 +1,45 @@
-import React, { useEffect, useState } from "react";
-import api from "../../api/axiosConfig.js";
+import React, { useState, useEffect } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { ShoppingCart, Search, ArrowRight, Rss } from "lucide-react";
 import Header from "@/components/Header.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext.jsx";
+import { useAuth } from "@/hooks/useRedux.js";
+import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
+import Footer from "@/components/Footer.jsx";
+
 export default function SignUpPage() {
-  let navigate = useNavigate();
-  // let { setUser, user } = useAuth();
+  const navigate = useNavigate();
+  const { loading, error, requiresVerification, verificationEmail, dispatch } =
+    useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     username: "",
     email: "",
-    password: "Admin@123",
-    confirmPassword: "Admin@123",
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Handle verification requirement
+  useEffect(() => {
+    if (requiresVerification && verificationEmail) {
+      navigate("/verify-otp", {
+        state: {
+          email: verificationEmail,
+        },
+      });
+    }
+  }, [requiresVerification, verificationEmail, navigate]);
 
   // Validation function
   const validateForm = () => {
@@ -94,266 +113,252 @@ export default function SignUpPage() {
     });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (validateForm()) {
-  //   await api.post('/auth/student/register',{
-  //     email:formData.email,
-  //     username:formData.username,
-  //     firstName:formData.firstName,
-  //  lastName:formData.lastName,
-  //  password:formData.password
-  //   })
-  //   navigate('/verify-otp',{
-  //     state:{
-  //       email:formData.email
-  //     }
-  //   })
-  //   }
-  // }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted, validation starting...");
 
     if (validateForm()) {
-      console.log("Validation passed, making API call...");
-      console.log("Form data:", formData);
-
       try {
-        console.log("Making POST request to /auth/student/register");
-        const res = await api.post("/auth/student/register", {
-          email: formData.email,
-          username: formData.username,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          password: formData.password,
-        });
-
-        let { accessToken } = res.data
-       
-
-        if (res.data.success) {
-          console.log("Registration successful, navigating to OTP page");
-           localStorage.setItem("token", accessToken);
-          navigate("/verify-otp", {
-            state: {
+        // Use Redux action to register user
+        await dispatch(
+          registerUser({
+            userData: {
               email: formData.email,
+              username: formData.username,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              password: formData.password,
             },
-          });
-        }
+            role: "student",
+          })
+        ).unwrap();
       } catch (err) {
-        console.error("Registration failed - Full error:", err);
-        console.error("Error response:", err.response);
-
-        const errorMessage =
-          err.response?.data?.message ||
-          "Registration failed. Please try again.";
-
+        console.error("Registration failed:", err);
         Swal.fire({
           icon: "error",
           title: "Registration failed",
-          text: errorMessage,
+          text: err.message || "Registration failed. Please try again.",
         });
       }
-    } else {
-      console.log("Form validation failed:", errors);
     }
   };
 
- 
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Main Content */}
-      <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
-        {/* Left Side - Image */}
-        <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden lg:min-h-screen">
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
-            alt="Student studying with laptop"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
+    <>
+      <Header />
+      <div className="min-h-screen bg-white">
+        {/* Main Content */}
+        <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
+          {/* Left Side - Image */}
+          <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden lg:min-h-screen">
+            <img
+              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
+              alt="Student studying with laptop"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
 
-        {/* Right Side - Form */}
-        <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
-              Create Your Account
-            </h1>
+          {/* Right Side - Form */}
+          <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
+            <div className="w-full max-w-md">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
+                Create Your Account
+              </h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Full Name
-                </label>
+              {/* Global Error Message */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Full Name
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        name="firstName"
+                        placeholder="First Name"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border ${
+                          errors.firstName
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                        disabled={loading}
+                      />
+                      {errors.firstName && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.firstName}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        name="lastName"
+                        placeholder="Last Name"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border ${
+                          errors.lastName ? "border-red-500" : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                        disabled={loading}
+                      />
+                      {errors.lastName && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.lastName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Username */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.username ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                    disabled={loading}
+                  />
+                  {errors.username && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.username}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email ID"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                    disabled={loading}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Password */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Password
+                    </label>
                     <input
-                      type="text"
-                      name="firstName"
-                      placeholder="First Name"
-                      value={formData.firstName}
+                      type="password"
+                      name="password"
+                      placeholder="Enter Password"
+                      value={formData.password}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 border ${
-                        errors.firstName ? "border-red-500" : "border-gray-300"
+                        errors.password ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      disabled={loading}
                     />
-                    {errors.firstName && (
+                    {errors.password && (
                       <p className="mt-1 text-sm text-red-500">
-                        {errors.firstName}
+                        {errors.password}
                       </p>
                     )}
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Confirm Password
+                    </label>
                     <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last Name"
-                      value={formData.lastName}
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm Password"
+                      value={formData.confirmPassword}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 border ${
-                        errors.lastName ? "border-red-500" : "border-gray-300"
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      disabled={loading}
                     />
-                    {errors.lastName && (
+                    {errors.confirmPassword && (
                       <p className="mt-1 text-sm text-red-500">
-                        {errors.lastName}
+                        {errors.confirmPassword}
                       </p>
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${
-                    errors.username ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-500">{errors.username}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email ID"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.password ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                  />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.confirmPassword
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2"
-              >
-                <span>Create Account</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <div>
-                <a
-                  href="#"
-                  className="text-gray-900  font-medium text-xs flex justify-center"
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${
+                    loading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
-                  Already have an account?
-                  <a href="" className=" text-blue-500 underline">
-                    <Link to={'/login'} >
-                    
-                  Login
-                    </Link>
-                  </a>
-                </a>
-              </div>
-
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">
-                    Sign up with
+                  <span>
+                    {loading ? "Creating Account..." : "Create Account"}
                   </span>
+                  {!loading && <ArrowRight className="w-5 h-5" />}
+                </button>
+                <div>
+                  <a
+                    href="#"
+                    className="text-gray-900  font-medium text-xs flex justify-center"
+                  >
+                    Already have an account?
+                    <a href="" className=" text-blue-500 underline">
+                      <Link to={"/login"}>Login</Link>
+                    </a>
+                  </a>
                 </div>
-              </div>
 
-              {/* Google Sign Up */}
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500">
+                      Sign up with
+                    </span>
+                  </div>
+                </div>
 
-            <GoogleAuth role={'student'}/>
-            </form>
+                {/* Google Sign Up */}
+
+                <GoogleAuth role={"student"} />
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

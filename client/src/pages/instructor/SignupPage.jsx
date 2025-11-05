@@ -1,26 +1,43 @@
-import React, { useEffect, useState } from "react";
-import api from "../../api/axiosConfig.js";
-
+import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ArrowRight } from "lucide-react";
 import Header from "@/components/Header.jsx";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext.jsx";
+import { useAuth } from "@/hooks/useRedux.js";
+import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
+
 export default function SignUpPage() {
-  let navigate = useNavigate();
-  // let { setUser, user } = useAuth();
+  const navigate = useNavigate();
+  const { loading, error, requiresVerification, verificationEmail, dispatch } =
+    useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     username: "",
     email: "",
-    password: "Admin@123",
-    confirmPassword: "Admin@123",
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Handle verification requirement
+  useEffect(() => {
+    if (requiresVerification && verificationEmail) {
+      navigate("/verify-otp", {
+        state: {
+          email: verificationEmail,
+        },
+      });
+    }
+  }, [requiresVerification, verificationEmail, navigate]);
 
   // Validation function
   const validateForm = () => {
@@ -94,72 +111,33 @@ export default function SignUpPage() {
     });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (validateForm()) {
-  //   await api.post('/auth/student/register',{
-  //     email:formData.email,
-  //     username:formData.username,
-  //     firstName:formData.firstName,
-  //  lastName:formData.lastName,
-  //  password:formData.password
-  //   })
-  //   navigate('/verify-otp',{
-  //     state:{
-  //       email:formData.email
-  //     }
-  //   })
-  //   }
-  // }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted, validation starting...");
 
     if (validateForm()) {
-      console.log("Validation passed, making API call...");
-      console.log("Form data:", formData);
-
       try {
-        console.log("Making POST request to /auth/instructor/register");
-        const res = await api.post("/auth/instructor/register", {
-          email: formData.email,
-          username: formData.username,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          password: formData.password,
-        });
-
-        console.log("API Response:", res);
-
-        if (res.data.success) {
-          console.log("Registration successful, navigating to OTP page");
-          navigate("/verify-otp", {
-            state: {
+        // Use Redux action to register instructor
+        await dispatch(
+          registerUser({
+            userData: {
               email: formData.email,
+              username: formData.username,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              password: formData.password,
             },
-          });
-        }
+            role: "instructor",
+          })
+        ).unwrap();
       } catch (err) {
-        console.error("Registration failed - Full error:", err);
-        console.error("Error response:", err.response);
-
-        const errorMessage =
-          err.response?.data?.message ||
-          "Registration failed. Please try again.";
-
+        console.error("Registration failed:", err);
         Swal.fire({
           icon: "error",
           title: "Registration failed",
-          text: errorMessage,
+          text: err.message || "Registration failed. Please try again.",
         });
       }
-    } else {
-      console.log("Form validation failed:", errors);
     }
-  };
-
-  const handleGoogleSignUp = () => {
-    console.log("Sign up with Google");
   };
 
   return (
@@ -182,6 +160,13 @@ export default function SignUpPage() {
               Become an Intructor
             </h1>
 
+            {/* Global Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Full Name */}
               <div>
@@ -199,6 +184,7 @@ export default function SignUpPage() {
                       className={`w-full px-4 py-3 border ${
                         errors.firstName ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      disabled={loading}
                     />
                     {errors.firstName && (
                       <p className="mt-1 text-sm text-red-500">
@@ -216,6 +202,7 @@ export default function SignUpPage() {
                       className={`w-full px-4 py-3 border ${
                         errors.lastName ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      disabled={loading}
                     />
                     {errors.lastName && (
                       <p className="mt-1 text-sm text-red-500">
@@ -240,6 +227,7 @@ export default function SignUpPage() {
                   className={`w-full px-4 py-3 border ${
                     errors.username ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  disabled={loading}
                 />
                 {errors.username && (
                   <p className="mt-1 text-sm text-red-500">{errors.username}</p>
@@ -260,6 +248,7 @@ export default function SignUpPage() {
                   className={`w-full px-4 py-3 border ${
                     errors.email ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  disabled={loading}
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-500">{errors.email}</p>
@@ -281,6 +270,7 @@ export default function SignUpPage() {
                     className={`w-full px-4 py-3 border ${
                       errors.password ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                    disabled={loading}
                   />
                   {errors.password && (
                     <p className="mt-1 text-sm text-red-500">
@@ -303,6 +293,7 @@ export default function SignUpPage() {
                         ? "border-red-500"
                         : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                    disabled={loading}
                   />
                   {errors.confirmPassword && (
                     <p className="mt-1 text-sm text-red-500">
@@ -315,10 +306,17 @@ export default function SignUpPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2"
+                disabled={loading}
+                className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${
+                  loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-800"
+                }`}
               >
-                <span>Create Account</span>
-                <ArrowRight className="w-5 h-5" />
+                <span>
+                  {loading ? "Creating Account..." : "Create Account"}
+                </span>
+                {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
 
               {/* Divider */}
@@ -334,7 +332,7 @@ export default function SignUpPage() {
               </div>
 
               {/* Google Sign Up */}
-             <GoogleAuth role={'instructor'} />
+              <GoogleAuth role={"instructor"} />
             </form>
           </div>
         </div>

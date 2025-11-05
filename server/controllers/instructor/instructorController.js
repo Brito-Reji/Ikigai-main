@@ -1,14 +1,13 @@
-import asyncHandler from 'express-async-handler'
-import bcrypt from 'bcrypt'
-import { Instructor } from '../../models/Instructor.js'
-import jwt from 'jsonwebtoken'
-import api from '../../config/axiosConfig.js';
-import { OAuth2Client } from 'google-auth-library';
-import { generateTokens } from '../../utils/generateTokens.js';
-
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+import { Instructor } from "../../models/Instructor.js";
+import jwt from "jsonwebtoken";
+import api from "../../config/axiosConfig.js";
+import { OAuth2Client } from "google-auth-library";
+import { generateTokens } from "../../utils/generateTokens.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-  console.log("Student registration endpoint hit!");
+  console.log("Instructor registration endpoint hit!");
   console.log("Request body:", req.body);
 
   let { email, username, firstName, lastName, password } = req.body;
@@ -19,10 +18,12 @@ export const instructorRegister = asyncHandler(async (req, res) => {
       .status(400)
       .json({ success: false, message: "Please provide all required fields" });
   }
-  const existingUser = await Instructor.findOne({ $or: [{ email }, { username }] });
-  console.log(existingUser, " existing user student");
+  const existingUser = await Instructor.findOne({
+    $or: [{ email }, { username }],
+  });
+  console.log(existingUser, " existing user instructor");
   if (existingUser) {
-    console.log('user already exist')
+    console.log("user already exist");
     return res
       .status(400)
       .json({ success: false, message: "email or username  already exist" });
@@ -71,13 +72,6 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
 export const instructorSignin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -117,33 +111,130 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     });
   }
 
-  // Generate JWT token
-  let {accessToken,refreshToken} = generateTokens({userId:user._id,email,username,firstName,role})
+  // Generate JWT tokens
+  let { accessToken, refreshToken } = generateTokens({
+    userId: user._id,
+    email: user.email,
+    username: user.username,
+    firstName: user.firstName,
+    role: user.role,
+    profileImageUrl: user.profileImageUrl,
+    isVerified: user.isVerfied,
+  });
+
+  // Store refresh token in database
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+
+  // Set refresh token in HttpOnly cookie
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 
   return res.json({
     success: true,
-    message: "Sign in successful",
     data: {
-     
-      token:accessToken
+      token: accessToken,
+    },
+    user: {
+      email: user.email,
+      role: user.role,
     },
   });
 });
 
 export const instructorGoogleAuth = asyncHandler(async (req, res) => {
-    const client = new OAuth2Client()
-    const{token}  = req.body;
-  console.log(token)
-      const ticket = await client.verifyIdToken({
-        idToken: token, // The credential from your frontend
-        audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
-      });
-    console.log(ticket)
-  let { email, name, picture, } = ticket.payload
-  console.log('name of the teacher is: ',name)
-    let [firstName, ...lastName] = name.split(' ')
-    let user = await Instructor.findOne({email})
-    if (user) {
-     
-   }
-})
+  const client = new OAuth2Client();
+  const { token } = req.body;
+  console.log(token);
+  const ticket = await client.verifyIdToken({
+    idToken: token, // The credential from your frontend
+    audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
+  });
+  console.log(ticket);
+  let { email, name, picture } = ticket.payload;
+  console.log("name of the instructor is: ", name);
+  let [firstName, ...lastName] = name.split(" ");
+  lastName = lastName.join(" ");
+  let user = await Instructor.findOne({ email });
+  if (user) {
+    let { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      role: user.role,
+      profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerfied,
+    });
+
+    // Store refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set refresh token in HttpOnly cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        token: accessToken,
+      },
+      user: {
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } else {
+    // Create new instructor account
+    user = await Instructor.create({
+      email,
+      firstName,
+      lastName,
+      username: null,
+      isVerfied: true,
+      profileImageUrl: picture,
+    });
+
+    let { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      role: user.role,
+      profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerfied,
+    });
+
+    // Store refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set refresh token in HttpOnly cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        token: accessToken,
+      },
+      user: {
+        email: user.email,
+        role: user.role,
+      },
+    });
+  }
+});

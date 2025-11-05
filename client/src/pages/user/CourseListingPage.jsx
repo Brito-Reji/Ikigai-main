@@ -21,7 +21,6 @@ export default function CoursesPage() {
     category: false,
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   function toggleSection(section) {
     setExpandedSections({

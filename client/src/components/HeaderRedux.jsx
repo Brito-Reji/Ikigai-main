@@ -1,27 +1,26 @@
 import React, { useState } from "react";
 import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth, useUI, useCourses } from "../hooks/useRedux.js";
+import { useAuth, useCourses } from "../hooks/useRedux.js";
 import { logout } from "../store/slices/authSlice.js";
-import { toggleMobileMenu } from "../store/slices/uiSlice.js";
 
 export default function HeaderRedux() {
   const navigate = useNavigate();
   const { isAuthenticated, user, dispatch: authDispatch } = useAuth();
-  const { mobileMenuOpen, dispatch: uiDispatch } = useUI();
   const { cart, wishlist } = useCourses();
-  
+
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     authDispatch(logout());
-    navigate('/');
+    navigate("/");
     setShowUserMenu(false);
   };
 
   const toggleMobileMenuHandler = () => {
-    uiDispatch(toggleMobileMenu());
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   return (
@@ -67,8 +66,8 @@ export default function HeaderRedux() {
                 </button>
 
                 {/* Cart */}
-                <button 
-                  onClick={() => navigate('/cart')}
+                <button
+                  onClick={() => navigate("/cart")}
                   className="relative p-2 text-gray-600 hover:text-gray-900 transition"
                 >
                   <ShoppingCart className="w-6 h-6" />
@@ -92,7 +91,9 @@ export default function HeaderRedux() {
                     className="flex items-center space-x-2 p-2 text-gray-600 hover:text-gray-900 transition"
                   >
                     <User className="w-6 h-6" />
-                    <span className="text-sm font-medium">{user?.firstName || 'User'}</span>
+                    <span className="text-sm font-medium">
+                      {user?.firstName || "User"}
+                    </span>
                   </button>
 
                   {showUserMenu && (
@@ -191,7 +192,9 @@ export default function HeaderRedux() {
                   <div className="flex items-center space-x-3 px-4 py-2">
                     <User className="w-8 h-8 text-gray-400" />
                     <div>
-                      <p className="font-medium text-gray-900">{user?.firstName || 'User'}</p>
+                      <p className="font-medium text-gray-900">
+                        {user?.firstName || "User"}
+                      </p>
                       <p className="text-sm text-gray-500">{user?.email}</p>
                     </div>
                   </div>

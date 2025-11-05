@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
-import axios from "axios";
-import api from "@/api/axiosConfig.js";
 import { Link, useNavigate } from "react-router-dom";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
-import { useGoogleLogin } from "@react-oauth/google";
-import Header from "@/components/Header.jsx";
+import { useAuth } from "@/hooks/useRedux.js";
+import { loginUser } from "@/store/slices/authSlice.js";
 
 function LoginPage() {
-  let navigate = useNavigate()
+  let navigate = useNavigate();
+  const { dispatch, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "Admin@123",
@@ -17,6 +16,7 @@ function LoginPage() {
   const [errors, setErrors] = useState({
     email: "",
     password: "",
+    general: "",
   });
   const [touched, setTouched] = useState({
     email: false,
@@ -24,14 +24,14 @@ function LoginPage() {
   });
 
   const validateEmail = (email) => {
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!email) {
-    //   return "Email is required";
-    // }
-    // if (!emailRegex.test(email)) {
-    //   return "Please enter a valid email address";
-    // }
-    // return "";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
   };
 
   const validatePassword = (password) => {
@@ -50,6 +50,14 @@ function LoginPage() {
       ...formData,
       [name]: value,
     });
+
+    // Clear general error when user starts typing
+    if (errors.general) {
+      setErrors({
+        ...errors,
+        general: "",
+      });
+    }
 
     // Real-time validation
     if (touched[name]) {
@@ -88,7 +96,9 @@ function LoginPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     // Mark all fields as touched
     setTouched({
       email: true,
@@ -102,34 +112,56 @@ function LoginPage() {
     setErrors({
       email: emailError,
       password: passwordError,
+      general: "",
     });
 
     // Only submit if no errors
     if (!emailError && !passwordError) {
-      console.log("Login submitted:", formData);
-     let response = await api.post('/auth/student/login', {
-        email: formData.email,
-        password:formData.password
-     })
-      let { data } = response
-      console.log(data.isVerified);
-      if (!data.isVerified && !data.isGoogle) {
-           navigate("/verify-otp", {
-             state: {
-               email: data.email,
-             },
-           });
-      } else {
-        navigate("/course");
+      try {
+        const resultAction = await dispatch(
+          loginUser({
+            email: formData.email,
+            password: formData.password,
+            role: "student",
+          })
+        );
+
+        console.log("Login result:", resultAction);
+
+        if (loginUser.fulfilled.match(resultAction)) {
+          console.log("Login successful, redirecting to course page");
+          // Check if user needs OTP verification
+          if (resultAction.payload?.requiresVerification) {
+            navigate("/verify-otp", {
+              state: {
+                email: formData.email,
+              },
+            });
+          } else {
+            // Redirect to course page after successful login
+            navigate("/course");
+          }
+        } else if (loginUser.rejected.match(resultAction)) {
+          // Handle login error
+          console.log("Login failed:", resultAction.payload);
+          setErrors({
+            ...errors,
+            general:
+              resultAction.payload?.message ||
+              "Login failed. Please try again.",
+          });
+        }
+      } catch {
+        setErrors({
+          ...errors,
+          general: "An unexpected error occurred. Please try again.",
+        });
       }
-     
     }
   };
 
-
   return (
     <>
-    
       <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
         {/* Left Side - Form */}
         <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 order-2 lg:order-1">
@@ -138,11 +170,17 @@ function LoginPage() {
               Sign in to your account
             </h1>
 
+            {errors.general && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">
+                {errors.general}
+              </div>
+            )}
+
             <div className="space-y-6">
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {/* Email */}
+                  Email
                 </label>
                 <input
                   type="email"
@@ -165,7 +203,7 @@ function LoginPage() {
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {/* Password */}
+                  Password
                 </label>
                 <div className="relative">
                   <input
@@ -201,28 +239,26 @@ function LoginPage() {
               {/* Sign In Button */}
               <button
                 onClick={handleSubmit}
-                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2"
+                disabled={loading}
+                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2 disabled:opacity-50"
               >
-                <span>Sign In</span>
-                <ArrowRight className="w-5 h-5" />
+                <span>{loading ? "Signing In..." : "Sign In"}</span>
+                {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
 
               {/* Forgot Password */}
               <div className="text-left flex justify-between">
                 <Link
-                  href="#"
+                  to="#"
                   className="text-gray-900 hover:text-gray-700 font-medium"
                 >
                   forgot password?
                 </Link>
               </div>
               <div>
-                <span
-                  href="#"
-                  className="text-gray-900  font-medium text-xs flex justify-center"
-                >
+                <span className="text-gray-900 font-medium text-xs flex justify-center">
                   Don't have an account?
-                  <span className=" text-blue-500 underline">
+                  <span className="text-blue-500 underline ml-1">
                     <Link to={"/signup"}>Sign up</Link>
                   </span>
                 </span>
@@ -241,7 +277,7 @@ function LoginPage() {
               </div>
 
               {/* Google Sign In */}
-              <GoogleAuth role={'student'} />
+              <GoogleAuth role={"student"} />
             </div>
           </div>
         </div>

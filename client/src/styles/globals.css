@@ -1,0 +1,259 @@
+/* Global Theme Variables */
+:root
+{
+    /* Brand Colors */
+    --color-gold: #d1a648;
+    --color-orange: #c56d45;
+    --color-sage: #78966e;
+    --color-teal: #135663;
+
+    /* Default Student Theme */
+    --color-primary: #135663;
+    --color-secondary: #78966e;
+    --color-accent: #d1a648;
+    --color-accent-2: #c56d45;
+
+    /* Semantic Colors */
+    --color-success: #78966e;
+    --color-warning: #d1a648;
+    --color-error: #dc2626;
+    --color-info: #135663;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(90deg, #135663, #78966e);
+    --gradient-secondary: linear-gradient(90deg, #d1a648, #c56d45);
+    --gradient-bg: linear-gradient(135deg, #fef7e0 0%, #ffffff 50%, #fef2e8 100%);
+    --gradient-card: linear-gradient(135deg, #f5f1e8, #f0ebe0);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(19, 86, 99, 0.05);
+    --shadow: 0 1px 3px 0 rgba(19, 86, 99, 0.1), 0 1px 2px 0 rgba(19, 86, 99, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(19, 86, 99, 0.1), 0 2px 4px -1px rgba(19, 86, 99, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(19, 86, 99, 0.1), 0 4px 6px -2px rgba(19, 86, 99, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(19, 86, 99, 0.1), 0 10px 10px -5px rgba(19, 86, 99, 0.04);
+}
+
+/* Instructor Theme Override */
+.theme-instructor
+{
+    --color-primary: #c56d45;
+    --color-secondary: #d1a648;
+    --color-accent: #135663;
+    --color-accent-2: #78966e;
+    --gradient-primary: linear-gradient(90deg, #c56d45, #d1a648);
+    --gradient-secondary: linear-gradient(90deg, #135663, #78966e);
+    --gradient-bg: linear-gradient(135deg, #fef2e8 0%, #ffffff 50%, #fef7e0 100%);
+    --gradient-card: linear-gradient(135deg, #fef2e8, #fef7e0);
+}
+
+/* Admin Theme Override */
+.theme-admin
+{
+    --color-primary: #135663;
+    --color-secondary: #c56d45;
+    --color-accent: #78966e;
+    --color-accent-2: #d1a648;
+    --gradient-primary: linear-gradient(90deg, #135663, #c56d45);
+    --gradient-secondary: linear-gradient(90deg, #78966e, #d1a648);
+    --gradient-bg: linear-gradient(135deg, #f8f6f0 0%, #ffffff 50%, #f5f3ed 100%);
+    --gradient-card: linear-gradient(135deg, #f8f6f0, #f5f3ed);
+}
+
+/* Utility Classes */
+.bg-gradient-primary
+{
+    background: var(--gradient-primary);
+}
+
+.bg-gradient-secondary
+{
+    background: var(--gradient-secondary);
+}
+
+.bg-gradient-page
+{
+    background: var(--gradient-bg);
+}
+
+.bg-gradient-card
+{
+    background: var(--gradient-card);
+}
+
+.text-primary
+{
+    color: var(--color-primary);
+}
+
+.text-secondary
+{
+    color: var(--color-secondary);
+}
+
+.text-accent
+{
+    color: var(--color-accent);
+}
+
+.text-success
+{
+    color: var(--color-success);
+}
+
+.text-warning
+{
+    color: var(--color-warning);
+}
+
+.text-error
+{
+    color: var(--color-error);
+}
+
+.border-primary
+{
+    border-color: var(--color-primary);
+}
+
+.border-secondary
+{
+    border-color: var(--color-secondary);
+}
+
+.border-accent
+{
+    border-color: var(--color-accent);
+}
+
+/* Button Styles */
+.btn-primary
+{
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:hover
+{
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.btn-secondary
+{
+    background: var(--gradient-secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary:hover
+{
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.btn-outline
+{
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover
+{
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Input Styles */
+.input-themed
+{
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    background: #f9fafb;
+}
+
+.input-themed:focus
+{
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+    background: white;
+}
+
+.input-themed:hover
+{
+    border-color: var(--color-secondary);
+    background: white;
+}
+
+/* Card Styles */
+.card-themed
+{
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-xl);
+}
+
+/* Link Styles */
+.link-themed
+{
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.link-themed:hover
+{
+    color: var(--color-secondary);
+}
+
+/* Badge Styles */
+.badge-success
+{
+    background: var(--color-success);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-warning
+{
+    background: var(--color-warning);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-primary
+{
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
