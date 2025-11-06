@@ -76,6 +76,29 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
       </div>
     );
   }
+  if (requireAuth && authenticated && user?.isBlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Account Blocked
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Your account has been blocked. Please contact support.
+          </p>
+          <button
+            onClick={() => {
+              localStorage.removeItem("accessToken");
+              window.location.href = "/login";
+            }}
+            className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   console.log("User authenticated, rendering children");
   return children;

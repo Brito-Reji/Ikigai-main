@@ -9,8 +9,9 @@ export default function OTPVerificationPage() {
   const navigate = useNavigate();
   const { loading, error, dispatch } = useAuth();
 
-  // Get email from navigation state
+  // Get email and role from navigation state
   const [email] = useState(location.state?.email || "");
+  const [role] = useState(location.state?.role || "instructor");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(0);
   const [resendingOtp, setResendingOtp] = useState(false);
@@ -144,9 +145,11 @@ export default function OTPVerificationPage() {
       localStorage.removeItem("otpExpiry");
       setVerified(true);
 
-      // Redirect to course page after successful verification
+      // Redirect to instructor dashboard after successful verification
       setTimeout(() => {
-        navigate("/course");
+        navigate("/instructor/dashboard", {
+          replace: true,
+        });
       }, 1500);
     } catch {
       // Error is handled by Redux, but we still need to reset the form
@@ -172,7 +175,9 @@ export default function OTPVerificationPage() {
 
   // Handle continue after verification
   const handleContinue = () => {
-    navigate("/course");
+    navigate("/instructor/dashboard", {
+      replace: true,
+    });
   };
 
   // Handle change email

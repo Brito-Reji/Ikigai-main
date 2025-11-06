@@ -31,9 +31,10 @@ export default function SignUpPage() {
   // Handle verification requirement
   useEffect(() => {
     if (requiresVerification && verificationEmail) {
-      navigate("/verify-otp", {
+      navigate("/instructor/verify-otp", {
         state: {
           email: verificationEmail,
+          role: "instructor",
         },
       });
     }

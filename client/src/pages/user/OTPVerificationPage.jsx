@@ -9,8 +9,9 @@ export default function OTPVerificationPage() {
   const navigate = useNavigate();
   const { loading, error, dispatch } = useAuth();
 
-  // Get email from navigation state
+  // Get email and role from navigation state
   const [email] = useState(location.state?.email || "");
+  const [role] = useState(location.state?.role || "student");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(0);
   const [resendingOtp, setResendingOtp] = useState(false);
@@ -144,15 +145,11 @@ export default function OTPVerificationPage() {
       localStorage.removeItem("otpExpiry");
       setVerified(true);
 
-      // Redirect to login page after successful verification
-      // User needs to log in to get access token
+      // Redirect to course list page after successful verification
+      // For student signup, redirect directly to course page
       setTimeout(() => {
-        navigate("/login", {
+        navigate("/course", {
           replace: true,
-          state: {
-            message: "Email verified successfully! Please log in to continue.",
-            email: email,
-          },
         });
       }, 1500);
     } catch {
@@ -179,12 +176,8 @@ export default function OTPVerificationPage() {
 
   // Handle continue after verification
   const handleContinue = () => {
-    navigate("/login", {
+    navigate("/course", {
       replace: true,
-      state: {
-        message: "Email verified successfully! Please log in to continue.",
-        email: email,
-      },
     });
   };
 

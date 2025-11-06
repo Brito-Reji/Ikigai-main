@@ -70,10 +70,11 @@ export const blockStudent = asyncHandler(async(req,res)=>{
   console.log('block students')
   let {studentId}= req.params
   const student = await User.findOne({_id:studentId})
+  console.log(student)
   student.isBlocked = !student.isBlocked;
   student.save()
   res.status(200).json({success:true})
-  console.log(student.username)
+ 
 })
 
 export const blockInstructor = asyncHandler((req,res)=>{

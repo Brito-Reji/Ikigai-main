@@ -1,4 +1,6 @@
-import { User } from "lucide-react";
+// import { User } from "lucide-react";
+import { User } from "../models/User.js";
+import jwt from "jsonwebtoken";
 
 const isStudent = async (req, res, next) => {
   const token = req.headers.authorization.split(' ')[1];

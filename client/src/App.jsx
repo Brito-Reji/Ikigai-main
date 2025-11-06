@@ -13,6 +13,8 @@ import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
 // Instructor Import
 import InstructorLoginPage from "./pages/instructor/LoginPage.jsx";
 import InstructorSignupPage from "./pages/instructor/SignupPage.jsx";
+import InstructorOTPVerificationPage from "./pages/instructor/OTPVerificationPage.jsx";
+import InstructorDashboard from "./pages/instructor/Dashboard.jsx";
 
 // Admin import
 import AdminLoginPage from "./pages/admin/LoginPage.jsx";
@@ -55,6 +57,15 @@ function App() {
         <Route path="/instructor" element={<Layout />}>
           <Route path="login" element={<InstructorLoginPage />} />
           <Route path="signup" element={<InstructorSignupPage />} />
+          <Route path="verify-otp" element={<InstructorOTPVerificationPage />} />
+          <Route
+            path="dashboard"
+            element={
+              <AuthGuard requireAuth={true} roles={["instructor"]}>
+                <InstructorDashboard />
+              </AuthGuard>
+            }
+          />
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />

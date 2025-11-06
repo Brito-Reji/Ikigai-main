@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
     console.log("Adding token to request:", token);
@@ -29,14 +29,14 @@ api.interceptors.response.use(
 
       try {
         const response = await api.post("/auth/refresh");
-        const { accessToken } = response.data;
-        localStorage.setItem("accessToken", accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        const { token } = response.data;
+        localStorage.setItem("token", accessToken);
+        originalRequest.headers.Authorization = `Bearer ${token}`;
         console.log("Token refreshed successfully:", accessToken);
         return api(originalRequest); // retry the original request
       } catch (err) {
         console.log("Refresh failed, user must login again");
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("token");
         // Optional: redirect to login or dispatch logout action
         // window.location.href = '/login';
         return Promise.reject(err);

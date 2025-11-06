@@ -11,6 +11,7 @@ export const loginUser = createAsyncThunk(
           ? "/auth/instructor/signin"
           : "/auth/student/login";
       const response = await api.post(endpoint, { email, password });
+      console.log("response",response)
 
       if (response.data.success) {
         const token = response.data.data?.token || response.data.accessToken;
@@ -145,8 +146,8 @@ export const googleAuth = createAsyncThunk(
 
 const initialState = {
   user: null,
-  token: localStorage.getItem("accessToken"),
-  isAuthenticated: !!localStorage.getItem("accessToken"),
+  token: localStorage.getItem("token"),
+  isAuthenticated: !!localStorage.getItem("token"),
   loading: false,
   error: null,
   requiresVerification: false,

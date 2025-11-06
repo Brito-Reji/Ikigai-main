@@ -43,6 +43,7 @@ export default function SignUpPage() {
       navigate("/verify-otp", {
         state: {
           email: verificationEmail,
+          role: "student",
         },
       });
     }

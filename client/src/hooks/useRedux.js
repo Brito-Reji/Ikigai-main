@@ -15,7 +15,7 @@ export const useAuth = () => {
   };
 };
 
-// Course hooks
+
 export const useCourses = () => {
   const dispatch = useAppDispatch();
   const courses = useAppSelector((state) => state.courses);
