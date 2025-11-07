@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Search, ArrowRight } from "lucide-react";
-import Header from "@/components/Header.jsx";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
+import AuthHeader from "@/components/instructor/AuthHeader.jsx";
+import AuthFooter from "@/components/instructor/AuthFooter.jsx";
+import Footer from "@/components/Footer";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -149,31 +151,54 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Main Content */}
-      <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
-        {/* Left Side - Image */}
-        <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden lg:min-h-screen">
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
-            alt="Student studying with laptop"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+    <>
+      <AuthHeader/>
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+      {/* Left Side - Image */}
+      <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden lg:min-h-screen">
+        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <img
+          src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"
+          alt="Instructor teaching"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
+        />
+        <div className="relative z-10 flex flex-col justify-center h-full p-12 text-white">
+          <h2 className="text-4xl font-bold mb-4">Start Teaching Today</h2>
+          <p className="text-xl mb-8 text-indigo-100">
+            Share your expertise with millions of students around the world.
+          </p>
+          <ul className="space-y-4">
+            <li className="flex items-center">
+              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Build your personal brand
+            </li>
+            <li className="flex items-center">
+              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Flexible schedule, work from anywhere
+            </li>
+            <li className="flex items-center">
+              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Get paid for your knowledge
+            </li>
+          </ul>
         </div>
+      </div>
 
-        {/* Right Side - Form */}
-        <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
-              Become an Intructor
+      {/* Right Side - Form */}
+      <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Become an Instructor
             </h1>
-
-            {/* Global Error Message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                {error}
-              </div>
-            )}
+            <p className="text-gray-600">Join our community of expert instructors</p>
+          </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Full Name */}
@@ -298,8 +323,8 @@ export default function SignUpPage() {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
                       errors.confirmPassword
-                        ? "border-red-500"
-                        : "border-gray-300"
+                      ? "border-red-500"
+                      : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                     disabled={loading}
                   />
@@ -315,17 +340,28 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${
+                className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg transition flex items-center justify-center space-x-2 font-medium ${
                   loading
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-800"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-indigo-700 shadow-lg hover:shadow-xl"
                 }`}
-              >
+                >
                 <span>
                   {loading ? "Creating Account..." : "Create Account"}
                 </span>
                 {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
+              
+              {/* Login Link */}
+              <div className="text-center text-sm text-gray-600">
+                Already have an account?{" "}
+                <a
+                  href="/instructor/login"
+                  className="text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                  Sign in
+                </a>
+              </div>
 
               {/* Divider */}
               <div className="relative my-6">
@@ -343,8 +379,12 @@ export default function SignUpPage() {
               <GoogleAuth role={"instructor"} />
             </form>
           </div>
-        </div>
       </div>
-    </div>
+      
+      </div>
+   
+      <AuthFooter/>
+                  </>
+    
   );
 }

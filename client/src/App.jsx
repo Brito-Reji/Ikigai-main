@@ -38,59 +38,56 @@ function App() {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  // Refresh token and check user status on app load
+  // Check user status on app load (only if token exists and is valid)
   useEffect(() => {
-    const refreshTokenOnLoad = async () => {
+    const checkUserStatusOnLoad = async () => {
       const accessToken = localStorage.getItem("accessToken");
       
-      if (accessToken) {
-        try {
-          // Check if token is expired or about to expire FIRST
-          if (isTokenExpired(accessToken)) {
-            console.log("Token expired or expiring soon, refreshing...");
-            try {
-              const response = await api.post("/auth/refresh");
-              if (response.data.success && response.data.accessToken) {
-                localStorage.setItem("accessToken", response.data.accessToken);
-                console.log("Token refreshed successfully on page load");
-              }
-            } catch (refreshError) {
-              console.log("Token refresh failed:", refreshError.message);
-              // If refresh fails, clear token and let user login again
-              localStorage.removeItem("accessToken");
-              return;
-            }
-          }
-          
-          // Now check user status with valid token
-          const userResponse = await api.get("/auth/me");
-          
-          if (userResponse.data.user?.isBlocked) {
-            console.log("User is blocked, logging out");
-            localStorage.removeItem("accessToken");
-            window.location.href = "/login";
-            return;
-          }
-          
-          console.log("User status checked, all good");
-        } catch (error) {
-          console.log("Error checking user status:", error.message);
-          
-          // If user is blocked, logout immediately
-          if (error.response?.data?.isBlocked) {
-            console.log("User is blocked, logging out");
-            localStorage.removeItem("accessToken");
-            window.location.href = "/login";
-          } else if (error.response?.status === 401) {
-            // Token is invalid, clear it
-            console.log("Invalid token, clearing");
-            localStorage.removeItem("accessToken");
-          }
+      // Don't do anything if no token
+      if (!accessToken) {
+        return;
+      }
+      
+      // Check if token is expired
+      const tokenExpired = isTokenExpired(accessToken);
+      
+      // If token is expired, don't try to refresh immediately
+      // Let the axios interceptor handle it when the first API call is made
+      if (tokenExpired) {
+        console.log("Token expired, will refresh on next API call");
+        return;
+      }
+      
+      // Token is valid, check user status for blocked accounts
+      try {
+        const userResponse = await api.get("/auth/me");
+        
+        if (userResponse.data.user?.isBlocked) {
+          console.log("User is blocked, logging out");
+          localStorage.removeItem("accessToken");
+          window.location.href = "/login";
+          return;
         }
+        
+        console.log("User status checked, all good");
+      } catch (error) {
+        console.log("Error checking user status:", error.message);
+        
+        // If user is blocked, logout immediately
+        if (error.response?.data?.isBlocked) {
+          console.log("User is blocked, logging out");
+          localStorage.removeItem("accessToken");
+          window.location.href = "/login";
+        } else if (error.response?.status === 401) {
+          // Token is invalid, clear it
+          console.log("Invalid token, clearing");
+          localStorage.removeItem("accessToken");
+        }
+        // Don't try to refresh here, let axios interceptor handle it
       }
     };
 
-    refreshTokenOnLoad();
+    checkUserStatusOnLoad();
   }, []);
 
   useEffect(() => {

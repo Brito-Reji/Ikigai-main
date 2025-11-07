@@ -84,7 +84,8 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Find user by email
-  const user = await Instructor.findOne({ email: email.toLowerCase() });
+  const user = await Instructor.findOne({ email: email.toLowerCase() }).select("+password");
+  console.log(user)
 
   if (!user) {
     return res.status(401).json({
@@ -102,7 +103,8 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  console.log('password from the from ->',password,"  hashed password from the db->",user.password)
+  const isPasswordValid = await  bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
     return res.status(401).json({

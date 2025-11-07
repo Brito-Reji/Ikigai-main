@@ -1,6 +1,6 @@
 import { Router } from 'express'
 // import { blockStudent, getStudents, getInstructors, blockInstructor } from '../controllers/admin/adminController.js'
-import {getStudents,getInstructors, blockStudent} from '../controllers/admin/adminController.js'
+import {getStudents,getInstructors, blockStudent, blockInstructor} from '../controllers/admin/adminController.js'
 const router = Router()
 
 router.get('/students', getStudents);
@@ -8,6 +8,7 @@ router.patch('/students/:studentId/toggle-block', blockStudent)
 
 // INSTRUCTOR CONTROLLER
 router.get('/instructors', getInstructors);
+router.patch('/instructors/:instructorId/toggle-block',blockInstructor)
 // router.patch('/instructors/:instructorId/toggle-block', blockInstructor)
 // router.get('/admin/categories', getCategories)
 // router.get('/admin/courses', getCourses)

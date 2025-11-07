@@ -1,6 +1,5 @@
 "use client";
-
-import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import logo from '../assets/images/logo.png'
 
 export default function Footer() {
   return (
@@ -11,8 +10,9 @@ export default function Footer() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">I</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                                <img src={logo} className="text-white font-bold text-sm"></img>
+                  
                 </div>
                 <span className="text-xl font-bold">Ikigai</span>
               </div>

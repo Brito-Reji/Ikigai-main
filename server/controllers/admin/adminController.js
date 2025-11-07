@@ -84,3 +84,14 @@ export const getInstructors = asyncHandler(async(req, res) => {
   console.log(instructor)
   return res.status(200).json({succes:true,data:instructor})
 })
+
+export const  blockInstructor = asyncHandler(async (req, res) => {
+  console.log("block instructor");
+  let { instructorId } = req.params;
+  const instructor = await Instructor.findOne({ _id: instructorId })
+  console.log(instructor);
+  instructor.isBlocked = !instructor.isBlocked;
+  instructor.save()
+  return res.status(200).json({ success: true})
+  
+})

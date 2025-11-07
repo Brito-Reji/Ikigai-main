@@ -6,6 +6,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useRedux.js";
 import { logout } from "../store/slices/authSlice.js";
 import { useDispatch } from "react-redux";
+import logo from "../assets/images/logo.png"
+
 
 export default function Header({ onMenuToggle, menuOpen }) {
   // Changed to use Redux hook instead of Context
@@ -42,8 +44,8 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">I</span>
+              <div className="w-8 h-8  rounded-full flex items-center justify-center">
+              <img src={logo} className="text-white font-bold text-sm"></img>
               </div>
               <span className="text-lg sm:text-xl font-bold text-gray-900">
                 Ikigai
