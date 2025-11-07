@@ -6,6 +6,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import LandingPage from "./pages/user/LandingPage.jsx";
 import UserSignupPage from "./pages/user/SignupPage.jsx";
 import Layout from "./components/Layout.jsx";
+import InstructorLayout from "./components/InstructorLayout.jsx";
 // import CoursesPage from './pages/CourseListingPage.jsx';
 import UserCourseListingPage from "./pages/user/CourseListingPage.jsx";
 import UserLoginPage from "./pages/user/LoginPage.jsx";
@@ -47,14 +48,14 @@ function App() {
           <Route
             path="course"
             element={
-              <AuthGuard requireAuth={true}>
+              <AuthGuard requireAuth={true} roles={["student"]}>
                 <UserCourseListingPage />
               </AuthGuard>
             }
           />
           <Route path="verify-otp" element={<UserOTPVerificationPage />} />
         </Route>
-        <Route path="/instructor" element={<Layout />}>
+        <Route path="/instructor" element={<InstructorLayout />}>
           <Route path="login" element={<InstructorLoginPage />} />
           <Route path="signup" element={<InstructorSignupPage />} />
           <Route path="verify-otp" element={<InstructorOTPVerificationPage />} />
