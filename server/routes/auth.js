@@ -12,6 +12,7 @@ import {
   instructorSignin,
 } from "../controllers/instructor/instructorController.js";
 import { User } from "../models/User.js";
+import { Instructor } from "../models/Instructor.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
 import { generateTokens } from "../utils/generateTokens.js";
 import passport from "passport";
@@ -28,7 +29,7 @@ router.post("/student/login", studentLogin);
 router
   .route("/student/google")
   .post(googleAuth)
-  .get(() => {});
+  .get(() => { });
 
 router.post("/admin/login", adminLogin);
 
@@ -64,7 +65,12 @@ router.post("/refresh", async (req, res) => {
         .json({ success: false, message: "Invalid refresh token" });
     }
 
-    const user = await User.findById(decoded.id);
+    // Try to find user in both User and Instructor collections
+    let user = await User.findById(decoded.id);
+    if (!user) {
+      user = await Instructor.findById(decoded.id);
+    }
+
     if (!user) {
       console.log("User not found for refresh token");
       return res

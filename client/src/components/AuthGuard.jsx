@@ -6,6 +6,7 @@ import { fetchCurrentUser } from "../store/slices/authSlice.js";
 const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   // Changed to use Redux hook instead of Context
   const { isAuthenticated, user, loading, dispatch } = useAuth();
+  const [fetchAttempted, setFetchAttempted] = React.useState(false);
   const hasToken = !!localStorage.getItem("accessToken");
   // Check authentication status - use token as fallback if Redux state isn't updated yet
   const authenticated = isAuthenticated || hasToken;
@@ -14,12 +15,18 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   console.log("AuthGuard state:", { isAuthenticated, user, loading, hasToken, authenticated });
 
   useEffect(() => {
-    // Fetch current user if token exists but no user data
-    if (hasToken && !user && !loading) {
+    // Fetch current user if token exists but no user data and haven't tried yet
+    if (hasToken && !user && !loading && !fetchAttempted) {
       console.log("Fetching current user...");
+      setFetchAttempted(true);
       dispatch(fetchCurrentUser());
     }
-  }, [dispatch, user, loading, hasToken]);
+    
+    // Reset fetch attempted if token is removed
+    if (!hasToken && fetchAttempted) {
+      setFetchAttempted(false);
+    }
+  }, [dispatch, user, loading, hasToken, fetchAttempted]);
 
   // Show loading spinner while checking authentication
   if (loading) {

@@ -6,8 +6,23 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem("accessToken");
+  let accessToken = localStorage.getItem("accessToken");
+
+  // Handle case where token might be stored as JSON object
   if (accessToken) {
+    try {
+      // Try to parse as JSON in case it was stored incorrectly
+      const parsed = JSON.parse(accessToken);
+      if (parsed.accessToken) {
+        // If it's an object with accessToken property, extract it
+        accessToken = parsed.accessToken;
+        // Fix the storage
+        localStorage.setItem("accessToken", accessToken);
+      }
+    } catch (e) {
+      // Not JSON, use as is (this is the correct case)
+    }
+
     config.headers.Authorization = `Bearer ${accessToken}`;
     console.log("Adding token to request:", accessToken);
   } else {

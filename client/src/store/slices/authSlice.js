@@ -15,7 +15,13 @@ export const loginUser = createAsyncThunk(
 
       if (response.data.success) {
         const accessToken = response.data.accessToken;
-        localStorage.setItem("accessToken", accessToken);
+        // Ensure we're storing a string, not an object
+        if (typeof accessToken === 'object') {
+          console.error("AccessToken is an object, extracting token string");
+          localStorage.setItem("accessToken", accessToken.accessToken || JSON.stringify(accessToken));
+        } else {
+          localStorage.setItem("accessToken", accessToken);
+        }
         console.log("Login successful, token stored:", accessToken);
         return {
           user: response.data.user || { email, role },
@@ -257,10 +263,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
-        state.accessToken = null;
-        console.log("this was tiggered");
-        // localStorage.removeItem("accessToken");
-        console.log("Current user rejected, state updated:", state);
+        state.token = null;
+        localStorage.removeItem("accessToken");
+        console.log("Current user rejected, token cleared");
       })
 
       // Google Auth cases
