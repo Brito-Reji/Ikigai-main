@@ -60,10 +60,10 @@ export default function InstructorHeader({ onMenuToggle, menuOpen }) {
                 My Courses
               </Link>
               <Link
-                to="/instructor/analytics"
+                to="/instructor/communication"
                 className="text-gray-700 hover:text-indigo-600 transition font-medium"
               >
-                Analytics
+                Communication
               </Link>
             </nav>
           </div>
@@ -143,11 +143,11 @@ export default function InstructorHeader({ onMenuToggle, menuOpen }) {
                   <span>My Courses</span>
                 </Link>
                 <Link
-                  to="/instructor/analytics"
+                  to="/instructor/communication"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <BarChart3 className="w-5 h-5" />
-                  <span>Analytics</span>
+                  <span>Communication</span>
                 </Link>
                 <Link
                   to="/instructor/settings"

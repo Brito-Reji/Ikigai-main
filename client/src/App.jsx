@@ -16,6 +16,9 @@ import InstructorLoginPage from "./pages/instructor/LoginPage.jsx";
 import InstructorSignupPage from "./pages/instructor/SignupPage.jsx";
 import InstructorOTPVerificationPage from "./pages/instructor/OTPVerificationPage.jsx";
 import InstructorDashboard from "./pages/instructor/Dashboard.jsx";
+import CoursesPage from "./pages/instructor/CoursesPage.jsx";
+import CourseDetailPage from "./pages/instructor/CourseDetailPage.jsx";
+import CommunicationPage from "./pages/instructor/CommunicationPage.jsx";
 
 // Admin import
 import AdminLoginPage from "./pages/admin/LoginPage.jsx";
@@ -64,6 +67,30 @@ function App() {
             element={
               <AuthGuard requireAuth={true} roles={["instructor"]}>
                 <InstructorDashboard />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="courses"
+            element={
+              <AuthGuard requireAuth={true} roles={["instructor"]}>
+                <CoursesPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="courses/:courseId"
+            element={
+              <AuthGuard requireAuth={true} roles={["instructor"]}>
+                <CourseDetailPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="communication"
+            element={
+              <AuthGuard requireAuth={true} roles={["instructor"]}>
+                <CommunicationPage />
               </AuthGuard>
             }
           />
