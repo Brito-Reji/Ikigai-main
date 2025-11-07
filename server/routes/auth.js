@@ -124,24 +124,24 @@ router.post("/refresh", async (req, res) => {
 router.get("/me", (req, res) => {
   try {
     // Extract token from Authorization header
-    let token = null;
+    let accessToken = null;
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer ")
     ) {
-      token = req.headers.authorization.split(" ")[1];
+      accessToken = req.headers.authorization.split(" ")[1];
     }
 
-    console.log("Token from header:", token);
+    console.log("Token from header:", accessToken);
 
-    if (!token) {
+    if (!accessToken) {
       console.log("No token provided in request");
       return res
         .status(401)
         .json({ success: false, message: "No token provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
     console.log("Decoded token:", decoded);
     return res.status(200).json({
       success: true,

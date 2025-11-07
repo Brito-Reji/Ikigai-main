@@ -28,3 +28,6 @@ client/src/pages/admin/Instructors.jsx.save
 .gitignore
 client/src/pages/admin/Instructors.jsx.save.2
 client/src/pages/admin/Instructors.jsx.save.3
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.windsurf/rules/snyk_rules.md

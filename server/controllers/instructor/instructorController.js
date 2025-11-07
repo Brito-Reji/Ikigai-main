@@ -136,9 +136,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
 
   return res.json({
     success: true,
-    data: {
-      token: accessToken,
-    },
+    accessToken,
     user: {
       email: user.email,
       role: user.role,
@@ -185,9 +183,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: {
-        token: accessToken,
-      },
+      accessToken,
       user: {
         email: user.email,
         role: user.role,
@@ -228,9 +224,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: {
-        token: accessToken,
-      },
+      accessToken,
       user: {
         email: user.email,
         role: user.role,

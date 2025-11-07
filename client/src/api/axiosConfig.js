@@ -6,10 +6,10 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-    console.log("Adding token to request:", token);
+  const accessToken = localStorage.getItem("accessToken");
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+    console.log("Adding token to request:", accessToken);
   } else {
     console.log("No token found in localStorage");
   }
@@ -29,14 +29,15 @@ api.interceptors.response.use(
 
       try {
         const response = await api.post("/auth/refresh");
-        const { token } = response.data;
-        localStorage.setItem("token", accessToken);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+        const { accessToken } = response.data;
+        localStorage.setItem("accessToken", accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         console.log("Token refreshed successfully:", accessToken);
         return api(originalRequest); // retry the original request
       } catch (err) {
         console.log("Refresh failed, user must login again");
-        localStorage.removeItem("token");
+        console.log('this was tiggered')
+        // localStorage.removeItem("accessToken");
         // Optional: redirect to login or dispatch logout action
         // window.location.href = '/login';
         return Promise.reject(err);

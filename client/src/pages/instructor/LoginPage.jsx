@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import api from "@/api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
+import { useAuth } from "@/hooks/useRedux.js";
+import { loginUser, clearError } from "@/store/slices/authSlice.js";
+import Swal from "sweetalert2";
 
 function LoginPage() {
   let navigate = useNavigate()
+  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } = useAuth();
+
   const [formData, setFormData] = useState({
     email: "",
-    password: "Admin@123",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
@@ -21,15 +26,39 @@ function LoginPage() {
     password: false,
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated || localStorage.getItem("accessToken")) {
+      navigate("/instructor/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Handle verification requirement
+  useEffect(() => {
+    if (requiresVerification && verificationEmail) {
+      navigate("/instructor/verify-otp", {
+        state: {
+          email: verificationEmail,
+          role: "instructor",
+        },
+      });
+    }
+  }, [requiresVerification, verificationEmail, navigate]);
+
   const validateEmail = (email) => {
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!email) {
-    //   return "Email is required";
-    // }
-    // if (!emailRegex.test(email)) {
-    //   return "Please enter a valid email address";
-    // }
-    // return "";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
   };
 
   const validatePassword = (password) => {
@@ -86,7 +115,9 @@ function LoginPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     // Mark all fields as touched
     setTouched({
       email: true,
@@ -104,19 +135,24 @@ function LoginPage() {
 
     // Only submit if no errors
     if (!emailError && !passwordError) {
-      console.log("Login submitted:", formData);
-     let response = await api.post('/auth/student/login', {
-        email: formData.email,
-        password:formData.password
-     })
-      let { data } = response
-      console.log(data)
-      if (!data.isVerified) {
-           navigate("/verify-otp", {
-             state: {
-               email: data.email,
-             },
-           });
+      try {
+        await dispatch(
+          loginUser({
+            email: formData.email,
+            password: formData.password,
+            role: "instructor",
+          })
+        ).unwrap();
+        // Success - will be redirected by useEffect
+      } catch (err) {
+        console.error("Login failed:", err);
+        if (!err.requiresVerification) {
+          Swal.fire({
+            icon: "error",
+            title: "Login failed",
+            text: err.message || "Login failed. Please try again.",
+          });
+        }
       }
     }
   };
@@ -133,7 +169,14 @@ function LoginPage() {
             Sign in to your account
           </h1>
 
-          <div className="space-y-6">
+          {/* Global Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -195,11 +238,14 @@ function LoginPage() {
 
             {/* Sign In Button */}
             <button
-              onClick={handleSubmit}
-              className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2"
+              type="submit"
+              disabled={loading}
+              className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${
+                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-800"
+              }`}
             >
-              <span>Sign In</span>
-              <ArrowRight className="w-5 h-5" />
+              <span>{loading ? "Signing In..." : "Sign In"}</span>
+              {!loading && <ArrowRight className="w-5 h-5" />}
             </button>
 
             {/* Forgot Password */}
@@ -226,7 +272,7 @@ function LoginPage() {
 
             {/* Google Sign In */}
           <GoogleAuth role={'instructor'} />
-          </div>
+          </form>
         </div>
       </div>
 

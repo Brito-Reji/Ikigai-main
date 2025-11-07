@@ -11,15 +11,15 @@ export const loginUser = createAsyncThunk(
           ? "/auth/instructor/signin"
           : "/auth/student/login";
       const response = await api.post(endpoint, { email, password });
-      console.log("response",response)
+      console.log("response", response)
 
       if (response.data.success) {
-        const token = response.data.data?.token || response.data.accessToken;
-        localStorage.setItem("accessToken", token);
-        console.log("Login successful, token stored:", token);
+        const accessToken = response.data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+        console.log("Login successful, token stored:", accessToken);
         return {
           user: response.data.user || { email, role },
-          token,
+          accessToken: accessToken,
           role,
         };
       } else {
@@ -55,7 +55,7 @@ export const registerUser = createAsyncThunk(
           ? "/auth/instructor/register"
           : "/auth/student/register";
       const response = await api.post(endpoint, userData);
-
+      console.log("response-> register redux", response)
       if (response.data.success) {
         return {
           message: response.data.message,
@@ -77,6 +77,9 @@ export const verifyOTP = createAsyncThunk(
     try {
       const response = await api.post("/auth/verify-otp", { email, otp });
 
+      console.log("response-> verify OTP redux", response)
+      localStorage.setItem("userAuth", JSON.stringify(response.data.instructor || response.data.user));
+      localStorage.setItem("accessToken", response.data.accessToken);
       if (response.data.success) {
         return {
           message: response.data.message,
@@ -107,7 +110,7 @@ export const fetchCurrentUser = createAsyncThunk(
       }
     } catch (error) {
       console.log("Error fetching current user:", error);
-      localStorage.removeItem("accessToken");
+      // localStorage.removeItem("accessToken");
       return rejectWithValue({
         message: "Failed to fetch user data",
       });
@@ -126,12 +129,12 @@ export const googleAuth = createAsyncThunk(
       const response = await api.post(endpoint, { token });
 
       if (response.data.success) {
-        const token = response.data.data?.token || response.data.accessToken;
-        localStorage.setItem("accessToken", token);
-        console.log("Google auth successful, token stored:", token);
+        const accessToken = response.data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+        console.log("Google auth successful, token stored:", accessToken);
         return {
           user: response.data.user || { role },
-          token,
+          token: accessToken,
           role,
         };
       }
@@ -146,8 +149,8 @@ export const googleAuth = createAsyncThunk(
 
 const initialState = {
   user: null,
-  token: localStorage.getItem("token"),
-  isAuthenticated: !!localStorage.getItem("token"),
+  accessToken: localStorage.getItem("accessToken"),
+  isAuthenticated: !!localStorage.getItem("accessToken"),
   loading: false,
   error: null,
   requiresVerification: false,
@@ -160,12 +163,13 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
-      state.token = null;
+      state.accessToken = null;
       state.isAuthenticated = false;
       state.error = null;
       state.requiresVerification = false;
       state.verificationEmail = null;
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("userAuth");
       console.log("User logged out");
     },
     clearError: (state) => {
@@ -190,7 +194,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
         state.error = null;
         state.requiresVerification = false;
@@ -253,8 +257,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
-        state.token = null;
-        localStorage.removeItem("accessToken");
+        state.accessToken = null;
+        console.log("this was tiggered");
+        // localStorage.removeItem("accessToken");
         console.log("Current user rejected, state updated:", state);
       })
 
@@ -266,7 +271,7 @@ const authSlice = createSlice({
       .addCase(googleAuth.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
         state.error = null;
         console.log("Google auth fulfilled, state updated:", state);

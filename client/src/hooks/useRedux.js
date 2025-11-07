@@ -8,6 +8,7 @@ export const useAppSelector = useSelector;
 export const useAuth = () => {
   const dispatch = useAppDispatch();
   const auth = useAppSelector((state) => state.auth);
+  console.log("useAuth state:", auth);
 
   return {
     ...auth,

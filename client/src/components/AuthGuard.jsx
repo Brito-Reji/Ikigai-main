@@ -9,6 +9,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   const hasToken = !!localStorage.getItem("accessToken");
   // Check authentication status - use token as fallback if Redux state isn't updated yet
   const authenticated = isAuthenticated || hasToken;
+  
 
   console.log("AuthGuard state:", { isAuthenticated, user, loading, hasToken, authenticated });
 
@@ -88,7 +89,8 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
           </p>
           <button
             onClick={() => {
-              localStorage.removeItem("accessToken");
+                 console.log('this was tiggered')
+              // localStorage.removeItem("accessToken");
               window.location.href = "/login";
             }}
             className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"

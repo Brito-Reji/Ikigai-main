@@ -3,11 +3,11 @@ import asyncHandler from 'express-async-handler'
 import { Instructor } from '../models/Instructor';
 const isInstructor = asyncHandler(async (req, res, next) => {
 
-  const token = req.headers.authorization?.split(' ')[1]
-  if (!token) {
+  const accessToken = req.headers.authorization?.split(' ')[1]
+  if (!accessToken) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
   if (decoded.role !== 'instructor') {
     return res.status(401).json({ message: 'Unauthorized' });
   }

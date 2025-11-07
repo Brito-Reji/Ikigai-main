@@ -32,10 +32,14 @@ const cartSlice = createSlice({
             state.items = state.items.find(item=>item._id==action.payload)
             saveCartToStorage(state.items)
             },
-            clearCart:(state,action)=>{
+            clearCart:(state)=>{
       state.items =[]
       localStorage.removeItem('cart')
             }
+    },
+    clearCart: (state) => {
+        state.items = [];
+        localStorage.removeItem('cart');
     }
 })
 

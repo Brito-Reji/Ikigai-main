@@ -9,7 +9,7 @@ import GoogleAuth from "@/components/GoogleAuth.jsx";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const { loading, error, requiresVerification, verificationEmail, dispatch } =
+  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
     useAuth();
 
   const [formData, setFormData] = useState({
@@ -22,6 +22,13 @@ export default function SignUpPage() {
   });
 
   const [errors, setErrors] = useState({});
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated || localStorage.getItem("accessToken")) {
+      navigate("/instructor/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // Clear errors when component mounts
   useEffect(() => {

@@ -9,7 +9,7 @@ let navigate = useNavigate()
   try{
 
     let res = await api.post(`/auth/${role}/google`, {
-      token: credentialResponse.credential,
+      accessToken: credentialResponse.credential,
     });
     let { success,accessToken,message } = res.data
     if(!success){

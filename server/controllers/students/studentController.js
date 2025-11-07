@@ -87,7 +87,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
               .json({
                 success: true,
                 message: "OTP sent successfully",
-                accessToken,
+               
               });
           } else {
             throw new Error(data.message || "Failed to send OTP");
@@ -193,9 +193,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
       // Return response in the expected format
       return res.status(200).json({
         success: true,
-        data: {
-          token: accessToken,
-        },
+        accessToken,
         user: {
           email: user.email,
           role: user.role,
@@ -254,9 +252,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: {
-        token: accessToken,
-      },
+      accessToken,
       user: {
         email: user.email,
         role: user.role,
@@ -297,9 +293,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: {
-        token: accessToken,
-      },
+      accessToken,
       user: {
         email: user.email,
         role: user.role,

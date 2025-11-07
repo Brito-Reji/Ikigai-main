@@ -36,7 +36,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -45,7 +45,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Admin login successful",
-      token,
+      accessToken,
       user: {
         id: user._id,
         email: user.email,
