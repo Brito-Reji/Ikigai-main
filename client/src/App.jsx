@@ -45,7 +45,24 @@ function App() {
       
       if (accessToken) {
         try {
-          // Always check user status on page load to catch blocked users
+          // Check if token is expired or about to expire FIRST
+          if (isTokenExpired(accessToken)) {
+            console.log("Token expired or expiring soon, refreshing...");
+            try {
+              const response = await api.post("/auth/refresh");
+              if (response.data.success && response.data.accessToken) {
+                localStorage.setItem("accessToken", response.data.accessToken);
+                console.log("Token refreshed successfully on page load");
+              }
+            } catch (refreshError) {
+              console.log("Token refresh failed:", refreshError.message);
+              // If refresh fails, clear token and let user login again
+              localStorage.removeItem("accessToken");
+              return;
+            }
+          }
+          
+          // Now check user status with valid token
           const userResponse = await api.get("/auth/me");
           
           if (userResponse.data.user?.isBlocked) {
@@ -55,25 +72,19 @@ function App() {
             return;
           }
           
-          // Check if token is expired or about to expire
-          if (isTokenExpired(accessToken)) {
-            console.log("Token expired or expiring soon, refreshing...");
-            const response = await api.post("/auth/refresh");
-            if (response.data.success && response.data.accessToken) {
-              localStorage.setItem("accessToken", response.data.accessToken);
-              console.log("Token refreshed successfully on page load");
-            }
-          } else {
-            console.log("Token is still valid, no refresh needed");
-          }
+          console.log("User status checked, all good");
         } catch (error) {
-          console.log("Error on load:", error.message);
+          console.log("Error checking user status:", error.message);
           
           // If user is blocked, logout immediately
           if (error.response?.data?.isBlocked) {
             console.log("User is blocked, logging out");
             localStorage.removeItem("accessToken");
             window.location.href = "/login";
+          } else if (error.response?.status === 401) {
+            // Token is invalid, clear it
+            console.log("Invalid token, clearing");
+            localStorage.removeItem("accessToken");
           }
         }
       }

@@ -21,6 +21,8 @@ api.interceptors.request.use((config) => {
       }
     } catch (e) {
       // Not JSON, use as is (this is the correct case)
+      console.log(e);
+
     }
 
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -37,6 +39,12 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     console.log("Response error:", error.response?.status, error.config?.url);
 
+    // Don't try to refresh if it's the refresh endpoint itself that failed
+    if (originalRequest.url?.includes('/auth/refresh')) {
+      console.log("Refresh endpoint failed, not retrying");
+      return Promise.reject(error);
+    }
+
     // Check if error.response exists to avoid crashes
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -44,20 +52,26 @@ api.interceptors.response.use(
 
       try {
         const response = await api.post("/auth/refresh");
-        const { accessToken } = response.data;
-        localStorage.setItem("accessToken", accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        console.log("Token refreshed successfully:", accessToken);
-        return api(originalRequest); // retry the original request
+        if (response.data.success && response.data.accessToken) {
+          const { accessToken } = response.data;
+          localStorage.setItem("accessToken", accessToken);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          console.log("Token refreshed successfully");
+          return api(originalRequest); // retry the original request
+        }
       } catch (err) {
-        console.log("Refresh failed, user must login again");
-        console.log('this was tiggered')
-        // localStorage.removeItem("accessToken");
-        // Optional: redirect to login or dispatch logout action
-        // window.location.href = '/login';
+        console.log("Refresh failed:", err.message);
+        localStorage.removeItem("accessToken");
         return Promise.reject(err);
       }
     }
+
+    // If user is blocked, clear token
+    if (error.response?.data?.isBlocked) {
+      console.log("User is blocked, clearing token");
+      localStorage.removeItem("accessToken");
+    }
+
     return Promise.reject(error);
   }
 );

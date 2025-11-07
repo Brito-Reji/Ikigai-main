@@ -15,7 +15,6 @@ import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
 import { generateTokens } from "../utils/generateTokens.js";
-import passport from "passport";
 const router = express.Router();
 
 // Instructor Routes
@@ -148,7 +147,7 @@ router.get("/me", async (req, res) => {
     }
 
     const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-    console.log("Decoded token:", decoded);
+    // console.log("Decoded token:", decoded);
 
     // Check user in database to verify blocked status
     let user = await User.findById(decoded.id);
