@@ -1,5 +1,9 @@
 "use client";
+
+import {FaFacebookF,FaLinkedinInm,FaInstagram,FaTwitter } from 'react-icons/fa'
+
 import logo from '../assets/images/logo.png'
+
 
 export default function Footer() {
   return (
@@ -9,7 +13,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
+               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                 <img src={logo} className="text-white font-bold text-sm"></img>
                   
@@ -86,7 +90,7 @@ export default function Footer() {
                   href="#"
                   className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
                 >
-                  <span className="text-gray-900 text-sm">f</span>
+                <span className="text-gray-900 text-sm">{ }</span>
                 </a>
                 <a
                   href="#"
