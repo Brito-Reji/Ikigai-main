@@ -107,6 +107,14 @@ export const fetchCurrentUser = createAsyncThunk(
       const response = await api.get("/auth/me");
       console.log("Current user fetched:", response.data);
       if (response.data.success && response.data.user) {
+        // Check if user is blocked
+        if (response.data.user.isBlocked) {
+          localStorage.removeItem("accessToken");
+          return rejectWithValue({
+            message: "Your account has been blocked. Please contact support.",
+            isBlocked: true,
+          });
+        }
         return response.data.user;
       } else {
         localStorage.removeItem("accessToken");
@@ -116,7 +124,17 @@ export const fetchCurrentUser = createAsyncThunk(
       }
     } catch (error) {
       console.log("Error fetching current user:", error);
-      // localStorage.removeItem("accessToken");
+
+      // Check if error is due to blocked account
+      if (error.response?.data?.isBlocked) {
+        localStorage.removeItem("accessToken");
+        return rejectWithValue({
+          message: error.response.data.message || "Your account has been blocked.",
+          isBlocked: true,
+        });
+      }
+
+      localStorage.removeItem("accessToken");
       return rejectWithValue({
         message: "Failed to fetch user data",
       });

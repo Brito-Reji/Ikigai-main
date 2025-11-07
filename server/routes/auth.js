@@ -127,7 +127,7 @@ router.post("/refresh", async (req, res) => {
 });
 
 // Get current user from access token
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   try {
     // Extract token from Authorization header
     let accessToken = null;
@@ -149,16 +149,42 @@ router.get("/me", (req, res) => {
 
     const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
     console.log("Decoded token:", decoded);
+
+    // Check user in database to verify blocked status
+    let user = await User.findById(decoded.id);
+    if (!user) {
+      user = await Instructor.findById(decoded.id);
+    }
+
+    if (!user) {
+      console.log("User not found in database");
+      return res.status(401).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if user is blocked
+    if (user.isBlocked) {
+      console.log("User is blocked:", user.email);
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been blocked. Please contact support.",
+        isBlocked: true
+      });
+    }
+
     return res.status(200).json({
       success: true,
       user: {
-        id: decoded.id,
-        email: decoded.email,
-        username: decoded.username,
-        firstName: decoded.firstName,
-        role: decoded.role,
-        profileImageUrl: decoded.profileImageUrl,
-        isVerified: decoded.isVerified,
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        role: user.role,
+        profileImageUrl: user.profileImageUrl,
+        isVerified: user.isVerfied,
+        isBlocked: user.isBlocked,
       },
     });
   } catch (err) {

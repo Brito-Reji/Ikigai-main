@@ -30,9 +30,57 @@ import Instructors from "./pages/admin/Instructors";
 
 // Auth Guard
 import AuthGuard from "./components/AuthGuard.jsx";
+import { useDispatch } from "react-redux";
+import api from "./api/axiosConfig.js";
+import { isTokenExpired } from "./utils/tokenUtils.js";
 
 function App() {
   const location = useLocation();
+  const dispatch = useDispatch();
+
+  // Refresh token and check user status on app load
+  useEffect(() => {
+    const refreshTokenOnLoad = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      
+      if (accessToken) {
+        try {
+          // Always check user status on page load to catch blocked users
+          const userResponse = await api.get("/auth/me");
+          
+          if (userResponse.data.user?.isBlocked) {
+            console.log("User is blocked, logging out");
+            localStorage.removeItem("accessToken");
+            window.location.href = "/login";
+            return;
+          }
+          
+          // Check if token is expired or about to expire
+          if (isTokenExpired(accessToken)) {
+            console.log("Token expired or expiring soon, refreshing...");
+            const response = await api.post("/auth/refresh");
+            if (response.data.success && response.data.accessToken) {
+              localStorage.setItem("accessToken", response.data.accessToken);
+              console.log("Token refreshed successfully on page load");
+            }
+          } else {
+            console.log("Token is still valid, no refresh needed");
+          }
+        } catch (error) {
+          console.log("Error on load:", error.message);
+          
+          // If user is blocked, logout immediately
+          if (error.response?.data?.isBlocked) {
+            console.log("User is blocked, logging out");
+            localStorage.removeItem("accessToken");
+            window.location.href = "/login";
+          }
+        }
+      }
+    };
+
+    refreshTokenOnLoad();
+  }, []);
 
   useEffect(() => {
     if (location.pathname !== "/verify-otp") {
