@@ -1,6 +1,6 @@
 "use client";
 
-import {FaFacebookF,FaLinkedinInm,FaInstagram,FaTwitter } from 'react-icons/fa'
+import {FaFacebookF,FaLinkedin,FaInstagram,FaTwitter } from 'react-icons/fa'
 
 import logo from '../assets/images/logo.png'
 

@@ -7,7 +7,7 @@ function GoogleAuth({role}) {
 let navigate = useNavigate()
   const handleGoogleSuccess = async (credentialResponse) => {
   try{
-
+   console.log(credentialResponse.credential)
     let res = await api.post(`/auth/${role}/google`, {
       accessToken: credentialResponse.credential,
     });

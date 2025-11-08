@@ -51,8 +51,7 @@ function App() {
       // Check if token is expired
       const tokenExpired = isTokenExpired(accessToken);
       
-      // If token is expired, don't try to refresh immediately
-      // Let the axios interceptor handle it when the first API call is made
+      
       if (tokenExpired) {
         console.log("Token expired, will refresh on next API call");
         return;
@@ -73,17 +72,17 @@ function App() {
       } catch (error) {
         console.log("Error checking user status:", error.message);
         
-        // If user is blocked, logout immediately
+        
         if (error.response?.data?.isBlocked) {
           console.log("User is blocked, logging out");
           localStorage.removeItem("accessToken");
           window.location.href = "/login";
         } else if (error.response?.status === 401) {
-          // Token is invalid, clear it
+         
           console.log("Invalid token, clearing");
           localStorage.removeItem("accessToken");
         }
-        // Don't try to refresh here, let axios interceptor handle it
+        
       }
     };
 
@@ -99,6 +98,7 @@ function App() {
   return (
     <div>
       <Routes>
+        {/* <Route path="/" element={<LandingPage/>} /> */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
@@ -142,14 +142,7 @@ function App() {
               </AuthGuard>
             }
           />
-          <Route
-            path="communication"
-            element={
-              <AuthGuard requireAuth={true} roles={["instructor"]}>
-                <CommunicationPage />
-              </AuthGuard>
-            }
-          />
+        
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
@@ -160,7 +153,7 @@ function App() {
         </Route>
       </Routes>
 
-      {/* <CourseListingPage/> */}
+   
     </div>
   );
 }
