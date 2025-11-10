@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { User } from "../../models/User.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
-import { sentOTP } from "../../utils/OTPServices.js";
+import { sendOTPToEmail } from "../../utils/OTPServices.js";
 
 // import { User } from './model/'
 
@@ -56,48 +56,32 @@ export const studentRegister = asyncHandler(async (req, res) => {
   });
 
   await user.save();
+
   try {
-    // Create a mock request object for the OTP service
-    const mockReq = { body: { email } };
-    const mockRes = {
-      status: (code) => ({
-        json: (data) => {
-          if (code === 200 && data.success) {
-            console.log("After sending the OTP", data);
+    await sendOTPToEmail(email);
+    console.log("OTP sent successfully to", email);
 
-            let { accessToken, refreshToken } = generateTokens({
-              userId: user._id,
-              role: user.role,
-            });
+    let { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      role: user.role,
+    });
 
-            // Store refresh token in database
-            user.refreshToken = refreshToken;
-            user.save({ validateBeforeSave: false });
+    // Store refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
 
-            // Set refresh token in HttpOnly cookie
-            res.cookie("refreshToken", refreshToken, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "strict",
-              maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-            });
+    // Set refresh token in HttpOnly cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-            res
-              .status(200)
-              .json({
-                success: true,
-                message: "OTP sent successfully",
-               
-              });
-          } else {
-            throw new Error(data.message || "Failed to send OTP");
-          }
-        },
-      }),
-    };
-
-    // Call the OTP service directly
-    await sentOTP(mockReq, mockRes);
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
   } catch (err) {
     console.error("OTP service failed:", err.message);
     return res
@@ -130,28 +114,15 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }
 
   // Check if user is verified
-  if (!user.isVerfied) {
+  if (!user.isVerified) {
     try {
-      // Create a mock request object for the OTP service
-      const mockReq = { body: { email: user.email } };
-      const mockRes = {
-        status: (code) => ({
-          json: (data) => {
-            if (code === 200 && data.success) {
-              console.log("After sending the OTP", data);
-              return res
-                .status(200)
-                .json({ success: true, message: "OTP sent for verification" });
-            } else {
-              throw new Error(data.message || "Failed to send OTP");
-            }
-          },
-        }),
-      };
+      await sendOTPToEmail(user.email);
+      console.log("OTP sent for verification to", user.email);
 
-      // Call the OTP service directly
-      await sentOTP(mockReq, mockRes);
-      return; // Exit early since response is handled above
+      return res.status(200).json({
+        success: true,
+        message: "OTP sent for verification",
+      });
     } catch (err) {
       console.error("OTP service failed:", err.message);
       return res
@@ -175,7 +146,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
         username: user.username,
         firstName: user.firstName,
         profileImageUrl: user.profileImageUrl,
-        isVerified: user.isVerfied,
+        isVerified: user.isVerified,
       });
 
       // Store refresh token in database
@@ -213,7 +184,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
   console.log(token);
   const ticket = await client.verifyIdToken({
     idToken: token,
-    audience: process.env.VITE_GOOGLE_ID, 
+    audience: process.env.VITE_GOOGLE_ID,
   });
   console.log(ticket);
   let { email, name, picture } = ticket.payload;
@@ -235,7 +206,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       username: user.username,
       firstName: user.firstName,
       profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerfied,
+      isVerified: user.isVerified,
     });
 
     // Store refresh token in database
@@ -266,7 +237,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       firstName,
       lastName,
       username: null,
-      isVerfied: true,
+      isVerified: true,
       profileImageUrl: picture,
     });
     let { accessToken, refreshToken } = generateTokens({
@@ -276,7 +247,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       username: user.username,
       firstName: user.firstName,
       profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerfied,
+      isVerified: user.isVerified,
     });
 
     // Store refresh token in database

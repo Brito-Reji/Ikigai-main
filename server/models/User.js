@@ -1,6 +1,4 @@
-import mongoose, {Schema} from "mongoose";
-
-
+import mongoose, { Schema } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -29,12 +27,12 @@ const userSchema = new Schema(
       type: String,
       trim: true,
     },
-   
+
     password: {
       type: String,
-      
+
       minlength: [6, "Password must be at least 6 characters long"],
-      select: false, 
+      select: false,
     },
     role: {
       type: String,
@@ -68,20 +66,19 @@ const userSchema = new Schema(
       github: { type: String, trim: true },
       youtube: { type: String, trim: true },
     },
-    isBlocked:{
-      type:Boolean,
-      default:false
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
-    isVerfied:{
-      type:Boolean,
-      default:false
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
-    refreshToken:String
+    refreshToken: String,
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 
-
-export const User = mongoose.model('User', userSchema)
+export const User = mongoose.model("User", userSchema);

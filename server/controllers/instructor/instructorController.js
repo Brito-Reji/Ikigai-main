@@ -84,8 +84,10 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Find user by email
-  const user = await Instructor.findOne({ email: email.toLowerCase() }).select("+password");
-  console.log(user)
+  const user = await Instructor.findOne({ email: email.toLowerCase() }).select(
+    "+password"
+  );
+  console.log(user);
 
   if (!user) {
     return res.status(401).json({
@@ -103,8 +105,13 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   }
 
   // Verify password
-  console.log('password from the from ->',password,"  hashed password from the db->",user.password)
-  const isPasswordValid = await  bcrypt.compare(password, user.password);
+  console.log(
+    "password from the from ->",
+    password,
+    "  hashed password from the db->",
+    user.password
+  );
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
     return res.status(401).json({
@@ -121,7 +128,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     firstName: user.firstName,
     role: user.role,
     profileImageUrl: user.profileImageUrl,
-    isVerified: user.isVerfied,
+    isVerified: user.isVerified,
   });
 
   // Store refresh token in database
@@ -168,7 +175,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       role: user.role,
       profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerfied,
+      isVerified: user.isVerified,
     });
 
     // Store refresh token in database
@@ -198,7 +205,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       firstName,
       lastName,
       username: null,
-      isVerfied: true,
+      isVerified: true,
       profileImageUrl: picture,
     });
 
@@ -209,7 +216,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       role: user.role,
       profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerfied,
+      isVerified: user.isVerified,
     });
 
     // Store refresh token in database

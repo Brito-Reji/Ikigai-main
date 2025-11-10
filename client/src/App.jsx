@@ -51,9 +51,9 @@ function App() {
       // Check if token is expired
       const tokenExpired = isTokenExpired(accessToken);
       
-      
       if (tokenExpired) {
-        console.log("Token expired, will refresh on next API call");
+        console.log("Token expired on load, clearing");
+        localStorage.removeItem("accessToken");
         return;
       }
       
@@ -72,17 +72,14 @@ function App() {
       } catch (error) {
         console.log("Error checking user status:", error.message);
         
-        
         if (error.response?.data?.isBlocked) {
           console.log("User is blocked, logging out");
           localStorage.removeItem("accessToken");
           window.location.href = "/login";
         } else if (error.response?.status === 401) {
-         
           console.log("Invalid token, clearing");
           localStorage.removeItem("accessToken");
         }
-        
       }
     };
 

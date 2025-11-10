@@ -28,7 +28,7 @@ router.post("/student/login", studentLogin);
 router
   .route("/student/google")
   .post(googleAuth)
-  .get(() => { });
+  .get(() => {});
 
 router.post("/admin/login", adminLogin);
 
@@ -100,7 +100,7 @@ router.post("/refresh", async (req, res) => {
       firstName: user.firstName,
       role: user.role,
       profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerfied,
+      isVerified: user.isVerified,
     });
 
     // Update refresh token in database
@@ -159,7 +159,7 @@ router.get("/me", async (req, res) => {
       console.log("User not found in database");
       return res.status(401).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -169,7 +169,7 @@ router.get("/me", async (req, res) => {
       return res.status(403).json({
         success: false,
         message: "Your account has been blocked. Please contact support.",
-        isBlocked: true
+        isBlocked: true,
       });
     }
 
@@ -182,7 +182,7 @@ router.get("/me", async (req, res) => {
         firstName: user.firstName,
         role: user.role,
         profileImageUrl: user.profileImageUrl,
-        isVerified: user.isVerfied,
+        isVerified: user.isVerified,
         isBlocked: user.isBlocked,
       },
     });

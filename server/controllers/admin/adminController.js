@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import asyncHandler from 'express-async-handler'
+import asyncHandler from "express-async-handler";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 export const adminLogin = asyncHandler(async (req, res) => {
-  console.log("adminLogin controller called")
+  console.log("adminLogin controller called");
   try {
     const { email, password } = req.body;
 
@@ -14,13 +14,12 @@ export const adminLogin = asyncHandler(async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-
 
     if (user.role !== "admin") {
       return res
@@ -32,7 +31,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -57,41 +56,42 @@ export const adminLogin = asyncHandler(async (req, res) => {
     console.error("Admin Login Error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
-})
+});
 
 export const getStudents = asyncHandler(async (req, res) => {
-  console.log("getStudents controller called")
-  const students = await User.find({ role: 'student', isVerfied: true })
+  console.log("getStudents controller called");
+  const students = await User.find({ role: "student", isVerified: true });
   // console.log(students)
 
-  res.status(200).json({ success: true, data: students })
-})
+  res.status(200).json({ success: true, data: students });
+});
 
 export const blockStudent = asyncHandler(async (req, res) => {
-  console.log('block students')
-  let { studentId } = req.params
-  const student = await User.findOne({ _id: studentId })
-  console.log(student)
+  console.log("block students");
+  let { studentId } = req.params;
+  const student = await User.findOne({ _id: studentId });
+  console.log(student);
   student.isBlocked = !student.isBlocked;
-  student.save()
-  res.status(200).json({ success: true })
+  student.save();
+  res.status(200).json({ success: true });
+});
 
-})
+export const getInstructors = asyncHandler(async (req, res) => {
+  console.log("get instructors called");
+  const instructor = await Instructor.find({
+    role: "instructor",
+    isVerified: true,
+  });
+  console.log(instructor);
+  return res.status(200).json({ succes: true, data: instructor });
+});
 
-export const getInstructors = asyncHandler(async(req, res) => {
-  console.log('get instructors called');
-  const instructor = await Instructor.find({ role: "instructor", isVerfied: true })
-  console.log(instructor)
-  return res.status(200).json({succes:true,data:instructor})
-})
-
-export const  blockInstructor = asyncHandler(async (req, res) => {
+export const blockInstructor = asyncHandler(async (req, res) => {
   console.log("block instructor");
   let { instructorId } = req.params;
-  const instructor = await Instructor.findOne({ _id: instructorId })
+  const instructor = await Instructor.findOne({ _id: instructorId });
   console.log(instructor);
   instructor.isBlocked = !instructor.isBlocked;
-  instructor.save()
-  return res.status(200).json({ success: true})
-  
-})
+  instructor.save();
+  return res.status(200).json({ success: true });
+});
