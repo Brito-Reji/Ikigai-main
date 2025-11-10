@@ -38,7 +38,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     // Generate token
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_ACCESS_SECRET,
       { expiresIn: "7d" }
     );
 

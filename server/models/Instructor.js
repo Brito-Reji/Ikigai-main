@@ -37,7 +37,7 @@ const instructorSchema = new Schema(
     role: {
       type: String,
       enum: ["admin", "instructor", "student"],
-      default: "student",
+      default: "instructor",
       required: true,
     },
     headline: {
