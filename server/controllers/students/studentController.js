@@ -19,12 +19,16 @@ export const studentRegister = asyncHandler(async (req, res) => {
       .status(400)
       .json({ success: false, message: "Please provide all required fields" });
   }
+
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
   console.log(existingUser, " existing user student");
-  if (existingUser)
+
+  // if verified user already exists -> block registration
+  if (existingUser && existingUser.isVerified) {
     return res
       .status(400)
-      .json({ success: false, message: "email or username  already exist" });
+      .json({ success: false, message: "Email or username already exists" });
+  }
 
   // Validate email format
   const emailRegex = /^\S+@\S+\.\S+$/;
@@ -46,16 +50,28 @@ export const studentRegister = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "student";
-  let user = await User.create({
-    email: email.toLowerCase(),
-    password: hashedPassword,
-    username,
-    firstName,
-    lastName,
-    role,
-  });
+  let user;
 
-  await user.save();
+  // if user exists but not verified, update their details
+  if (existingUser && !existingUser.isVerified) {
+    existingUser.username = username;
+    existingUser.firstName = firstName;
+    existingUser.lastName = lastName;
+    existingUser.password = hashedPassword;
+    existingUser.role = role;
+    user = await existingUser.save();
+    console.log("Updated unverified user:", user.email);
+  } else {
+    // create new user
+    user = await User.create({
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      username,
+      firstName,
+      lastName,
+      role,
+    });
+  }
 
   try {
     await sendOTPToEmail(email);
@@ -80,7 +96,9 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully",
+      message: existingUser
+        ? "Unverified account updated, OTP sent again"
+        : "OTP sent successfully",
     });
   } catch (err) {
     console.error("OTP service failed:", err.message);
@@ -89,6 +107,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Failed to send OTP. Try again." });
   }
 });
+
 
 export const studentLogin = asyncHandler(async (req, res) => {
   let { email, password } = req.body;

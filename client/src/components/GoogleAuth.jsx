@@ -9,17 +9,17 @@ let navigate = useNavigate()
   try{
    console.log(credentialResponse.credential)
     let res = await api.post(`/auth/${role}/google`, {
-      accessToken: credentialResponse.credential,
+      token: credentialResponse.credential,
     });
     let { success,accessToken,message } = res.data
     if(!success){
       console.log(message)
     }
     console.log("sucess? ",success)
-    if (success && role == "student") {
+    if (success && role === "student") {
       localStorage.setItem('accessToken',accessToken)
       navigate('/course', { replace: true })
-    } else if (success && role == "instructor") {
+    } else if (success && role === "instructor") {
       localStorage.setItem('accessToken',accessToken)
       navigate("/instructor/dashboard", { replace: true })
     }

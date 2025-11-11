@@ -137,7 +137,7 @@ router.get("/me", async (req, res) => {
       accessToken = req.headers.authorization.split(" ")[1];
     }
 
-    console.log("Token from header:", accessToken);
+  
 
     if (!accessToken) {
       console.log("No token provided in request");

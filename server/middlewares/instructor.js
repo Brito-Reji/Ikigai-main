@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import { Instructor } from "../models/Instructor";
+import { Instructor } from "../models/Instructor.js";
 const isInstructor = asyncHandler(async (req, res, next) => {
   const accessToken = req.headers.authorization?.split(" ")[1];
   if (!accessToken) {

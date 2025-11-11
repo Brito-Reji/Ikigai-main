@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import nodemailer from 'nodemailer'
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
@@ -9,7 +10,6 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Utility function to send OTP (business logic only)
 export const sendOTPToEmail = async (email) => {
   if (!email) {
     throw new Error("Email is required");
@@ -17,8 +17,23 @@ export const sendOTPToEmail = async (email) => {
 
   const otp = generateOTP();
   await Otp.create({ email, otp });
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.NODE_MAILER_PASSWORD
+    }
+    
+  })
+  const mailOptions = {
+    from: '"My App" <your-email@gmail.com>',
+    to: email,
+    subject: "Your OTP Code",
+    html: `<h2>Your OTP is: ${otp}</h2><p>Expires in 2 minutes.</p>`,
+  };
+  await transporter.sendMail(mailOptions);
 
-  console.log("OTP generated for", email);
+  console.log("OTP generated for", email, " ", otp);
   return { otp, success: true };
 };
 
@@ -48,7 +63,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
   console.log("data from the db ->", data);
   const resl = await User.findOne({ email });
   console.log("resl->", resl);
-  if (data?.email == email && data?.otp == otp) {
+  if (data?.email === email && data?.otp === otp) {
     console.log("User verfied", resl);
     if (resl) {
       console.log("user verfied");
