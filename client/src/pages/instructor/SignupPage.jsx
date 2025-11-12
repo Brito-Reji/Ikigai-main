@@ -5,13 +5,12 @@ import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
-import AuthHeader from "@/components/instructor/AuthHeader.jsx";
 import AuthFooter from "@/components/instructor/AuthFooter.jsx";
-import Footer from "@/components/Footer";
+import logo from "../../assets/images/logo.png";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
+  const { loading, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
     useAuth();
 
   const [formData, setFormData] = useState({
@@ -151,11 +150,9 @@ export default function SignUpPage() {
   };
 
   return (
-    <>
-      <AuthHeader/>
     <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {/* Left Side - Image */}
-      <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden lg:min-h-screen">
+      <div className="hidden lg:block lg:w-1/2 bg-linear-to-br from-indigo-600 to-purple-700 relative overflow-hidden lg:min-h-screen">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <img
           src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"
@@ -193,6 +190,15 @@ export default function SignUpPage() {
       {/* Right Side - Form */}
       <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
         <div className="w-full max-w-md">
+          {/* Logo and Brand */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-3">
+              <img src={logo} alt="Ikigai Logo" className="h-16 w-auto animate-spin-slow" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
+            <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
+          </div>
+          
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
               Become an Instructor
@@ -380,11 +386,6 @@ export default function SignUpPage() {
             </form>
           </div>
       </div>
-      
-      </div>
-   
-      <AuthFooter/>
-                  </>
-    
+    </div>
   );
 }

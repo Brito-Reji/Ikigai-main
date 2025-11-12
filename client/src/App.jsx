@@ -96,11 +96,18 @@ function App() {
     <div>
       <Routes>
         {/* <Route path="/" element={<LandingPage/>} /> */}
+        {/* Auth */}
+        <Route path="/">
+<Route path="login" element={<UserLoginPage />} />
+          <Route path="signup" element={<UserSignupPage />} />
+        </Route>
+        
+
+
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
-          <Route path="login" element={<UserLoginPage />} />
-          <Route path="signup" element={<UserSignupPage />} />
+          
           <Route
             path="course"
             element={

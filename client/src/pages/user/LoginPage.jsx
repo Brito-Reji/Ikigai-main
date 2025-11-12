@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Search, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
 import { loginUser, clearError } from "@/store/slices/authSlice.js";
+import logo from "../../assets/images/logo.png";
 
 function LoginPage() {
   let navigate = useNavigate();
@@ -191,14 +192,25 @@ function LoginPage() {
   };
 
   return (
-    <>
-      <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
-        {/* Left Side - Form */}
-        <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 order-2 lg:order-1">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
-              Sign in to your account
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left Side - Form */}
+      <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 order-2 lg:order-1">
+        <div className="w-full max-w-md">
+          {/* Logo and Brand */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-3">
+              <img src={logo} alt="Ikigai Logo" className="h-16 w-auto animate-spin-slow" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
+            <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
+          </div>
+          
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Welcome Back
             </h1>
+            <p className="text-gray-600">Sign in to continue your learning journey</p>
+          </div>
 
             {successMessage && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
@@ -315,19 +327,18 @@ function LoginPage() {
               {/* Google Sign In */}
               <GoogleAuth role={"student"} />
             </div>
-          </div>
-        </div>
-
-        {/* Right Side - Image */}
-        <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden lg:min-h-screen order-1 lg:order-2">
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
-            alt="Student reading in classroom"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
         </div>
       </div>
-    </>
+
+      {/* Right Side - Image */}
+      <div className="hidden lg:block lg:w-1/2 bg-gray-100 relative overflow-hidden lg:min-h-screen order-1 lg:order-2">
+        <img
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
+          alt="Student reading in classroom"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </div>
+    </div>
   );
 }
 

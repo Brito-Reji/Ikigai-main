@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer'
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
-import { Users } from "lucide-react";
+// import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
 
 function generateOTP() {

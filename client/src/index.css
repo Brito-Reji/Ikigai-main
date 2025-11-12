@@ -3,7 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme inline
+{
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -41,7 +42,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root {
+:root
+{
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -76,7 +78,8 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+.dark
+{
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -110,12 +113,33 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
+@layer base
+{
+  *
+  {
     @apply border-border outline-ring/50;
   }
-  body {
+
+  body
+  {
     @apply bg-background text-foreground;
   }
 }
 
+@keyframes spin-slow
+{
+  from
+  {
+    transform: rotate(0deg);
+  }
+
+  to
+  {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow
+{
+  animation: spin-slow 10s linear infinite;
+}

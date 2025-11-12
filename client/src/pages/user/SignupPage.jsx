@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { GoogleLogin } from "@react-oauth/google";
-import { ShoppingCart, Search, ArrowRight, Rss } from "lucide-react";
-import Header from "@/components/Header.jsx";
+import { ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
 import Footer from "@/components/Footer.jsx";
+import logo from "../../assets/images/logo.png";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -152,7 +151,6 @@ export default function SignUpPage() {
 
   return (
     <>
-     
       <div className="min-h-screen bg-white">
         {/* Main Content */}
         <div className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
@@ -168,9 +166,21 @@ export default function SignUpPage() {
           {/* Right Side - Form */}
           <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
             <div className="w-full max-w-md">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
-                Create Your Account
-              </h1>
+              {/* Logo and Brand */}
+              <div className="text-center mb-8">
+                <div className="flex justify-center mb-3">
+                  <img src={logo} alt="Ikigai Logo" className="h-20 w-auto animate-spin-slow" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
+                <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
+              </div>
+              
+              <div className="mb-8">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                  Create Your Account
+                </h1>
+                <p className="text-gray-600">Start your learning journey today</p>
+              </div>
 
               {/* Global Error Message */}
               {error && (
