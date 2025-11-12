@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
@@ -30,6 +30,7 @@ export default function SignUpPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   // Clear errors when component mounts
   useEffect(() => {
@@ -287,17 +288,30 @@ export default function SignUpPage() {
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Password
                     </label>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="Enter Password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.password ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                      disabled={loading}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Enter Password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border ${
+                          errors.password ? "border-red-500" : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12`}
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                     {errors.password && (
                       <p className="mt-1 text-sm text-red-500">
                         {errors.password}
@@ -315,9 +329,7 @@ export default function SignUpPage() {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 border ${
-                        errors.confirmPassword
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        errors.confirmPassword ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                       disabled={loading}
                     />
