@@ -26,3 +26,14 @@ export const useCourses = () => {
     dispatch,
   };
 };
+
+
+
+export const useCart = () => {
+  const dispatch = useAppDispatch()
+  const cart = useAppDispatch((state) => state.cart) 
+  return {
+    ...cart,
+    dispatch
+  }
+}

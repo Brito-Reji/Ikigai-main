@@ -45,6 +45,15 @@ export const loginUser = createAsyncThunk(
           email,
         });
       }
+
+      // Check if user is blocked
+      if (error.response?.data?.isBlocked || error.response?.data?.message?.toLowerCase().includes('blocked')) {
+        return rejectWithValue({
+          message: error.response?.data?.message || "Your account has been blocked",
+          isBlocked: true,
+        });
+      }
+
       return rejectWithValue({
         message: error.response?.data?.message || "Login failed",
       });
@@ -84,7 +93,7 @@ export const verifyOTP = createAsyncThunk(
       const response = await api.post("/auth/verify-otp", { email, otp });
 
       console.log("response-> verify OTP redux", response)
-      localStorage.setItem("userAuth", JSON.stringify(response.data.instructor || response.data.user));
+      localStorage.setItem("userAuth", 'hello world');
       localStorage.setItem("accessToken", response.data.accessToken);
       if (response.data.success) {
         return {
@@ -152,6 +161,7 @@ export const googleAuth = createAsyncThunk(
           : "/auth/student/google";
       const response = await api.post(endpoint, { token });
 
+      console.log(response.data)
       if (response.data.success) {
         const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);

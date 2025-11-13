@@ -347,9 +347,12 @@ export default function LandingPage() {
                   on Ikigai. We provide the tools and skills to teach what you
                   love.
                 </p>
+                <Link to={'/instructor/signup'}>
                 <button className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
                   Start Your Instructor Journey →
                 </button>
+                </Link>
+                
               </div>
             </div>
           </div>

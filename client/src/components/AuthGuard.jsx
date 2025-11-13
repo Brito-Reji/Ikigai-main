@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 // Changed import to use Redux hook instead of Context
 import { useAuth } from "../hooks/useRedux.js";
 import { fetchCurrentUser } from "../store/slices/authSlice.js";
+import ThreeDotLoader from "./ThreeDotLoader.jsx";
 
 const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   // Changed to use Redux hook instead of Context
@@ -34,7 +35,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   if (loading || (hasToken && !user && isValidating)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+        <ThreeDotLoader size="lg" color="indigo" />
       </div>
     );
   }

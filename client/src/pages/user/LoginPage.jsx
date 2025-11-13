@@ -5,6 +5,7 @@ import GoogleAuth from "@/components/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
 import { loginUser, clearError } from "@/store/slices/authSlice.js";
 import logo from "../../assets/images/logo.png";
+import Swal from "sweetalert2";
 
 function LoginPage() {
   let navigate = useNavigate();
@@ -175,12 +176,24 @@ function LoginPage() {
         } else if (loginUser.rejected.match(resultAction)) {
           // Handle login error
           console.log("Login failed:", resultAction.payload);
-          setErrors({
-            ...errors,
-            general:
-              resultAction.payload?.message ||
-              "Login failed. Please try again.",
-          });
+          
+          // Check if user is blocked
+          if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes('blocked')) {
+            Swal.fire({
+              icon: "error",
+              title: "Account Blocked",
+              text: "Your account has been blocked. Please contact support for assistance.",
+              confirmButtonColor: "#dc2626",
+              confirmButtonText: "OK",
+            });
+          } else {
+            setErrors({
+              ...errors,
+              general:
+                resultAction.payload?.message ||
+                "Login failed. Please try again.",
+            });
+          }
         }
       } catch {
         setErrors({

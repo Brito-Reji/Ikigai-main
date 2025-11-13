@@ -1,3 +1,4 @@
+import { useCart } from "@/hooks/useRedux";
 import { Star, ShoppingCart, Check, Heart } from "lucide-react";
 import { useState } from "react";
 
@@ -6,6 +7,7 @@ export default function CourseCard({ course }) {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
+  const { addToCart,dispatch}  =useCart()
 
   const handleAddToCart = (e) => {
     e.stopPropagation(); // Prevent card click event
@@ -20,7 +22,9 @@ export default function CourseCard({ course }) {
         setShowNotification(false);
       }, 2000);
       
-      // You can add your cart logic here
+      // Add course to cart
+      dispatch(addToCart(course));
+      
       console.log("Added to cart:", course.title);
     }
   };
@@ -52,7 +56,7 @@ export default function CourseCard({ course }) {
       )}
 
       {/* Image Container */}
-      <div className="relative h-40 sm:h-48 bg-gradient-to-br from-orange-300 to-orange-400 overflow-hidden">
+      <div className="relative h-40 sm:h-48 bg-linear-to-br from-orange-300 to-orange-400 overflow-hidden">
         <img
           src={course.image || "/placeholder.svg"}
           alt={course.title}

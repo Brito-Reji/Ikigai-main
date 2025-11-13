@@ -1,7 +1,10 @@
 import api from '@/api/axiosConfig';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Students = () => {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,25 +28,54 @@ const Students = () => {
   }, []);
 
   const handleBlockToggle = async (studentId) => {
-    try {
-      // Call your API to block/unblock the student
-      await api.patch(`/admin/students/${studentId}/toggle-block`);
-      
-      // Update local state
-      setStudents(students.map(student => 
-        student._id === studentId 
-          ? { ...student, isBlocked: !student.isBlocked }
-          : student
-      ));
-    } catch (error) {
-      console.error('Error toggling block status:', error);
-      alert('Failed to update student status');
+    const student = students.find(s => s._id === studentId);
+    const action = student.isBlocked ? 'unblock' : 'block';
+    
+    const result = await Swal.fire({
+      title: `${action === 'block' ? 'Block' : 'Unblock'} Student?`,
+      html: `
+        <p>Are you sure you want to ${action} <strong>${student.fullName || student.username}</strong>?</p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action}!`,
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.patch(`/admin/students/${studentId}/toggle-block`);
+        
+        // Update local state
+        setStudents(students.map(s => 
+          s._id === studentId 
+            ? { ...s, isBlocked: !s.isBlocked }
+            : s
+        ));
+        
+        Swal.fire({
+          title: 'Success!',
+          text: `Student has been ${action}ed successfully.`,
+          icon: 'success',
+          confirmButtonColor: '#3b82f6',
+          timer: 2000
+        });
+      } catch (error) {
+        console.error('Error toggling block status:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to update student status.',
+          icon: 'error',
+          confirmButtonColor: '#dc2626'
+        });
+      }
     }
   };
 
   const handleViewDetails = (studentId) => {
-    console.log('View student details:', studentId);
-    // Add navigation to student detail page or open modal
+    navigate(`/admin/students/${studentId}`);
   };
 
   // Filter students based on search

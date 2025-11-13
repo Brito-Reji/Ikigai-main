@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, CheckCircle, XCircle, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/GoogleAuth.jsx";
 import logo from "../../assets/images/logo.png";
+import { useUsernameCheck } from "@/hooks/useUsernameCheck.js";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ export default function SignUpPage() {
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check username availability
+  const { isChecking, isAvailable, message } = useUsernameCheck(formData.username);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -122,6 +126,16 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if username is available
+    if (isAvailable === false) {
+      Swal.fire({
+        icon: "error",
+        title: "Username not available",
+        text: "Please choose a different username",
+      });
+      return;
+    }
 
     if (validateForm()) {
       try {
@@ -247,7 +261,7 @@ export default function SignUpPage() {
                       <p className="mt-1 text-sm text-red-500">
                         {errors.lastName}
                       </p>
-                    )}
+                    )}   
                   </div>
                 </div>
               </div>
@@ -257,19 +271,44 @@ export default function SignUpPage() {
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Username
                 </label>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${
-                    errors.username ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.username 
+                        ? "border-red-500" 
+                        : isAvailable === false 
+                        ? "border-red-500" 
+                        : isAvailable === true 
+                        ? "border-green-500" 
+                        : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10`}
+                    disabled={loading}
+                  />
+                  {/* Username availability indicator */}
+                  {formData.username.length >= 3 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {isChecking ? (
+                        <Loader className="w-5 h-5 text-gray-400 animate-spin" />
+                      ) : isAvailable === true ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : isAvailable === false ? (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
                 {errors.username && (
                   <p className="mt-1 text-sm text-red-500">{errors.username}</p>
+                )}
+                {!errors.username && formData.username.length >= 3 && message && (
+                  <p className={`mt-1 text-sm ${isAvailable ? "text-green-600" : "text-red-600"}`}>
+                    {message}
+                  </p>
                 )}
               </div>
 
@@ -356,9 +395,9 @@ export default function SignUpPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isAvailable === false || isChecking}
                 className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg transition flex items-center justify-center space-x-2 font-medium ${
-                  loading
+                  loading || isAvailable === false || isChecking
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-indigo-700 shadow-lg hover:shadow-xl"
                 }`}

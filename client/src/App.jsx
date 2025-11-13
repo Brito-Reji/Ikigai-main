@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
@@ -26,29 +26,30 @@ import AdminDashboard from "./pages/admin/AdminDashBoard.jsx";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Categories from "./pages/admin/Categories";
 import Students from "./pages/admin/Students";
+import StudentDetail from "./pages/admin/StudentDetail";
 import Instructors from "./pages/admin/Instructors";
+import InstructorDetail from "./pages/admin/InstructorDetail";
 
 // Auth Guard
 import AuthGuard from "./components/AuthGuard.jsx";
-import { useDispatch } from "react-redux";
+import LoadingScreen from "./components/LoadingScreen.jsx";
 import api from "./api/axiosConfig.js";
 import { isTokenExpired } from "./utils/tokenUtils.js";
 
 function App() {
   const location = useLocation();
-  const dispatch = useDispatch();
 
-  // Check user status on app load (only if token exists and is valid)
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const checkUserStatusOnLoad = async () => {
       const accessToken = localStorage.getItem("accessToken");
       
-      // Don't do anything if no token
       if (!accessToken) {
+        setIsLoading(false);
         return;
       }
       
-      // Check if token is expired
       const tokenExpired = isTokenExpired(accessToken);
       
       if (tokenExpired) {
@@ -57,7 +58,6 @@ function App() {
         return;
       }
       
-      // Token is valid, check user status for blocked accounts
       try {
         const userResponse = await api.get("/auth/me");
         
@@ -80,6 +80,8 @@ function App() {
           console.log("Invalid token, clearing");
           localStorage.removeItem("accessToken");
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -92,11 +94,16 @@ function App() {
       console.log("LocalStorage cleared!");
     }
   }, [location.pathname]);
+
+  // Show loading screen
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div>
       <Routes>
-        {/* <Route path="/" element={<LandingPage/>} /> */}
-        {/* Auth */}
+   
         <Route path="/">
 <Route path="login" element={<UserLoginPage />} />
           <Route path="signup" element={<UserSignupPage />} />
@@ -153,7 +160,9 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="category" element={<Categories />} />
           <Route path="students" element={<Students />} />
+          <Route path="students/:id" element={<StudentDetail />} />
           <Route path="instructors" element={<Instructors />} />
+          <Route path="instructors/:id" element={<InstructorDetail />} />
         </Route>
       </Routes>
 

@@ -218,6 +218,23 @@ export const googleAuth = asyncHandler(async (req, res) => {
         message: "user is blocked by the admin ",
       });
     }
+    let needUpdate = false;
+    if(user.firstName !== firstName){
+      user.firstName = firstName;
+      needUpdate = true;
+    }
+    if(user.lastName !== lastName){
+      user.lastName = lastName;
+      needUpdate = true;
+    }
+    if(user.profileImageUrl !== picture){
+      user.profileImageUrl = picture;
+      needUpdate = true;
+    }
+    if(needUpdate){
+      await user.save();
+    }
+   
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
       role: user.role,
@@ -251,6 +268,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
   if (!user) {
     // console.log(lastName.join())
+    console.log(firstName)
     user = await User.create({
       email,
       firstName,

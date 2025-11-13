@@ -1,7 +1,10 @@
 import api from "@/api/axiosConfig";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Instructors = () => {
+  const navigate = useNavigate();
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,27 +28,56 @@ const Instructors = () => {
   }, []);
 
   const handleBlockToggle = async (instructorId) => {
-    try {
-      // Call your API to block/unblock the instructor
-      await api.patch(`/admin/instructors/${instructorId}/toggle-block`);
+    const instructor = instructors.find(i => i._id === instructorId);
+    const action = instructor.isBlocked ? 'unblock' : 'block';
+    
+    const result = await Swal.fire({
+      title: `${action === 'block' ? 'Block' : 'Unblock'} Instructor?`,
+      html: `
+        <p>Are you sure you want to ${action} <strong>${instructor.fullName || instructor.username}</strong>?</p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action}!`,
+      cancelButtonText: 'Cancel'
+    });
 
-      // Update local state
-      setInstructors(
-        instructors.map((instructor) =>
-          instructor._id === instructorId
-            ? { ...instructor, isBlocked: !instructor.isBlocked }
-            : instructor
-        )
-      );
-    } catch (error) {
-      console.error("Error toggling block status:", error);
-      alert("Failed to update instructor status");
+    if (result.isConfirmed) {
+      try {
+        await api.patch(`/admin/instructors/${instructorId}/toggle-block`);
+
+        // Update local state
+        setInstructors(
+          instructors.map((i) =>
+            i._id === instructorId
+              ? { ...i, isBlocked: !i.isBlocked }
+              : i
+          )
+        );
+        
+        Swal.fire({
+          title: 'Success!',
+          text: `Instructor has been ${action}ed successfully.`,
+          icon: 'success',
+          confirmButtonColor: '#3b82f6',
+          timer: 2000
+        });
+      } catch (error) {
+        console.error("Error toggling block status:", error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to update instructor status.',
+          icon: 'error',
+          confirmButtonColor: '#dc2626'
+        });
+      }
     }
   };
 
   const handleViewDetails = (instructorId) => {
-    console.log("View instructor details:", instructorId);
-    // Add navigation to instructor detail page or open modal
+    navigate(`/admin/instructors/${instructorId}`);
   };
 
   // Filter instructors based on search

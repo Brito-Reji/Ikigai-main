@@ -28,13 +28,52 @@ router.post("/student/login", studentLogin);
 router
   .route("/student/google")
   .post(googleAuth)
-  .get(() => {});
+  .get(() => { });
 
 router.post("/admin/login", adminLogin);
 
 // OTP
 router.post("/send-otp", sentOTP);
 router.post("/verify-otp", verifyOTP);
+
+// Check username availability using query params
+router.get("/check-username", async (req, res) => {
+  try {
+    const { username } = req.query;
+
+    // Check if username is provided
+    if (!username || username.trim().length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Username must be at least 3 characters",
+      });
+    }
+
+    // Check in both User and Instructor collections
+    const userExists = await User.findOne({ username: username.toLowerCase() });
+    const instructorExists = await Instructor.findOne({ username: username.toLowerCase() });
+
+    if (userExists || instructorExists) {
+      return res.status(200).json({
+        success: true,
+        available: false,
+        message: "Username is already taken",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      available: true,
+      message: "Username is available",
+    });
+  } catch (error) {
+    console.error("Error checking username:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error checking username availability",
+    });
+  }
+});
 
 // Refresh token endpoint
 router.post("/refresh", async (req, res) => {
@@ -137,7 +176,7 @@ router.get("/me", async (req, res) => {
       accessToken = req.headers.authorization.split(" ")[1];
     }
 
-  
+
 
     if (!accessToken) {
       console.log("No token provided in request");

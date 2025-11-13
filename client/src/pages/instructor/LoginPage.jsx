@@ -148,11 +148,29 @@ function LoginPage() {
       } catch (err) {
         console.error("Login failed:", err);
         if (!err.requiresVerification) {
-          Swal.fire({
-            icon: "error",
-            title: "Login failed",
-            text: err.message || "Login failed. Please try again.",
-          });
+          // Check if user is blocked
+          if (err.isBlocked || err.message?.toLowerCase().includes('blocked')) {
+            Swal.fire({
+              icon: "error",
+              title: "Account Blocked",
+              html: `
+                <p>Your account has been blocked.</p>
+                <p class="mt-2 text-sm text-gray-600">Please contact support for assistance.</p>
+              `,
+              confirmButtonColor: "#dc2626",
+              confirmButtonText: "OK",
+              customClass: {
+                popup: 'rounded-lg',
+                title: 'text-red-600',
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Login failed",
+              text: err.message || "Login failed. Please try again.",
+            });
+          }
         }
       }
     }
@@ -292,7 +310,7 @@ function LoginPage() {
       </div>
 
       {/* Right Side - Image */}
-      <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden lg:min-h-screen order-1 lg:order-2">
+      <div className="hidden lg:block lg:w-1/2 bg-linear-to-br from-indigo-600 to-purple-700 relative overflow-hidden lg:min-h-screen order-1 lg:order-2">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <img
           src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"

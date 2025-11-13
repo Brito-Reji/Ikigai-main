@@ -17,6 +17,7 @@ let navigate = useNavigate()
     }
     console.log("sucess? ",success)
     if (success && role === "student") {
+      
       localStorage.setItem('accessToken',accessToken)
       navigate('/course', { replace: true })
     } else if (success && role === "instructor") {
@@ -44,7 +45,7 @@ let navigate = useNavigate()
         onError={() => {
           console.log("login failed");
         }}
-        auto_select={true}
+       
       />
     </>
   );
