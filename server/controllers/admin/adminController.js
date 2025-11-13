@@ -95,3 +95,18 @@ export const blockInstructor = asyncHandler(async (req, res) => {
   instructor.save();
   return res.status(200).json({ success: true });
 });
+
+export const getStudentDetails = asyncHandler(async (req, res) => {
+  console.log("get student details");
+  // console.log(req.params.id)
+  let { id } = req.params;
+  const student = await User.findOne({ _id: id });
+  console.log(student);
+  return res.status(200).json({ success: true, data: student });
+});
+
+export const getInstructorDetails = asyncHandler(async (req, res) => {
+  let { id } = req.params;
+  const instructor = await Instructor.findOne({ _id: id })
+  return res.status(200).json({success:true,data:instructor})
+})

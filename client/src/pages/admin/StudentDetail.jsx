@@ -29,6 +29,7 @@ const StudentDetail = () => {
     try {
       setLoading(true);
       const response = await api.get(`/admin/students/${id}`);
+      console.log(response)
       setStudent(response.data.data);
     } catch (error) {
       console.error('Error fetching student details:', error);
