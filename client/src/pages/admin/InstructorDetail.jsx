@@ -142,7 +142,7 @@ const InstructorDetail = () => {
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+            <div className="w-24 h-24 bg-linear-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
               {instructor.fullName?.charAt(0) || instructor.username?.charAt(0) || 'I'}
             </div>
             <div>
