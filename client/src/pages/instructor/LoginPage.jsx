@@ -147,6 +147,11 @@ function LoginPage() {
         // Success - will be redirected by useEffect
       } catch (err) {
         console.error("Login failed:", err);
+        
+        // Clear any existing tokens to prevent stale authentication
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("userAuth");
+        
         if (!err.requiresVerification) {
           // Check if user is blocked
           if (err.isBlocked || err.message?.toLowerCase().includes('blocked')) {
@@ -163,6 +168,15 @@ function LoginPage() {
                 popup: 'rounded-lg',
                 title: 'text-red-600',
               }
+            });
+          } else if (err.message?.toLowerCase().includes('google')) {
+            // Special handling for Google auth error
+            Swal.fire({
+              icon: "info",
+              title: "Google Account Detected",
+              text: "This account was created with Google. Please use the 'Sign in with Google' button below.",
+              confirmButtonColor: "#4285f4",
+              confirmButtonText: "OK",
             });
           } else {
             Swal.fire({

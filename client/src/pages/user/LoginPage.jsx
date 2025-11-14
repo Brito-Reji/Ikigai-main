@@ -177,6 +177,10 @@ function LoginPage() {
           // Handle login error
           console.log("Login failed:", resultAction.payload);
           
+          // Clear any existing tokens to prevent stale authentication
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("userAuth");
+          
           // Check if user is blocked
           if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes('blocked')) {
             Swal.fire({
@@ -184,6 +188,15 @@ function LoginPage() {
               title: "Account Blocked",
               text: "Your account has been blocked. Please contact support for assistance.",
               confirmButtonColor: "#dc2626",
+              confirmButtonText: "OK",
+            });
+          } else if (resultAction.payload?.message?.toLowerCase().includes('google')) {
+            // Special handling for Google auth error
+            Swal.fire({
+              icon: "info",
+              title: "Google Account Detected",
+              text: "This account was created with Google. Please use the 'Sign in with Google' button below.",
+              confirmButtonColor: "#4285f4",
               confirmButtonText: "OK",
             });
           } else {

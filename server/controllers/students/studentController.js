@@ -120,9 +120,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }
   let user = await User.findOne({
     $or: [{ email: email }, { username: email }],
-  })
-    .select("+password")
-    .exec();
+  }).select("+password").exec();
 
   // Check if user exists
   if (!user) {
@@ -130,6 +128,13 @@ export const studentLogin = asyncHandler(async (req, res) => {
       success: false,
       message: "Invalid credentials",
     });
+  }
+
+  if (user.authType == "google") {
+    return res.status(401).json({
+      success: false,
+      message: "This account was created with Google. Please use Google Sign-In to continue."
+    })
   }
 
   // Check if user is verified
@@ -219,22 +224,22 @@ export const googleAuth = asyncHandler(async (req, res) => {
       });
     }
     let needUpdate = false;
-    if(user.firstName !== firstName){
+    if (user.firstName !== firstName) {
       user.firstName = firstName;
       needUpdate = true;
     }
-    if(user.lastName !== lastName){
+    if (user.lastName !== lastName) {
       user.lastName = lastName;
       needUpdate = true;
     }
-    if(user.profileImageUrl !== picture){
+    if (user.profileImageUrl !== picture) {
       user.profileImageUrl = picture;
       needUpdate = true;
     }
-    if(needUpdate){
+    if (needUpdate) {
       await user.save();
     }
-   
+
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
       role: user.role,
@@ -243,6 +248,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       profileImageUrl: user.profileImageUrl,
       isVerified: user.isVerified,
+
     });
 
     // Store refresh token in database
@@ -276,6 +282,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
+      authType: 'google'
     });
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
@@ -310,6 +317,6 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
 });
 
-const studentForgetPassword = asyncHandler(async (req, res) => {});
+const studentForgetPassword = asyncHandler(async (req, res) => { });
 
-const studentAddToCart = asyncHandler(async (req, res) => {});
+const studentAddToCart = asyncHandler(async (req, res) => { });

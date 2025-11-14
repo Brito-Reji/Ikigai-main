@@ -95,7 +95,12 @@ export const instructorSignin = asyncHandler(async (req, res) => {
       message: "Invalid email or password",
     });
   }
-
+  if (user.authType == "google") {
+    return res.status(401).json({
+      success: false,
+      message: "This account was created with Google. Please use Google Sign-In to continue.",
+    });
+  }
   // Check if user is an instructor
   if (user.role !== "instructor") {
     return res.status(403).json({
@@ -207,6 +212,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
+      authType: 'google'
     });
 
     let { accessToken, refreshToken } = generateTokens({

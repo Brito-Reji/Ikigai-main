@@ -237,6 +237,10 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;
+        // Clear authentication state on login failure
+        state.user = null;
+        state.accessToken = null;
+        state.isAuthenticated = false;
         if (action.payload.requiresVerification) {
           state.requiresVerification = true;
           state.verificationEmail = action.payload.email;

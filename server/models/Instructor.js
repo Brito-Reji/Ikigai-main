@@ -26,7 +26,11 @@ const instructorSchema = new Schema(
       type: String,
       trim: true,
     },
-
+    authType: {
+      type: String,
+      enum: ["email", 'google'],
+      default:"email"
+   },
     password: {
       type: String,
 
