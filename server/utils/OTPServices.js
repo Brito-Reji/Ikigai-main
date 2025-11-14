@@ -47,7 +47,7 @@ export const sentOTP = asyncHandler(async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "OTP generated", otp: result.otp, success: true }); // ⚠️ Don't send OTP in production!
+      .json({ message: "OTP generated", otp: result.otp, success: true });
   } catch (err) {
     console.log(err.message);
     res.status(500).json({ message: err.message });

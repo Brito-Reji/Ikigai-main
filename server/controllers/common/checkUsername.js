@@ -38,8 +38,8 @@ export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
     } catch (error) {
         console.error("Availability check error:", error);
         return res.status(500).json({
-            success: false,
-            message: "Error checking availability",
+          success: false,
+          message: "Error checking availability",
         });
     }
 })
