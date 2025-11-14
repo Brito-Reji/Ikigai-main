@@ -43,7 +43,7 @@ const StudentDetail = () => {
     const result = await Swal.fire({
       title: `${action === 'block' ? 'Block' : 'Unblock'} Student?`,
       html: `
-        <p>Are you sure you want to ${action} <strong>${student.fullName || student.username}</strong>?</p>
+        <p>Are you sure you want to ${action} <strong>${getFullName(student)}</strong>?</p>
         ${action === 'block' ? '<p class="text-sm text-gray-600 mt-2">This student will not be able to access their account.</p>' : '<p class="text-sm text-gray-600 mt-2">This student will regain access to their account.</p>'}
       `,
       icon: 'warning',
@@ -61,7 +61,7 @@ const StudentDetail = () => {
         
         Swal.fire({
           title: `Student ${action === 'block' ? 'Blocked' : 'Unblocked'}!`,
-          text: `${student.fullName || student.username} has been ${action}ed successfully.`,
+          text: `${getFullName(student)} has been ${action}ed successfully.`,
           icon: 'success',
           confirmButtonColor: '#3b82f6'
         });
@@ -75,6 +75,16 @@ const StudentDetail = () => {
         });
       }
     }
+  };
+
+  const getFullName = (student) => {
+    if (!student) return 'N/A';
+    if (student.fullName) return student.fullName;
+    if (student.firstName && student.lastName) {
+      return `${student.firstName} ${student.lastName}`;
+    }
+    if (student.firstName) return student.firstName;
+    return student.username || 'N/A';
   };
 
   const formatDate = (dateString) => {
@@ -124,7 +134,7 @@ const StudentDetail = () => {
         </Link>
         <ChevronRight className="w-4 h-4" />
         <span className="text-gray-900 font-medium">
-          {student.fullName || student.username}
+          {getFullName(student)}
         </span>
       </nav>
 
@@ -141,12 +151,12 @@ const StudentDetail = () => {
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-teal-400 to-blue-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
-              {student.fullName?.charAt(0) || student.username?.charAt(0) || 'S'}
+            <div className="w-24 h-24 bg-linear-to-br from-teal-400 to-blue-500 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+              {getFullName(student).charAt(0)}
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                {student.fullName || 'N/A'}
+                {getFullName(student)}
               </h1>
               <p className="text-gray-600 text-lg mb-3">@{student.username || 'N/A'}</p>
               <div className="flex items-center space-x-3">

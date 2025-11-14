@@ -11,6 +11,16 @@ const Students = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
+  // Helper function to get full name
+  const getFullName = (student) => {
+    if (student.fullName) return student.fullName;
+    if (student.firstName && student.lastName) {
+      return `${student.firstName} ${student.lastName}`;
+    }
+    if (student.firstName) return student.firstName;
+    return student.username || 'N/A';
+  };
+
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -34,7 +44,7 @@ const Students = () => {
     const result = await Swal.fire({
       title: `${action === 'block' ? 'Block' : 'Unblock'} Student?`,
       html: `
-        <p>Are you sure you want to ${action} <strong>${student.fullName || student.username}</strong>?</p>
+        <p>Are you sure you want to ${action} <strong>${getFullName(student)}</strong>?</p>
       `,
       icon: 'warning',
       showCancelButton: true,
@@ -80,7 +90,7 @@ const Students = () => {
 
   // Filter students based on search
   const filteredStudents = students.filter(student =>
-    student.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    getFullName(student).toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student._id?.toString().includes(searchQuery)
@@ -262,7 +272,7 @@ const Students = () => {
                       #{student._id.slice(-6)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {student.fullName || 'N/A'}
+                      {getFullName(student)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {student.username || 'N/A'}

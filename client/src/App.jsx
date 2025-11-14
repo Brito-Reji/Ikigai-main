@@ -11,6 +11,8 @@ import InstructorLayout from "./components/InstructorLayout.jsx";
 import UserCourseListingPage from "./pages/user/CourseListingPage.jsx";
 import UserLoginPage from "./pages/user/LoginPage.jsx";
 import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
+import CartPage from "./pages/user/CartPage.jsx";
+import CheckoutPage from "./pages/user/CheckoutPage.jsx";
 // Instructor Import
 import InstructorLoginPage from "./pages/instructor/LoginPage.jsx";
 import InstructorSignupPage from "./pages/instructor/SignupPage.jsx";
@@ -120,6 +122,22 @@ function App() {
             element={
               <AuthGuard requireAuth={true} roles={["student"]}>
                 <UserCourseListingPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="cart"
+            element={
+              <AuthGuard requireAuth={true} roles={["student"]}>
+                <CartPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="checkout"
+            element={
+              <AuthGuard requireAuth={true} roles={["student"]}>
+                <CheckoutPage />
               </AuthGuard>
             }
           />

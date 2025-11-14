@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 
 export const useAvailabilityCheck = (value, field, role = "student", delay = 500) => {
@@ -37,7 +37,6 @@ export const useAvailabilityCheck = (value, field, role = "student", delay = 500
             }
         }, delay);
 
-        // Cleanup function
         return () => {
             clearTimeout(timeoutId);
             setIsChecking(false);

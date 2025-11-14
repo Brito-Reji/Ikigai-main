@@ -30,10 +30,10 @@ export const useCourses = () => {
 
 
 export const useCart = () => {
-  const dispatch = useAppDispatch()
-  const cart = useAppDispatch((state) => state.cart) 
+  const dispatch = useAppDispatch();
+  const cart = useAppSelector((state) => state.cart);
   return {
     ...cart,
     dispatch
-  }
-}
+  };
+};

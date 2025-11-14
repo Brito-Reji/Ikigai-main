@@ -44,7 +44,7 @@ const InstructorDetail = () => {
     const result = await Swal.fire({
       title: `${action === 'block' ? 'Block' : 'Unblock'} Instructor?`,
       html: `
-        <p>Are you sure you want to ${action} <strong>${instructor.fullName || instructor.username}</strong>?</p>
+        <p>Are you sure you want to ${action} <strong>${getFullName(instructor)}</strong>?</p>
         ${action === 'block' ? '<p class="text-sm text-gray-600 mt-2">This instructor will not be able to access their account and manage courses.</p>' : '<p class="text-sm text-gray-600 mt-2">This instructor will regain access to their account and courses.</p>'}
       `,
       icon: 'warning',
@@ -62,7 +62,7 @@ const InstructorDetail = () => {
         
         Swal.fire({
           title: `Instructor ${action === 'block' ? 'Blocked' : 'Unblocked'}!`,
-          text: `${instructor.fullName || instructor.username} has been ${action}ed successfully.`,
+          text: `${getFullName(instructor)} has been ${action}ed successfully.`,
           icon: 'success',
           confirmButtonColor: '#3b82f6'
         });
@@ -76,6 +76,16 @@ const InstructorDetail = () => {
         });
       }
     }
+  };
+
+  const getFullName = (instructor) => {
+    if (!instructor) return 'N/A';
+    if (instructor.fullName) return instructor.fullName;
+    if (instructor.firstName && instructor.lastName) {
+      return `${instructor.firstName} ${instructor.lastName}`;
+    }
+    if (instructor.firstName) return instructor.firstName;
+    return instructor.username || 'N/A';
   };
 
   const formatDate = (dateString) => {
@@ -125,7 +135,7 @@ const InstructorDetail = () => {
         </Link>
         <ChevronRight className="w-4 h-4" />
         <span className="text-gray-900 font-medium">
-          {instructor.fullName || instructor.username}
+          {getFullName(instructor)}
         </span>
       </nav>
 
@@ -142,13 +152,13 @@ const InstructorDetail = () => {
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-linear-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
-              {instructor.fullName?.charAt(0) || instructor.username?.charAt(0) || 'I'}
+            <div className="w-24 h-24 bg-linear-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+              {getFullName(instructor).charAt(0)}
             </div>
             <div>
               <div className="flex items-center space-x-2 mb-2">
                 <h1 className="text-3xl font-bold text-gray-800">
-                  {instructor.fullName || 'N/A'}
+                  {getFullName(instructor)}
                 </h1>
                 <Award className="w-6 h-6 text-yellow-500" />
               </div>

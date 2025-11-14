@@ -11,6 +11,16 @@ const Instructors = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
+  // Helper function to get full name
+  const getFullName = (instructor) => {
+    if (instructor.fullName) return instructor.fullName;
+    if (instructor.firstName && instructor.lastName) {
+      return `${instructor.firstName} ${instructor.lastName}`;
+    }
+    if (instructor.firstName) return instructor.firstName;
+    return instructor.username || 'N/A';
+  };
+
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
@@ -34,7 +44,7 @@ const Instructors = () => {
     const result = await Swal.fire({
       title: `${action === 'block' ? 'Block' : 'Unblock'} Instructor?`,
       html: `
-        <p>Are you sure you want to ${action} <strong>${instructor.fullName || instructor.username}</strong>?</p>
+        <p>Are you sure you want to ${action} <strong>${getFullName(instructor)}</strong>?</p>
       `,
       icon: 'warning',
       showCancelButton: true,
@@ -83,7 +93,7 @@ const Instructors = () => {
   // Filter instructors based on search
   const filteredInstructors = instructors.filter(
     (instructor) =>
-      instructor.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getFullName(instructor).toLowerCase().includes(searchQuery.toLowerCase()) ||
       instructor.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       instructor.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       instructor._id?.toString().includes(searchQuery)
@@ -274,7 +284,7 @@ const Instructors = () => {
                       #{instructor._id.slice(-6)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {instructor.fullName || "N/A"}
+                      {getFullName(instructor)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {instructor.username || "N/A"}

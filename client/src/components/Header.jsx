@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
-import { Search, Heart, ShoppingCart, Bell, User, Menu, X } from "lucide-react";
+import { Search, Heart, Bell, User, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 // Changed import to use Redux hook instead of Context
 import { useAuth } from "../hooks/useRedux.js";
 import { logout } from "../store/slices/authSlice.js";
 import { useDispatch } from "react-redux";
-import logo from "../assets/images/logo.png"
+import logo from "../assets/images/logo.png";
+import CartIcon from "./CartIcon.jsx";
 
 
 export default function Header({ onMenuToggle, menuOpen }) {
@@ -94,9 +95,9 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <Heart className="w-5 h-5" />
                 </button>
-                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
-                  <ShoppingCart className="w-5 h-5" />
-                </button>
+                <div className="hidden md:block">
+                  <CartIcon />
+                </div>
                 <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
                   <Bell className="w-5 h-5" />
                 </button>
@@ -168,13 +169,13 @@ export default function Header({ onMenuToggle, menuOpen }) {
                   <Heart className="w-5 h-5" />
                   <span>Wishlist</span>
                 </a>
-                <a
-                  href="#"
+                <Link
+                  to="/cart"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <CartIcon />
                   <span>Cart</span>
-                </a>
+                </Link>
                 <a
                   href="#"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"

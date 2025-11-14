@@ -11,6 +11,9 @@ import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header.jsx";
 
+import bannerOne from '../../assets/images/banner/one.png'
+import bannerTwo from '../../assets/images/banner/two.png'
+
 export default function LandingPage() {
   // const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
@@ -176,10 +179,21 @@ export default function LandingPage() {
                 </Link>
               </div>
               <div className="relative h-96 hidden md:block">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-red-400 rounded-full"></div>
-                <div className="absolute top-10 right-48 w-40 h-40 bg-blue-500 rounded-full"></div>
-                <div className="absolute bottom-0 right-20 w-56 h-56 bg-yellow-400 rounded-full"></div>
-                <div className="absolute top-1/2 left-0 w-12 h-12 bg-gray-900 rounded-full"></div>
+                <div className="absolute top-0 right-0 w-48 h-48 bg-red-400 rounded-full"   style={{
+    backgroundImage: `url(${bannerOne})`,
+    backgroundPosition: "-17px 0px", 
+    backgroundSize: "200px",
+  }}></div>
+                <div className="absolute top-10 right-48 w-48 h-48 bg-blue-500 rounded-full"  style={{
+    backgroundImage: `url(${bannerTwo})`,
+    backgroundPosition: "-17px 0px", 
+    backgroundSize: "200px", 
+  }}></div>
+                <div className="absolute bottom-0 right-24 w-48 h-48 bg-yellow-400 rounded-full" style={{
+                  backgroundImage: `url(${bannerOne})`,
+                  backgroundPosition: "-17px 0px", 
+                  backgroundSize: "200px", 
+                }}></div>
               </div>
             </div>
           </div>
