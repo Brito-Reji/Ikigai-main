@@ -1,0 +1,10 @@
+# Node modules
+server/node_modules
+client/node_modules
+
+# Build/dist output
+client/build
+server/dist
+
+# VS Code settings
+.vscode
