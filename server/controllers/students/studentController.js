@@ -4,6 +4,7 @@ import { User } from "../../models/User.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
+import api from "../../config/axiosConfig.js";
 
 // import { User } from './model/'
 
@@ -108,7 +109,6 @@ export const studentRegister = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const studentLogin = asyncHandler(async (req, res) => {
   let { email, password } = req.body;
   console.log("login response ->", email);
@@ -120,7 +120,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }
   let user = await User.findOne({
     $or: [{ email: email }, { username: email }],
-  }).select("+password").exec();
+  })
+    .select("+password")
+    .exec();
 
   // Check if user exists
   if (!user) {
@@ -133,8 +135,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
   if (user.authType == "google") {
     return res.status(401).json({
       success: false,
-      message: "This account was created with Google. Please use Google Sign-In to continue."
-    })
+      message:
+        "This account was created with Google. Please use Google Sign-In to continue.",
+    });
   }
 
   // Check if user is verified
@@ -156,49 +159,45 @@ export const studentLogin = asyncHandler(async (req, res) => {
   }
   console.log(user);
   console.log(password, user?.password);
-  bcrypt.compare(password, user.password, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
 
-    if (result) {
-      let { accessToken, refreshToken } = generateTokens({
-        userId: user._id,
-        role: user.role,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        profileImageUrl: user.profileImageUrl,
-        isVerified: user.isVerified,
-      });
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
-      // Store refresh token in database
-      user.refreshToken = refreshToken;
-      user.save({ validateBeforeSave: false });
+  if (!isPasswordValid) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid credentials" });
+  }
 
-      // Set refresh token in HttpOnly cookie
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+  let { accessToken, refreshToken } = generateTokens({
+    userId: user._id,
+    role: user.role,
+    email: user.email,
+    username: user.username,
+    firstName: user.firstName,
+    profileImageUrl: user.profileImageUrl,
+    isVerified: user.isVerified,
+  });
 
-      // Return response in the expected format
-      return res.status(200).json({
-        success: true,
-        accessToken,
-        user: {
-          email: user.email,
-          role: user.role,
-        },
-      });
-    } else {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
-    }
+  // Store refresh token in database
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+
+  // Set refresh token in HttpOnly cookie
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  // Return response in the expected format
+  return res.status(200).json({
+    success: true,
+    accessToken,
+    user: {
+      email: user.email,
+      role: user.role,
+    },
   });
 });
 
@@ -248,7 +247,6 @@ export const googleAuth = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       profileImageUrl: user.profileImageUrl,
       isVerified: user.isVerified,
-
     });
 
     // Store refresh token in database
@@ -274,7 +272,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
   if (!user) {
     // console.log(lastName.join())
-    console.log(firstName)
+    console.log(firstName);
     user = await User.create({
       email,
       firstName,
@@ -282,7 +280,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
-      authType: 'google'
+      authType: "google",
     });
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
@@ -317,6 +315,4 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
 });
 
-const studentForgetPassword = asyncHandler(async (req, res) => { });
-
-const studentAddToCart = asyncHandler(async (req, res) => { });
+const studentAddToCart = asyncHandler(async (req, res) => {});

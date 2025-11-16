@@ -308,7 +308,7 @@ const authSlice = createSlice({
       .addCase(googleAuth.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
+        state.accessToken = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
         console.log("Google auth fulfilled, state updated:", state);

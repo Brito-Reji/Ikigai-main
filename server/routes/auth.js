@@ -15,6 +15,8 @@ import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
 import { generateTokens } from "../utils/generateTokens.js";
+import { forgetPassword } from "../controllers/common/forgetPassword.js";
+
 const router = express.Router();
 
 // Instructor Routes
@@ -34,6 +36,7 @@ router.post("/admin/login", adminLogin);
 
 // OTP
 router.post("/send-otp", sentOTP);
+router.post('/forget-password',forgetPassword)
 router.post("/verify-otp", verifyOTP);
 
 // Check username availability using query params

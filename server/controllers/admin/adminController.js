@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
+import { generateTokens } from "../../utils/generateTokens.js";
 export const adminLogin = asyncHandler(async (req, res) => {
   console.log("adminLogin controller called");
   try {
@@ -27,7 +28,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
         .json({ success: false, message: "Access denied. Not an admin." });
     }
 
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -35,12 +36,8 @@ export const adminLogin = asyncHandler(async (req, res) => {
       });
     }
 
-    // Generate token
-    const accessToken = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "7d" }
-    );
+    const { accessToken, refreshToken } = generateTokens({ userId: user._id, email: user.email, firstName: user.firstName, role: user.role })
+    res.cookie("refreshToken",refreshToken);
 
     res.status(200).json({
       success: true,
@@ -72,7 +69,7 @@ export const blockStudent = asyncHandler(async (req, res) => {
   const student = await User.findOne({ _id: studentId });
   console.log(student);
   student.isBlocked = !student.isBlocked;
-  student.save();
+  await student.save();
   res.status(200).json({ success: true });
 });
 
@@ -83,7 +80,7 @@ export const getInstructors = asyncHandler(async (req, res) => {
     isVerified: true,
   });
   console.log(instructor);
-  return res.status(200).json({ succes: true, data: instructor });
+  return res.status(200).json({ success: true, data: instructor });
 });
 
 export const blockInstructor = asyncHandler(async (req, res) => {
@@ -92,7 +89,7 @@ export const blockInstructor = asyncHandler(async (req, res) => {
   const instructor = await Instructor.findOne({ _id: instructorId });
   console.log(instructor);
   instructor.isBlocked = !instructor.isBlocked;
-  instructor.save();
+  await instructor.save();
   return res.status(200).json({ success: true });
 });
 

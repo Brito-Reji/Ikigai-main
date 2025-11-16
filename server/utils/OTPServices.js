@@ -1,10 +1,12 @@
-import asyncHandler from "express-async-handler";
+ import asyncHandler from "express-async-handler";
 import nodemailer from 'nodemailer'
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 // import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
+
+const testAccount = await nodemailer.createTestAccount();
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -18,13 +20,14 @@ export const sendOTPToEmail = async (email) => {
   const otp = generateOTP();
   await Otp.create({ email, otp });
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL,
-      pass: process.env.NODE_MAILER_PASSWORD
-    }
-    
-  })
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
   const mailOptions = {
     from: '"My App" <your-email@gmail.com>',
     to: email,

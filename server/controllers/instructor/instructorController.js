@@ -57,7 +57,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     role,
   });
 
-  await user.save();
+
   try {
     let response = await api.post("/auth/send-otp", { email });
     if (response.data.success) {
