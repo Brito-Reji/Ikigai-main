@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
 import { Instructor } from "../../models/Instructor.js";
-import jwt from "jsonwebtoken";
+
 import api from "../../config/axiosConfig.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";

@@ -4,7 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import authRoute from './routes/auth.js'
 import cookieParser from "cookie-parser";
-import instructorRoute from './routes/instructorRoute.js'
+
 
 // import { verifyInstructor } from './middlewares/auth.js'
 import adminRoute from './routes/adminRoute.js'
