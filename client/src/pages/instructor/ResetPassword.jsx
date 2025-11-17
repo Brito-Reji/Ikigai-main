@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, ArrowRight, Clock } from 'lucide-react';
 
-function Password() {
+function InstructorResetPassword() {
   const location = useLocation();
   const navigate = useNavigate();
   const [email] = useState(location.state?.email || '');
@@ -20,7 +20,7 @@ function Password() {
 
   useEffect(() => {
     if (!email) {
-      navigate('/student/forget-password');
+      navigate('/instructor/forget-password');
       return;
     }
 
@@ -127,7 +127,7 @@ function Password() {
       if (response.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/login', { replace: true });
+          navigate('/instructor/signin', { replace: true });
         }, 2000);
       }
     } catch (err) {
@@ -302,4 +302,4 @@ function Password() {
   );
 }
 
-export default Password;
+export default InstructorResetPassword;

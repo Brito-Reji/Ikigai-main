@@ -323,7 +323,7 @@ function LoginPage() {
               {/* Forgot Password */}
               <div className="text-left flex justify-between">
                 <Link
-                  to="/forgot-password"
+                  to="/student/forget-password"
                   className="text-gray-900 hover:text-gray-700 font-medium"
                 >
                   forgot password?

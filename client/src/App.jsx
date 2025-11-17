@@ -11,12 +11,16 @@ import InstructorLayout from "./components/InstructorLayout.jsx";
 import UserCourseListingPage from "./pages/user/CourseListingPage.jsx";
 import UserLoginPage from "./pages/user/LoginPage.jsx";
 import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
+import StudentForgetPassword from "./pages/user/StudentForgetPassword.jsx";
+import StudentResetPassword from "./pages/user/Password.jsx";
 import CartPage from "./pages/user/CartPage.jsx";
 import CheckoutPage from "./pages/user/CheckoutPage.jsx";
 // Instructor Import
 import InstructorLoginPage from "./pages/instructor/LoginPage.jsx";
 import InstructorSignupPage from "./pages/instructor/SignupPage.jsx";
 import InstructorOTPVerificationPage from "./pages/instructor/OTPVerificationPage.jsx";
+import InstructorForgetPassword from "./pages/instructor/ForgetPassword.jsx";
+import InstructorResetPassword from "./pages/instructor/ResetPassword.jsx";
 import InstructorDashboard from "./pages/instructor/Dashboard.jsx";
 import CoursesPage from "./pages/instructor/CoursesPage.jsx";
 import CourseDetailPage from "./pages/instructor/CourseDetailPage.jsx";
@@ -142,11 +146,15 @@ function App() {
             }
           />
           <Route path="verify-otp" element={<UserOTPVerificationPage />} />
+          <Route path="student/forget-password" element={<StudentForgetPassword />} />
+          <Route path="student/reset-password" element={<StudentResetPassword />} />
         </Route>
         <Route path="/instructor" element={<InstructorLayout />}>
           <Route path="login" element={<InstructorLoginPage />} />
           <Route path="signup" element={<InstructorSignupPage />} />
           <Route path="verify-otp" element={<InstructorOTPVerificationPage />} />
+          <Route path="forget-password" element={<InstructorForgetPassword />} />
+          <Route path="reset-password" element={<InstructorResetPassword />} />
           <Route
             path="dashboard"
             element={

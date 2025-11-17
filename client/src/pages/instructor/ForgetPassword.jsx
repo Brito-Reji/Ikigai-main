@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, ArrowRight, ArrowLeft } from 'lucide-react';
 
-function StudentForgetPassword() {
+function InstructorForgetPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,7 +29,7 @@ function StudentForgetPassword() {
       const response = await api.post('/auth/forget-password', { email });
       
       if (response.data.success) {
-        navigate('/student/reset-password', {
+        navigate('/instructor/reset-password', {
           state: { email }
         });
       }
@@ -93,7 +93,7 @@ function StudentForgetPassword() {
 
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/instructor/signin')}
               className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition flex items-center justify-center space-x-2"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -113,4 +113,4 @@ function StudentForgetPassword() {
   );
 }
 
-export default StudentForgetPassword;
+export default InstructorForgetPassword;

@@ -289,7 +289,7 @@ function LoginPage() {
             {/* Forgot Password & Sign Up Link */}
             <div className="flex items-center justify-between text-sm">
               <a
-                href="#"
+                href="/instructor/forget-password"
                 className="text-indigo-600 hover:text-indigo-700 font-medium"
                 >
                 Forgot password?
