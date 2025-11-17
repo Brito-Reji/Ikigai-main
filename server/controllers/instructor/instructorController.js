@@ -48,7 +48,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "instructor";
-  let user = await Instructor.create({
+   await Instructor.create({
     email: email.toLowerCase(),
     password: hashedPassword,
     username,

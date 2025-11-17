@@ -4,7 +4,7 @@ import { User } from "../../models/User.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
-import api from "../../config/axiosConfig.js";
+
 
 // import { User } from './model/'
 
@@ -78,7 +78,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
     await sendOTPToEmail(email);
     console.log("OTP sent successfully to", email);
 
-    let { accessToken, refreshToken } = generateTokens({
+    let {  refreshToken } = generateTokens({
       userId: user._id,
       role: user.role,
     });
@@ -315,4 +315,4 @@ export const googleAuth = asyncHandler(async (req, res) => {
   }
 });
 
-const studentAddToCart = asyncHandler(async (req, res) => {});
+// const studentAddToCart = asyncHandler(async (req, res) => {});

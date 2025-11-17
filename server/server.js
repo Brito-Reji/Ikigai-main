@@ -28,7 +28,7 @@ console.log = function(...args) {
   const match = stack.match(/at\s+(.+):(\d+):(\d+)/);
   
   if (match) {
-    const [, file, line, col] = match;
+    const [, file, line] = match;
     const fileName = file.split('/').pop(); // Get just the filename
     originalLog(`${colors.cyan}[${fileName}:${line}]${colors.reset}`, ...args);
   } else {
