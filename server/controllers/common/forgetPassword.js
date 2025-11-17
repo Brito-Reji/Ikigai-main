@@ -23,6 +23,12 @@ export const forgetPassword = asyncHandler(async (req, res) => {
       message: "No account found with this email",
     });
   }
+  if (user.isBlocked) {
+    return res.status(400).json({
+      success: false,
+      message:"The user is blocked pleses contact the admin for more info"
+    })
+  }
 
   await sendOTPToEmail(email);
 
