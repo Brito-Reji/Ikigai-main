@@ -163,8 +163,8 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
   const { token } = req.body;
   console.log(token);
   const ticket = await client.verifyIdToken({
-    idToken: token, // The credential from your frontend
-    audience: process.env.VITE_GOOGLE_ID, // Your app's Client ID
+    idToken: token, 
+    audience: process.env.VITE_GOOGLE_ID,
   });
   console.log(ticket);
   let { email, name, picture } = ticket.payload;
@@ -190,7 +190,6 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     // Set refresh token in HttpOnly cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -232,7 +231,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     // Set refresh token in HttpOnly cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+     
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
