@@ -1,6 +1,7 @@
 import { Router } from 'express'
 // import { blockStudent, getStudents, getInstructors, blockInstructor } from '../controllers/admin/adminController.js'
 import {getStudents,getInstructors, blockStudent, blockInstructor, getStudentDetails, getInstructorDetails} from '../controllers/admin/adminController.js'
+import { createCategory } from '../controllers/admin/catergoryController.js';
 const router = Router()
 
 router.get('/students', getStudents);
@@ -11,6 +12,9 @@ router.patch('/students/:studentId/toggle-block', blockStudent)
 router.get('/instructors', getInstructors);
 router.patch('/instructors/:instructorId/toggle-block', blockInstructor)
 router.get('/instructors/:id', getInstructorDetails)
+
+// CATOGERY MANAGEMENT
+router.post('/category/create', createCategory);
 
 
 
