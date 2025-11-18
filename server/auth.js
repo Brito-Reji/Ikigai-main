@@ -10,7 +10,6 @@ import {
   instructorRegister,
   instructorSignin,
 } from "./controllers/instructor/instructorController.js";
-// import { generateTokens } from "./utils/generateTokens.js";
 import { forgetPassword, verifyForgetPasswordOTP, resetPassword } from "./controllers/auth/forgetPassword.js";
 import { checkUsernameAvailabilty } from "./controllers/auth/checkUsername.js";
 import { currentUser } from "./controllers/auth/currentUser.js";
@@ -29,7 +28,6 @@ router.post("/student/login", studentLogin);
 router
   .route("/student/google")
   .post(googleAuth)
-  .get(() => { });
 
 router.post("/admin/login", adminLogin);
 
