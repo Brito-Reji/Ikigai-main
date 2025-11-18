@@ -18,6 +18,12 @@ const courseSchema = new mongoose.Schema({
     trim: true,
     maxlength: [2000, 'Description cannot exceed 2000 characters'],
   },
+  overview: {
+    type: String,
+    required: [true, 'Overview is required'],
+    trim: true,
+    maxlength: [1000, 'Overview cannot exceed 1000 characters'],
+  },
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Instructor',
@@ -32,12 +38,7 @@ const courseSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  createdAt: {
-    type: Date,
-  },
-  updatedAt: {
-    type: Date,
-  },
+
   blocked: {
     type: Boolean,
     default: false,
@@ -45,13 +46,12 @@ const courseSchema = new mongoose.Schema({
   duration: {
     type: Number,
   },
-  languages: {
-    type: [String],
-  },
   thumbnail: {
     type: String,
     trim: true,
   },
+}, {
+  timestamps: true
 });
 
 export const Course = mongoose.model('Course', courseSchema);

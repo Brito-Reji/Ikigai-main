@@ -14,6 +14,7 @@ const isInstructor = asyncHandler(async (req, res, next) => {
   if (user.isBlocked) {
     return res.status(401).json({ message: "Account is blocked" });
   }
+  req.user = { id: decoded.id, role: decoded.role };
   next();
 });
 

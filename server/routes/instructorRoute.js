@@ -1,14 +1,14 @@
-// import { Router } from 'express'
-// import { getAllCourseByInstructor } from '../controllers/instructor/courseController.js'
-// // import { verifyInstructor } from '../middlewares/auth.js'
+import { Router } from 'express'
+import { createCourse, getAllCourseByInstructor } from '../controllers/instructor/courseController.js'
 
 
-// const router = Router()
 
-// router.get('/course', (req,res)=>{
-//     res.send('helloo')
-// })
+const router = Router()
 
-// // router.post('/course/create')
+router.get('/course', (req, res) => {
+    res.send('helloo')
+})
 
-// export default router
+router.post('/courses/create', createCourse)
+
+export default router
