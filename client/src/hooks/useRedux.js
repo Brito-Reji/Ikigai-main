@@ -37,3 +37,14 @@ export const useCart = () => {
     dispatch
   };
 };
+
+
+export const useCategory = () => {
+  const dispatch = useAppDispatch();
+  const categories = useAppSelector((state) => state.category);
+  return {
+    ...categories,
+    dispatch
+  };
+};
+

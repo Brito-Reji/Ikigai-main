@@ -1,41 +1,40 @@
-import React, { useState } from 'react';
+import { useCategory } from '@/hooks/useRedux';
+import { createCategory, fetchCategories } from '@/store/slices/categorySlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const Categories = () => {
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Web Development', description: 'Learn web technologies and frameworks' },
-    { id: 2, name: 'Data Science', description: 'Master data analysis and machine learning' },
-    { id: 3, name: 'Mobile Development', description: 'Build iOS and Android applications' }
-  ]);
+  const { categories, loading, error, dispatch } = useCategory();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-  const [currentCategory, setCurrentCategory] = useState({ id: null, name: '', description: '' });
+  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: '', description: '' });
   const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleAddCategory = () => {
     setModalMode('add');
-    setCurrentCategory({ id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: '', description: '' });
     setErrors({});
     setIsModalOpen(true);
   };
 
-  const handleEdit = (id) => {
-    const category = categories.find(cat => cat.id === id);
-    setModalMode('edit');
-    setCurrentCategory(category);
-    setErrors({});
-    setIsModalOpen(true);
+
+
+  const handleUnlist = (_id) => {
+    // Toggle category status
+    console.log('Unlisting category:', _id);
+    // Add your unlist logic here
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      setCategories(categories.filter(cat => cat.id !== id));
-    }
-  };
-
-  const handleView = (id) => {
-    const category = categories.find(cat => cat.id === id);
-    alert(`Category: ${category.name}\nDescription: ${category.description}`);
+  const handleView = (_id) => {
+    navigate(`/admin/categories/${_id}`);
   };
 
   const validateForm = () => {
@@ -63,24 +62,31 @@ const Categories = () => {
     if (modalMode === 'add') {
       const newCategory = {
         ...currentCategory,
-        id: categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1
+       
       };
-      setCategories([...categories, newCategory]);
+      console.log(newCategory)
+      dispatch(createCategory(newCategory))
     } else {
       setCategories(categories.map(cat => 
-        cat.id === currentCategory.id ? currentCategory : cat
+        cat._id === currentCategory._id ? currentCategory : cat
       ));
     }
 
     setIsModalOpen(false);
-    setCurrentCategory({ id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: '', description: '' });
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setCurrentCategory({ id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: '', description: '' });
     setErrors({});
   };
+
+  // Filter categories based on search term
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -98,12 +104,38 @@ const Categories = () => {
           </button>
         </div>
 
+        {/* Search Section */}
+        <div className="mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search categories by name or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+
         {/* Category List */}
-        <div className="space-y-3">
-          {categories.length > 0 ? (
-            categories.map((category) => (
+        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+          {filteredCategories.length > 0 ? (
+            filteredCategories.map((category) => (
               <div
-                key={category.id}
+                key={category._id}
                 className="flex justify-between items-center bg-gray-100 px-6 py-4 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div>
@@ -113,29 +145,36 @@ const Categories = () => {
                 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => handleView(category.id)}
+                    onClick={() => handleView(category._id)}
                     className="px-6 py-1.5 bg-teal-500 text-white rounded font-medium hover:bg-teal-600 transition-colors"
                   >
                     View
                   </button>
                   <button
-                    onClick={() => handleEdit(category.id)}
-                    className="px-6 py-1.5 bg-white text-blue-500 border border-blue-500 rounded font-medium hover:bg-blue-50 transition-colors"
+                    onClick={() => handleUnlist(category._id)}
+                    className="px-5 py-1.5 bg-white text-orange-500 border border-orange-500 rounded font-medium hover:bg-orange-50 transition-colors"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    className="px-5 py-1.5 bg-white text-red-500 border border-red-500 rounded font-medium hover:bg-red-50 transition-colors"
-                  >
-                    Delete
+                    Unlist
                   </button>
                 </div>
               </div>
             ))
           ) : (
             <div className="text-center py-8 text-gray-500">
-              No categories available. Click "Add Category" to create one.
+              {searchTerm ? (
+                <>
+                  No categories found matching "{searchTerm}".
+                  <br />
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-teal-500 hover:text-teal-600 underline mt-2"
+                  >
+                    Clear search
+                  </button>
+                </>
+              ) : (
+                'No categories available. Click "Add Category" to create one.'
+              )}
             </div>
           )}
         </div>

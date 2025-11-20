@@ -6,10 +6,14 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password, role }, { rejectWithValue }) => {
     try {
-      const endpoint =
-        role === "instructor"
-          ? "/auth/instructor/signin"
-          : "/auth/student/login";
+      let endpoint;
+      if (role === "instructor") {
+        endpoint = "/auth/instructor/signin";
+      } else if (role === "admin") {
+        endpoint = "/auth/admin/login";
+      } else {
+        endpoint = "/auth/student/login";
+      }
       const response = await api.post(endpoint, { email, password });
       console.log("response", response)
 

@@ -32,6 +32,7 @@ import AdminLoginPage from "./pages/admin/LoginPage.jsx";
 import AdminDashboard from "./pages/admin/AdminDashBoard.jsx";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Categories from "./pages/admin/Categories";
+import CategoryDetail from "./pages/admin/CategoryDetail";
 import Students from "./pages/admin/Students";
 import StudentDetail from "./pages/admin/StudentDetail";
 import Instructors from "./pages/admin/Instructors";
@@ -193,7 +194,8 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="category" element={<Categories />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="categories/:categoryId" element={<CategoryDetail />} />
           <Route path="students" element={<Students />} />
           <Route path="students/:id" element={<StudentDetail />} />
           <Route path="instructors" element={<Instructors />} />

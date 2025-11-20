@@ -14,7 +14,7 @@ const generateTokens = ({userId,email,username,firstName,role,profileImageUrl,is
       isVerified,
     },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "7d" }
   );
 
   // Long-lived refresh token (7-30 days)
