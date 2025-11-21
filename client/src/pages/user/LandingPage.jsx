@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ShoppingCart,
   Search,
@@ -10,12 +10,19 @@ import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header.jsx";
+import { useCourse } from "@/hooks/useRedux.js";
+import { fetchFeaturedCourses } from "@/store/slices/courseSlice.js";
 
 import bannerOne from '../../assets/images/banner/one.png'
 import bannerTwo from '../../assets/images/banner/two.png'
 
 export default function LandingPage() {
-  // const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const { featuredCourses, featuredLoading, featuredError, dispatch } = useCourse();
+
+  // Fetch featured courses on component mount
+  useEffect(() => {
+    dispatch(fetchFeaturedCourses({ limit: 4 }));
+  }, [dispatch]);
 
   const stats = [
     { number: "250+", label: "Courses by our best mentors" },
@@ -31,32 +38,17 @@ export default function LandingPage() {
     { icon: "⚛️", name: "Physics", courses: 14 },
   ];
 
-  const courses = [
-    {
-      title: "Beginner's Guide to Design",
-      instructor: "Ronald Richards",
-      price: "₹149.9",
-      rating: 5,
-    },
-    {
-      title: "Beginner's Guide to Design",
-      instructor: "Ronald Richards",
-      price: "₹149.9",
-      rating: 5,
-    },
-    {
-      title: "Beginner's Guide to Design",
-      instructor: "Ronald Richards",
-      price: "₹149.9",
-      rating: 5,
-    },
-    {
-      title: "Beginner's Guide to Design",
-      instructor: "Ronald Richards",
-      price: "₹149.9",
-      rating: 5,
-    },
-  ];
+  // Transform featured courses data for CourseCard component
+  const courses = featuredCourses.map(course => ({
+    id: course._id,
+    title: course.title,
+    instructor: course.instructor?.name || 'Unknown Instructor',
+    price: `₹${course.price}`,
+    rating: course.rating || 0,
+    thumbnail: course.thumbnail,
+    description: course.description,
+    category: course.category?.name
+  }));
 
   const instructors = [
     {
@@ -258,11 +250,33 @@ export default function LandingPage() {
                 See All
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {courses.map((course, idx) => (
-                <CourseCard key={idx} course={course} />
-              ))}
-            </div>
+            {featuredLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
+                ))}
+              </div>
+            ) : featuredError ? (
+              <div className="text-center py-8">
+                <p className="text-red-500 mb-4">Error loading courses: {featuredError}</p>
+                <button 
+                  onClick={() => dispatch(fetchFeaturedCourses({ limit: 4 }))}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : courses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {courses.map((course, idx) => (
+                  <CourseCard key={course.id || idx} course={course} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No courses available at the moment.</p>
+              </div>
+            )}
           </div>
         </section>
 

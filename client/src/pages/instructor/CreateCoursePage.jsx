@@ -294,6 +294,21 @@ export default function CreateCoursePage() {
               </div>
             </div>
 
+            {/* Publish Option */}
+            <div className="flex items-center space-x-3 pt-4 border-t border-gray-200">
+              <input
+                type="checkbox"
+                id="published"
+                name="published"
+                checked={formData.published}
+                onChange={handleInputChange}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="published" className="text-sm font-medium text-gray-700">
+                Publish course immediately (make it visible to students)
+              </label>
+            </div>
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-8">
               <button
@@ -308,7 +323,7 @@ export default function CreateCoursePage() {
                 disabled={createLoading}
                 className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
               >
-                {createLoading ? "Creating..." : "Save"}
+                {createLoading ? "Creating..." : (formData.published ? "Create & Publish" : "Save as Draft")}
               </button>
             </div>
           </div>

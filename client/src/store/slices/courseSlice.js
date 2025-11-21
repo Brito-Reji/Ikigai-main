@@ -51,15 +51,58 @@ export const fetchInstructorCourses = createAsyncThunk(
     }
 );
 
+// Fetch public courses for landing page
+export const fetchPublicCourses = createAsyncThunk(
+    'courses/fetchPublicCourses',
+    async ({ limit = 8, category, search } = {}, { rejectWithValue }) => {
+        try {
+            console.log('Fetching public courses from API...');
+            const params = new URLSearchParams();
+            if (limit) params.append('limit', limit);
+            if (category) params.append('category', category);
+            if (search) params.append('search', search);
+
+            const response = await api.get(`/public/courses?${params.toString()}`);
+            console.log('Public courses response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching public courses:', error);
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch public courses' });
+        }
+    }
+);
+
+// Fetch featured courses
+export const fetchFeaturedCourses = createAsyncThunk(
+    'courses/fetchFeaturedCourses',
+    async ({ limit = 4 } = {}, { rejectWithValue }) => {
+        try {
+            console.log('Fetching featured courses from API...');
+            const response = await api.get(`/public/courses/featured?limit=${limit}`);
+            console.log('Featured courses response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching featured courses:', error);
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch featured courses' });
+        }
+    }
+);
+
 const courseSlice = createSlice({
     name: 'courses',
     initialState: {
         courses: [],
         instructorCourses: [],
+        publicCourses: [],
+        featuredCourses: [],
         loading: false,
         createLoading: false,
+        publicLoading: false,
+        featuredLoading: false,
         error: null,
         createError: null,
+        publicError: null,
+        featuredError: null,
         currentPage: 1,
         totalPages: 1,
         createSuccess: false,
@@ -73,6 +116,8 @@ const courseSlice = createSlice({
         clearError: (state) => {
             state.error = null;
             state.createError = null;
+            state.publicError = null;
+            state.featuredError = null;
         }
     },
     extraReducers: (builder) => {
@@ -121,6 +166,34 @@ const courseSlice = createSlice({
             .addCase(fetchInstructorCourses.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Failed to fetch instructor courses';
+            })
+
+            // Fetch public courses
+            .addCase(fetchPublicCourses.pending, (state) => {
+                state.publicLoading = true;
+                state.publicError = null;
+            })
+            .addCase(fetchPublicCourses.fulfilled, (state, action) => {
+                state.publicLoading = false;
+                state.publicCourses = action.payload.data || [];
+            })
+            .addCase(fetchPublicCourses.rejected, (state, action) => {
+                state.publicLoading = false;
+                state.publicError = action.payload?.message || 'Failed to fetch public courses';
+            })
+
+            // Fetch featured courses
+            .addCase(fetchFeaturedCourses.pending, (state) => {
+                state.featuredLoading = true;
+                state.featuredError = null;
+            })
+            .addCase(fetchFeaturedCourses.fulfilled, (state, action) => {
+                state.featuredLoading = false;
+                state.featuredCourses = action.payload.data || [];
+            })
+            .addCase(fetchFeaturedCourses.rejected, (state, action) => {
+                state.featuredLoading = false;
+                state.featuredError = action.payload?.message || 'Failed to fetch featured courses';
             });
     },
 });

@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 // import { verifyInstructor } from './middlewares/auth.js'
 import adminRoute from './routes/adminRoute.js'
 import categoryRoute from './routes/categoryRoute.js'
+import publicRoute from './routes/publicRoute.js'
 import isAdmin from './middlewares/admin.js';
 import isInstructor from './middlewares/instructor.js'
 import instructorRoute from './routes/instructorRoute.js'
@@ -27,6 +28,7 @@ app.use(
 );
 app.use('/api/auth', authRoute)
 app.use('/api/categories', categoryRoute)
+app.use('/api/public', publicRoute)
 app.use('/api/admin', isAdmin, adminRoute)
 app.use('/api/instructor', isInstructor, instructorRoute)
 

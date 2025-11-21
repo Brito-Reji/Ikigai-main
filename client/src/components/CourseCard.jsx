@@ -56,9 +56,9 @@ export default function CourseCard({ course }) {
       )}
 
       {/* Image Container */}
-      <div className="relative h-40 sm:h-48 bg-linear-to-br from-orange-300 to-orange-400 overflow-hidden">
+      <div className="relative h-40 sm:h-48 bg-gradient-to-br from-orange-300 to-orange-400 overflow-hidden">
         <img
-          src={course.image || "/placeholder.svg"}
+          src={course.thumbnail || course.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -112,16 +112,22 @@ export default function CourseCard({ course }) {
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400"
+              className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                i < Math.floor(course.rating || 0) 
+                  ? "fill-yellow-400 text-yellow-400" 
+                  : "text-gray-300"
+              }`}
             />
           ))}
-          <span className="text-xs text-gray-600 ml-1">({course.rating})</span>
+          <span className="text-xs text-gray-600 ml-1">({course.rating || 0})</span>
         </div>
 
-        {/* Hours and Price */}
-        <p className="text-xs sm:text-sm text-gray-600 mb-3">
-          {course.hours} Total Hours
-        </p>
+        {/* Category and Price */}
+        {course.category && (
+          <p className="text-xs sm:text-sm text-gray-600 mb-3">
+            {course.category}
+          </p>
+        )}
         <div className="flex justify-between items-center">
           <p className="text-lg sm:text-xl font-bold text-gray-900">
             {course.price}
