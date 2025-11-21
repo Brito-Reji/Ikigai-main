@@ -187,13 +187,27 @@ export default function CoursesPage() {
                   </div>
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                     <div className="bg-white rounded-lg shadow-lg p-1">
-                      <button className="p-2 hover:bg-gray-100 rounded">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/instructor/courses/${course.id}/edit`);
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded"
+                        title="Edit Course"
+                      >
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-2 hover:bg-gray-100 rounded">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewCourse(course.id);
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded"
+                        title="View Course"
+                      >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-2 hover:bg-red-50 rounded">
+                      <button className="p-2 hover:bg-red-50 rounded" title="Delete Course">
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
                     </div>
@@ -267,7 +281,10 @@ export default function CoursesPage() {
                         ⭐ {course.rating}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-indigo-600 hover:text-indigo-900 mr-3">
+                        <button 
+                          onClick={() => navigate(`/instructor/courses/${course.id}/edit`)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
                           Edit
                         </button>
                         <button className="text-red-600 hover:text-red-900">

@@ -34,7 +34,7 @@ const Breadcrumb = () => {
     ]
   };
 
-  // Handle dynamic routes (like /instructor/courses/:courseId)
+  // Handle dynamic routes (like /instructor/courses/:courseId and /instructor/courses/:courseId/edit)
   const getBreadcrumbs = () => {
     const currentPath = location.pathname;
     
@@ -45,12 +45,23 @@ const Breadcrumb = () => {
     
     // Handle dynamic routes
     if (currentPath.startsWith('/instructor/courses/') && currentPath !== '/instructor/courses/create') {
-      const courseId = currentPath.split('/')[3];
-      return [
-        { label: 'Dashboard', path: '/instructor/dashboard' },
-        { label: 'Courses', path: '/instructor/courses' },
-        { label: 'Course Details', path: currentPath, isLast: true }
-      ];
+      const pathParts = currentPath.split('/');
+      const courseId = pathParts[3];
+      const action = pathParts[4]; // 'edit' or undefined
+      
+      if (action === 'edit') {
+        return [
+          { label: 'Dashboard', path: '/instructor/dashboard' },
+          { label: 'Courses', path: '/instructor/courses' },
+          { label: 'Edit Course', path: currentPath, isLast: true }
+        ];
+      } else {
+        return [
+          { label: 'Dashboard', path: '/instructor/dashboard' },
+          { label: 'Courses', path: '/instructor/courses' },
+          { label: 'Course Details', path: currentPath, isLast: true }
+        ];
+      }
     }
     
     // Default fallback

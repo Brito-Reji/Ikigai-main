@@ -24,6 +24,7 @@ import InstructorResetPassword from "./pages/instructor/ResetPassword.jsx";
 import InstructorDashboard from "./pages/instructor/Dashboard.jsx";
 import CoursesPage from "./pages/instructor/CoursesPage.jsx";
 import CreateCoursePage from "./pages/instructor/CreateCoursePage.jsx";
+import EditCoursePage from "./pages/instructor/EditCoursePage.jsx";
 import CourseDetailPage from "./pages/instructor/CourseDetailPage.jsx";
 import CommunicationPage from "./pages/instructor/CommunicationPage.jsx";
 
@@ -178,6 +179,14 @@ function App() {
             element={
               <AuthGuard requireAuth={true} roles={["instructor"]}>
                 <CreateCoursePage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="courses/:courseId/edit"
+            element={
+              <AuthGuard requireAuth={true} roles={["instructor"]}>
+                <EditCoursePage />
               </AuthGuard>
             }
           />

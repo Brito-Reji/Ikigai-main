@@ -88,6 +88,38 @@ export const fetchFeaturedCourses = createAsyncThunk(
     }
 );
 
+// Fetch single course for editing
+export const fetchCourseById = createAsyncThunk(
+    'courses/fetchCourseById',
+    async (courseId, { rejectWithValue }) => {
+        try {
+            console.log('Fetching course by ID:', courseId);
+            const response = await api.get(`/instructor/courses/${courseId}`);
+            console.log('Course by ID response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching course by ID:', error);
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch course' });
+        }
+    }
+);
+
+// Update course
+export const updateCourse = createAsyncThunk(
+    'courses/updateCourse',
+    async ({ courseId, courseData }, { rejectWithValue }) => {
+        try {
+            console.log('Updating course:', courseId, 'with data:', courseData);
+            const response = await api.put(`/instructor/courses/${courseId}`, courseData);
+            console.log('Course update response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating course:', error);
+            return rejectWithValue(error.response?.data || { message: 'Failed to update course' });
+        }
+    }
+);
+
 const courseSlice = createSlice({
     name: 'courses',
     initialState: {
@@ -95,17 +127,23 @@ const courseSlice = createSlice({
         instructorCourses: [],
         publicCourses: [],
         featuredCourses: [],
+        currentCourse: null,
         loading: false,
         createLoading: false,
+        updateLoading: false,
         publicLoading: false,
         featuredLoading: false,
+        courseLoading: false,
         error: null,
         createError: null,
+        updateError: null,
         publicError: null,
         featuredError: null,
+        courseError: null,
         currentPage: 1,
         totalPages: 1,
         createSuccess: false,
+        updateSuccess: false,
     },
     reducers: {
         clearCreateState: (state) => {
@@ -113,11 +151,18 @@ const courseSlice = createSlice({
             state.createError = null;
             state.createSuccess = false;
         },
+        clearUpdateState: (state) => {
+            state.updateLoading = false;
+            state.updateError = null;
+            state.updateSuccess = false;
+        },
         clearError: (state) => {
             state.error = null;
             state.createError = null;
+            state.updateError = null;
             state.publicError = null;
             state.featuredError = null;
+            state.courseError = null;
         }
     },
     extraReducers: (builder) => {
@@ -194,9 +239,44 @@ const courseSlice = createSlice({
             .addCase(fetchFeaturedCourses.rejected, (state, action) => {
                 state.featuredLoading = false;
                 state.featuredError = action.payload?.message || 'Failed to fetch featured courses';
+            })
+
+            // Fetch course by ID
+            .addCase(fetchCourseById.pending, (state) => {
+                state.courseLoading = true;
+                state.courseError = null;
+            })
+            .addCase(fetchCourseById.fulfilled, (state, action) => {
+                state.courseLoading = false;
+                state.currentCourse = action.payload.data;
+            })
+            .addCase(fetchCourseById.rejected, (state, action) => {
+                state.courseLoading = false;
+                state.courseError = action.payload?.message || 'Failed to fetch course';
+            })
+
+            // Update course
+            .addCase(updateCourse.pending, (state) => {
+                state.updateLoading = true;
+                state.updateError = null;
+                state.updateSuccess = false;
+            })
+            .addCase(updateCourse.fulfilled, (state, action) => {
+                state.updateLoading = false;
+                state.updateSuccess = true;
+                state.currentCourse = action.payload.data;
+                // Update the course in instructorCourses array
+                const index = state.instructorCourses.findIndex(course => course._id === action.payload.data._id);
+                if (index !== -1) {
+                    state.instructorCourses[index] = action.payload.data;
+                }
+            })
+            .addCase(updateCourse.rejected, (state, action) => {
+                state.updateLoading = false;
+                state.updateError = action.payload?.message || 'Failed to update course';
             });
     },
 });
 
-export const { clearCreateState, clearError } = courseSlice.actions;
+export const { clearCreateState, clearUpdateState, clearError } = courseSlice.actions;
 export default courseSlice.reducer;
