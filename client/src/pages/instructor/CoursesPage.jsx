@@ -1,58 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Search, Filter, Grid, List, MoreVertical, Edit, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CourseCard from "@/components/instructor/CourseCard.jsx";
+import { useCourse } from "@/hooks/useRedux.js";
+import { fetchInstructorCourses } from "@/store/slices/courseSlice.js";
 
 export default function CoursesPage() {
   const navigate = useNavigate();
+  const { instructorCourses, loading, error, dispatch } = useCourse();
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const [courses] = useState([
-    {
-      id: 1,
-      title: "Complete Web Development Bootcamp",
-      price: "₹2,999",
-      chapters: 24,
-      orders: 1254,
-      reviews: 342,
-      rating: 4.8,
-      status: "Published",
-      students: 1254,
-      revenue: "₹37,54,746",
-      thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80",
-      lastUpdated: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Advanced React & Redux Masterclass",
-      price: "₹1,999",
-      chapters: 18,
-      orders: 856,
-      reviews: 198,
-      rating: 4.6,
-      status: "Published",
-      students: 856,
-      revenue: "₹17,11,144",
-      thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&q=80",
-      lastUpdated: "1 week ago",
-    },
-    {
-      id: 3,
-      title: "UI/UX Design Fundamentals",
-      price: "₹1,499",
-      chapters: 15,
-      orders: 432,
-      reviews: 89,
-      rating: 4.7,
-      status: "Draft",
-      students: 0,
-      revenue: "₹0",
-      thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&q=80",
-      lastUpdated: "3 days ago",
-    },
-  ]);
+  // Fetch instructor courses on component mount
+  useEffect(() => {
+    console.log('Fetching instructor courses...');
+    dispatch(fetchInstructorCourses());
+  }, [dispatch]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Courses state:', { instructorCourses, loading, error });
+  }, [instructorCourses, loading, error]);
+
+  // Transform backend data to match component expectations
+  const courses = instructorCourses.map(course => ({
+    id: course._id,
+    title: course.title,
+    price: `₹${course.price}`,
+    chapters: course.chapters || 0,
+    orders: course.enrollments || 0,
+    reviews: course.reviews || 0,
+    rating: course.rating || 0,
+    status: course.published ? "Published" : "Draft",
+    students: course.enrollments || 0,
+    revenue: `₹${(course.price * (course.enrollments || 0)).toLocaleString()}`,
+    thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80",
+    lastUpdated: new Date(course.updatedAt).toLocaleDateString(),
+    description: course.description,
+    overview: course.overview,
+    category: course.category
+  }));
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -76,7 +64,9 @@ export default function CoursesPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
-              <p className="text-gray-600 mt-1">Manage and track your courses</p>
+              <p className="text-gray-600 mt-1">
+                Manage and track your courses • {courses.length} total courses
+              </p>
             </div>
             <button
               onClick={handleCreateCourse}
@@ -86,6 +76,36 @@ export default function CoursesPage() {
               Create Course
             </button>
           </div>
+
+          {/* Stats Cards */}
+          {!loading && courses.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white p-4 rounded-lg shadow">
+                <div className="text-2xl font-bold text-gray-900">
+                  {courses.length}
+                </div>
+                <div className="text-sm text-gray-600">Total Courses</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <div className="text-2xl font-bold text-green-600">
+                  {courses.filter(c => c.status === "Published").length}
+                </div>
+                <div className="text-sm text-gray-600">Published</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {courses.filter(c => c.status === "Draft").length}
+                </div>
+                <div className="text-sm text-gray-600">Drafts</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow">
+                <div className="text-2xl font-bold text-blue-600">
+                  {courses.reduce((total, course) => total + course.students, 0)}
+                </div>
+                <div className="text-sm text-gray-600">Total Students</div>
+              </div>
+            </div>
+          )}
 
           {/* Filters and Search */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-lg shadow">
@@ -131,8 +151,33 @@ export default function CoursesPage() {
           </div>
         </div>
 
-        {/* Courses Grid/List */}
-        {filteredCourses.length > 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <div className="text-gray-400 mb-4">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto"></div>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Loading courses...
+            </h3>
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <div className="text-red-400 mb-4">
+              <Search className="w-16 h-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Error loading courses
+            </h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <button
+              onClick={() => dispatch(fetchInstructorCourses())}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filteredCourses.length > 0 ? (
           viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCourses.map((course) => (
@@ -238,14 +283,26 @@ export default function CoursesPage() {
         ) : (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <div className="text-gray-400 mb-4">
-              <Search className="w-16 h-16 mx-auto" />
+              <Plus className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No courses found
+              {searchQuery || filterStatus !== "all" ? "No courses found" : "No courses yet"}
             </h3>
-            <p className="text-gray-500">
-              Try adjusting your search or filter criteria
+            <p className="text-gray-500 mb-4">
+              {searchQuery || filterStatus !== "all" 
+                ? "Try adjusting your search or filter criteria" 
+                : "Create your first course to get started"
+              }
             </p>
+            {!searchQuery && filterStatus === "all" && (
+              <button
+                onClick={handleCreateCourse}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center mx-auto"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Your First Course
+              </button>
+            )}
           </div>
         )}
       </div>

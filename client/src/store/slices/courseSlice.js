@@ -39,9 +39,13 @@ export const fetchInstructorCourses = createAsyncThunk(
     'courses/fetchInstructorCourses',
     async (_, { rejectWithValue }) => {
         try {
+            console.log('Fetching instructor courses from API...');
             const response = await api.get('/instructor/courses');
+            console.log('Instructor courses response:', response.data);
             return response.data;
         } catch (error) {
+            console.error('Error fetching instructor courses:', error);
+            console.error('Error response:', error.response?.data);
             return rejectWithValue(error.response?.data || { message: 'Failed to fetch courses' });
         }
     }
