@@ -7,6 +7,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     courses: courseReducer,
+    course: courseReducer, // For instructor course management
     cart: cartReducer,
     category: categoryReducer
   },

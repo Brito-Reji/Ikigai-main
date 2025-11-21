@@ -7,7 +7,7 @@ const AdminLayout = () => {
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Category", path: "/admin/category" },
+    { name: "Categories", path: "/admin/categories" },
     { name: "Students", path: "/admin/students" },
     { name: "Orders", path: "/admin/orders" },
     { name: "Instructors", path: "/admin/instructors" },

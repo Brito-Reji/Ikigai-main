@@ -13,10 +13,10 @@ import isInstructor from './middlewares/instructor.js'
 import instructorRoute from './routes/instructorRoute.js'
 import { logger } from './utils/logger.js';
 const app = express()
-app.use(express.json())
+app.use(express.json({ limit: '50mb' })) // Increase JSON payload limit for image uploads
 app.use(helmet());
 app.use(logger);
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true, limit: '50mb' })) // Increase URL encoded payload limit
 
 app.use(cookieParser())
 app.use(

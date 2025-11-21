@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, X, ChevronRight, Home, FileImage } from "lucide-react";
-import api from "@/api/axiosConfig.js";
+import SearchableSelect from "@/components/SearchableSelect.jsx";
+import { useCourse } from "@/hooks/useRedux.js";
+import { useCategory } from "@/hooks/useRedux.js";
+import { createCourse, clearCreateState } from "@/store/slices/courseSlice.js";
+import { fetchCategories } from "@/store/slices/categorySlice.js";
 
 export default function CreateCoursePage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const { createLoading, createError, createSuccess, dispatch: courseDispatch } = useCourse();
+  const { categories, loading: categoriesLoading, dispatch: categoryDispatch } = useCategory();
   const [errors, setErrors] = useState({});
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
@@ -22,25 +26,27 @@ export default function CreateCoursePage() {
 
   // Fetch categories on component mount
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get("/admin/categories");
-      if (response.data.success) {
-        setCategories(response.data.data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      // Fallback to mock data if API fails
-      setCategories([
-        { _id: "1", name: "Web Development" },
-        { _id: "2", name: "Data Science" },
-        { _id: "3", name: "Mobile Development" },
-      ]);
+    if (categories.length === 0) {
+      categoryDispatch(fetchCategories());
     }
-  };
+  }, [categoryDispatch, categories.length]);
+
+  // Handle course creation success
+  useEffect(() => {
+    if (createSuccess) {
+      alert("Course created successfully!");
+      navigate("/instructor/courses");
+      courseDispatch(clearCreateState());
+    }
+  }, [createSuccess, navigate, courseDispatch]);
+
+  // Handle course creation error
+  useEffect(() => {
+    if (createError) {
+      alert(createError);
+      courseDispatch(clearCreateState());
+    }
+  }, [createError, courseDispatch]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -98,65 +104,56 @@ export default function CreateCoursePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    console.log("Form submitted with data:", formData);
+    console.log("Validation result:", validateForm());
 
     if (!validateForm()) {
+      console.log("Validation failed, errors:", errors);
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await api.post("/instructor/courses", formData);
-      
-      if (response.data.success) {
-        alert("Course created successfully!");
-        navigate("/instructor/courses");
-      }
-    } catch (error) {
-      console.error("Error creating course:", error);
-      alert(error.response?.data?.message || "Failed to create course. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    console.log("Dispatching createCourse action...");
+    // Dispatch the createCourse action
+    courseDispatch(createCourse(formData));
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-8 py-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center space-x-2 text-sm mb-6 text-gray-600">
-          <button
-            onClick={() => navigate("/instructor/dashboard")}
-            className="hover:text-gray-900"
-          >
-            <Home className="w-4 h-4" />
-          </button>
-          <ChevronRight className="w-4 h-4" />
-          <button
-            onClick={() => navigate("/instructor/courses")}
-            className="hover:text-gray-900"
-          >
-            Courses
-          </button>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900">Add New Course</span>
-        </nav>
-
+    <div className="bg-white">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <h1 className="text-2xl font-bold text-black mb-8">Add New Course</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-8">
+            {/* Category Selection */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <SearchableSelect
+                options={categories}
+                value={formData.category}
+                onChange={handleInputChange}
+                name="category"
+                placeholder="Select a category"
+                searchPlaceholder="Search categories..."
+                error={errors.category}
+              />
+              {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+            </div>
+
             {/* Course Title */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Course Title
+                Course Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
+                placeholder="Enter course title"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
               />
               {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
@@ -165,13 +162,14 @@ export default function CreateCoursePage() {
             {/* Description */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={6}
+                placeholder="Enter course description"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 resize-none"
               />
               {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
@@ -180,13 +178,14 @@ export default function CreateCoursePage() {
             {/* Overview */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Overview
+                Overview <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="overview"
                 value={formData.overview}
                 onChange={handleInputChange}
                 rows={4}
+                placeholder="Enter course overview"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 resize-none"
               />
               {errors.overview && <p className="text-red-500 text-sm mt-1">{errors.overview}</p>}
@@ -195,7 +194,7 @@ export default function CreateCoursePage() {
             {/* Price */}
             <div className="w-1/3">
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Price
+                Price <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -204,6 +203,7 @@ export default function CreateCoursePage() {
                 onChange={handleInputChange}
                 min={0}
                 step="0.01"
+                placeholder="0.00"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
               />
               {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
@@ -305,10 +305,10 @@ export default function CreateCoursePage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={createLoading}
                 className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
               >
-                {loading ? "Creating..." : "Save"}
+                {createLoading ? "Creating..." : "Save"}
               </button>
             </div>
           </div>

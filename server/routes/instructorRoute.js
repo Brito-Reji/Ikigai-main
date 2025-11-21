@@ -5,10 +5,7 @@ import { createCourse, getAllCourseByInstructor } from '../controllers/instructo
 
 const router = Router()
 
-router.get('/course', (req, res) => {
-    res.send('helloo')
-})
-
-router.post('/courses/create', createCourse)
+router.post('/courses', createCourse)
+router.get('/courses', getAllCourseByInstructor)
 
 export default router

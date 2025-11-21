@@ -27,6 +27,16 @@ export const useCourses = () => {
   };
 };
 
+export const useCourse = () => {
+  const dispatch = useAppDispatch();
+  const course = useAppSelector((state) => state.course);
+
+  return {
+    ...course,
+    dispatch,
+  };
+};
+
 
 
 export const useCart = () => {
