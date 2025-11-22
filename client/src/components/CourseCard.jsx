@@ -2,6 +2,7 @@ import { useCart } from "@/hooks/useRedux";
 import { Star, ShoppingCart, Check, Heart } from "lucide-react";
 import { useState } from "react";
 
+// Course card component for displaying course information
 export default function CourseCard({ course }) {
   const [isInCart, setIsInCart] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -104,7 +105,7 @@ export default function CourseCard({ course }) {
           {course.title}
         </h3>
         <p className="text-xs sm:text-sm text-gray-600 mb-2">
-          By {course.instructor}
+          By {course.instructor?.firstName} {course.instructor?.lastName}
         </p>
 
         {/* Rating */}

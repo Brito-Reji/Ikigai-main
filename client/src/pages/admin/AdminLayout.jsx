@@ -8,12 +8,12 @@ const AdminLayout = () => {
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Categories", path: "/admin/categories" },
+    { name: "Courses", path: "/admin/courses" },
     { name: "Students", path: "/admin/students" },
-    { name: "Orders", path: "/admin/orders" },
     { name: "Instructors", path: "/admin/instructors" },
+    { name: "Orders", path: "/admin/orders" },
     { name: "Coupons", path: "/admin/coupons" },
-    { name: "Course", path: "/admin/course" },
-    { name: "Report", path: "/admin/report" },
+    { name: "Reports", path: "/admin/reports" },
     { name: "Logout", path: "/admin/logout" },
   ];
 

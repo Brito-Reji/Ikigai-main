@@ -1,6 +1,7 @@
 import { Router } from 'express'
 // import { blockStudent, getStudents, getInstructors, blockInstructor } from '../controllers/admin/adminController.js'
 import { getStudents, getInstructors, blockStudent, blockInstructor, getStudentDetails, getInstructorDetails } from '../controllers/admin/adminController.js'
+import { getAllCourses, getCourseDetails, toggleCourseBlock, deleteCourse, getCourseStatistics } from '../controllers/admin/courseController.js'
 const router = Router()
 
 router.get('/students', getStudents);
@@ -11,6 +12,13 @@ router.patch('/students/:studentId/toggle-block', blockStudent)
 router.get('/instructors', getInstructors);
 router.patch('/instructors/:instructorId/toggle-block', blockInstructor)
 router.get('/instructors/:id', getInstructorDetails)
+
+// COURSE MANAGEMENT
+router.get('/courses', getAllCourses);
+router.get('/courses/statistics', getCourseStatistics);
+router.get('/courses/:courseId', getCourseDetails);
+router.patch('/courses/:courseId/toggle-block', toggleCourseBlock);
+router.delete('/courses/:courseId', deleteCourse);
 
 
 

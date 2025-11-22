@@ -16,6 +16,7 @@ import { useCourse } from "@/hooks/useRedux.js";
 import { useCategory } from "@/hooks/useRedux.js";
 import { fetchPublicCourses } from "@/store/slices/courseSlice.js";
 import { fetchCategories } from "@/store/slices/categorySlice.js";
+import { Link } from "react-router-dom";
 
 export default function CoursesPage() {
   const { publicCourses, publicLoading, publicError, dispatch: courseDispatch } = useCourse();
@@ -93,7 +94,7 @@ export default function CoursesPage() {
   const transformedCourses = paginatedCourses.map(course => ({
     id: course._id,
     title: course.title,
-    instructor: course.instructor?.name || 'Unknown Instructor',
+    instructor: course.instructor, // Pass the whole instructor object
     rating: course.rating || 0,
     hours: course.duration || 0,
     price: `₹${course.price}`,
@@ -101,6 +102,8 @@ export default function CoursesPage() {
     description: course.description,
     category: course.category?.name
   }));
+
+  console.log("instructorName ->",paginatedCourses[0])
 
   function toggleSection(section) {
     setExpandedSections({
@@ -391,8 +394,13 @@ export default function CoursesPage() {
               </div>
             ) : transformedCourses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-                {transformedCourses.map((course, idx) => (
-                  <CourseCard key={course.id || idx} course={course} />
+                    {transformedCourses.map((course, idx) => (
+                  <>
+                        <Link to={`/course/${course.id}`} key={course.id || idx}>
+                        
+                  <CourseCard  course={course} />
+                        </Link>
+                  </>
                 ))}
               </div>
             ) : (

@@ -9,6 +9,7 @@ import Layout from "./components/Layout.jsx";
 import InstructorLayout from "./components/InstructorLayout.jsx";
 // import CoursesPage from './pages/CourseListingPage.jsx';
 import UserCourseListingPage from "./pages/user/CourseListingPage.jsx";
+import UserCourseDetailPage from "./pages/user/CourseDetailPage.jsx";
 import UserLoginPage from "./pages/user/LoginPage.jsx";
 import UserOTPVerificationPage from "./pages/user/OTPVerificationPage.jsx";
 import StudentForgetPassword from "./pages/user/StudentForgetPassword.jsx";
@@ -34,6 +35,8 @@ import AdminDashboard from "./pages/admin/AdminDashBoard.jsx";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Categories from "./pages/admin/Categories";
 import CategoryDetail from "./pages/admin/CategoryDetail";
+import Courses from "./pages/admin/Courses";
+import CourseDetail from "./pages/admin/CourseDetail";
 import Students from "./pages/admin/Students";
 import StudentDetail from "./pages/admin/StudentDetail";
 import Instructors from "./pages/admin/Instructors";
@@ -51,6 +54,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+
     const checkUserStatusOnLoad = async () => {
       const accessToken = localStorage.getItem("accessToken");
       
@@ -95,6 +99,8 @@ function App() {
     };
 
     checkUserStatusOnLoad();
+          // call the function defined in index.html
+
   }, []);
 
   useEffect(() => {
@@ -131,6 +137,10 @@ function App() {
                 <UserCourseListingPage />
               </AuthGuard>
             }
+          />
+          <Route
+            path="course/:courseId"
+            element={<UserCourseDetailPage />}
           />
           <Route
             path="cart"
@@ -205,6 +215,8 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="categories" element={<Categories />} />
           <Route path="categories/:categoryId" element={<CategoryDetail />} />
+          <Route path="courses" element={<Courses />} />
+          <Route path="courses/:courseId" element={<CourseDetail />} />
           <Route path="students" element={<Students />} />
           <Route path="students/:id" element={<StudentDetail />} />
           <Route path="instructors" element={<Instructors />} />

@@ -1,8 +1,7 @@
-"use client";
+
 import { useState } from "react";
 import { Search, Heart, Bell, User, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-// Changed import to use Redux hook instead of Context
 import { useAuth } from "../hooks/useRedux.js";
 import { logout } from "../store/slices/authSlice.js";
 import { useDispatch } from "react-redux";
@@ -11,7 +10,6 @@ import CartIcon from "./CartIcon.jsx";
 
 
 export default function Header({ onMenuToggle, menuOpen }) {
-  // Changed to use Redux hook instead of Context
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();

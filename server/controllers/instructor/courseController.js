@@ -9,7 +9,7 @@ export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
 
         const courses = await Course.find({ instructor: instructorId })
             .populate('category', 'name')
-            .populate('instructor', 'name email')
+            .populate('instructor', 'firstName lastName email profileImageUrl headline')
             .sort({ createdAt: -1 });
 
         console.log('Found courses:', courses.length);
@@ -116,7 +116,7 @@ export const createCourse = asyncHandler(async (req, res) => {
         // Populate the created course with category and instructor details
         const populatedCourse = await Course.findById(course._id)
             .populate('category', 'name')
-            .populate('instructor', 'name email');
+            .populate('instructor', 'firstName lastName email profileImageUrl headline');
 
         return res.status(201).json({
             success: true,
@@ -232,7 +232,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
                 published: published !== undefined ? published : existingCourse.published
             },
             { new: true, runValidators: true }
-        ).populate('category', 'name').populate('instructor', 'name email');
+        ).populate('category', 'name').populate('instructor', 'firstName lastName email profileImageUrl headline');
 
         console.log('Course updated successfully:', updatedCourse._id);
 
@@ -271,7 +271,7 @@ export const getCourseById = asyncHandler(async (req, res) => {
 
         const course = await Course.findById(courseId)
             .populate('category', 'name')
-            .populate('instructor', 'name email');
+            .populate('instructor', 'firstName lastName email profileImageUrl headline');
 
         if (!course) {
             return res.status(404).json({

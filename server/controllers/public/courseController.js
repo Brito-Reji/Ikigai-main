@@ -24,7 +24,7 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
 
         const courses = await Course.find(query)
             .populate('category', 'name')
-            .populate('instructor', 'name email')
+            .populate('instructor', 'firstName lastName email profileImageUrl headline description')
             .sort({ createdAt: -1 })
             .limit(parseInt(limit));
 
@@ -65,7 +65,7 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
             blocked: false
         })
             .populate('category', 'name')
-            .populate('instructor', 'name email')
+            .populate('instructor', 'firstName lastName email profileImageUrl headline description')
             .sort({ createdAt: -1 }) // You can change this to sort by rating or enrollments
             .limit(parseInt(limit));
 
@@ -82,6 +82,43 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Error fetching featured courses",
+            error: error.message
+        });
+    }
+});
+
+// Get single course details for public view
+export const getPublicCourseDetails = asyncHandler(async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        const course = await Course.findOne({
+            _id: courseId,
+            published: true,
+            blocked: false
+        })
+            .populate('category', 'name description')
+            .populate('instructor', 'firstName lastName email profileImageUrl headline description social');
+
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found or not available"
+            });
+        }
+
+        console.log(`Public course details viewed: ${course.title}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "Course details fetched successfully",
+            data: course
+        });
+    } catch (error) {
+        console.error("Error fetching public course details:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching course details",
             error: error.message
         });
     }

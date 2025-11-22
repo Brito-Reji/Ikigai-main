@@ -120,6 +120,22 @@ export const updateCourse = createAsyncThunk(
     }
 );
 
+// Fetch public course details for student view
+export const fetchPublicCourseDetails = createAsyncThunk(
+    'courses/fetchPublicCourseDetails',
+    async (courseId, { rejectWithValue }) => {
+        try {
+            console.log('Fetching public course details:', courseId);
+            const response = await api.get(`/public/courses/${courseId}`);
+            console.log('Public course details response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching public course details:', error);
+            return rejectWithValue(error.response?.data || { message: 'Course not found or unavailable' });
+        }
+    }
+);
+
 const courseSlice = createSlice({
     name: 'courses',
     initialState: {
@@ -128,18 +144,21 @@ const courseSlice = createSlice({
         publicCourses: [],
         featuredCourses: [],
         currentCourse: null,
+        publicCourseDetails: null,
         loading: false,
         createLoading: false,
         updateLoading: false,
         publicLoading: false,
         featuredLoading: false,
         courseLoading: false,
+        publicDetailsLoading: false,
         error: null,
         createError: null,
         updateError: null,
         publicError: null,
         featuredError: null,
         courseError: null,
+        publicDetailsError: null,
         currentPage: 1,
         totalPages: 1,
         createSuccess: false,
@@ -156,6 +175,11 @@ const courseSlice = createSlice({
             state.updateError = null;
             state.updateSuccess = false;
         },
+        clearPublicDetailsState: (state) => {
+            state.publicDetailsLoading = false;
+            state.publicDetailsError = null;
+            state.publicCourseDetails = null;
+        },
         clearError: (state) => {
             state.error = null;
             state.createError = null;
@@ -163,6 +187,7 @@ const courseSlice = createSlice({
             state.publicError = null;
             state.featuredError = null;
             state.courseError = null;
+            state.publicDetailsError = null;
         }
     },
     extraReducers: (builder) => {
@@ -274,9 +299,23 @@ const courseSlice = createSlice({
             .addCase(updateCourse.rejected, (state, action) => {
                 state.updateLoading = false;
                 state.updateError = action.payload?.message || 'Failed to update course';
+            })
+
+            // Fetch public course details
+            .addCase(fetchPublicCourseDetails.pending, (state) => {
+                state.publicDetailsLoading = true;
+                state.publicDetailsError = null;
+            })
+            .addCase(fetchPublicCourseDetails.fulfilled, (state, action) => {
+                state.publicDetailsLoading = false;
+                state.publicCourseDetails = action.payload.data;
+            })
+            .addCase(fetchPublicCourseDetails.rejected, (state, action) => {
+                state.publicDetailsLoading = false;
+                state.publicDetailsError = action.payload?.message || 'Course not found or unavailable';
             });
     },
 });
 
-export const { clearCreateState, clearUpdateState, clearError } = courseSlice.actions;
+export const { clearCreateState, clearUpdateState, clearPublicDetailsState, clearError } = courseSlice.actions;
 export default courseSlice.reducer;

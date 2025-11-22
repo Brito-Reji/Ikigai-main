@@ -42,7 +42,7 @@ export default function LandingPage() {
   const courses = featuredCourses.map(course => ({
     id: course._id,
     title: course.title,
-    instructor: course.instructor?.name || 'Unknown Instructor',
+    instructor: course.instructor, // Pass the whole instructor object
     price: `₹${course.price}`,
     rating: course.rating || 0,
     thumbnail: course.thumbnail,
