@@ -58,3 +58,12 @@ export const useCategory = () => {
   };
 };
 
+export const useChapter = () => {
+  const dispatch = useAppDispatch();
+  const chapters = useAppSelector((state) => state.chapters);
+  return {
+    ...chapters,
+    dispatch
+  };
+};
+

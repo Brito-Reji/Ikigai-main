@@ -141,6 +141,7 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
 // Delete course (admin only)
 export const deleteCourse = asyncHandler(async (req, res) => {
     try {
+      
         const { courseId } = req.params;
 
         const course = await Course.findById(courseId);

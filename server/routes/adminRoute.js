@@ -1,5 +1,4 @@
 import { Router } from 'express'
-// import { blockStudent, getStudents, getInstructors, blockInstructor } from '../controllers/admin/adminController.js'
 import { getStudents, getInstructors, blockStudent, blockInstructor, getStudentDetails, getInstructorDetails } from '../controllers/admin/adminController.js'
 import { getAllCourses, getCourseDetails, toggleCourseBlock, deleteCourse, getCourseStatistics } from '../controllers/admin/courseController.js'
 const router = Router()

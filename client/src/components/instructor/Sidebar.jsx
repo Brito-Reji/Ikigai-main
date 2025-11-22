@@ -8,9 +8,11 @@ import {
   Settings,
   ChevronLeft,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useRedux.js";
 
 export default function Sidebar() {
   const location = useLocation();
+  const { user } = useAuth();
 
   const menuItems = [
     {
@@ -89,12 +91,14 @@ export default function Sidebar() {
       <div className="p-4 border-t border-slate-800">
         <div className="flex items-center space-x-3 px-2 py-2">
           <img
-            src="https://i.pravatar.cc/150?img=12"
-            alt="User"
-            className="w-10 h-10 rounded-full"
+            src={user?.profileImageUrl || "https://i.pravatar.cc/150?img=12"}
+            alt={user?.firstName || "User"}
+            className="w-10 h-10 rounded-full object-cover"
           />
           <div className="flex-1">
-            <p className="text-white text-sm font-medium">Hi, John</p>
+            <p className="text-white text-sm font-medium">
+              Hi, {user?.firstName || "Instructor"}
+            </p>
           </div>
           <button className="text-slate-400 hover:text-white">
             <Settings className="w-5 h-5" />
