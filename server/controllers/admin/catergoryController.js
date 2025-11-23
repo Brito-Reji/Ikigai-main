@@ -2,9 +2,40 @@ import { Category } from "../../models/Category.js";
 
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
-    console.log(categories)
-    return res.status(200).json({ success: true, categories });
+    const { page = 1, limit = 10, search } = req.query;
+
+    // Build query
+    let query = {};
+
+    // Search filter
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const categories = await Category.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalCategories = await Category.countDocuments(query);
+    const totalPages = Math.ceil(totalCategories / parseInt(limit));
+
+    return res.status(200).json({
+      success: true,
+      categories,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalCategories,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch categories" });
   }
@@ -29,7 +60,7 @@ export const createCategory = async (req, res) => {
   await Category.create({ name: name.trim(), description: description.trim() });
   return res
     .status(201)
-    .json({ success: true, message: "Category created successfully",category:{name:name,description:description} });
+    .json({ success: true, message: "Category created successfully", category: { name: name, description: description } });
 }
 
 export const editCategory = async (req, res) => {

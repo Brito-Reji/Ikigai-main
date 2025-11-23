@@ -1,80 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, 
-  Filter, 
   Eye, 
   Ban, 
   Trash2, 
   CheckCircle, 
   Clock,
-  Users,
   BookOpen,
   DollarSign,
   Calendar
 } from 'lucide-react';
-import api from '@/api/axiosConfig.js';
+import { useSearchParams } from 'react-router-dom';
+import { useCourse, useCategory } from '@/hooks/useRedux.js';
+import { 
+  fetchAdminCourses, 
+  fetchCourseStatistics, 
+  toggleCourseBlock, 
+  deleteAdminCourse 
+} from '@/store/slices/courseSlice.js';
+import { fetchCategories } from '@/store/slices/categorySlice.js';
 
 const Courses = () => {
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { adminCourses, pagination, statistics, adminLoading, adminError, dispatch: courseDispatch } = useCourse();
+  const { categories, dispatch: categoryDispatch } = useCategory();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({});
-  const [statistics, setStatistics] = useState({});
+  // Get initial values from URL
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
 
-  // Fetch courses
-  const fetchCourses = async (page = 1) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12'
-      });
-      
-      if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (selectedStatus) params.append('status', selectedStatus);
-
-      const response = await api.get(`/admin/courses?${params.toString()}`);
-      if (response.data.success) {
-        setCourses(response.data.data);
-        setPagination(response.data.pagination);
-      }
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      setError('Failed to fetch courses');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/categories');
-      if (response.data.success) {
-        setCategories(response.data.categories);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  // Fetch statistics
-  const fetchStatistics = async () => {
-    try {
-      const response = await api.get('/admin/courses/statistics');
-      if (response.data.success) {
-        setStatistics(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching statistics:', error);
-    }
+  // Fetch courses with filters
+  const fetchCourses = (page = 1) => {
+    courseDispatch(fetchAdminCourses({
+      page,
+      limit: 12,
+      search: searchTerm,
+      category: selectedCategory,
+      status: selectedStatus
+    }));
   };
 
   // Navigate to course details
@@ -83,42 +48,44 @@ const Courses = () => {
   };
 
   // Toggle course block status
-  const toggleCourseBlock = async (courseId) => {
+  const handleToggleBlock = async (courseId) => {
     try {
-      const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
-      if (response.data.success) {
-        fetchCourses(currentPage);
-        alert(response.data.message);
-      }
+      await courseDispatch(toggleCourseBlock(courseId)).unwrap();
+      alert('Course status updated successfully');
     } catch (error) {
-      console.error('Error toggling course block:', error);
       alert('Failed to update course status');
     }
   };
 
   // Delete course
-  const deleteCourse = async (courseId) => {
+  const handleDeleteCourse = async (courseId) => {
     if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
       try {
-        const response = await api.delete(`/admin/courses/${courseId}`);
-        if (response.data.success) {
-          fetchCourses(currentPage);
-          alert('Course deleted successfully');
-        }
+        await courseDispatch(deleteAdminCourse(courseId)).unwrap();
+        alert('Course deleted successfully');
       } catch (error) {
-        console.error('Error deleting course:', error);
         alert('Failed to delete course');
       }
     }
   };
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    if (selectedCategory) params.category = selectedCategory;
+    if (selectedStatus) params.status = selectedStatus;
+    if (currentPage > 1) params.page = currentPage;
+    setSearchParams(params);
+  }, [searchTerm, selectedCategory, selectedStatus, currentPage, setSearchParams]);
 
   useEffect(() => {
     fetchCourses(currentPage);
   }, [searchTerm, selectedCategory, selectedStatus, currentPage]);
 
   useEffect(() => {
-    fetchCategories();
-    fetchStatistics();
+    categoryDispatch(fetchCategories());
+    courseDispatch(fetchCourseStatistics());
   }, []);
 
   const getStatusBadge = (course) => {
@@ -193,13 +160,19 @@ const Courses = () => {
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Categories</option>
@@ -211,7 +184,10 @@ const Courses = () => {
           </select>
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={(e) => {
+              setSelectedStatus(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
@@ -234,15 +210,15 @@ const Courses = () => {
       </div>
 
       {/* Course Cards */}
-      {loading ? (
+      {adminLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
           ))}
         </div>
-      ) : error ? (
+      ) : adminError ? (
         <div className="text-center py-8">
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="text-red-500 mb-4">{adminError}</p>
           <button 
             onClick={() => fetchCourses(currentPage)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -250,10 +226,10 @@ const Courses = () => {
             Retry
           </button>
         </div>
-      ) : courses.length > 0 ? (
+      ) : adminCourses.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {courses.map((course) => (
+            {adminCourses.map((course) => (
               <div key={course._id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
@@ -292,7 +268,7 @@ const Courses = () => {
                       View
                     </button>
                     <button
-                      onClick={() => toggleCourseBlock(course._id)}
+                      onClick={() => handleToggleBlock(course._id)}
                       className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${
                         course.blocked 
                           ? 'bg-green-600 text-white hover:bg-green-700' 
@@ -302,7 +278,7 @@ const Courses = () => {
                       {course.blocked ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
                     </button>
                     <button
-                      onClick={() => deleteCourse(course._id)}
+                      onClick={() => handleDeleteCourse(course._id)}
                       className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center"
                     >
                       <Trash2 className="w-4 h-4" />

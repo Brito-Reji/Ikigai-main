@@ -1,22 +1,50 @@
 import { useCategory } from '@/hooks/useRedux';
-import { createCategory, fetchCategories } from '@/store/slices/categorySlice';
+import { createCategory } from '@/store/slices/categorySlice';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '@/api/axiosConfig.js';
 
 const Categories = () => {
-  const { categories, loading, error, dispatch } = useCategory();
+  const { dispatch } = useCategory();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+  const [modalMode, setModalMode] = useState('add');
   const [currentCategory, setCurrentCategory] = useState({ _id: null, name: '', description: '' });
   const [errors, setErrors] = useState({});
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pagination state with URL sync
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+
+  // Fetch categories
+  const fetchCategoriesData = async (page = 1) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '5'
+      });
+      
+      if (searchTerm) params.append('search', searchTerm);
+
+      const response = await api.get(`/public?${params.toString()}`);
+      
+      if (response.data.success) {
+        setCategories(response.data.categories);
+        setPagination(response.data.pagination);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddCategory = () => {
     setModalMode('add');
@@ -24,8 +52,6 @@ const Categories = () => {
     setErrors({});
     setIsModalOpen(true);
   };
-
-
 
   const handleUnlist = (_id) => {
     // Toggle category status
@@ -52,7 +78,7 @@ const Categories = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -62,14 +88,9 @@ const Categories = () => {
     if (modalMode === 'add') {
       const newCategory = {
         ...currentCategory,
-       
       };
-      console.log(newCategory)
-      dispatch(createCategory(newCategory))
-    } else {
-      setCategories(categories.map(cat => 
-        cat._id === currentCategory._id ? currentCategory : cat
-      ));
+      await dispatch(createCategory(newCategory));
+      fetchCategoriesData(currentPage);
     }
 
     setIsModalOpen(false);
@@ -82,11 +103,59 @@ const Categories = () => {
     setErrors({});
   };
 
-  // Filter categories based on search term
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Update URL when filters change
+  useEffect(() => {
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    if (currentPage > 1) params.page = currentPage;
+    setSearchParams(params);
+  }, [searchTerm, currentPage, setSearchParams]);
+
+  // Fetch categories when filters change
+  useEffect(() => {
+    fetchCategoriesData(currentPage);
+  }, [searchTerm, currentPage]);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevious = () => {
+    if (pagination.hasPrev) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (pagination.hasNext) setCurrentPage(currentPage + 1);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    const totalPages = pagination.totalPages || 1;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pageNumbers.push(i);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) pageNumbers.push(i);
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pageNumbers.push(i);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    return pageNumbers;
+  };
 
   return (
     <div>
@@ -111,7 +180,10 @@ const Categories = () => {
               type="text"
               placeholder="Search categories by name or description..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
             <svg
@@ -130,10 +202,19 @@ const Categories = () => {
           </div>
         </div>
 
+        {/* Stats */}
+        <div className="mb-6 text-sm text-gray-600">
+          {pagination.totalCategories > 0 && (
+            <>Showing {((currentPage - 1) * 5) + 1} to {Math.min(currentPage * 5, pagination.totalCategories)} of {pagination.totalCategories} categories</>
+          )}
+        </div>
+
         {/* Category List */}
         <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-          {filteredCategories.length > 0 ? (
-            filteredCategories.map((category) => (
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Loading categories...</div>
+          ) : categories.length > 0 ? (
+            categories.map((category) => (
               <div
                 key={category._id}
                 className="flex justify-between items-center bg-gray-100 px-6 py-4 rounded-lg hover:bg-gray-200 transition-colors"
@@ -178,6 +259,65 @@ const Categories = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="mt-6 pt-6 border-t">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {pagination.totalPages}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrevious}
+                  disabled={!pagination.hasPrev}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    !pagination.hasPrev
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
+                >
+                  Previous
+                </button>
+
+                <div className="flex gap-1">
+                  {getPageNumbers().map((pageNum, index) =>
+                    pageNum === '...' ? (
+                      <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          currentPage === pageNum
+                            ? 'bg-teal-500 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  )}
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  disabled={!pagination.hasNext}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    !pagination.hasNext
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Overlay */}

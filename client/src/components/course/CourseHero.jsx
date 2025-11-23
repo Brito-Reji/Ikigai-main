@@ -82,18 +82,24 @@ const CourseHero = ({ course }) => {
           {/* Course Preview Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <div className="relative">
+              <div className="relative group cursor-pointer">
                 <img
                   src={course.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'}
                   alt={course.title}
                   className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80';
+                  }}
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <button className="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-4 transition-all">
-                    <svg className="w-8 h-8 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M8 5v10l8-5-8-5z"/>
+                <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all">
+                  <button className="bg-white bg-opacity-90 hover:bg-opacity-100 hover:scale-110 rounded-full p-5 transition-all shadow-lg">
+                    <svg className="w-10 h-10 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
                     </svg>
                   </button>
+                </div>
+                <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
+                  Preview
                 </div>
               </div>
               

@@ -136,6 +136,67 @@ export const fetchPublicCourseDetails = createAsyncThunk(
     }
 );
 
+// Admin: Fetch all courses with filters
+export const fetchAdminCourses = createAsyncThunk(
+    'courses/fetchAdminCourses',
+    async ({ page = 1, limit = 12, search, category, status }, { rejectWithValue }) => {
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString()
+            });
+
+            if (search) params.append('search', search);
+            if (category) params.append('category', category);
+            if (status) params.append('status', status);
+
+            const response = await api.get(`/admin/courses?${params.toString()}`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch courses' });
+        }
+    }
+);
+
+// Admin: Fetch course statistics
+export const fetchCourseStatistics = createAsyncThunk(
+    'courses/fetchCourseStatistics',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/admin/courses/statistics');
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch statistics' });
+        }
+    }
+);
+
+// Admin: Toggle course block status
+export const toggleCourseBlock = createAsyncThunk(
+    'courses/toggleCourseBlock',
+    async (courseId, { rejectWithValue }) => {
+        try {
+            const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to update course status' });
+        }
+    }
+);
+
+// Admin: Delete course
+export const deleteAdminCourse = createAsyncThunk(
+    'courses/deleteAdminCourse',
+    async (courseId, { rejectWithValue }) => {
+        try {
+            const response = await api.delete(`/admin/courses/${courseId}`);
+            return { ...response.data, courseId };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to delete course' });
+        }
+    }
+);
+
 const courseSlice = createSlice({
     name: 'courses',
     initialState: {
@@ -143,8 +204,11 @@ const courseSlice = createSlice({
         instructorCourses: [],
         publicCourses: [],
         featuredCourses: [],
+        adminCourses: [],
         currentCourse: null,
         publicCourseDetails: null,
+        statistics: {},
+        pagination: {},
         loading: false,
         createLoading: false,
         updateLoading: false,
@@ -152,6 +216,8 @@ const courseSlice = createSlice({
         featuredLoading: false,
         courseLoading: false,
         publicDetailsLoading: false,
+        adminLoading: false,
+        statisticsLoading: false,
         error: null,
         createError: null,
         updateError: null,
@@ -159,6 +225,7 @@ const courseSlice = createSlice({
         featuredError: null,
         courseError: null,
         publicDetailsError: null,
+        adminError: null,
         currentPage: 1,
         totalPages: 1,
         createSuccess: false,
@@ -313,6 +380,47 @@ const courseSlice = createSlice({
             .addCase(fetchPublicCourseDetails.rejected, (state, action) => {
                 state.publicDetailsLoading = false;
                 state.publicDetailsError = action.payload?.message || 'Course not found or unavailable';
+            })
+
+            // Admin: Fetch all courses
+            .addCase(fetchAdminCourses.pending, (state) => {
+                state.adminLoading = true;
+                state.adminError = null;
+            })
+            .addCase(fetchAdminCourses.fulfilled, (state, action) => {
+                state.adminLoading = false;
+                state.adminCourses = action.payload.data || [];
+                state.pagination = action.payload.pagination || {};
+            })
+            .addCase(fetchAdminCourses.rejected, (state, action) => {
+                state.adminLoading = false;
+                state.adminError = action.payload?.message || 'Failed to fetch courses';
+            })
+
+            // Admin: Fetch statistics
+            .addCase(fetchCourseStatistics.pending, (state) => {
+                state.statisticsLoading = true;
+            })
+            .addCase(fetchCourseStatistics.fulfilled, (state, action) => {
+                state.statisticsLoading = false;
+                state.statistics = action.payload.data || {};
+            })
+            .addCase(fetchCourseStatistics.rejected, (state, action) => {
+                state.statisticsLoading = false;
+            })
+
+            // Admin: Toggle course block
+            .addCase(toggleCourseBlock.fulfilled, (state, action) => {
+                const updatedCourse = action.payload.data;
+                const index = state.adminCourses.findIndex(course => course._id === updatedCourse._id);
+                if (index !== -1) {
+                    state.adminCourses[index] = updatedCourse;
+                }
+            })
+
+            // Admin: Delete course
+            .addCase(deleteAdminCourse.fulfilled, (state, action) => {
+                state.adminCourses = state.adminCourses.filter(course => course._id !== action.payload.courseId);
             });
     },
 });

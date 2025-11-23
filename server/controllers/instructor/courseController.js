@@ -99,6 +99,9 @@ export const createCourse = asyncHandler(async (req, res) => {
             });
         }
 
+        // create cloudinary image url
+        
+
         // Create course
         const course = await Course.create({
             title: title.trim(),

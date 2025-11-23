@@ -10,23 +10,25 @@ import {
   X,
 } from "lucide-react";
 import CourseCard from "../../components/CourseCard.jsx";
-import { useCourse } from "@/hooks/useRedux.js";
 import { useCategory } from "@/hooks/useRedux.js";
-import { fetchPublicCourses } from "@/store/slices/courseSlice.js";
-import { fetchCategories } from "@/store/slices/categorySlice.js";
 import { Link, useSearchParams } from "react-router-dom";
+import api from "@/api/axiosConfig.js";
 
 export default function CoursesPage() {
-  const { publicCourses, publicLoading, publicError, dispatch: courseDispatch } = useCourse();
-  const { categories, dispatch: categoryDispatch } = useCategory();
+  const { dispatch: categoryDispatch } = useCategory();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({});
   
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState("relevance");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [expandedSections, setExpandedSections] = useState({
     rating: true,
     chapters: true,
@@ -35,93 +37,83 @@ export default function CoursesPage() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Sync filters from URL whenever searchParams change
+  // Sync filters from URL on mount
   useEffect(() => {
     const urlSearch = searchParams.get('search');
     const urlCategory = searchParams.get('category');
-    const urlRatings = searchParams.get('ratings');
     const urlSort = searchParams.get('sort');
+    const urlPage = searchParams.get('page');
     
     setSearchQuery(urlSearch || '');
-    setSelectedCategories(urlCategory ? urlCategory.split(',') : []);
-    setSelectedRatings(urlRatings ? urlRatings.split(',').map(Number) : []);
-    setSortBy(urlSort || 'relevance');
-  }, [searchParams]);
+    setSelectedCategories(urlCategory ? [urlCategory] : []);
+    setSortBy(urlSort || 'newest');
+    setCurrentPage(Number(urlPage) || 1);
+  }, []);
 
   // Update URL when filters change
-  const updateURL = () => {
+  useEffect(() => {
     const params = {};
     if (searchQuery) params.search = searchQuery;
-    if (selectedCategories.length > 0) params.category = selectedCategories.join(',');
-    if (selectedRatings.length > 0) params.ratings = selectedRatings.join(',');
-    if (sortBy !== 'relevance') params.sort = sortBy;
+    if (selectedCategories.length > 0) params.category = selectedCategories[0];
+    if (sortBy !== 'newest') params.sort = sortBy;
+    if (currentPage > 1) params.page = currentPage;
     
     setSearchParams(params);
+  }, [searchQuery, selectedCategories, sortBy, currentPage, setSearchParams]);
+
+  // Fetch categories
+  const fetchCategoriesData = async () => {
+    try {
+      const response = await api.get('/public');
+      if (response.data.success) {
+        setCategories(response.data.categories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
   };
 
-  useEffect(() => {
-    updateURL();
-  }, [selectedCategories, selectedRatings, sortBy]);
+  // Fetch courses
+  const fetchCoursesData = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '12',
+        sort: sortBy
+      });
+      
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedCategories.length > 0) params.append('category', selectedCategories[0]);
 
-  // Fetch courses and categories on component mount
-  useEffect(() => {
-    courseDispatch(fetchPublicCourses({ limit: 50 }));
-    if (categories.length === 0) {
-      categoryDispatch(fetchCategories());
-    }
-  }, [courseDispatch, categoryDispatch, categories.length]);
-
-  // Filter and search courses
-  const filteredCourses = publicCourses.filter(course => {
-    // Search filter
-    if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !course.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    
-    // Category filter
-    if (selectedCategories.length > 0 && !selectedCategories.includes(course.category?._id)) {
-      return false;
-    }
-    
-    // Rating filter
-    if (selectedRatings.length > 0) {
-      const courseRating = Math.floor(course.rating || 0);
-      if (!selectedRatings.includes(courseRating)) {
-        return false;
+      const response = await api.get(`/public/courses?${params.toString()}`);
+      
+      if (response.data.success) {
+        setCourses(response.data.data);
+        setPagination(response.data.pagination);
       }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    return true;
-  });
+  };
 
-  // Sort courses
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return (b.rating || 0) - (a.rating || 0);
-      case 'newest':
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      default:
-        return 0;
-    }
-  });
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategoriesData();
+  }, []);
 
-  // Pagination
-  const coursesPerPage = 12;
-  const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
-  const startIndex = (currentPage - 1) * coursesPerPage;
-  const paginatedCourses = sortedCourses.slice(startIndex, startIndex + coursesPerPage);
+  // Fetch courses when filters change
+  useEffect(() => {
+    fetchCoursesData();
+  }, [searchQuery, selectedCategories, sortBy, currentPage]);
 
   // Transform courses for CourseCard component
-  const transformedCourses = paginatedCourses.map(course => ({
+  const transformedCourses = courses.map(course => ({
     id: course._id,
     title: course.title,
-    instructor: course.instructor, // Pass the whole instructor object
+    instructor: course.instructor,
     rating: course.rating || 0,
     hours: course.duration || 0,
     price: `₹${course.price}`,
@@ -129,8 +121,6 @@ export default function CoursesPage() {
     description: course.description,
     category: course.category?.name
   }));
-
-  console.log("instructorName ->",paginatedCourses[0])
 
   function toggleSection(section) {
     setExpandedSections({
@@ -159,9 +149,9 @@ export default function CoursesPage() {
   function toggleCategory(categoryId) {
     setCurrentPage(1);
     if (selectedCategories.includes(categoryId)) {
-      setSelectedCategories(selectedCategories.filter((c) => c !== categoryId));
+      setSelectedCategories([]);
     } else {
-      setSelectedCategories([...selectedCategories, categoryId]);
+      setSelectedCategories([categoryId]);
     }
   }
 
@@ -170,6 +160,7 @@ export default function CoursesPage() {
     setSelectedRatings([]);
     setSelectedCategories([]);
     setSearchQuery("");
+    setSortBy("newest");
     setSearchParams({});
     setCurrentPage(1);
   }
@@ -186,7 +177,7 @@ export default function CoursesPage() {
             All Courses
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            {publicLoading ? 'Loading courses...' : `${filteredCourses.length} courses available`}
+            {loading ? 'Loading courses...' : `${pagination.totalCourses || 0} courses available`}
           </p>
         </div>
 
@@ -391,21 +382,11 @@ export default function CoursesPage() {
 
           {/* Courses Grid */}
           <div className="flex-1 w-full">
-            {publicLoading ? (
+            {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
                 ))}
-              </div>
-            ) : publicError ? (
-              <div className="text-center py-12">
-                <p className="text-red-500 mb-4">Error loading courses: {publicError}</p>
-                <button 
-                  onClick={() => courseDispatch(fetchPublicCourses({ limit: 50 }))}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Retry
-                </button>
               </div>
             ) : transformedCourses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
@@ -438,24 +419,24 @@ export default function CoursesPage() {
             )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {pagination.totalPages > 1 && (
               <div className="flex justify-center items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2">
                 <button 
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!pagination.hasPrev}
+                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 
-                {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
                   let pageNum;
-                  if (totalPages <= 5) {
+                  if (pagination.totalPages <= 5) {
                     pageNum = i + 1;
                   } else if (currentPage <= 3) {
                     pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
+                  } else if (currentPage >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
@@ -464,7 +445,7 @@ export default function CoursesPage() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition flex-shrink-0 text-sm ${
+                      className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition shrink-0 text-sm ${
                         currentPage === pageNum
                           ? "bg-gray-900 text-white hover:bg-gray-800"
                           : "border border-gray-300 hover:bg-gray-50"
@@ -476,9 +457,9 @@ export default function CoursesPage() {
                 })}
                 
                 <button 
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+                  disabled={!pagination.hasNext}
+                  className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

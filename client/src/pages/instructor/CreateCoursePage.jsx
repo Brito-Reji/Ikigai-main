@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, X, ChevronRight, Home, FileImage } from "lucide-react";
+import { FileImage } from "lucide-react";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
+import ImageUpload from "@/components/ImageUpload.jsx";
 import { useCourse } from "@/hooks/useRedux.js";
 import { useCategory } from "@/hooks/useRedux.js";
 import { createCourse, clearCreateState } from "@/store/slices/courseSlice.js";
@@ -12,7 +13,6 @@ export default function CreateCoursePage() {
   const { createLoading, createError, createSuccess, dispatch: courseDispatch } = useCourse();
   const { categories, loading: categoriesLoading, dispatch: categoryDispatch } = useCategory();
   const [errors, setErrors] = useState({});
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const [formData, setFormData] = useState({
     category: "",
@@ -60,26 +60,9 @@ export default function CreateCoursePage() {
     }
   };
 
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        setErrors({ ...errors, thumbnail: "Please select an image file" });
-        return;
-      }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, thumbnail: "Image size should be less than 5MB" });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result);
-        setFormData({ ...formData, thumbnail: reader.result });
-      };
-      reader.readAsDataURL(file);
+  const handleThumbnailChange = (url) => {
+    setFormData({ ...formData, thumbnail: url });
+    if (errors.thumbnail) {
       setErrors({ ...errors, thumbnail: "" });
     }
   };
@@ -212,50 +195,16 @@ export default function CreateCoursePage() {
             {/* Upload and Preview Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Upload Thumbnail */}
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3">
-                  Upload Thumbnail
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-12">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleThumbnailChange}
-                    className="hidden"
-                    id="thumbnail-upload"
-                  />
-                  <label
-                    htmlFor="thumbnail-upload"
-                    className="cursor-pointer flex flex-col items-center justify-center"
-                  >
-                    {!thumbnailPreview ? (
-                      <div className="w-20 h-16 bg-black rounded-md flex items-center justify-center">
-                        <FileImage className="w-10 h-8 text-white" />
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <img
-                          src={thumbnailPreview}
-                          alt="Preview"
-                          className="max-h-32 rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setThumbnailPreview(null);
-                            setFormData({ ...formData, thumbnail: "" });
-                          }}
-                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
-                  </label>
-                </div>
-                {errors.thumbnail && <p className="text-red-500 text-sm mt-1">{errors.thumbnail}</p>}
-              </div>
+              <ImageUpload
+                value={formData.thumbnail}
+                onChange={handleThumbnailChange}
+                endpoint="/upload/course-thumbnail"
+                label="Upload Thumbnail"
+                maxSize={5}
+                error={errors.thumbnail}
+                aspectRatio={16 / 9}
+                enableCrop={true}
+              />
 
               {/* Thumbnail Preview */}
               <div>
@@ -263,9 +212,9 @@ export default function CreateCoursePage() {
                   Thumbnail Preview
                 </label>
                 <div className="bg-white border border-gray-200 rounded-lg p-4 max-w-sm">
-                  {thumbnailPreview ? (
+                  {formData.thumbnail ? (
                     <img
-                      src={thumbnailPreview}
+                      src={formData.thumbnail}
                       alt="Course Thumbnail"
                       className="w-full h-32 object-cover rounded-md mb-3"
                     />

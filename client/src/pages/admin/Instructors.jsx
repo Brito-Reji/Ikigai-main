@@ -1,15 +1,18 @@
 import api from "@/api/axiosConfig";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const Instructors = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  
+  // Get initial values from URL or defaults
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+  const [itemsPerPage, setItemsPerPage] = useState(Number(searchParams.get('limit')) || 10);
 
   // Helper function to get full name
   const getFullName = (instructor) => {
@@ -107,6 +110,15 @@ const Instructors = () => {
     indexOfFirstInstructor,
     indexOfLastInstructor
   );
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = {};
+    if (searchQuery) params.search = searchQuery;
+    if (currentPage > 1) params.page = currentPage;
+    if (itemsPerPage !== 10) params.limit = itemsPerPage;
+    setSearchParams(params);
+  }, [searchQuery, currentPage, itemsPerPage, setSearchParams]);
 
   // Change page
   const handlePageChange = (pageNumber) => {

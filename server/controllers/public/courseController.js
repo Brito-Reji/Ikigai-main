@@ -4,7 +4,7 @@ import { Course } from '../../models/Course.js';
 // Get all published courses for public display
 export const getPublishedCourses = asyncHandler(async (req, res) => {
     try {
-        const { limit = 8, category, search } = req.query;
+        const { page = 1, limit = 12, category, search, sort = 'newest' } = req.query;
 
         // Build query for published courses only
         let query = { published: true, blocked: false };
@@ -17,24 +17,53 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
         // Add search filter if provided
         if (search) {
             query.$or = [
-          { title: { $regex: search, $options: 'i' } },
+                { title: { $regex: search, $options: 'i' } },
                 { description: { $regex: search, $options: 'i' } }
             ];
         }
 
+        // Determine sort order
+        let sortOption = { createdAt: -1 };
+        switch (sort) {
+            case 'price-low':
+                sortOption = { price: 1 };
+                break;
+            case 'price-high':
+                sortOption = { price: -1 };
+                break;
+            case 'rating':
+                sortOption = { rating: -1 };
+                break;
+            case 'newest':
+                sortOption = { createdAt: -1 };
+                break;
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
         const courses = await Course.find(query)
             .populate('category', 'name')
             .populate('instructor', 'firstName lastName email profileImageUrl headline description')
-            .sort({ createdAt: -1 })
+            .sort(sortOption)
+            .skip(skip)
             .limit(parseInt(limit));
 
-        console.log(`Found ${courses.length} published courses`);
+        const totalCourses = await Course.countDocuments(query);
+        const totalPages = Math.ceil(totalCourses / parseInt(limit));
+
+        console.log(`Found ${courses.length} published courses (page ${page}/${totalPages})`);
 
         return res.status(200).json({
             success: true,
             message: "Published courses fetched successfully",
             data: courses,
-            count: courses.length
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages,
+                totalCourses,
+                hasNext: parseInt(page) < totalPages,
+                hasPrev: parseInt(page) > 1
+            }
         });
     } catch (error) {
         console.error("Error fetching published courses:", error);
@@ -59,7 +88,7 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
         })
             .populate('category', 'name')
             .populate('instructor', 'firstName lastName email profileImageUrl headline description')
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
             .limit(parseInt(limit));
 
         console.log(`Found ${courses.length} published courses for featured section`);
@@ -123,12 +152,12 @@ export const getCourseStats = asyncHandler(async (req, res) => {
         const totalCourses = await Course.countDocuments({ published: true, blocked: false });
         const totalInstructors = await Course.distinct('instructor', { published: true, blocked: false });
 
-       
+
         const stats = {
             totalCourses,
             totalInstructors: totalInstructors.length,
             totalStudents: 0,
-            totalCategories: 0 
+            totalCategories: 0
         };
 
         return res.status(200).json({

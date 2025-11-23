@@ -14,7 +14,9 @@ export const protect = asyncHandler(async (req, res, next) => {
 
     // Find user based on decoded.role
     console.log("Decoded role:", decoded);
+
     let user = await User.findById(decoded.id);
+    console.log("User:", user);
 
     if (!user) return res.status(401).json({ message: "User not found" });
 
