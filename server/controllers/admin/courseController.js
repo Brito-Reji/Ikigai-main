@@ -7,8 +7,8 @@ export const getAllCourses = asyncHandler(async (req, res) => {
     try {
         const { page = 1, limit = 20, search, category, status } = req.query;
 
-        // Build query
-        let query = {};
+        // Build query - exclude deleted courses
+        let query = { deleted: { $ne: true } };
 
         // Search filter
         if (search) {
@@ -138,10 +138,9 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
     }
 });
 
-// Delete course (admin only)
+// Soft delete course (admin only)
 export const deleteCourse = asyncHandler(async (req, res) => {
     try {
-      
         const { courseId } = req.params;
 
         const course = await Course.findById(courseId);
@@ -152,9 +151,17 @@ export const deleteCourse = asyncHandler(async (req, res) => {
             });
         }
 
-        await Course.findByIdAndDelete(courseId);
+        if (course.deleted) {
+            return res.status(400).json({
+                success: false,
+                message: "Course is already deleted"
+            });
+        }
 
-        console.log(`Admin deleted course: ${course.title}`);
+        course.deleted = true;
+        await course.save();
+
+        console.log(`Admin soft deleted course: ${course.title}`);
 
         return res.status(200).json({
             success: true,
@@ -173,13 +180,16 @@ export const deleteCourse = asyncHandler(async (req, res) => {
 // Get course statistics for admin dashboard
 export const getCourseStatistics = asyncHandler(async (req, res) => {
     try {
-        const totalCourses = await Course.countDocuments();
-        const publishedCourses = await Course.countDocuments({ published: true });
-        const draftCourses = await Course.countDocuments({ published: false });
-        const blockedCourses = await Course.countDocuments({ blocked: true });
+        const totalCourses = await Course.countDocuments({ deleted: { $ne: true } });
+        const publishedCourses = await Course.countDocuments({ published: true, deleted: { $ne: true } });
+        const draftCourses = await Course.countDocuments({ published: false, deleted: { $ne: true } });
+        const blockedCourses = await Course.countDocuments({ blocked: true, deleted: { $ne: true } });
 
-        // Get courses by category
+        // Get courses by category (exclude deleted)
         const coursesByCategory = await Course.aggregate([
+            {
+                $match: { deleted: { $ne: true } }
+            },
             {
                 $lookup: {
                     from: 'categories',

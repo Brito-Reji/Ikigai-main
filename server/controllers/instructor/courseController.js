@@ -7,7 +7,7 @@ export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
         const instructorId = req.user.id;
         console.log('Fetching courses for instructor:', instructorId);
 
-        const courses = await Course.find({ instructor: instructorId })
+        const courses = await Course.find({ instructor: instructorId, deleted: { $ne: true } })
             .populate('category', 'name')
             .populate('instructor', 'firstName lastName email profileImageUrl headline')
             .sort({ createdAt: -1 });
@@ -100,7 +100,7 @@ export const createCourse = asyncHandler(async (req, res) => {
         }
 
         // create cloudinary image url
-        
+
 
         // Create course
         const course = await Course.create({

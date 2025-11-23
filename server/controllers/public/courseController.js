@@ -6,8 +6,8 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
     try {
         const { page = 1, limit = 12, category, search, sort = 'newest' } = req.query;
 
-        // Build query for published courses only
-        let query = { published: true, blocked: false };
+        // Build query for published courses only (exclude deleted)
+        let query = { published: true, blocked: false, deleted: { $ne: true } };
 
         // Add category filter if provided
         if (category) {
@@ -84,7 +84,8 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
 
         const courses = await Course.find({
             published: true,
-            blocked: false
+            blocked: false,
+            deleted: { $ne: true }
         })
             .populate('category', 'name')
             .populate('instructor', 'firstName lastName email profileImageUrl headline description')
@@ -117,7 +118,8 @@ export const getPublicCourseDetails = asyncHandler(async (req, res) => {
         const course = await Course.findOne({
             _id: courseId,
             published: true,
-            blocked: false
+            blocked: false,
+            deleted: { $ne: true }
         })
             .populate('category', 'name description')
             .populate('instructor', 'firstName lastName email profileImageUrl headline description social');
@@ -149,8 +151,8 @@ export const getPublicCourseDetails = asyncHandler(async (req, res) => {
 // Get course statistics for landing page
 export const getCourseStats = asyncHandler(async (req, res) => {
     try {
-        const totalCourses = await Course.countDocuments({ published: true, blocked: false });
-        const totalInstructors = await Course.distinct('instructor', { published: true, blocked: false });
+        const totalCourses = await Course.countDocuments({ published: true, blocked: false, deleted: { $ne: true } });
+        const totalInstructors = await Course.distinct('instructor', { published: true, blocked: false, deleted: { $ne: true } });
 
 
         const stats = {

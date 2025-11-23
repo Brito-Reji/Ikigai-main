@@ -43,6 +43,10 @@ const courseSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  deleted: {
+    type: Boolean,
+    default: false,
+  },
   duration: {
     type: Number,
   },
