@@ -1,28 +1,33 @@
 import React, { useEffect } from "react";
 import {
-  ShoppingCart,
-  Search,
   Star,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header.jsx";
-import { useCourse } from "@/hooks/useRedux.js";
+import { useCourse, useCategory } from "@/hooks/useRedux.js";
 import { fetchFeaturedCourses } from "@/store/slices/courseSlice.js";
+import { fetchCategories } from "@/store/slices/categorySlice";
 
 import bannerOne from '../../assets/images/banner/one.png'
 import bannerTwo from '../../assets/images/banner/two.png'
 
 export default function LandingPage() {
-  const { featuredCourses, featuredLoading, featuredError, dispatch } = useCourse();
+  const { featuredCourses, featuredLoading, featuredError, dispatch: courseDispatch } = useCourse();
+  const categoryState = useCategory();
+  const { categories, loading: categoriesLoading, dispatch: categoryDispatch } = categoryState;
 
-  // Fetch featured courses on component mount
+  console.log('Category state:', categoryState);
+  console.log('Categories array:', categories);
+
+  // Fetch featured courses and categories on component mount
   useEffect(() => {
-    dispatch(fetchFeaturedCourses({ limit: 4 }));
-  }, [dispatch]);
+    courseDispatch(fetchFeaturedCourses({ limit: 4 }));
+    categoryDispatch(fetchCategories());
+  }, [courseDispatch, categoryDispatch]);
 
   const stats = [
     { number: "250+", label: "Courses by our best mentors" },
@@ -31,11 +36,16 @@ export default function LandingPage() {
     { number: "2400+", label: "Courses by our best mentors" },
   ];
 
-  const categories = [
-    { icon: "🔬", name: "Astrology", courses: 11 },
-    { icon: "💻", name: "Development", courses: 12 },
-    { icon: "💼", name: "Marketing", courses: 12 },
-    { icon: "⚛️", name: "Physics", courses: 14 },
+  // Gradient colors for categories
+  const gradients = [
+    'from-blue-500 to-indigo-600',
+    'from-purple-500 to-pink-600',
+    'from-green-500 to-teal-600',
+    'from-orange-500 to-red-600',
+    'from-cyan-500 to-blue-600',
+    'from-yellow-500 to-orange-600',
+    'from-rose-500 to-pink-600',
+    'from-emerald-500 to-green-600',
   ];
 
   // Transform featured courses data for CourseCard component
@@ -64,7 +74,7 @@ export default function LandingPage() {
       students: 2400,
     },
     {
-      name: "Ronald Richards",
+      name: "Rothis a   testnald Richards",
       role: "UI/UX Designer",
       rating: 4.9,
       students: 2400,
@@ -105,51 +115,8 @@ export default function LandingPage() {
     <>
     
       <div className="min-h-screen bg-white">
-        {/* Navigation */}
-        {/* <nav className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">I</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Ikigai</span>
-              </div>
-              <a
-                href="#"
-                className="hidden md:block text-gray-700 hover:text-gray-900"
-              >
-                Categories
-              </a>
-            </div>
-            <div className="hidden md:block flex-1 max-w-md mx-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search courses"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-gray-900">
-                <ShoppingCart className="w-5 h-5" />
-              </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Log In
-              </button>
-              <button className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
-                Sign Up
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav> */}
-
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <section className="py-16 bg-linear-to-br from-gray-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
@@ -211,30 +178,66 @@ export default function LandingPage() {
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Top Categories
-              </h2>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Explore Top Categories
+                </h2>
+                <p className="text-gray-600">Discover courses across various fields</p>
+              </div>
               <Link
-                to={"/courses"}
-                className="text-blue-600 hover:text-blue-700"
+                to={"/course"}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium group"
               >
                 See All
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {categories.map((cat, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white p-8 rounded-xl text-center hover:shadow-lg transition cursor-pointer"
-                >
-                  <div className="text-5xl mb-4">{cat.icon}</div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    {cat.name}
-                  </h3>
-                  <p className="text-gray-500 text-sm">{cat.courses} Courses</p>
-                </div>
-              ))}
-            </div>
+            
+            {categoriesLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-gray-200 animate-pulse rounded-2xl h-40"></div>
+                ))}
+              </div>
+            ) : categories && categories.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {categories.slice(0, 4).map((cat, idx) => (
+                  <Link
+                    key={cat._id}
+                    to={`/course?category=${cat._id}`}
+                    className="group relative overflow-hidden bg-white rounded-2xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100"
+                  >
+                    {/* Gradient background on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Decorative element */}
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradients[idx % gradients.length]} mb-4 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform duration-300`}>
+                        {cat.name.charAt(0).toUpperCase()}
+                      </div>
+                      
+                      <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">
+                        {cat.name}
+                      </h3>
+                      
+                      <p className="text-gray-500 text-sm">
+                        {cat.courseCount || 0} {cat.courseCount === 1 ? 'Course' : 'Courses'}
+                      </p>
+                    </div>
+                    
+                    {/* Arrow indicator */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight className="w-5 h-5 text-blue-600" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl">
+                <p className="text-gray-500">No categories available at the moment.</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -244,7 +247,7 @@ export default function LandingPage() {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900">Top Courses</h2>
               <Link
-                to={"/courses"}
+                to={"/course"}
                 className="text-blue-600 hover:text-blue-700"
               >
                 See All
@@ -288,7 +291,7 @@ export default function LandingPage() {
                 Top Instructors
               </h2>
               <Link
-                to={"/courses"}
+                to={"/course"}
                 className="text-blue-600 hover:text-blue-700"
               >
                 See All

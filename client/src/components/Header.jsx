@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Search, Heart, Bell, User, Menu, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useRedux.js";
 import { logout } from "../store/slices/authSlice.js";
 import { useDispatch } from "react-redux";
@@ -13,13 +13,26 @@ export default function Header({ onMenuToggle, menuOpen }) {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
   console.log("Header auth state:", { isAuthenticated, user });
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/course?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleSearchInput = (value) => {
+    setSearchQuery(value);
   };
 
   return (
@@ -42,6 +55,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
             </button>
 
             {/* Logo */}
+            <Link to='/'>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8  rounded-full flex items-center justify-center">
               <img src={logo} className="text-white font-bold text-sm"></img>
@@ -50,6 +64,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 Ikigai
               </span>
             </div>
+            </Link>
 
             {/* Desktop Categories Link */}
             <a
@@ -62,14 +77,18 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
           {/* Center - Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-4 lg:mx-8">
-            <div className="relative w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
               <input
                 type="text"
                 placeholder="Search courses"
+                value={searchQuery}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               />
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-            </div>
+              <button type="submit" className="absolute left-3 top-2.5">
+                <Search className="w-5 h-5 text-gray-400" />
+              </button>
+            </form>
           </div>
 
           {/* Right Section - Actions */}
@@ -134,15 +153,19 @@ export default function Header({ onMenuToggle, menuOpen }) {
         {/* Mobile Search Bar - Only shows on small screens when toggled */}
         {showMobileSearch && (
           <div className="md:hidden pb-4 pt-2 animate-in slide-in-from-top">
-            <div className="relative w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
               <input
                 type="text"
                 placeholder="Search courses"
+                value={searchQuery}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 autoFocus
               />
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-            </div>
+              <button type="submit" className="absolute left-3 top-2.5">
+                <Search className="w-5 h-5 text-gray-400" />
+              </button>
+            </form>
           </div>
         )}
       </div>

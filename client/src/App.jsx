@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/user/LandingPage.jsx";
 import UserSignupPage from "./pages/user/SignupPage.jsx";
 import Layout from "./components/Layout.jsx";
@@ -117,6 +118,7 @@ function App() {
 
   return (
     <div>
+      <Toaster position="top-right" />
       <Routes>
    
         <Route path="/">

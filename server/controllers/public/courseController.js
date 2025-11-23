@@ -17,7 +17,7 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
         // Add search filter if provided
         if (search) {
             query.$or = [
-                { title: { $regex: search, $options: 'i' } },
+          { title: { $regex: search, $options: 'i' } },
                 { description: { $regex: search, $options: 'i' } }
             ];
         }
@@ -51,14 +51,7 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
     try {
         const { limit = 4 } = req.query;
 
-        // First, let's check all courses in the database
-        const allCourses = await Course.find({});
-        console.log(`Total courses in database: ${allCourses.length}`);
-        console.log('All courses:', allCourses.map(c => ({
-            title: c.title,
-            published: c.published,
-            blocked: c.blocked
-        })));
+
 
         const courses = await Course.find({
             published: true,
@@ -66,7 +59,7 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
         })
             .populate('category', 'name')
             .populate('instructor', 'firstName lastName email profileImageUrl headline description')
-            .sort({ createdAt: -1 }) // You can change this to sort by rating or enrollments
+            .sort({ createdAt: -1 }) 
             .limit(parseInt(limit));
 
         console.log(`Found ${courses.length} published courses for featured section`);
@@ -130,12 +123,12 @@ export const getCourseStats = asyncHandler(async (req, res) => {
         const totalCourses = await Course.countDocuments({ published: true, blocked: false });
         const totalInstructors = await Course.distinct('instructor', { published: true, blocked: false });
 
-        // You can add more stats like total students, total categories, etc.
+       
         const stats = {
             totalCourses,
             totalInstructors: totalInstructors.length,
-            totalStudents: 0, // This would need enrollment tracking
-            totalCategories: 0 // This would need category counting
+            totalStudents: 0,
+            totalCategories: 0 
         };
 
         return res.status(200).json({

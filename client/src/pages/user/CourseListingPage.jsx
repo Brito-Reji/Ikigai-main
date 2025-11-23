@@ -10,22 +10,22 @@ import {
   X,
   Search,
 } from "lucide-react";
-import Header from "../../components/Header.jsx";
 import CourseCard from "../../components/CourseCard.jsx";
 import { useCourse } from "@/hooks/useRedux.js";
 import { useCategory } from "@/hooks/useRedux.js";
 import { fetchPublicCourses } from "@/store/slices/courseSlice.js";
 import { fetchCategories } from "@/store/slices/categorySlice.js";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 export default function CoursesPage() {
   const { publicCourses, publicLoading, publicError, dispatch: courseDispatch } = useCourse();
   const { categories, dispatch: categoryDispatch } = useCategory();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [sortBy, setSortBy] = useState("relevance");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedSections, setExpandedSections] = useState({
@@ -35,6 +35,14 @@ export default function CoursesPage() {
     category: true,
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sync search query from URL
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
 
   // Fetch courses and categories on component mount
   useEffect(() => {
@@ -141,8 +149,19 @@ export default function CoursesPage() {
     setSelectedRatings([]);
     setSelectedCategories([]);
     setSearchQuery("");
+    setSearchParams({});
     setCurrentPage(1);
   }
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+    if (value.trim()) {
+      setSearchParams({ search: value.trim() });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -166,10 +185,7 @@ export default function CoursesPage() {
               type="text"
               placeholder="Search courses..."
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { ShoppingCart, Search, ArrowRight, Eye, EyeOff, Coins } from "lucide-react";
-import axios from "axios";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import api from "@/api/axiosConfig.js";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 function LoginPage() {
   let navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: "",
-    password: "Admin@123",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
@@ -21,14 +21,14 @@ function LoginPage() {
   });
 
   const validateEmail = (email) => {
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!email) {
-    //   return "Email is required";
-    // }
-    // if (!emailRegex.test(email)) {
-    //   return "Please enter a valid email address";
-    // }
-    // return "";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
   };
 
   const validatePassword = (password) => {
@@ -85,7 +85,9 @@ function LoginPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
     // Mark all fields as touched
     setTouched({
       email: true,
@@ -103,22 +105,28 @@ function LoginPage() {
 
     // Only submit if no errors
     if (!emailError && !passwordError) {
-      console.log("Login submitted:", formData);
-     let response = await api.post('/auth/admin/login', {
-        email: formData.email,
-        password:formData.password
-     })
-     console.log("response",response)
-     localStorage.setItem('accessToken', response.data.accessToken)
-      console.log(response)
-      let { data } = response
-      console.log(data)
-      if(data.success){
-        navigate("/admin/dashboard")
-      } else {
-        toast.error(data.message)
+      try {
+        console.log("Login submitted:", formData);
+        const response = await api.post('/auth/admin/login', {
+          email: formData.email,
+          password: formData.password
+        });
+        
+        console.log("response", response);
+        
+        if (response.data.success) {
+          localStorage.setItem('accessToken', response.data.accessToken);
+          toast.success("Login successful!");
+          navigate("/admin/dashboard");
+        } else {
+          toast.error(response.data.message || "Login failed");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        toast.error(error.response?.data?.message || "Invalid email or password");
       }
-  
+    } else {
+      toast.error("Please fix the validation errors");
     }
   };
 
@@ -194,8 +202,10 @@ function LoginPage() {
 
             {/* Sign In Button */}
             <button
+              type="submit"
               onClick={handleSubmit}
-              className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2"
+              disabled={!formData.email || !formData.password}
+              className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>Sign In</span>
               <ArrowRight className="w-5 h-5" />

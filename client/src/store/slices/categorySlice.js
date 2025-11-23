@@ -3,12 +3,12 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchCategories = createAsyncThunk(
     'categories/fetchCategories',
-    async (_,thunkAPI) => {
+    async (_, thunkAPI) => {
         try {
-            const res = await api.get('/categories')
-            console.log('category thunk ->',res)
+            const res = await api.get('/public')
+            console.log('category thunk ->', res)
             return res.data
-       }catch(err){
+        } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
         }
     }
@@ -21,7 +21,7 @@ export const createCategory = createAsyncThunk(
         try {
             const res = await api.post('/categories', category)
             return res.data
-       }catch(err){
+        } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
         }
     }
@@ -32,7 +32,7 @@ export const updateCategory = createAsyncThunk(
         try {
             const res = await api.put(`/categories/${category._id}`, category)
             return res.data
-       }catch(err){
+        } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
         }
     }
@@ -41,9 +41,9 @@ export const deleteCategory = createAsyncThunk(
     'categories/deleteCategory',
     async (_id, thunkAPI) => {
         try {
-             await api.patch(`/categories/${_id}`)
+            await api.patch(`/categories/${_id}`)
             return _id
-       }catch(err){
+        } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
         }
     }
