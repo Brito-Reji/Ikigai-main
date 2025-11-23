@@ -185,7 +185,7 @@ export default function LandingPage() {
                 <p className="text-gray-600">Discover courses across various fields</p>
               </div>
               <Link
-                to={"/course"}
+                to={"/courses"}
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium group"
               >
                 See All

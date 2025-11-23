@@ -11,8 +11,11 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: false,
     trim: true,
-    },
-  
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 export const Category = mongoose.model('Category', categorySchema);

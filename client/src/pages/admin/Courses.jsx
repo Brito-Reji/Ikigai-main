@@ -19,6 +19,7 @@ import {
   deleteAdminCourse 
 } from '@/store/slices/courseSlice.js';
 import { fetchCategories } from '@/store/slices/categorySlice.js';
+import Swal from 'sweetalert2';
 
 const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,22 +50,73 @@ const Courses = () => {
 
   // Toggle course block status
   const handleToggleBlock = async (courseId) => {
-    try {
-      await courseDispatch(toggleCourseBlock(courseId)).unwrap();
-      alert('Course status updated successfully');
-    } catch (error) {
-      alert('Failed to update course status');
+    const course = adminCourses.find(c => c._id === courseId);
+    const action = course?.blocked ? 'unblock' : 'block';
+    
+    const result = await Swal.fire({
+      title: `${action === 'block' ? 'Block' : 'Unblock'} this course?`,
+      text: `Are you sure you want to ${action} this course?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#eab308' : '#22c55e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action} it!`,
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await courseDispatch(toggleCourseBlock(courseId)).unwrap();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message || 'Course status updated successfully',
+          confirmButtonColor: '#3b82f6',
+          timer: 2000
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: error.message || 'Failed to update course status',
+          confirmButtonColor: '#ef4444'
+        });
+      }
     }
   };
 
   // Delete course
   const handleDeleteCourse = async (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "This course will be deleted. You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
       try {
         await courseDispatch(deleteAdminCourse(courseId)).unwrap();
-        alert('Course deleted successfully');
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Course has been deleted successfully.',
+          confirmButtonColor: '#3b82f6',
+          timer: 2000
+        });
       } catch (error) {
-        alert('Failed to delete course');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: error.message || 'Failed to delete course',
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
   };

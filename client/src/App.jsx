@@ -38,6 +38,7 @@ import Categories from "./pages/admin/Categories";
 import CategoryDetail from "./pages/admin/CategoryDetail";
 import Courses from "./pages/admin/Courses";
 import CourseDetail from "./pages/admin/CourseDetail";
+import NotFound from "./pages/NotFound.jsx";
 import Students from "./pages/admin/Students";
 import StudentDetail from "./pages/admin/StudentDetail";
 import Instructors from "./pages/admin/Instructors";
@@ -133,7 +134,7 @@ function App() {
           <Route index element={<LandingPage />} />
           
           <Route
-            path="course"
+            path="courses"
             element={
               <AuthGuard requireAuth={true} roles={["student"]}>
                 <UserCourseListingPage />
@@ -224,6 +225,9 @@ function App() {
           <Route path="instructors" element={<Instructors />} />
           <Route path="instructors/:id" element={<InstructorDetail />} />
         </Route>
+
+        {/* 404 Not Found - Catch all unmatched routes */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
    

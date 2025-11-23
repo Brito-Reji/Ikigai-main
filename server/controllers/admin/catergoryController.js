@@ -107,3 +107,31 @@ export const editCategory = async (req, res) => {
     .status(200)
     .json({ success: true, message: "Category updated successfully" });
 }
+
+export const toggleCategoryBlock = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found"
+      });
+    }
+
+    category.isBlocked = !category.isBlocked;
+    await category.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Category ${category.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      category
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update category status"
+    });
+  }
+}

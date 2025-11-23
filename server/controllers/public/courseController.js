@@ -22,6 +22,32 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
             ];
         }
 
+        // Add price range filter if provided
+        const { priceRange } = req.query;
+        if (priceRange) {
+            const ranges = priceRange.split(',');
+            const priceConditions = [];
+
+            ranges.forEach(range => {
+                if (range === 'free') {
+                    priceConditions.push({ price: 0 });
+                } else if (range === '0-500') {
+                    priceConditions.push({ price: { $gt: 0, $lte: 500 } });
+                } else if (range === '500-1000') {
+                    priceConditions.push({ price: { $gt: 500, $lte: 1000 } });
+                } else if (range === '1000-2000') {
+                    priceConditions.push({ price: { $gt: 1000, $lte: 2000 } });
+                } else if (range === '2000+') {
+                    priceConditions.push({ price: { $gt: 2000 } });
+                }
+            });
+
+            if (priceConditions.length > 0) {
+                query.$and = query.$and || [];
+                query.$and.push({ $or: priceConditions });
+            }
+        }
+
         // Determine sort order
         let sortOption = { createdAt: -1 };
         switch (sort) {
@@ -34,7 +60,14 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
             case 'rating':
                 sortOption = { rating: -1 };
                 break;
+            case 'title-asc':
+                sortOption = { title: 1 };
+                break;
+            case 'title-desc':
+                sortOption = { title: -1 };
+                break;
             case 'newest':
+            default:
                 sortOption = { createdAt: -1 };
                 break;
         }

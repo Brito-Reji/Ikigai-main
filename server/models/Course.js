@@ -29,9 +29,24 @@ const courseSchema = new mongoose.Schema({
     ref: 'Instructor',
     required: [true, 'Instructor is required'],
   },
+  actualPrice: {
+    type: Number,
+    required: [true, 'Actual price is required'],
+    min: [0, 'Actual price cannot be negative'],
+  },
+  discountType: {
+    type: String,
+    enum: ['percentage', 'fixed', 'none'],
+    default: 'none',
+  },
+  discountValue: {
+    type: Number,
+    default: 0,
+    min: [0, 'Discount value cannot be negative'],
+  },
   price: {
     type: Number,
-    required: [true, 'Price is required'],
+    required: [true, 'Final price is required'],
     min: [0, 'Price cannot be negative'],
   },
   published: {

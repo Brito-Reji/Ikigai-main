@@ -27,7 +27,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/course?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

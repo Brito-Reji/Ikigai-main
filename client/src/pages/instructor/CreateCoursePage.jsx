@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileImage } from "lucide-react";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
 import ImageUpload from "@/components/ImageUpload.jsx";
 import { useCourse } from "@/hooks/useRedux.js";
@@ -19,6 +18,9 @@ export default function CreateCoursePage() {
     title: "",
     description: "",
     overview: "",
+    actualPrice: "",
+    discountType: "none",
+    discountValue: "",
     price: "",
     thumbnail: "",
     published: false,
@@ -67,6 +69,24 @@ export default function CreateCoursePage() {
     }
   };
 
+  // Calculate final price based on discount
+  useEffect(() => {
+    if (formData.actualPrice && formData.discountType !== 'none' && formData.discountValue) {
+      let finalPrice = parseFloat(formData.actualPrice);
+      
+      if (formData.discountType === 'percentage') {
+        const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
+        finalPrice = finalPrice - discount;
+      } else if (formData.discountType === 'fixed') {
+        finalPrice = finalPrice - parseFloat(formData.discountValue);
+      }
+      
+      setFormData(prev => ({ ...prev, price: Math.max(0, finalPrice).toFixed(2) }));
+    } else if (formData.actualPrice) {
+      setFormData(prev => ({ ...prev, price: parseFloat(formData.actualPrice).toFixed(2) }));
+    }
+  }, [formData.actualPrice, formData.discountType, formData.discountValue]);
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -77,8 +97,14 @@ export default function CreateCoursePage() {
     if (formData.description.length > 2000) newErrors.description = "Description cannot exceed 2000 characters";
     if (!formData.overview.trim()) newErrors.overview = "Overview is required";
     if (formData.overview.length > 1000) newErrors.overview = "Overview cannot exceed 1000 characters";
-    if (!formData.price) newErrors.price = "Price is required";
-    if (formData.price < 0) newErrors.price = "Price cannot be negative";
+    if (!formData.actualPrice) newErrors.actualPrice = "Actual price is required";
+    if (formData.actualPrice < 0) newErrors.actualPrice = "Actual price cannot be negative";
+    if (formData.discountType !== 'none' && !formData.discountValue) {
+      newErrors.discountValue = "Discount value is required";
+    }
+    if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+      newErrors.discountValue = "Percentage cannot exceed 100%";
+    }
     if (!formData.thumbnail) newErrors.thumbnail = "Thumbnail is required";
 
     setErrors(newErrors);
@@ -174,74 +200,89 @@ export default function CreateCoursePage() {
               {errors.overview && <p className="text-red-500 text-sm mt-1">{errors.overview}</p>}
             </div>
 
-            {/* Price */}
-            <div className="w-1/3">
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Price <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                min={0}
-                step="0.01"
-                placeholder="0.00"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
-              />
-              {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-            </div>
-
-            {/* Upload and Preview Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Upload Thumbnail */}
-              <ImageUpload
-                value={formData.thumbnail}
-                onChange={handleThumbnailChange}
-                endpoint="/upload/course-thumbnail"
-                label="Upload Thumbnail"
-                maxSize={5}
-                error={errors.thumbnail}
-                aspectRatio={16 / 9}
-                enableCrop={true}
-              />
-
-              {/* Thumbnail Preview */}
+            {/* Pricing Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Actual Price */}
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-3">
-                  Thumbnail Preview
+                  Actual Price (₹) <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white border border-gray-200 rounded-lg p-4 max-w-sm">
-                  {formData.thumbnail ? (
-                    <img
-                      src={formData.thumbnail}
-                      alt="Course Thumbnail"
-                      className="w-full h-32 object-cover rounded-md mb-3"
-                    />
-                  ) : (
-                    <div className="w-full h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center">
-                      <FileImage className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-gray-800 text-white px-2 py-1 rounded text-xs font-medium">
-                      Learn
-                    </span>
-                    <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
-                      Figma
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full mr-2"></div>
-                    <div className="text-sm text-gray-600">
-                      {formData.title || "Course title will appear here"}
-                    </div>
+                <input
+                  type="number"
+                  name="actualPrice"
+                  value={formData.actualPrice}
+                  onChange={handleInputChange}
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
+                />
+                {errors.actualPrice && <p className="text-red-500 text-sm mt-1">{errors.actualPrice}</p>}
+              </div>
+
+              {/* Discount Type */}
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Discount Type
+                </label>
+                <select
+                  name="discountType"
+                  value={formData.discountType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
+                >
+                  <option value="none">No Discount</option>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount (₹)</option>
+                </select>
+              </div>
+
+              {/* Discount Value */}
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Discount Value {formData.discountType !== 'none' && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="number"
+                  name="discountValue"
+                  value={formData.discountValue}
+                  onChange={handleInputChange}
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  disabled={formData.discountType === 'none'}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                {errors.discountValue && <p className="text-red-500 text-sm mt-1">{errors.discountValue}</p>}
+              </div>
+            </div>
+
+            {/* Final Price Display */}
+            {formData.actualPrice && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-700">Final Price:</span>
+                  <div className="text-right">
+                    {formData.discountType !== 'none' && formData.discountValue && (
+                      <span className="text-gray-500 line-through mr-2">₹{parseFloat(formData.actualPrice).toFixed(2)}</span>
+                    )}
+                    <span className="text-2xl font-bold text-blue-600">₹{formData.price || '0.00'}</span>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Upload Thumbnail */}
+            <ImageUpload
+              value={formData.thumbnail}
+              onChange={handleThumbnailChange}
+              endpoint="/upload/course-thumbnail"
+              label="Upload Thumbnail"
+              maxSize={5}
+              error={errors.thumbnail}
+              aspectRatio={16 / 9}
+              enableCrop={true}
+            />
 
             {/* Publish Option */}
             <div className="flex items-center space-x-3 pt-4 border-t border-gray-200">

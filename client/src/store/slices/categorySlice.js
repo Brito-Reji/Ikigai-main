@@ -49,6 +49,18 @@ export const deleteCategory = createAsyncThunk(
     }
 )
 
+export const toggleCategoryBlock = createAsyncThunk(
+    'categories/toggleCategoryBlock',
+    async (categoryId, thunkAPI) => {
+        try {
+            const res = await api.patch(`/categories/${categoryId}/toggle-block`)
+            return res.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.response?.data?.message || err.message)
+        }
+    }
+)
+
 
 const categorySlice = createSlice({
     name: 'categories',
@@ -103,6 +115,12 @@ const categorySlice = createSlice({
             .addCase(deleteCategory.rejected, (state, action) => {
                 state.loading = false
                 state.error = action.payload
+            })
+            .addCase(toggleCategoryBlock.fulfilled, (state, action) => {
+                const updatedCategory = action.payload.category
+                state.categories = state.categories.map((category) =>
+                    category._id === updatedCategory._id ? updatedCategory : category
+                )
             })
     }
 })

@@ -25,14 +25,21 @@ export default function CoursesPage() {
   
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState("relevance");
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+  const [selectedCategories, setSelectedCategories] = useState(() => {
+    const cat = searchParams.get('category');
+    return cat ? [cat] : [];
+  });
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState(() => {
+    const price = searchParams.get('priceRange');
+    return price ? price.split(',') : [];
+  });
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || '');
+  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || 'newest');
+  const [currentPage, setCurrentPage] = useState(() => Number(searchParams.get('page')) || 1);
   const [expandedSections, setExpandedSections] = useState({
     rating: true,
     chapters: true,
-    price: false,
+    price: true,
     category: true,
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,23 +50,26 @@ export default function CoursesPage() {
     const urlCategory = searchParams.get('category');
     const urlSort = searchParams.get('sort');
     const urlPage = searchParams.get('page');
+    const urlPriceRange = searchParams.get('priceRange');
     
-    setSearchQuery(urlSearch || '');
-    setSelectedCategories(urlCategory ? [urlCategory] : []);
-    setSortBy(urlSort || 'newest');
-    setCurrentPage(Number(urlPage) || 1);
-  }, []);
+    if (urlSearch) setSearchQuery(urlSearch);
+    if (urlCategory) setSelectedCategories([urlCategory]);
+    if (urlSort) setSortBy(urlSort);
+    if (urlPage) setCurrentPage(Number(urlPage));
+    if (urlPriceRange) setSelectedPriceRanges(urlPriceRange.split(','));
+  }, [searchParams]);
 
   // Update URL when filters change
   useEffect(() => {
     const params = {};
     if (searchQuery) params.search = searchQuery;
     if (selectedCategories.length > 0) params.category = selectedCategories[0];
+    if (selectedPriceRanges.length > 0) params.priceRange = selectedPriceRanges.join(',');
     if (sortBy !== 'newest') params.sort = sortBy;
     if (currentPage > 1) params.page = currentPage;
     
     setSearchParams(params);
-  }, [searchQuery, selectedCategories, sortBy, currentPage, setSearchParams]);
+  }, [searchQuery, selectedCategories, selectedPriceRanges, sortBy, currentPage, setSearchParams]);
 
   // Fetch categories
   const fetchCategoriesData = async () => {
@@ -85,6 +95,7 @@ export default function CoursesPage() {
       
       if (searchQuery) params.append('search', searchQuery);
       if (selectedCategories.length > 0) params.append('category', selectedCategories[0]);
+      if (selectedPriceRanges.length > 0) params.append('priceRange', selectedPriceRanges.join(','));
 
       const response = await api.get(`/public/courses?${params.toString()}`);
       
@@ -107,7 +118,7 @@ export default function CoursesPage() {
   // Fetch courses when filters change
   useEffect(() => {
     fetchCoursesData();
-  }, [searchQuery, selectedCategories, sortBy, currentPage]);
+  }, [searchQuery, selectedCategories, selectedPriceRanges, sortBy, currentPage]);
 
   // Transform courses for CourseCard component
   const transformedCourses = courses.map(course => ({
@@ -155,10 +166,20 @@ export default function CoursesPage() {
     }
   }
 
+  function togglePriceRange(range) {
+    setCurrentPage(1);
+    if (selectedPriceRanges.includes(range)) {
+      setSelectedPriceRanges(selectedPriceRanges.filter((r) => r !== range));
+    } else {
+      setSelectedPriceRanges([...selectedPriceRanges, range]);
+    }
+  }
+
   function clearAllFilters() {
     setSelectedChapters([]);
     setSelectedRatings([]);
     setSelectedCategories([]);
+    setSelectedPriceRanges([]);
     setSearchQuery("");
     setSortBy("newest");
     setSearchParams({});
@@ -191,7 +212,7 @@ export default function CoursesPage() {
               <Filter className="w-4 h-4" />
               <span className="text-sm">Filter</span>
             </button>
-            {(selectedCategories.length > 0 || selectedRatings.length > 0 || searchQuery) && (
+            {(selectedCategories.length > 0 || selectedRatings.length > 0 || selectedPriceRanges.length > 0 || searchQuery) && (
               <button
                 onClick={clearAllFilters}
                 className="text-sm text-blue-600 hover:text-blue-700 underline"
@@ -207,11 +228,12 @@ export default function CoursesPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
-              <option value="relevance">Relevance</option>
               <option value="newest">Newest</option>
               <option value="rating">Highest Rated</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
+              <option value="title-asc">Title: A-Z</option>
+              <option value="title-desc">Title: Z-A</option>
             </select>
           </div>
         </div>
@@ -332,15 +354,39 @@ export default function CoursesPage() {
               <div className="bg-white lg:bg-transparent rounded-lg p-4 lg:p-0 lg:mb-0 mb-4">
                 <button
                   onClick={() => toggleSection("price")}
-                  className="flex justify-between items-center w-full"
+                  className="flex justify-between items-center w-full mb-4"
                 >
-                  <h3 className="font-semibold text-gray-900 text-sm">Price</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm">Price Range</h3>
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
                       expandedSections.price ? "rotate-180" : ""
                     }`}
                   />
                 </button>
+                {expandedSections.price && (
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Free', value: 'free' },
+                      { label: 'Under ₹500', value: '0-500' },
+                      { label: '₹500 - ₹1000', value: '500-1000' },
+                      { label: '₹1000 - ₹2000', value: '1000-2000' },
+                      { label: 'Above ₹2000', value: '2000+' }
+                    ].map((range) => (
+                      <label
+                        key={range.value}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          className="rounded text-blue-600"
+                          checked={selectedPriceRanges.includes(range.value)}
+                          onChange={() => togglePriceRange(range.value)}
+                        />
+                        <span className="text-gray-700 text-sm">{range.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Category Filter */}

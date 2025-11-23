@@ -1,8 +1,9 @@
 import { useCategory } from '@/hooks/useRedux';
-import { createCategory } from '@/store/slices/categorySlice';
+import { createCategory, toggleCategoryBlock } from '@/store/slices/categorySlice';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@/api/axiosConfig.js';
+import Swal from 'sweetalert2';
 
 const Categories = () => {
   const { dispatch } = useCategory();
@@ -53,10 +54,44 @@ const Categories = () => {
     setIsModalOpen(true);
   };
 
-  const handleUnlist = (_id) => {
-    // Toggle category status
-    console.log('Unlisting category:', _id);
-    // Add your unlist logic here
+  const handleUnlist = async (categoryId) => {
+    const category = categories.find(c => c._id === categoryId);
+    const action = category?.isBlocked ? 'unblock' : 'block';
+    
+    const result = await Swal.fire({
+      title: `${action === 'block' ? 'Block' : 'Unblock'} this category?`,
+      text: `Are you sure you want to ${action} this category?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#f97316' : '#22c55e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action} it!`,
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await dispatch(toggleCategoryBlock(categoryId)).unwrap();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message || 'Category status updated successfully',
+          confirmButtonColor: '#14b8a6',
+          timer: 2000
+        });
+        
+        // Refresh categories
+        fetchCategoriesData(currentPage);
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: error || 'Failed to update category status',
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    }
   };
 
   const handleView = (_id) => {
@@ -233,9 +268,13 @@ const Categories = () => {
                   </button>
                   <button
                     onClick={() => handleUnlist(category._id)}
-                    className="px-5 py-1.5 bg-white text-orange-500 border border-orange-500 rounded font-medium hover:bg-orange-50 transition-colors"
+                    className={`px-5 py-1.5 rounded font-medium transition-colors ${
+                      category.isBlocked
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-white text-orange-500 border border-orange-500 hover:bg-orange-50'
+                    }`}
                   >
-                    Unlist
+                    {category.isBlocked ? 'Unblock' : 'Block'}
                   </button>
                 </div>
               </div>
