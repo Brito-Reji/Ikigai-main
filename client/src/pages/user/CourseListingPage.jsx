@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Search,
 } from "lucide-react";
 import CourseCard from "../../components/CourseCard.jsx";
 import { useCourse } from "@/hooks/useRedux.js";
@@ -25,7 +24,7 @@ export default function CoursesPage() {
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState("relevance");
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedSections, setExpandedSections] = useState({
@@ -36,13 +35,33 @@ export default function CoursesPage() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Sync search query from URL
+  // Sync filters from URL whenever searchParams change
   useEffect(() => {
     const urlSearch = searchParams.get('search');
-    if (urlSearch) {
-      setSearchQuery(urlSearch);
-    }
+    const urlCategory = searchParams.get('category');
+    const urlRatings = searchParams.get('ratings');
+    const urlSort = searchParams.get('sort');
+    
+    setSearchQuery(urlSearch || '');
+    setSelectedCategories(urlCategory ? urlCategory.split(',') : []);
+    setSelectedRatings(urlRatings ? urlRatings.split(',').map(Number) : []);
+    setSortBy(urlSort || 'relevance');
   }, [searchParams]);
+
+  // Update URL when filters change
+  const updateURL = () => {
+    const params = {};
+    if (searchQuery) params.search = searchQuery;
+    if (selectedCategories.length > 0) params.category = selectedCategories.join(',');
+    if (selectedRatings.length > 0) params.ratings = selectedRatings.join(',');
+    if (sortBy !== 'relevance') params.sort = sortBy;
+    
+    setSearchParams(params);
+  };
+
+  useEffect(() => {
+    updateURL();
+  }, [selectedCategories, selectedRatings, sortBy]);
 
   // Fetch courses and categories on component mount
   useEffect(() => {
@@ -129,6 +148,7 @@ export default function CoursesPage() {
   }
 
   function toggleRating(rating) {
+    setCurrentPage(1);
     if (selectedRatings.includes(rating)) {
       setSelectedRatings(selectedRatings.filter((r) => r !== rating));
     } else {
@@ -137,6 +157,7 @@ export default function CoursesPage() {
   }
 
   function toggleCategory(categoryId) {
+    setCurrentPage(1);
     if (selectedCategories.includes(categoryId)) {
       setSelectedCategories(selectedCategories.filter((c) => c !== categoryId));
     } else {
@@ -153,15 +174,7 @@ export default function CoursesPage() {
     setCurrentPage(1);
   }
 
-  const handleSearchChange = (value) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-    if (value.trim()) {
-      setSearchParams({ search: value.trim() });
-    } else {
-      setSearchParams({});
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -175,20 +188,6 @@ export default function CoursesPage() {
           <p className="text-sm sm:text-base text-gray-600">
             {publicLoading ? 'Loading courses...' : `${filteredCourses.length} courses available`}
           </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
         </div>
 
         {/* Filter and Sort Bar */}

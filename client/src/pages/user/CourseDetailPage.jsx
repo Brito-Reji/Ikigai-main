@@ -141,45 +141,7 @@ const CourseDetailPage = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
-              {/* Course Purchase Card */}
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="relative">
-                  <img
-                    src={publicCourseDetails.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'}
-                    alt={publicCourseDetails.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <button className="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-4 transition-all">
-                      <svg className="w-8 h-8 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 5v10l8-5-8-5z"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <div className="text-center mb-4">
-                    <span className="text-3xl font-bold text-gray-900">₹{publicCourseDetails.price}</span>
-                    <span className="text-gray-500 line-through ml-2">₹{Math.round(publicCourseDetails.price * 1.5)}</span>
-                  </div>
-                  
-                  <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors mb-3">
-                    Add to Cart
-                  </button>
-                  
-                  <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors mb-4">
-                    Buy Now
-                  </button>
-                  
-                  <div className="text-center text-sm text-gray-600 space-y-1">
-                    <p>✓ 30-Day Money-Back Guarantee</p>
-                    <p>✓ Full Lifetime Access</p>
-                    <p>✓ Access on Mobile and TV</p>
-                    <p>✓ Certificate of Completion</p>
-                  </div>
-                </div>
-              </div>
+    
 
               {/* Course Features */}
               <div className="bg-white rounded-lg shadow-lg p-6">
