@@ -61,6 +61,10 @@ api.interceptors.response.use(
       } catch (err) {
         console.log("Refresh failed:", err.message)
         localStorage.removeItem("accessToken")
+        // Don't reject if it's just an invalid/missing refresh token on login page
+        if (window.location.pathname.includes('/login')) {
+          return Promise.reject({ ...err, silent: true })
+        }
         return Promise.reject(err)
       }
     }

@@ -6,6 +6,7 @@ import { useCourse } from "@/hooks/useRedux.js";
 import { useCategory } from "@/hooks/useRedux.js";
 import { createCourse, clearCreateState } from "@/store/slices/courseSlice.js";
 import { fetchCategories } from "@/store/slices/categorySlice.js";
+import Swal from "sweetalert2";
 
 export default function CreateCoursePage() {
   const navigate = useNavigate();
@@ -36,16 +37,28 @@ export default function CreateCoursePage() {
   // Handle course creation success
   useEffect(() => {
     if (createSuccess) {
-      alert("Course created successfully!");
-      navigate("/instructor/courses");
-      courseDispatch(clearCreateState());
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Course created successfully!',
+        confirmButtonColor: '#4f46e5',
+        timer: 2000
+      }).then(() => {
+        navigate("/instructor/courses");
+        courseDispatch(clearCreateState());
+      });
     }
   }, [createSuccess, navigate, courseDispatch]);
 
   // Handle course creation error
   useEffect(() => {
     if (createError) {
-      alert(createError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: createError,
+        confirmButtonColor: '#ef4444'
+      });
       courseDispatch(clearCreateState());
     }
   }, [createError, courseDispatch]);
