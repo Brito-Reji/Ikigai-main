@@ -1,5 +1,5 @@
 import { useCategory } from "@/hooks/useRedux";
-import { createCategory, toggleCategoryBlock } from "@/store/slices/categorySlice";
+import { createCategory, updateCategory, toggleCategoryBlock } from "@/store/slices/categorySlice";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "@/api/axiosConfig.js";
@@ -50,6 +50,13 @@ const Categories = () => {
   const handleAddCategory = () => {
     setModalMode("add");
     setCurrentCategory({ _id: null, name: "", description: "" });
+    setErrors({});
+    setIsModalOpen(true);
+  };
+
+  const handleEditCategory = (category) => {
+    setModalMode("edit");
+    setCurrentCategory({ _id: category._id, name: category.name, description: category.description });
     setErrors({});
     setIsModalOpen(true);
   };
@@ -120,16 +127,43 @@ const Categories = () => {
       return;
     }
 
-    if (modalMode === "add") {
-      const newCategory = {
-        ...currentCategory,
-      };
-      await dispatch(createCategory(newCategory));
+    try {
+      if (modalMode === "add") {
+        const newCategory = {
+          ...currentCategory,
+        };
+        await dispatch(createCategory(newCategory)).unwrap();
+        
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Category created successfully",
+          confirmButtonColor: "#14b8a6",
+          timer: 2000
+        });
+      } else {
+        await dispatch(updateCategory(currentCategory)).unwrap();
+        
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Category updated successfully",
+          confirmButtonColor: "#14b8a6",
+          timer: 2000
+        });
+      }
+      
       fetchCategoriesData(currentPage);
+      setIsModalOpen(false);
+      setCurrentCategory({ _id: null, name: "", description: "" });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error || "Failed to save category",
+        confirmButtonColor: "#ef4444"
+      });
     }
-
-    setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: "", description: "" });
   };
 
   const handleCancel = () => {
@@ -265,6 +299,12 @@ const Categories = () => {
                     className="px-6 py-1.5 bg-teal-500 text-white rounded font-medium hover:bg-teal-600 transition-colors"
                   >
                     View
+                  </button>
+                  <button
+                    onClick={() => handleEditCategory(category)}
+                    className="px-6 py-1.5 bg-blue-500 text-white rounded font-medium hover:bg-blue-600 transition-colors"
+                  >
+                    Edit
                   </button>
                   <button
                     onClick={() => handleUnlist(category._id)}

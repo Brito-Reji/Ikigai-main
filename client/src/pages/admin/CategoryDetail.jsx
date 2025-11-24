@@ -1,319 +1,152 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useCategory } from "@/hooks/useRedux";
-import { createCategory, fetchCategories } from "@/store/slices/categorySlice";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, BookOpen, Eye } from 'lucide-react';
+import api from '@/api/axiosConfig.js';
 
 const CategoryDetail = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
-  const { categories, loading, error, dispatch } = useCategory();
-  
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("edit");
-  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: "", description: "" });
-  const [errors, setErrors] = useState({});
+  const [category, setCategory] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (categories.length === 0) {
-      dispatch(fetchCategories());
-    }
-  }, [dispatch, categories.length]);
+    fetchCategoryDetails();
+    fetchCategoryCourses();
+  }, [categoryId]);
 
-  useEffect(() => {
-    if (categories.length > 0 && categoryId) {
-      const category = categories.find(cat => cat._id === categoryId);
-      if (category) {
-        setSelectedCategory(category);
-      } else {
-        // Category not found, redirect to categories list
-        navigate("/admin/categories");
+  const fetchCategoryDetails = async () => {
+    try {
+      const response = await api.get(`/public`);
+      if (response.data.success) {
+        const cat = response.data.categories.find(c => c._id === categoryId);
+        setCategory(cat);
       }
-    }
-  }, [categories, categoryId, navigate]);
-
-  // Mock courses data for demonstration
-  const mockCourses = [
-    { _id: "1", title: "React Fundamentals", instructor: "John Doe", students: 150, status: "active" },
-    { _id: "2", title: "Advanced JavaScript", instructor: "Jane Smith", students: 89, status: "active" },
-    { _id: "3", title: "Node.js Backend", instructor: "Mike Johnson", students: 67, status: "draft" },
-  ];
-
-  const handleBackToList = () => {
-    navigate("/admin/categories");
-  };
-
-  const handleSettings = () => {
-    setShowSettings(!showSettings);
-  };
-
-  const handleUnlist = (_id) => {
-    console.log("Unlisting category:", _id);
-    setShowSettings(false);
-  };
-
-  const handleEdit = (_id) => {
-    const category = categories.find(cat => cat._id === _id);
-    setModalMode("edit");
-    setCurrentCategory(category);
-    setErrors({});
-    setIsModalOpen(true);
-    setShowSettings(false);
-  };
-
-  const handleDelete = (_id) => {
-    if (window.confirm("⚠️ PERMANENT ACTION: This will permanently delete the category and cannot be undone. Are you absolutely sure?")) {
-      console.log("Deleting category:", _id);
-      setShowSettings(false);
-      // After deletion, navigate back to categories list
-      navigate("/admin/categories");
+    } catch (error) {
+      console.error('Error fetching category:', error);
+      setError('Failed to fetch category details');
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!currentCategory.name.trim()) {
-      newErrors.name = "Category name is required";
+  const fetchCategoryCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/admin/courses?category=${categoryId}&limit=100`);
+      if (response.data.success) {
+        setCourses(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setError('Failed to fetch courses');
+    } finally {
+      setLoading(false);
     }
-    
-    if (!currentCategory.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    // Update category logic here
-    console.log("Updating category:", currentCategory);
-    
-    setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: "", description: "" });
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: "", description: "" });
-    setErrors({});
-  };
-
-  if (loading) {
+  if (loading && !category) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading category...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     );
   }
 
-  if (!selectedCategory) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Category not found</div>
+      <div className="text-center py-12">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button
+          onClick={() => navigate('/admin/categories')}
+          className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+        >
+          Back to Categories
+        </button>
       </div>
     );
   }
 
   return (
     <div>
-      {/* GitHub-style top bar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleBackToList}
-              className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Categories
-            </button>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-semibold text-gray-800">{selectedCategory.name}</h1>
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-sm rounded-full">Active</span>
-            </div>
+      {/* Header */}
+      <div className="mb-8">
+        <button
+          onClick={() => navigate('/admin/categories')}
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to Categories
+        </button>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{category?.name}</h1>
+          <p className="text-gray-600">{category?.description}</p>
+          <div className="mt-4 flex items-center text-sm text-gray-500">
+            <BookOpen className="w-4 h-4 mr-2" />
+            {courses.length} {courses.length === 1 ? 'course' : 'courses'} in this category
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
-              Export
-            </button>
-            <button className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors">
-              Add Course
-            </button>
-            <div className="relative">
-              <button
-                onClick={handleSettings}
-                className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-              
-              {/* Settings Dropdown */}
-              {showSettings && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                  <div className="py-1">
-                    <button
-                      onClick={() => handleEdit(selectedCategory._id)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Edit Category
-                    </button>
-                    <button
-                      onClick={() => handleUnlist(selectedCategory._id)}
-                      className="block w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-gray-100"
-                    >
-                      Unlist Category
-                    </button>
-                    <hr className="my-1" />
-                    <button
-                      onClick={() => handleDelete(selectedCategory._id)}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    >
-                      Delete Category
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Category Description */}
-        <p className="text-gray-600 mt-2">{selectedCategory.description}</p>
-      </div>
-
-      {/* Courses List */}
-      <div className="p-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Courses in this Category</h2>
-          </div>
-          
-          <div className="divide-y divide-gray-200">
-            {mockCourses.map((course) => (
-              <div key={course._id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900">{course.title}</h3>
-                    <p className="text-sm text-gray-600">by {course.instructor}</p>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <span className="text-sm text-gray-500">{course.students} students</span>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        course.status === "active" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                        {course.status}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <button className="px-4 py-2 text-sm bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors">
-                      View
-                    </button>
-                    <button className="px-4 py-2 text-sm bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                      Edit
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {mockCourses.length === 0 && (
-            <div className="px-6 py-8 text-center text-gray-500">
-              No courses found in this category.
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            <div className="flex justify-between items-center p-6 border-b">
-              <h3 className="text-xl font-semibold text-gray-800">Edit Category</h3>
-              <button
-                onClick={handleCancel}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+      {/* Courses Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
+          ))}
+        </div>
+      ) : courses.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses.map((course) => (
+            <div key={course._id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="relative">
+                <img
+                  src={course.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'}
+                  alt={course.title}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+                <div className="absolute top-2 right-2">
+                  {course.blocked ? (
+                    <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                      Blocked
+                    </span>
+                  ) : course.published ? (
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      Published
+                    </span>
+                  ) : (
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                      Draft
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{course.title}</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  by {course.instructor?.firstName} {course.instructor?.lastName}
+                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-lg font-bold text-teal-600">₹{course.price}</span>
+                  {course.actualPrice > course.price && (
+                    <span className="text-sm text-gray-500 line-through">₹{course.actualPrice}</span>
+                  )}
+                </div>
+                <Link
+                  to={`/admin/courses/${course._id}`}
+                  className="w-full px-4 py-2 bg-teal-600 text-white text-sm rounded hover:bg-teal-700 transition-colors flex items-center justify-center"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Link>
+              </div>
             </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={currentCategory.name}
-                    onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.name ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="Enter category name"
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={currentCategory.description}
-                    onChange={(e) => setCurrentCategory({ ...currentCategory, description: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.description ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder="Enter category description"
-                    rows="4"
-                  />
-                  {errors.description && (
-                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-lg">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses in this category</h3>
+          <p className="text-gray-500">Courses will appear here once instructors create them</p>
         </div>
       )}
     </div>

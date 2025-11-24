@@ -1,142 +1,134 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft,
-  Ban, 
-  Trash2, 
-  CheckCircle, 
-  Clock,
-  DollarSign,
-  Calendar,
-  User,
-  BookOpen,
-  Eye,
-  Edit,
-  Globe,
-  Lock
-} from "lucide-react";
-import api from "@/api/axiosConfig.js";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Ban, CheckCircle, Trash2 } from 'lucide-react';
+import api from '@/api/axiosConfig.js';
+import Swal from 'sweetalert2';
+
+// Reuse user components
+import CourseHero from '@/components/course/CourseHero.jsx';
+import CourseSyllabus from '@/components/course/CourseSyllabus.jsx';
+import InstructorInfo from '@/components/course/InstructorInfo.jsx';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  // Fetch course details
+  useEffect(() => {
+    fetchCourseDetails();
+  }, [courseId]);
+
   const fetchCourseDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/admin/courses/${courseId}`);
+      const response = await api.get(`/public/courses/${courseId}`);
       if (response.data.success) {
         setCourse(response.data.data);
       }
     } catch (error) {
-      console.error("Error fetching course details:", error);
-      setError("Failed to fetch course details");
+      console.error('Error fetching course:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to fetch course details',
+        confirmButtonColor: '#ef4444'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Toggle course block status
-  const toggleCourseBlock = async () => {
-    try {
-      setActionLoading(true);
-      const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
-      if (response.data.success) {
-        setCourse(response.data.data);
-        alert(response.data.message);
-      }
-    } catch (error) {
-      console.error("Error toggling course block:", error);
-      alert("Failed to update course status");
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const handleToggleBlock = async () => {
+    const action = course?.blocked ? 'unblock' : 'block';
+    
+    const result = await Swal.fire({
+      title: `${action === 'block' ? 'Block' : 'Unblock'} this course?`,
+      text: `Are you sure you want to ${action} this course?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: action === 'block' ? '#eab308' : '#22c55e',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action} it!`,
+      cancelButtonText: 'Cancel'
+    });
 
-  // Delete course
-  const deleteCourse = async () => {
-    if (window.confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
+    if (result.isConfirmed) {
       try {
-        setActionLoading(true);
-        const response = await api.delete(`/admin/courses/${courseId}`);
+        const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
         if (response.data.success) {
-          alert("Course deleted successfully");
-          navigate("/admin/courses");
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: response.data.message,
+            confirmButtonColor: '#14b8a6',
+            timer: 2000
+          });
+          fetchCourseDetails();
         }
       } catch (error) {
-        console.error("Error deleting course:", error);
-        alert("Failed to delete course");
-      } finally {
-        setActionLoading(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'Failed to update course status',
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
   };
 
-  useEffect(() => {
-    if (courseId) {
-      fetchCourseDetails();
-    }
-  }, [courseId]);
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "This course will be deleted. You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    });
 
-  const getStatusBadge = (course) => {
-    if (course.blocked) {
-      return (
-        <span className="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">
-          <Ban className="w-4 h-4 mr-2" />
-          Blocked
-        </span>
-      );
+    if (result.isConfirmed) {
+      try {
+        const response = await api.delete(`/admin/courses/${courseId}`);
+        if (response.data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Course has been deleted successfully.',
+            confirmButtonColor: '#14b8a6',
+            timer: 2000
+          });
+          navigate('/admin/courses');
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'Failed to delete course',
+          confirmButtonColor: '#ef4444'
+        });
+      }
     }
-    if (course.published) {
-      return (
-        <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-          <Globe className="w-4 h-4 mr-2" />
-          Published
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">
-        <Clock className="w-4 h-4 mr-2" />
-        Draft
-      </span>
-    );
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500 mb-4">{error}</p>
-        <button 
-          onClick={fetchCourseDetails}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Retry
-        </button>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-teal-600"></div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Course not found</p>
-        <button 
-          onClick={() => navigate("/admin/courses")}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h2>
+        <button
+          onClick={() => navigate('/admin/courses')}
+          className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
         >
           Back to Courses
         </button>
@@ -144,35 +136,31 @@ const CourseDetail = () => {
     );
   }
 
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'syllabus', label: 'Syllabus' },
+    { id: 'instructor', label: 'Instructor' }
+  ];
+
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8">
-        <button
-          onClick={() => navigate("/admin/courses")}
-          className="flex items-center text-gray-600 hover:text-gray-800 mb-4 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Courses
-        </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Admin Actions Bar */}
+      <div className="bg-white border-b border-gray-200 mb-6 p-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
-            <div className="flex items-center space-x-4">
-              {getStatusBadge(course)}
-              <span className="text-gray-500">
-                Created on {new Date(course.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-          <div className="flex space-x-3">
+          <button
+            onClick={() => navigate('/admin/courses')}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Courses
+          </button>
+          <div className="flex gap-3">
             <button
-              onClick={toggleCourseBlock}
-              disabled={actionLoading}
-              className={`px-4 py-2 rounded-lg transition-colors flex items-center disabled:opacity-50 ${
-                course.blocked 
-                  ? "bg-green-600 text-white hover:bg-green-700" 
-                  : "bg-yellow-600 text-white hover:bg-yellow-700"
+              onClick={handleToggleBlock}
+              className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                course.blocked
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
               }`}
             >
               {course.blocked ? (
@@ -188,9 +176,8 @@ const CourseDetail = () => {
               )}
             </button>
             <button
-              onClick={deleteCourse}
-              disabled={actionLoading}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center disabled:opacity-50"
+              onClick={handleDelete}
+              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete Course
@@ -199,156 +186,96 @@ const CourseDetail = () => {
         </div>
       </div>
 
-      {/* Course Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Course Image */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Thumbnail</h2>
-            <img
-              src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80"}
-              alt={course.title}
-              className="w-full h-64 object-cover rounded-lg"
-            />
-          </div>
+      {/* Course Hero Section */}
+      <CourseHero course={course} />
 
-          {/* Description */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-            <p className="text-gray-700 leading-relaxed">{course.description}</p>
-          </div>
-
-          {/* Overview */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Overview</h2>
-            <p className="text-gray-700 leading-relaxed">{course.overview}</p>
-          </div>
-
-          {/* Course Analytics (Placeholder) */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Analytics</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <Eye className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-blue-600">0</p>
-                <p className="text-sm text-gray-600">Views</p>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <User className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-green-600">0</p>
-                <p className="text-sm text-gray-600">Enrollments</p>
-              </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <DollarSign className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-yellow-600">₹0</p>
-                <p className="text-sm text-gray-600">Revenue</p>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <BookOpen className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-purple-600">0</p>
-                <p className="text-sm text-gray-600">Completions</p>
-              </div>
-            </div>
-          </div>
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-teal-500 text-teal-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
+      </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Course Info */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Information</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Price</span>
-                <span className="font-semibold text-lg text-green-600">₹{course.price}</span>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-8">
+            {activeTab === 'overview' && (
+              <div className="space-y-8">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Course</h2>
+                  <p className="text-gray-700 leading-relaxed mb-6">{course.overview}</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-teal-50 rounded-lg">
+                      <div className="text-2xl font-bold text-teal-600 mb-2">₹{course.price}</div>
+                      <div className="text-sm text-gray-600">Current Price</div>
+                      {course.actualPrice > course.price && (
+                        <div className="text-xs text-gray-500 line-through mt-1">₹{course.actualPrice}</div>
+                      )}
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 mb-2">{course.category?.name}</div>
+                      <div className="text-sm text-gray-600">Category</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600 mb-2">
+                        {course.published ? 'Published' : 'Draft'}
+                      </div>
+                      <div className="text-sm text-gray-600">Status</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <CourseSyllabus course={course} />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Category</span>
-                <span className="font-medium">{course.category?.name}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Status</span>
-                {getStatusBadge(course)}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Created</span>
-                <span className="font-medium">{new Date(course.createdAt).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Last Updated</span>
-                <span className="font-medium">{new Date(course.updatedAt).toLocaleDateString()}</span>
-              </div>
-            </div>
+            )}
+
+            {activeTab === 'syllabus' && <CourseSyllabus course={course} />}
+            {activeTab === 'instructor' && <InstructorInfo instructor={course.instructor} />}
           </div>
 
-          {/* Instructor Info */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Instructor</h2>
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                {course.instructor?.profileImageUrl ? (
-                  <img 
-                    src={course.instructor.profileImageUrl} 
-                    alt={`${course.instructor.firstName} ${course.instructor.lastName}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-6 h-6 text-gray-600" />
-                )}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">
-                  {course.instructor?.firstName} {course.instructor?.lastName}
-                </p>
-                <p className="text-sm text-gray-600">{course.instructor?.email}</p>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                View Instructor Profile
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview Course
-              </button>
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Course Details
-              </button>
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
-                <BookOpen className="w-4 h-4 mr-2" />
-                View Course Content
-              </button>
-            </div>
-          </div>
-
-          {/* Course Statistics */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Statistics</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total Views</span>
-                <span className="font-semibold">0</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Enrollments</span>
-                <span className="font-semibold">0</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Completion Rate</span>
-                <span className="font-semibold">0%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Average Rating</span>
-                <span className="font-semibold">0.0</span>
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
+              {/* Course Status */}
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Course Status</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Published:</span>
+                    <span className={`font-medium ${course.published ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {course.published ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Blocked:</span>
+                    <span className={`font-medium ${course.blocked ? 'text-red-600' : 'text-green-600'}`}>
+                      {course.blocked ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Created:</span>
+                    <span className="font-medium text-gray-900">
+                      {new Date(course.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
