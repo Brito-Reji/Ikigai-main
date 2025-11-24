@@ -15,7 +15,7 @@ function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated || localStorage.getItem("accessToken")) {
-      navigate("/course", { replace: true });
+      navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -182,7 +182,7 @@ function LoginPage() {
           localStorage.removeItem("userAuth");
           
           // Check if user is blocked
-          if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes('blocked')) {
+          if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes("blocked")) {
             Swal.fire({
               icon: "error",
               title: "Account Blocked",
@@ -190,7 +190,7 @@ function LoginPage() {
               confirmButtonColor: "#dc2626",
               confirmButtonText: "OK",
             });
-          } else if (resultAction.payload?.message?.toLowerCase().includes('google')) {
+          } else if (resultAction.payload?.message?.toLowerCase().includes("google")) {
             // Special handling for Google auth error
             Swal.fire({
               icon: "info",

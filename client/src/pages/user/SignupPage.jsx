@@ -17,7 +17,7 @@ export default function SignUpPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated || localStorage.getItem("accessToken")) {
-      navigate("/course", { replace: true });
+      navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

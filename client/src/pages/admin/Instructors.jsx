@@ -1,7 +1,7 @@
 import api from "@/api/axiosConfig";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Instructors = () => {
   const navigate = useNavigate();
@@ -10,9 +10,9 @@ const Instructors = () => {
   const [loading, setLoading] = useState(true);
   
   // Get initial values from URL or defaults
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
-  const [itemsPerPage, setItemsPerPage] = useState(Number(searchParams.get('limit')) || 10);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [itemsPerPage, setItemsPerPage] = useState(Number(searchParams.get("limit")) || 10);
 
   // Helper function to get full name
   const getFullName = (instructor) => {
@@ -21,7 +21,7 @@ const Instructors = () => {
       return `${instructor.firstName} ${instructor.lastName}`;
     }
     if (instructor.firstName) return instructor.firstName;
-    return instructor.username || 'N/A';
+    return instructor.username || "N/A";
   };
 
   useEffect(() => {
@@ -42,19 +42,19 @@ const Instructors = () => {
 
   const handleBlockToggle = async (instructorId) => {
     const instructor = instructors.find(i => i._id === instructorId);
-    const action = instructor.isBlocked ? 'unblock' : 'block';
+    const action = instructor.isBlocked ? "unblock" : "block";
     
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} Instructor?`,
+      title: `${action === "block" ? "Block" : "Unblock"} Instructor?`,
       html: `
         <p>Are you sure you want to ${action} <strong>${getFullName(instructor)}</strong>?</p>
       `,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -71,19 +71,19 @@ const Instructors = () => {
         );
         
         Swal.fire({
-          title: 'Success!',
+          title: "Success!",
           text: `Instructor has been ${action}ed successfully.`,
-          icon: 'success',
-          confirmButtonColor: '#3b82f6',
+          icon: "success",
+          confirmButtonColor: "#3b82f6",
           timer: 2000
         });
       } catch (error) {
         console.error("Error toggling block status:", error);
         Swal.fire({
-          title: 'Error!',
-          text: 'Failed to update instructor status.',
-          icon: 'error',
-          confirmButtonColor: '#dc2626'
+          title: "Error!",
+          text: "Failed to update instructor status.",
+          icon: "error",
+          confirmButtonColor: "#dc2626"
         });
       }
     }

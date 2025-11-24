@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Star, ThumbsUp, Flag } from 'lucide-react';
+import React, { useState } from "react";
+import { Star, ThumbsUp, Flag } from "lucide-react";
 
 const CourseReviews = ({ course }) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -170,7 +170,7 @@ const CourseReviews = ({ course }) => {
             onClick={() => setShowAllReviews(!showAllReviews)}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            {showAllReviews ? 'Show Less Reviews' : `Show All ${reviews.length} Reviews`}
+            {showAllReviews ? "Show Less Reviews" : `Show All ${reviews.length} Reviews`}
           </button>
         </div>
       )}

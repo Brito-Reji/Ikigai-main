@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '@/api/axiosConfig';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import api from "@/api/axiosConfig";
 import { 
   ArrowLeft, 
   Mail, 
@@ -13,9 +13,9 @@ import {
   Home,
   Award,
   BookOpen
-} from 'lucide-react';
-import ThreeDotLoader from '@/components/ThreeDotLoader';
-import Swal from 'sweetalert2';
+} from "lucide-react";
+import ThreeDotLoader from "@/components/ThreeDotLoader";
+import Swal from "sweetalert2";
 
 const InstructorDetail = () => {
   const { id } = useParams();
@@ -33,26 +33,26 @@ const InstructorDetail = () => {
       const response = await api.get(`/admin/instructors/${id}`);
       setInstructor(response.data.data);
     } catch (error) {
-      console.error('Error fetching instructor details:', error);
+      console.error("Error fetching instructor details:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleBlockToggle = async () => {
-    const action = instructor.isBlocked ? 'unblock' : 'block';
+    const action = instructor.isBlocked ? "unblock" : "block";
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} Instructor?`,
+      title: `${action === "block" ? "Block" : "Unblock"} Instructor?`,
       html: `
         <p>Are you sure you want to ${action} <strong>${getFullName(instructor)}</strong>?</p>
-        ${action === 'block' ? '<p class="text-sm text-gray-600 mt-2">This instructor will not be able to access their account and manage courses.</p>' : '<p class="text-sm text-gray-600 mt-2">This instructor will regain access to their account and courses.</p>'}
+        ${action === "block" ? '<p class="text-sm text-gray-600 mt-2">This instructor will not be able to access their account and manage courses.</p>' : '<p class="text-sm text-gray-600 mt-2">This instructor will regain access to their account and courses.</p>'}
       `,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -61,42 +61,42 @@ const InstructorDetail = () => {
         setInstructor({ ...instructor, isBlocked: !instructor.isBlocked });
         
         Swal.fire({
-          title: `Instructor ${action === 'block' ? 'Blocked' : 'Unblocked'}!`,
+          title: `Instructor ${action === "block" ? "Blocked" : "Unblocked"}!`,
           text: `${getFullName(instructor)} has been ${action}ed successfully.`,
-          icon: 'success',
-          confirmButtonColor: '#3b82f6'
+          icon: "success",
+          confirmButtonColor: "#3b82f6"
         });
       } catch (error) {
-        console.error('Error toggling block status:', error);
+        console.error("Error toggling block status:", error);
         Swal.fire({
-          title: 'Error!',
-          text: 'Failed to update instructor status. Please try again.',
-          icon: 'error',
-          confirmButtonColor: '#dc2626'
+          title: "Error!",
+          text: "Failed to update instructor status. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#dc2626"
         });
       }
     }
   };
 
   const getFullName = (instructor) => {
-    if (!instructor) return 'N/A';
+    if (!instructor) return "N/A";
     if (instructor.fullName) return instructor.fullName;
     if (instructor.firstName && instructor.lastName) {
       return `${instructor.firstName} ${instructor.lastName}`;
     }
     if (instructor.firstName) return instructor.firstName;
-    return instructor.username || 'N/A';
+    return instructor.username || "N/A";
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", { 
+      day: "2-digit", 
+      month: "long", 
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -113,7 +113,7 @@ const InstructorDetail = () => {
       <div className="flex flex-col items-center justify-center h-screen">
         <p className="text-xl text-gray-600 mb-4">Instructor not found</p>
         <button
-          onClick={() => navigate('/admin/instructors')}
+          onClick={() => navigate("/admin/instructors")}
           className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
         >
           Back to Instructors
@@ -141,7 +141,7 @@ const InstructorDetail = () => {
 
       {/* Back Button */}
       <button
-        onClick={() => navigate('/admin/instructors')}
+        onClick={() => navigate("/admin/instructors")}
         className="flex items-center text-indigo-600 hover:text-indigo-700 mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -162,25 +162,25 @@ const InstructorDetail = () => {
                 </h1>
                 <Award className="w-6 h-6 text-yellow-500" />
               </div>
-              <p className="text-gray-600 text-lg mb-3">@{instructor.username || 'N/A'}</p>
+              <p className="text-gray-600 text-lg mb-3">@{instructor.username || "N/A"}</p>
               <div className="flex items-center space-x-3">
                 <span
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
                     instructor.isBlocked
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-green-100 text-green-800'
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800"
                   }`}
                 >
-                  {instructor.isBlocked ? 'Blocked' : 'Active'}
+                  {instructor.isBlocked ? "Blocked" : "Active"}
                 </span>
                 <span
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
                     instructor.isVerified
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {instructor.isVerified ? 'Verified' : 'Not Verified'}
+                  {instructor.isVerified ? "Verified" : "Not Verified"}
                 </span>
                 <span className="px-4 py-1.5 text-sm font-semibold rounded-full bg-purple-100 text-purple-800">
                   Instructor
@@ -192,11 +192,11 @@ const InstructorDetail = () => {
             onClick={handleBlockToggle}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               instructor.isBlocked
-                ? 'bg-green-500 text-white hover:bg-green-600'
-                : 'bg-red-500 text-white hover:bg-red-600'
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-red-500 text-white hover:bg-red-600"
             }`}
           >
-            {instructor.isBlocked ? 'Unblock Instructor' : 'Block Instructor'}
+            {instructor.isBlocked ? "Unblock Instructor" : "Block Instructor"}
           </button>
         </div>
       </div>
@@ -213,14 +213,14 @@ const InstructorDetail = () => {
               <Mail className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Email Address</p>
-                <p className="text-gray-800 font-medium">{instructor.email || 'N/A'}</p>
+                <p className="text-gray-800 font-medium">{instructor.email || "N/A"}</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <User className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Username</p>
-                <p className="text-gray-800 font-medium">{instructor.username || 'N/A'}</p>
+                <p className="text-gray-800 font-medium">{instructor.username || "N/A"}</p>
               </div>
             </div>
           </div>
@@ -255,7 +255,7 @@ const InstructorDetail = () => {
               <div>
                 <p className="text-sm text-gray-500">Email Verification</p>
                 <p className="text-gray-800 font-medium">
-                  {instructor.isVerified ? 'Verified' : 'Not Verified'}
+                  {instructor.isVerified ? "Verified" : "Not Verified"}
                 </p>
               </div>
             </div>
@@ -310,7 +310,7 @@ const InstructorDetail = () => {
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <Shield className="w-8 h-8 text-purple-600 mx-auto mb-2" />
             <p className="text-3xl font-bold text-purple-600">
-              {instructor.isBlocked ? 'Blocked' : 'Active'}
+              {instructor.isBlocked ? "Blocked" : "Active"}
             </p>
             <p className="text-sm text-gray-600 mt-1">Account Status</p>
           </div>

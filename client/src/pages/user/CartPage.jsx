@@ -1,8 +1,8 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
-import { useCart } from '@/hooks/useRedux';
-import { removeFromCart, clearCart } from '@/store/slices/cartSlice';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Trash2, ShoppingCart, ArrowRight } from "lucide-react";
+import { useCart } from "@/hooks/useRedux";
+import { removeFromCart, clearCart } from "@/store/slices/cartSlice";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -13,14 +13,14 @@ const CartPage = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm('Are you sure you want to clear your cart?')) {
+    if (window.confirm("Are you sure you want to clear your cart?")) {
       dispatch(clearCart());
     }
   };
 
   const calculateTotal = () => {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.price?.replace(/[^0-9.-]+/g, '') || 0);
+      const price = parseFloat(item.price?.replace(/[^0-9.-]+/g, "") || 0);
       return total + price;
     }, 0);
   };
@@ -33,7 +33,7 @@ const CartPage = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Start adding courses to your cart!</p>
           <button
-            onClick={() => navigate('/course')}
+            onClick={() => navigate("/courses")}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
           >
             Browse Courses
@@ -67,7 +67,7 @@ const CartPage = () => {
               >
                 {/* Course Image */}
                 <img
-                  src={course.image || '/placeholder.svg'}
+                  src={course.image || "/placeholder.svg"}
                   alt={course.title}
                   className="w-32 h-20 object-cover rounded"
                 />
@@ -119,7 +119,7 @@ const CartPage = () => {
               </div>
 
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => navigate("/checkout")}
                 className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2"
               >
                 <span>Proceed to Checkout</span>
@@ -127,7 +127,7 @@ const CartPage = () => {
               </button>
 
               <button
-                onClick={() => navigate('/course')}
+                onClick={() => navigate("/courses")}
                 className="w-full mt-3 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
               >
                 Continue Shopping

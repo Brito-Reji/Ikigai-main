@@ -1,11 +1,11 @@
-import React from 'react';
-import { Star, Users, Award, PlayCircle } from 'lucide-react';
+import React from "react";
+import { Star, Users, Award, PlayCircle } from "lucide-react";
 
 const InstructorInfo = ({ instructor }) => {
   if (!instructor) return null;
 
   // Combine firstName and lastName
-  const fullName = `${instructor.firstName || ''} ${instructor.lastName || ''}`.trim() || "Instructor";
+  const fullName = `${instructor.firstName || ""} ${instructor.lastName || ""}`.trim() || "Instructor";
   
   // Use real instructor data with fallbacks
   const instructorData = {

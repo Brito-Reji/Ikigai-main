@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { 
   Search, 
   Eye, 
@@ -9,17 +9,17 @@ import {
   BookOpen,
   DollarSign,
   Calendar
-} from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
-import { useCourse, useCategory } from '@/hooks/useRedux.js';
+} from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useCourse, useCategory } from "@/hooks/useRedux.js";
 import { 
   fetchAdminCourses, 
   fetchCourseStatistics, 
   toggleCourseBlock, 
   deleteAdminCourse 
-} from '@/store/slices/courseSlice.js';
-import { fetchCategories } from '@/store/slices/categorySlice.js';
-import Swal from 'sweetalert2';
+} from "@/store/slices/courseSlice.js";
+import { fetchCategories } from "@/store/slices/categorySlice.js";
+import Swal from "sweetalert2";
 
 const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,10 +27,10 @@ const Courses = () => {
   const { categories, dispatch: categoryDispatch } = useCategory();
 
   // Get initial values from URL
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
-  const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [selectedStatus, setSelectedStatus] = useState(searchParams.get("status") || "");
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
 
   // Fetch courses with filters
   const fetchCourses = (page = 1) => {
@@ -51,17 +51,17 @@ const Courses = () => {
   // Toggle course block status
   const handleToggleBlock = async (courseId) => {
     const course = adminCourses.find(c => c._id === courseId);
-    const action = course?.blocked ? 'unblock' : 'block';
+    const action = course?.blocked ? "unblock" : "block";
     
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} this course?`,
+      title: `${action === "block" ? "Block" : "Unblock"} this course?`,
       text: `Are you sure you want to ${action} this course?`,
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#eab308' : '#22c55e',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#eab308" : "#22c55e",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action} it!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -69,18 +69,18 @@ const Courses = () => {
         const response = await courseDispatch(toggleCourseBlock(courseId)).unwrap();
         
         Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: response.message || 'Course status updated successfully',
-          confirmButtonColor: '#3b82f6',
+          icon: "success",
+          title: "Success!",
+          text: response.message || "Course status updated successfully",
+          confirmButtonColor: "#3b82f6",
           timer: 2000
         });
       } catch (error) {
         Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: error.message || 'Failed to update course status',
-          confirmButtonColor: '#ef4444'
+          icon: "error",
+          title: "Error!",
+          text: error.message || "Failed to update course status",
+          confirmButtonColor: "#ef4444"
         });
       }
     }
@@ -89,14 +89,14 @@ const Courses = () => {
   // Delete course
   const handleDeleteCourse = async (courseId) => {
     const result = await Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "This course will be deleted. You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel'
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -104,18 +104,18 @@ const Courses = () => {
         await courseDispatch(deleteAdminCourse(courseId)).unwrap();
         
         Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'Course has been deleted successfully.',
-          confirmButtonColor: '#3b82f6',
+          icon: "success",
+          title: "Deleted!",
+          text: "Course has been deleted successfully.",
+          confirmButtonColor: "#3b82f6",
           timer: 2000
         });
       } catch (error) {
         Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: error.message || 'Failed to delete course',
-          confirmButtonColor: '#ef4444'
+          icon: "error",
+          title: "Error!",
+          text: error.message || "Failed to delete course",
+          confirmButtonColor: "#ef4444"
         });
       }
     }
@@ -249,9 +249,9 @@ const Courses = () => {
           </select>
           <button
             onClick={() => {
-              setSearchTerm('');
-              setSelectedCategory('');
-              setSelectedStatus('');
+              setSearchTerm("");
+              setSelectedCategory("");
+              setSelectedStatus("");
               setCurrentPage(1);
             }}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -285,7 +285,7 @@ const Courses = () => {
               <div key={course._id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
-                    src={course.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'}
+                    src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
                     alt={course.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />
@@ -323,8 +323,8 @@ const Courses = () => {
                       onClick={() => handleToggleBlock(course._id)}
                       className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${
                         course.blocked 
-                          ? 'bg-green-600 text-white hover:bg-green-700' 
-                          : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                          ? "bg-green-600 text-white hover:bg-green-700" 
+                          : "bg-yellow-600 text-white hover:bg-yellow-700"
                       }`}
                     >
                       {course.blocked ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}

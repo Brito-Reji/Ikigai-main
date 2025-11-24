@@ -154,7 +154,7 @@ function LoginPage() {
         
         if (!err.requiresVerification) {
           // Check if user is blocked
-          if (err.isBlocked || err.message?.toLowerCase().includes('blocked')) {
+          if (err.isBlocked || err.message?.toLowerCase().includes("blocked")) {
             Swal.fire({
               icon: "error",
               title: "Account Blocked",
@@ -165,11 +165,11 @@ function LoginPage() {
               confirmButtonColor: "#dc2626",
               confirmButtonText: "OK",
               customClass: {
-                popup: 'rounded-lg',
-                title: 'text-red-600',
+                popup: "rounded-lg",
+                title: "text-red-600",
               }
             });
-          } else if (err.message?.toLowerCase().includes('google')) {
+          } else if (err.message?.toLowerCase().includes("google")) {
             // Special handling for Google auth error
             Swal.fire({
               icon: "info",
@@ -318,7 +318,7 @@ function LoginPage() {
             </div>
 
             {/* Google Sign In */}
-          <GoogleAuth role={'instructor'} />
+          <GoogleAuth role={"instructor"} />
           </form>
         </div>
       </div>

@@ -10,8 +10,8 @@ export const getCategories = async (req, res) => {
     // Search filter
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
       ];
     }
 
@@ -37,7 +37,7 @@ export const getCategories = async (req, res) => {
       }
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to fetch categories" });
+    return res.status(500).json({ success: false, message: "Failed to fetch categories" , error: error.message });
   }
 };
 
@@ -125,7 +125,7 @@ export const toggleCategoryBlock = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Category ${category.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      message: `Category ${category.isBlocked ? "blocked" : "unblocked"} successfully`,
       category
     });
   } catch (error) {

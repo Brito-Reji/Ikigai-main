@@ -1,9 +1,9 @@
-import { useCategory } from '@/hooks/useRedux';
-import { createCategory, toggleCategoryBlock } from '@/store/slices/categorySlice';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import api from '@/api/axiosConfig.js';
-import Swal from 'sweetalert2';
+import { useCategory } from "@/hooks/useRedux";
+import { createCategory, toggleCategoryBlock } from "@/store/slices/categorySlice";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "@/api/axiosConfig.js";
+import Swal from "sweetalert2";
 
 const Categories = () => {
   const { dispatch } = useCategory();
@@ -15,13 +15,13 @@ const Categories = () => {
   const [pagination, setPagination] = useState({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('add');
-  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: '', description: '' });
+  const [modalMode, setModalMode] = useState("add");
+  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: "", description: "" });
   const [errors, setErrors] = useState({});
   
   // Pagination state with URL sync
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
 
   // Fetch categories
   const fetchCategoriesData = async (page = 1) => {
@@ -29,10 +29,10 @@ const Categories = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '5'
+        limit: "5"
       });
       
-      if (searchTerm) params.append('search', searchTerm);
+      if (searchTerm) params.append("search", searchTerm);
 
       const response = await api.get(`/public?${params.toString()}`);
       
@@ -41,32 +41,32 @@ const Categories = () => {
         setPagination(response.data.pagination);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddCategory = () => {
-    setModalMode('add');
-    setCurrentCategory({ _id: null, name: '', description: '' });
+    setModalMode("add");
+    setCurrentCategory({ _id: null, name: "", description: "" });
     setErrors({});
     setIsModalOpen(true);
   };
 
   const handleUnlist = async (categoryId) => {
     const category = categories.find(c => c._id === categoryId);
-    const action = category?.isBlocked ? 'unblock' : 'block';
+    const action = category?.isBlocked ? "unblock" : "block";
     
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} this category?`,
+      title: `${action === "block" ? "Block" : "Unblock"} this category?`,
       text: `Are you sure you want to ${action} this category?`,
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#f97316' : '#22c55e',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#f97316" : "#22c55e",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action} it!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -74,10 +74,10 @@ const Categories = () => {
         const response = await dispatch(toggleCategoryBlock(categoryId)).unwrap();
         
         Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: response.message || 'Category status updated successfully',
-          confirmButtonColor: '#14b8a6',
+          icon: "success",
+          title: "Success!",
+          text: response.message || "Category status updated successfully",
+          confirmButtonColor: "#14b8a6",
           timer: 2000
         });
         
@@ -85,10 +85,10 @@ const Categories = () => {
         fetchCategoriesData(currentPage);
       } catch (error) {
         Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: error || 'Failed to update category status',
-          confirmButtonColor: '#ef4444'
+          icon: "error",
+          title: "Error!",
+          text: error || "Failed to update category status",
+          confirmButtonColor: "#ef4444"
         });
       }
     }
@@ -102,11 +102,11 @@ const Categories = () => {
     const newErrors = {};
     
     if (!currentCategory.name.trim()) {
-      newErrors.name = 'Category name is required';
+      newErrors.name = "Category name is required";
     }
     
     if (!currentCategory.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = "Description is required";
     }
     
     setErrors(newErrors);
@@ -120,7 +120,7 @@ const Categories = () => {
       return;
     }
 
-    if (modalMode === 'add') {
+    if (modalMode === "add") {
       const newCategory = {
         ...currentCategory,
       };
@@ -129,12 +129,12 @@ const Categories = () => {
     }
 
     setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: "", description: "" });
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: "", description: "" });
     setErrors({});
   };
 
@@ -175,17 +175,17 @@ const Categories = () => {
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) pageNumbers.push(i);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         pageNumbers.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pageNumbers.push(1);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) pageNumbers.push(i);
       } else {
         pageNumbers.push(1);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pageNumbers.push(i);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         pageNumbers.push(totalPages);
       }
     }
@@ -270,11 +270,11 @@ const Categories = () => {
                     onClick={() => handleUnlist(category._id)}
                     className={`px-5 py-1.5 rounded font-medium transition-colors ${
                       category.isBlocked
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : 'bg-white text-orange-500 border border-orange-500 hover:bg-orange-50'
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-white text-orange-500 border border-orange-500 hover:bg-orange-50"
                     }`}
                   >
-                    {category.isBlocked ? 'Unblock' : 'Block'}
+                    {category.isBlocked ? "Unblock" : "Block"}
                   </button>
                 </div>
               </div>
@@ -286,7 +286,7 @@ const Categories = () => {
                   No categories found matching "{searchTerm}".
                   <br />
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                     className="text-teal-500 hover:text-teal-600 underline mt-2"
                   >
                     Clear search
@@ -313,8 +313,8 @@ const Categories = () => {
                   disabled={!pagination.hasPrev}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     !pagination.hasPrev
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
                 >
                   Previous
@@ -322,7 +322,7 @@ const Categories = () => {
 
                 <div className="flex gap-1">
                   {getPageNumbers().map((pageNum, index) =>
-                    pageNum === '...' ? (
+                    pageNum === "..." ? (
                       <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
                         ...
                       </span>
@@ -332,8 +332,8 @@ const Categories = () => {
                         onClick={() => handlePageChange(pageNum)}
                         className={`px-4 py-2 rounded-lg transition-colors ${
                           currentPage === pageNum
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            ? "bg-teal-500 text-white"
+                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                         }`}
                       >
                         {pageNum}
@@ -347,8 +347,8 @@ const Categories = () => {
                   disabled={!pagination.hasNext}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     !pagination.hasNext
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
                 >
                   Next
@@ -366,7 +366,7 @@ const Categories = () => {
             {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-800">
-                {modalMode === 'add' ? 'Add New Category' : 'Edit Category'}
+                {modalMode === "add" ? "Add New Category" : "Edit Category"}
               </h3>
               <button
                 onClick={handleCancel}
@@ -391,7 +391,7 @@ const Categories = () => {
                     value={currentCategory.name}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
+                      errors.name ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter category name"
                   />
@@ -409,7 +409,7 @@ const Categories = () => {
                     value={currentCategory.description}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, description: e.target.value })}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
+                      errors.description ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter category description"
                     rows="4"
@@ -433,7 +433,7 @@ const Categories = () => {
                   type="submit"
                   className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
                 >
-                  {modalMode === 'add' ? 'Add Category' : 'Save Changes'}
+                  {modalMode === "add" ? "Add Category" : "Save Changes"}
                 </button>
               </div>
             </form>

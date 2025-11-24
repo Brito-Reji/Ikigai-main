@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft,
   Ban, 
@@ -14,8 +14,8 @@ import {
   Edit,
   Globe,
   Lock
-} from 'lucide-react';
-import api from '@/api/axiosConfig.js';
+} from "lucide-react";
+import api from "@/api/axiosConfig.js";
 
 const CourseDetail = () => {
   const { courseId } = useParams();
@@ -34,8 +34,8 @@ const CourseDetail = () => {
         setCourse(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching course details:', error);
-      setError('Failed to fetch course details');
+      console.error("Error fetching course details:", error);
+      setError("Failed to fetch course details");
     } finally {
       setLoading(false);
     }
@@ -51,8 +51,8 @@ const CourseDetail = () => {
         alert(response.data.message);
       }
     } catch (error) {
-      console.error('Error toggling course block:', error);
-      alert('Failed to update course status');
+      console.error("Error toggling course block:", error);
+      alert("Failed to update course status");
     } finally {
       setActionLoading(false);
     }
@@ -60,17 +60,17 @@ const CourseDetail = () => {
 
   // Delete course
   const deleteCourse = async () => {
-    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+    if (window.confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
       try {
         setActionLoading(true);
         const response = await api.delete(`/admin/courses/${courseId}`);
         if (response.data.success) {
-          alert('Course deleted successfully');
-          navigate('/admin/courses');
+          alert("Course deleted successfully");
+          navigate("/admin/courses");
         }
       } catch (error) {
-        console.error('Error deleting course:', error);
-        alert('Failed to delete course');
+        console.error("Error deleting course:", error);
+        alert("Failed to delete course");
       } finally {
         setActionLoading(false);
       }
@@ -135,7 +135,7 @@ const CourseDetail = () => {
       <div className="text-center py-8">
         <p className="text-gray-500">Course not found</p>
         <button 
-          onClick={() => navigate('/admin/courses')}
+          onClick={() => navigate("/admin/courses")}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Back to Courses
@@ -149,7 +149,7 @@ const CourseDetail = () => {
       {/* Header */}
       <div className="mb-8">
         <button
-          onClick={() => navigate('/admin/courses')}
+          onClick={() => navigate("/admin/courses")}
           className="flex items-center text-gray-600 hover:text-gray-800 mb-4 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -171,8 +171,8 @@ const CourseDetail = () => {
               disabled={actionLoading}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center disabled:opacity-50 ${
                 course.blocked 
-                  ? 'bg-green-600 text-white hover:bg-green-700' 
-                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                  ? "bg-green-600 text-white hover:bg-green-700" 
+                  : "bg-yellow-600 text-white hover:bg-yellow-700"
               }`}
             >
               {course.blocked ? (
@@ -207,7 +207,7 @@ const CourseDetail = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Thumbnail</h2>
             <img
-              src={course.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80'}
+              src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80"}
               alt={course.title}
               className="w-full h-64 object-cover rounded-lg"
             />

@@ -1,10 +1,11 @@
- import asyncHandler from "express-async-handler";
-import nodemailer from 'nodemailer'
+import asyncHandler from "express-async-handler";
+import nodemailer from "nodemailer";
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 // import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
+
 
 const testAccount = await nodemailer.createTestAccount();
 
@@ -12,7 +13,7 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export const sendOTPToEmail = async (email) => {
+export const sendOTPToEmail = async email => {
   if (!email) {
     throw new Error("Email is required");
   }
@@ -44,7 +45,9 @@ export const sendOTPToEmail = async (email) => {
 export const sentOTP = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) { return res.status(400).json({ message: "email is required" }) }
+    if (!email) {
+      return res.status(400).json({ message: "email is required" });
+    }
 
     const result = await sendOTPToEmail(email);
 

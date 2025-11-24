@@ -1,9 +1,9 @@
-
 import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { generateTokens } from "../../utils/generateTokens.js";
+
 export const adminLogin = asyncHandler(async (req, res) => {
   console.log("adminLogin controller called");
   try {
@@ -36,8 +36,13 @@ export const adminLogin = asyncHandler(async (req, res) => {
       });
     }
 
-    const { accessToken, refreshToken } = generateTokens({ userId: user._id, email: user.email, firstName: user.firstName, role: user.role })
-    res.cookie("refreshToken",refreshToken);
+    const { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      role: user.role,
+    });
+    res.cookie("refreshToken", refreshToken);
 
     res.status(200).json({
       success: true,
@@ -104,6 +109,6 @@ export const getStudentDetails = asyncHandler(async (req, res) => {
 
 export const getInstructorDetails = asyncHandler(async (req, res) => {
   let { id } = req.params;
-  const instructor = await Instructor.findOne({ _id: id })
-  return res.status(200).json({success:true,data:instructor})
-})
+  const instructor = await Instructor.findOne({ _id: id });
+  return res.status(200).json({ success: true, data: instructor });
+});

@@ -1,16 +1,16 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const lessonSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: [true, 'Lesson title is required'],
+        required: [true, "Lesson title is required"],
         trim: true,
-        maxlength: [200, 'Lesson title cannot exceed 200 characters'],
+        maxlength: [200, "Lesson title cannot exceed 200 characters"],
     },
     description: {
         type: String,
         trim: true,
-        maxlength: [1000, 'Lesson description cannot exceed 1000 characters'],
+        maxlength: [1000, "Lesson description cannot exceed 1000 characters"],
     },
     videoUrl: {
         type: String,
@@ -34,8 +34,8 @@ const lessonSchema = new mongoose.Schema({
         url: String,
         type: {
             type: String,
-            enum: ['pdf', 'video', 'link', 'document', 'other'],
-            default: 'other'
+            enum: ["pdf", "video", "link", "document", "other"],
+            default: "other"
         }
     }]
 }, {
@@ -45,19 +45,19 @@ const lessonSchema = new mongoose.Schema({
 const chapterSchema = new mongoose.Schema({
     course: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-        required: [true, 'Course is required'],
+        ref: "Course",
+        required: [true, "Course is required"],
     },
     title: {
         type: String,
-        required: [true, 'Chapter title is required'],
+        required: [true, "Chapter title is required"],
         trim: true,
-        maxlength: [200, 'Chapter title cannot exceed 200 characters'],
+        maxlength: [200, "Chapter title cannot exceed 200 characters"],
     },
     description: {
         type: String,
         trim: true,
-        maxlength: [1000, 'Chapter description cannot exceed 1000 characters'],
+        maxlength: [1000, "Chapter description cannot exceed 1000 characters"],
     },
     order: {
         type: Number,
@@ -72,4 +72,4 @@ const chapterSchema = new mongoose.Schema({
 
 chapterSchema.index({ course: 1, order: 1 });
 
-export const Chapter = mongoose.model('Chapter', chapterSchema);
+export const Chapter = mongoose.model("Chapter", chapterSchema);

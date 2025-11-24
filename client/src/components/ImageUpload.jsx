@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { Upload, X, Loader2, Crop } from 'lucide-react';
-import toast from 'react-hot-toast';
-import api from '../api/axiosConfig';
-import ImageCropModal from './ImageCropModal';
-import { createCroppedImage } from '../utils/cropImage';
+import React, { useState } from "react";
+import { Upload, X, Loader2, Crop } from "lucide-react";
+import toast from "react-hot-toast";
+import api from "../api/axiosConfig";
+import ImageCropModal from "./ImageCropModal";
+import { createCroppedImage } from "../utils/cropImage";
 
 const ImageUpload = ({
   value,
   onChange,
-  endpoint = '/upload/image',
-  label = 'Upload Image',
+  endpoint = "/upload/image",
+  label = "Upload Image",
   maxSize = 5,
-  accept = 'image/*',
-  className = '',
-  error = '',
+  accept = "image/*",
+  className = "",
+  error = "",
   aspectRatio = 16 / 9,
   enableCrop = true
 }) => {
@@ -33,8 +33,8 @@ const ImageUpload = ({
     }
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
       return;
     }
 
@@ -55,7 +55,7 @@ const ImageUpload = ({
   const handleCropComplete = async (croppedAreaPixels) => {
     try {
       const croppedBlob = await createCroppedImage(originalImage, croppedAreaPixels);
-      const croppedFile = new File([croppedBlob], 'cropped-image.jpg', { type: 'image/jpeg' });
+      const croppedFile = new File([croppedBlob], "cropped-image.jpg", { type: "image/jpeg" });
       
       // Show preview
       const reader = new FileReader();
@@ -67,40 +67,40 @@ const ImageUpload = ({
       setShowCropModal(false);
       uploadImage(croppedFile);
     } catch (error) {
-      console.error('Crop error:', error);
-      toast.error('Failed to crop image');
+      console.error("Crop error:", error);
+      toast.error("Failed to crop image");
     }
   };
 
   const uploadImage = async (file) => {
 
     setUploading(true);
-    const uploadToast = toast.loading('Uploading image to Cloudinary...');
+    const uploadToast = toast.loading("Uploading image to Cloudinary...");
     
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append("image", file);
 
       const response = await api.post(endpoint, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
       if (response.data.success) {
         onChange(response.data.url);
-        toast.success('Image uploaded successfully! ✨', { id: uploadToast });
+        toast.success("Image uploaded successfully! ✨", { id: uploadToast });
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       
-      let errorMessage = 'Error uploading image';
+      let errorMessage = "Error uploading image";
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.status === 401) {
-        errorMessage = 'Not authenticated. Please log in again.';
+        errorMessage = "Not authenticated. Please log in again.";
       } else if (error.response?.status === 500) {
-        errorMessage = 'Server error. Check Cloudinary configuration.';
+        errorMessage = "Server error. Check Cloudinary configuration.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -114,8 +114,8 @@ const ImageUpload = ({
 
   const handleRemove = () => {
     setPreview(null);
-    onChange('');
-    toast.success('Image removed');
+    onChange("");
+    toast.success("Image removed");
   };
 
   return (
@@ -147,7 +147,7 @@ const ImageUpload = ({
               <Upload className="w-12 h-12 text-gray-400 mb-4" />
             )}
             <p className="text-sm text-gray-600 mb-2">
-              {uploading ? 'Uploading...' : 'Click to upload or drag and drop'}
+              {uploading ? "Uploading..." : "Click to upload or drag and drop"}
             </p>
             <p className="text-xs text-gray-500">
               PNG, JPG, WEBP up to {maxSize}MB

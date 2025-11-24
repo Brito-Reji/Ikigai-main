@@ -16,7 +16,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
-    "cloudinary": "^2.8.0",
+    "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -31,7 +31,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.10",
-    "otp-generator": "^4.0.1"
+    "otp-generator": "^4.0.1",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

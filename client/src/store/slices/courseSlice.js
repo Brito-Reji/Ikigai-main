@@ -1,12 +1,12 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import api from '@/api/axiosConfig.js';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import api from "@/api/axiosConfig.js";
 
 // Fetch courses from an API with pagination support
 export const fetchCourses = createAsyncThunk(
-    'courses/fetchCourses',
+    "courses/fetchCourses",
     async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
         try {
-            const response = await api.get('/courses', {
+            const response = await api.get("/courses", {
                 params: { page, limit }
             });
             return response.data;
@@ -19,126 +19,126 @@ export const fetchCourses = createAsyncThunk(
 
 // Create a new course (instructor)
 export const createCourse = createAsyncThunk(
-    'courses/createCourse',
+    "courses/createCourse",
     async (courseData, { rejectWithValue }) => {
         try {
-            console.log('Creating course with data:', courseData);
-            const response = await api.post('/instructor/courses', courseData);
-            console.log('Course creation response:', response.data);
+            console.log("Creating course with data:", courseData);
+            const response = await api.post("/instructor/courses", courseData);
+            console.log("Course creation response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Course creation error:', error);
-            console.error('Error response:', error.response?.data);
-            return rejectWithValue(error.response?.data || { message: 'Failed to create course' });
+            console.error("Course creation error:", error);
+            console.error("Error response:", error.response?.data);
+            return rejectWithValue(error.response?.data || { message: "Failed to create course" });
         }
     }
 );
 
 // Fetch instructor's courses
 export const fetchInstructorCourses = createAsyncThunk(
-    'courses/fetchInstructorCourses',
+    "courses/fetchInstructorCourses",
     async (_, { rejectWithValue }) => {
         try {
-            console.log('Fetching instructor courses from API...');
-            const response = await api.get('/instructor/courses');
-            console.log('Instructor courses response:', response.data);
+            console.log("Fetching instructor courses from API...");
+            const response = await api.get("/instructor/courses");
+            console.log("Instructor courses response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching instructor courses:', error);
-            console.error('Error response:', error.response?.data);
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch courses' });
+            console.error("Error fetching instructor courses:", error);
+            console.error("Error response:", error.response?.data);
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch courses" });
         }
     }
 );
 
 // Fetch public courses for landing page
 export const fetchPublicCourses = createAsyncThunk(
-    'courses/fetchPublicCourses',
+    "courses/fetchPublicCourses",
     async ({ limit = 8, category, search } = {}, { rejectWithValue }) => {
         try {
-            console.log('Fetching public courses from API...');
+            console.log("Fetching public courses from API...");
             const params = new URLSearchParams();
-            if (limit) params.append('limit', limit);
-            if (category) params.append('category', category);
-            if (search) params.append('search', search);
+            if (limit) params.append("limit", limit);
+            if (category) params.append("category", category);
+            if (search) params.append("search", search);
 
             const response = await api.get(`/public/courses?${params.toString()}`);
-            console.log('Public courses response:', response.data);
+            console.log("Public courses response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching public courses:', error);
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch public courses' });
+            console.error("Error fetching public courses:", error);
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch public courses" });
         }
     }
 );
 
 // Fetch featured courses
 export const fetchFeaturedCourses = createAsyncThunk(
-    'courses/fetchFeaturedCourses',
+    "courses/fetchFeaturedCourses",
     async ({ limit = 4 } = {}, { rejectWithValue }) => {
         try {
-            console.log('Fetching featured courses from API...');
+            console.log("Fetching featured courses from API...");
             const response = await api.get(`/public/courses/featured?limit=${limit}`);
-            console.log('Featured courses response:', response.data);
+            console.log("Featured courses response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching featured courses:', error);
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch featured courses' });
+            console.error("Error fetching featured courses:", error);
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch featured courses" });
         }
     }
 );
 
 // Fetch single course for editing
 export const fetchCourseById = createAsyncThunk(
-    'courses/fetchCourseById',
+    "courses/fetchCourseById",
     async (courseId, { rejectWithValue }) => {
         try {
-            console.log('Fetching course by ID:', courseId);
+            console.log("Fetching course by ID:", courseId);
             const response = await api.get(`/instructor/courses/${courseId}`);
-            console.log('Course by ID response:', response.data);
+            console.log("Course by ID response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching course by ID:', error);
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch course' });
+            console.error("Error fetching course by ID:", error);
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch course" });
         }
     }
 );
 
 // Update course
 export const updateCourse = createAsyncThunk(
-    'courses/updateCourse',
+    "courses/updateCourse",
     async ({ courseId, courseData }, { rejectWithValue }) => {
         try {
-            console.log('Updating course:', courseId, 'with data:', courseData);
+            console.log("Updating course:", courseId, "with data:", courseData);
             const response = await api.put(`/instructor/courses/${courseId}`, courseData);
-            console.log('Course update response:', response.data);
+            console.log("Course update response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error updating course:', error);
-            return rejectWithValue(error.response?.data || { message: 'Failed to update course' });
+            console.error("Error updating course:", error);
+            return rejectWithValue(error.response?.data || { message: "Failed to update course" });
         }
     }
 );
 
 // Fetch public course details for student view
 export const fetchPublicCourseDetails = createAsyncThunk(
-    'courses/fetchPublicCourseDetails',
+    "courses/fetchPublicCourseDetails",
     async (courseId, { rejectWithValue }) => {
         try {
-            console.log('Fetching public course details:', courseId);
+            console.log("Fetching public course details:", courseId);
             const response = await api.get(`/public/courses/${courseId}`);
-            console.log('Public course details response:', response.data);
+            console.log("Public course details response:", response.data);
             return response.data;
         } catch (error) {
-            console.error('Error fetching public course details:', error);
-            return rejectWithValue(error.response?.data || { message: 'Course not found or unavailable' });
+            console.error("Error fetching public course details:", error);
+            return rejectWithValue(error.response?.data || { message: "Course not found or unavailable" });
         }
     }
 );
 
 // Admin: Fetch all courses with filters
 export const fetchAdminCourses = createAsyncThunk(
-    'courses/fetchAdminCourses',
+    "courses/fetchAdminCourses",
     async ({ page = 1, limit = 12, search, category, status }, { rejectWithValue }) => {
         try {
             const params = new URLSearchParams({
@@ -146,59 +146,59 @@ export const fetchAdminCourses = createAsyncThunk(
                 limit: limit.toString()
             });
 
-            if (search) params.append('search', search);
-            if (category) params.append('category', category);
-            if (status) params.append('status', status);
+            if (search) params.append("search", search);
+            if (category) params.append("category", category);
+            if (status) params.append("status", status);
 
             const response = await api.get(`/admin/courses?${params.toString()}`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch courses' });
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch courses" });
         }
     }
 );
 
 // Admin: Fetch course statistics
 export const fetchCourseStatistics = createAsyncThunk(
-    'courses/fetchCourseStatistics',
+    "courses/fetchCourseStatistics",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get('/admin/courses/statistics');
+            const response = await api.get("/admin/courses/statistics");
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch statistics' });
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch statistics" });
         }
     }
 );
 
 // Admin: Toggle course block status
 export const toggleCourseBlock = createAsyncThunk(
-    'courses/toggleCourseBlock',
+    "courses/toggleCourseBlock",
     async (courseId, { rejectWithValue }) => {
         try {
             const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to update course status' });
+            return rejectWithValue(error.response?.data || { message: "Failed to update course status" });
         }
     }
 );
 
 // Admin: Delete course
 export const deleteAdminCourse = createAsyncThunk(
-    'courses/deleteAdminCourse',
+    "courses/deleteAdminCourse",
     async (courseId, { rejectWithValue }) => {
         try {
             const response = await api.delete(`/admin/courses/${courseId}`);
             return { ...response.data, courseId };
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to delete course' });
+            return rejectWithValue(error.response?.data || { message: "Failed to delete course" });
         }
     }
 );
 
 const courseSlice = createSlice({
-    name: 'courses',
+    name: "courses",
     initialState: {
         courses: [],
         instructorCourses: [],
@@ -272,7 +272,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchCourses.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload?.message || 'Failed to fetch courses';
+                state.error = action.payload?.message || "Failed to fetch courses";
             })
 
             // Create course
@@ -288,7 +288,7 @@ const courseSlice = createSlice({
             })
             .addCase(createCourse.rejected, (state, action) => {
                 state.createLoading = false;
-                state.createError = action.payload?.message || 'Failed to create course';
+                state.createError = action.payload?.message || "Failed to create course";
             })
 
             // Fetch instructor courses
@@ -302,7 +302,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchInstructorCourses.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload?.message || 'Failed to fetch instructor courses';
+                state.error = action.payload?.message || "Failed to fetch instructor courses";
             })
 
             // Fetch public courses
@@ -316,7 +316,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchPublicCourses.rejected, (state, action) => {
                 state.publicLoading = false;
-                state.publicError = action.payload?.message || 'Failed to fetch public courses';
+                state.publicError = action.payload?.message || "Failed to fetch public courses";
             })
 
             // Fetch featured courses
@@ -330,7 +330,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchFeaturedCourses.rejected, (state, action) => {
                 state.featuredLoading = false;
-                state.featuredError = action.payload?.message || 'Failed to fetch featured courses';
+                state.featuredError = action.payload?.message || "Failed to fetch featured courses";
             })
 
             // Fetch course by ID
@@ -344,7 +344,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchCourseById.rejected, (state, action) => {
                 state.courseLoading = false;
-                state.courseError = action.payload?.message || 'Failed to fetch course';
+                state.courseError = action.payload?.message || "Failed to fetch course";
             })
 
             // Update course
@@ -365,7 +365,7 @@ const courseSlice = createSlice({
             })
             .addCase(updateCourse.rejected, (state, action) => {
                 state.updateLoading = false;
-                state.updateError = action.payload?.message || 'Failed to update course';
+                state.updateError = action.payload?.message || "Failed to update course";
             })
 
             // Fetch public course details
@@ -379,7 +379,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchPublicCourseDetails.rejected, (state, action) => {
                 state.publicDetailsLoading = false;
-                state.publicDetailsError = action.payload?.message || 'Course not found or unavailable';
+                state.publicDetailsError = action.payload?.message || "Course not found or unavailable";
             })
 
             // Admin: Fetch all courses
@@ -394,7 +394,7 @@ const courseSlice = createSlice({
             })
             .addCase(fetchAdminCourses.rejected, (state, action) => {
                 state.adminLoading = false;
-                state.adminError = action.payload?.message || 'Failed to fetch courses';
+                state.adminError = action.payload?.message || "Failed to fetch courses";
             })
 
             // Admin: Fetch statistics

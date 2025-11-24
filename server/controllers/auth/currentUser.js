@@ -8,16 +8,16 @@ export const currentUser = async (req, res) => {
     let accessToken = null;
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer ')
+      req.headers.authorization.startsWith("Bearer ")
     ) {
-      accessToken = req.headers.authorization.split(' ')[1];
+      accessToken = req.headers.authorization.split(" ")[1];
     }
 
     if (!accessToken) {
-      console.log('No token provided in request');
+      console.log("No token provided in request");
       return res
         .status(401)
-        .json({ success: false, message: 'No token provided' });
+        .json({ success: false, message: "No token provided" });
     }
 
     const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
@@ -30,19 +30,19 @@ export const currentUser = async (req, res) => {
     }
 
     if (!user) {
-      console.log('User not found in database');
+      console.log("User not found in database");
       return res.status(401).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
     // Check if user is blocked
     if (user.isBlocked) {
-      console.log('User is blocked:', user.email);
+      console.log("User is blocked:", user.email);
       return res.status(403).json({
         success: false,
-        message: 'Your account has been blocked. Please contact support.',
+        message: "Your account has been blocked. Please contact support.",
         isBlocked: true,
       });
     }
@@ -61,7 +61,7 @@ export const currentUser = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log('Token verification error:', err);
-    return res.status(401).json({ success: false, message: 'Invalid token' });
+    console.log("Token verification error:", err);
+    return res.status(401).json({ success: false, message: "Invalid token" });
   }
 };

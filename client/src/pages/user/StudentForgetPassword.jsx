@@ -1,40 +1,40 @@
-import api from '@/api/axiosConfig.js';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, ArrowRight, ArrowLeft } from 'lucide-react';
+import api from "@/api/axiosConfig.js";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
 
 function StudentForgetPassword() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const sendOtp = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!email) {
-      setError('Please enter your email');
+      setError("Please enter your email");
       return;
     }
 
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/forget-password', { email });
+      const response = await api.post("/auth/forget-password", { email });
       
       if (response.data.success) {
-        navigate('/student/reset-password', {
+        navigate("/student/reset-password", {
           state: { email }
         });
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -84,16 +84,16 @@ function StudentForgetPassword() {
               type="submit"
               disabled={loading}
               className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium transition flex items-center justify-center space-x-2 ${
-                loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'
+                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"
               }`}
             >
-              <span>{loading ? 'Sending...' : 'Send OTP'}</span>
+              <span>{loading ? "Sending..." : "Send OTP"}</span>
               {!loading && <ArrowRight className="w-5 h-5" />}
             </button>
 
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
               className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition flex items-center justify-center space-x-2"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -103,7 +103,7 @@ function StudentForgetPassword() {
         </div>
 
         <p className="text-center text-gray-500 text-sm mt-6">
-          Need help?{' '}
+          Need help?{" "}
           <a href="#" className="text-indigo-600 hover:underline">
             Contact support
           </a>

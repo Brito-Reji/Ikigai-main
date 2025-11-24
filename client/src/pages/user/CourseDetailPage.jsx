@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useCourse } from '@/hooks/useRedux.js';
-import { fetchPublicCourses, fetchPublicCourseDetails, clearPublicDetailsState } from '@/store/slices/courseSlice.js';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useCourse } from "@/hooks/useRedux.js";
+import { fetchPublicCourses, fetchPublicCourseDetails, clearPublicDetailsState } from "@/store/slices/courseSlice.js";
 
 // Components
-import CourseHero from '@/components/course/CourseHero.jsx';
-import CourseSyllabus from '@/components/course/CourseSyllabus.jsx';
-import CourseReviews from '@/components/course/CourseReviews.jsx';
-import InstructorInfo from '@/components/course/InstructorInfo.jsx';
-import RelatedCourses from '@/components/course/RelatedCourses.jsx';
-import Footer from '@/components/Footer.jsx';
+import CourseHero from "@/components/course/CourseHero.jsx";
+import CourseSyllabus from "@/components/course/CourseSyllabus.jsx";
+import CourseReviews from "@/components/course/CourseReviews.jsx";
+import InstructorInfo from "@/components/course/InstructorInfo.jsx";
+import RelatedCourses from "@/components/course/RelatedCourses.jsx";
+import Footer from "@/components/Footer.jsx";
 
 const CourseDetailPage = () => {
   const { courseId } = useParams();
@@ -19,7 +19,7 @@ const CourseDetailPage = () => {
     publicDetailsError, 
     dispatch 
   } = useCourse();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (courseId) {
@@ -55,7 +55,7 @@ const CourseDetailPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h1>
             <p className="text-gray-600 mb-6">
-              {publicDetailsError || 'The course you are looking for does not exist or is no longer available.'}
+              {publicDetailsError || "The course you are looking for does not exist or is no longer available."}
             </p>
             <button
               onClick={() => window.history.back()}
@@ -70,10 +70,10 @@ const CourseDetailPage = () => {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'syllabus', label: 'Syllabus' },
-    { id: 'instructor', label: 'Instructor' },
-    { id: 'reviews', label: 'Reviews' }
+    { id: "overview", label: "Overview" },
+    { id: "syllabus", label: "Syllabus" },
+    { id: "instructor", label: "Instructor" },
+    { id: "reviews", label: "Reviews" }
   ];
 
   return (
@@ -91,8 +91,8 @@ const CourseDetailPage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 {tab.label}
@@ -107,7 +107,7 @@ const CourseDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-8">
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div className="space-y-8">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Course</h2>
@@ -133,9 +133,9 @@ const CourseDetailPage = () => {
               </div>
             )}
 
-            {activeTab === 'syllabus' && <CourseSyllabus course={publicCourseDetails} />}
-            {activeTab === 'instructor' && <InstructorInfo instructor={publicCourseDetails.instructor} />}
-            {activeTab === 'reviews' && <CourseReviews course={publicCourseDetails} />}
+            {activeTab === "syllabus" && <CourseSyllabus course={publicCourseDetails} />}
+            {activeTab === "instructor" && <InstructorInfo instructor={publicCourseDetails.instructor} />}
+            {activeTab === "reviews" && <CourseReviews course={publicCourseDetails} />}
           </div>
 
           {/* Sidebar */}

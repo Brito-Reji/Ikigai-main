@@ -1,25 +1,25 @@
-import express from 'express'
-import cors from 'cors'
-import helmet from 'helmet'
-import authRoute from './routes/auth.js'
+import express from "express"
+import cors from "cors"
+import helmet from "helmet"
+import authRoute from "./routes/auth.js"
 import cookieParser from "cookie-parser";
 
 
 // import { verifyInstructor } from './middlewares/auth.js'
-import adminRoute from './routes/adminRoute.js'
-import categoryRoute from './routes/categoryRoute.js'
-import publicRoute from './routes/publicRoute.js'
-import uploadRoute from './routes/uploadRoute.js'
-import isAdmin from './middlewares/admin.js';
-import isInstructor from './middlewares/instructor.js'
-import instructorRoute from './routes/instructorRoute.js'
-import { logger } from './utils/logger.js';
-import { protect } from './middlewares/protect.js';
+import adminRoute from "./routes/adminRoute.js"
+import categoryRoute from "./routes/categoryRoute.js"
+import publicRoute from "./routes/publicRoute.js"
+import uploadRoute from "./routes/uploadRoute.js"
+import isAdmin from "./middlewares/admin.js";
+import isInstructor from "./middlewares/instructor.js"
+import instructorRoute from "./routes/instructorRoute.js"
+
+
 const app = express()
-app.use(express.json({ limit: '50mb' })) // Increase JSON payload limit for image uploads
+app.use(express.json({ limit: "50mb" })) // Increase JSON payload limit for image uploads
 app.use(helmet());
-app.use(logger);
-app.use(express.urlencoded({ extended: true, limit: '50mb' })) // Increase URL encoded payload limit
+
+app.use(express.urlencoded({ extended: true, limit: "50mb" })) // Increase URL encoded payload limit
 
 app.use(cookieParser())
 app.use(
@@ -28,24 +28,15 @@ app.use(
     credentials: true,
   })
 );
-app.use('/api/auth', authRoute)
-app.use('/api/categories', categoryRoute)
-app.use('/api/public', publicRoute)
-app.use('/api/upload', uploadRoute)
-app.use('/api/admin', isAdmin, adminRoute)
-app.use('/api/instructor', isInstructor, instructorRoute)
+app.use("/api/auth", authRoute)
+app.use("/api/categories", categoryRoute)
+app.use("/api/public", publicRoute)
+app.use("/api/upload", uploadRoute)
+app.use("/api/admin", isAdmin, adminRoute)
+app.use("/api/instructor", isInstructor, instructorRoute)
 
 // Global error handler
-app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
-  console.error('Error stack:', err.stack);
 
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
-  });
-});
 
 console.log("ENV TEST:", process.env.CLOUDINARY_API_KEY);
 

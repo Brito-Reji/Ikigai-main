@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, ArrowLeft } from 'lucide-react';
-import { useCart } from '@/hooks/useRedux';
-import { clearCart } from '@/store/slices/cartSlice';
-import Swal from 'sweetalert2';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CreditCard, Lock, ArrowLeft } from "lucide-react";
+import { useCart } from "@/hooks/useRedux";
+import { clearCart } from "@/store/slices/cartSlice";
+import Swal from "sweetalert2";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -11,16 +11,16 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
+    fullName: "",
+    email: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
   });
 
   const calculateTotal = () => {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.price?.replace(/[^0-9.-]+/g, '') || 0);
+      const price = parseFloat(item.price?.replace(/[^0-9.-]+/g, "") || 0);
       return total + price;
     }, 0);
   };
@@ -42,18 +42,18 @@ const CheckoutPage = () => {
       dispatch(clearCart());
       
       Swal.fire({
-        icon: 'success',
-        title: 'Payment Successful!',
-        text: 'Your courses have been added to your library.',
-        confirmButtonColor: '#4f46e5',
+        icon: "success",
+        title: "Payment Successful!",
+        text: "Your courses have been added to your library.",
+        confirmButtonColor: "#4f46e5",
       }).then(() => {
-        navigate('/my-courses');
+        navigate("/my-courses");
       });
     }, 2000);
   };
 
   if (items.length === 0) {
-    navigate('/cart');
+    navigate("/cart");
     return null;
   }
 
@@ -62,7 +62,7 @@ const CheckoutPage = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/cart')}
+          onClick={() => navigate("/cart")}
           className="flex items-center text-indigo-600 hover:text-indigo-700 mb-6"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -173,7 +173,7 @@ const CheckoutPage = () => {
                   disabled={loading}
                   className="w-full px-6 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium disabled:opacity-50"
                 >
-                  {loading ? 'Processing...' : `Pay ₹${calculateTotal().toFixed(2)}`}
+                  {loading ? "Processing..." : `Pay ₹${calculateTotal().toFixed(2)}`}
                 </button>
               </form>
             </div>

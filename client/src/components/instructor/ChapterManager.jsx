@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
-import { useChapter } from '@/hooks/useRedux.js';
+import React, { useState, useEffect } from "react";
+import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
+import { useChapter } from "@/hooks/useRedux.js";
 import { 
   fetchChapters, 
   createChapter, 
   updateChapter, 
   deleteChapter,
   clearChapterState 
-} from '@/store/slices/chapterSlice.js';
+} from "@/store/slices/chapterSlice.js";
 
 const ChapterManager = ({ courseId }) => {
   const { chapters, loading, createLoading, dispatch } = useChapter();
@@ -15,8 +15,8 @@ const ChapterManager = ({ courseId }) => {
   const [editingChapter, setEditingChapter] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState({});
   const [formData, setFormData] = useState({
-    title: '',
-    description: ''
+    title: "",
+    description: ""
   });
 
   useEffect(() => {
@@ -49,20 +49,20 @@ const ChapterManager = ({ courseId }) => {
       setShowAddChapter(false);
     }
     
-    setFormData({ title: '', description: '' });
+    setFormData({ title: "", description: "" });
   };
 
   const handleEdit = (chapter) => {
     setEditingChapter(chapter);
     setFormData({
       title: chapter.title,
-      description: chapter.description || ''
+      description: chapter.description || ""
     });
     setShowAddChapter(true);
   };
 
   const handleDelete = async (chapterId) => {
-    if (window.confirm('Are you sure you want to delete this chapter?')) {
+    if (window.confirm("Are you sure you want to delete this chapter?")) {
       await dispatch(deleteChapter({ courseId, chapterId }));
     }
   };
@@ -77,7 +77,7 @@ const ChapterManager = ({ courseId }) => {
   const handleCancel = () => {
     setShowAddChapter(false);
     setEditingChapter(null);
-    setFormData({ title: '', description: '' });
+    setFormData({ title: "", description: "" });
   };
 
   if (loading) {
@@ -106,7 +106,7 @@ const ChapterManager = ({ courseId }) => {
       {showAddChapter && (
         <div className="bg-white rounded-lg shadow-md p-6 border-2 border-indigo-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingChapter ? 'Edit Chapter' : 'Add New Chapter'}
+            {editingChapter ? "Edit Chapter" : "Add New Chapter"}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -142,7 +142,7 @@ const ChapterManager = ({ courseId }) => {
                 disabled={createLoading}
                 className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
               >
-                {createLoading ? 'Saving...' : editingChapter ? 'Update Chapter' : 'Add Chapter'}
+                {createLoading ? "Saving..." : editingChapter ? "Update Chapter" : "Add Chapter"}
               </button>
               <button
                 type="button"

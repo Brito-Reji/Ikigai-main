@@ -99,8 +99,8 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
           </p>
           <button
             onClick={() => {
-                 console.log('this was tiggered')
-              // localStorage.removeItem("accessToken");
+                 console.log("this was tiggered")
+              localStorage.removeItem("accessToken");
               window.location.href = "/login";
             }}
             className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"

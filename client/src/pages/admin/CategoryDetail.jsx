@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCategory } from '@/hooks/useRedux';
-import { createCategory, fetchCategories } from '@/store/slices/categorySlice';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCategory } from "@/hooks/useRedux";
+import { createCategory, fetchCategories } from "@/store/slices/categorySlice";
 
 const CategoryDetail = () => {
   const { categoryId } = useParams();
@@ -11,8 +11,8 @@ const CategoryDetail = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('edit');
-  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: '', description: '' });
+  const [modalMode, setModalMode] = useState("edit");
+  const [currentCategory, setCurrentCategory] = useState({ _id: null, name: "", description: "" });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -28,20 +28,20 @@ const CategoryDetail = () => {
         setSelectedCategory(category);
       } else {
         // Category not found, redirect to categories list
-        navigate('/admin/categories');
+        navigate("/admin/categories");
       }
     }
   }, [categories, categoryId, navigate]);
 
   // Mock courses data for demonstration
   const mockCourses = [
-    { _id: '1', title: 'React Fundamentals', instructor: 'John Doe', students: 150, status: 'active' },
-    { _id: '2', title: 'Advanced JavaScript', instructor: 'Jane Smith', students: 89, status: 'active' },
-    { _id: '3', title: 'Node.js Backend', instructor: 'Mike Johnson', students: 67, status: 'draft' },
+    { _id: "1", title: "React Fundamentals", instructor: "John Doe", students: 150, status: "active" },
+    { _id: "2", title: "Advanced JavaScript", instructor: "Jane Smith", students: 89, status: "active" },
+    { _id: "3", title: "Node.js Backend", instructor: "Mike Johnson", students: 67, status: "draft" },
   ];
 
   const handleBackToList = () => {
-    navigate('/admin/categories');
+    navigate("/admin/categories");
   };
 
   const handleSettings = () => {
@@ -49,13 +49,13 @@ const CategoryDetail = () => {
   };
 
   const handleUnlist = (_id) => {
-    console.log('Unlisting category:', _id);
+    console.log("Unlisting category:", _id);
     setShowSettings(false);
   };
 
   const handleEdit = (_id) => {
     const category = categories.find(cat => cat._id === _id);
-    setModalMode('edit');
+    setModalMode("edit");
     setCurrentCategory(category);
     setErrors({});
     setIsModalOpen(true);
@@ -63,11 +63,11 @@ const CategoryDetail = () => {
   };
 
   const handleDelete = (_id) => {
-    if (window.confirm('⚠️ PERMANENT ACTION: This will permanently delete the category and cannot be undone. Are you absolutely sure?')) {
-      console.log('Deleting category:', _id);
+    if (window.confirm("⚠️ PERMANENT ACTION: This will permanently delete the category and cannot be undone. Are you absolutely sure?")) {
+      console.log("Deleting category:", _id);
       setShowSettings(false);
       // After deletion, navigate back to categories list
-      navigate('/admin/categories');
+      navigate("/admin/categories");
     }
   };
 
@@ -75,11 +75,11 @@ const CategoryDetail = () => {
     const newErrors = {};
     
     if (!currentCategory.name.trim()) {
-      newErrors.name = 'Category name is required';
+      newErrors.name = "Category name is required";
     }
     
     if (!currentCategory.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = "Description is required";
     }
     
     setErrors(newErrors);
@@ -94,15 +94,15 @@ const CategoryDetail = () => {
     }
 
     // Update category logic here
-    console.log('Updating category:', currentCategory);
+    console.log("Updating category:", currentCategory);
     
     setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: "", description: "" });
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setCurrentCategory({ _id: null, name: '', description: '' });
+    setCurrentCategory({ _id: null, name: "", description: "" });
     setErrors({});
   };
 
@@ -212,9 +212,9 @@ const CategoryDetail = () => {
                     <div className="flex items-center space-x-4 mt-2">
                       <span className="text-sm text-gray-500">{course.students} students</span>
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        course.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
+                        course.status === "active" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-yellow-100 text-yellow-800"
                       }`}>
                         {course.status}
                       </span>
@@ -269,7 +269,7 @@ const CategoryDetail = () => {
                     value={currentCategory.name}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
+                      errors.name ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter category name"
                   />
@@ -286,7 +286,7 @@ const CategoryDetail = () => {
                     value={currentCategory.description}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, description: e.target.value })}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
+                      errors.description ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter category description"
                     rows="4"

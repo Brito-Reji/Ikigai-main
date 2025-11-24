@@ -71,13 +71,13 @@ export default function CreateCoursePage() {
 
   // Calculate final price based on discount
   useEffect(() => {
-    if (formData.actualPrice && formData.discountType !== 'none' && formData.discountValue) {
+    if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
       let finalPrice = parseFloat(formData.actualPrice);
       
-      if (formData.discountType === 'percentage') {
+      if (formData.discountType === "percentage") {
         const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
         finalPrice = finalPrice - discount;
-      } else if (formData.discountType === 'fixed') {
+      } else if (formData.discountType === "fixed") {
         finalPrice = finalPrice - parseFloat(formData.discountValue);
       }
       
@@ -99,10 +99,10 @@ export default function CreateCoursePage() {
     if (formData.overview.length > 1000) newErrors.overview = "Overview cannot exceed 1000 characters";
     if (!formData.actualPrice) newErrors.actualPrice = "Actual price is required";
     if (formData.actualPrice < 0) newErrors.actualPrice = "Actual price cannot be negative";
-    if (formData.discountType !== 'none' && !formData.discountValue) {
+    if (formData.discountType !== "none" && !formData.discountValue) {
       newErrors.discountValue = "Discount value is required";
     }
-    if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+    if (formData.discountType === "percentage" && formData.discountValue > 100) {
       newErrors.discountValue = "Percentage cannot exceed 100%";
     }
     if (!formData.thumbnail) newErrors.thumbnail = "Thumbnail is required";
@@ -240,7 +240,7 @@ export default function CreateCoursePage() {
               {/* Discount Value */}
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-3">
-                  Discount Value {formData.discountType !== 'none' && <span className="text-red-500">*</span>}
+                  Discount Value {formData.discountType !== "none" && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="number"
@@ -250,7 +250,7 @@ export default function CreateCoursePage() {
                   min={0}
                   step="0.01"
                   placeholder="0.00"
-                  disabled={formData.discountType === 'none'}
+                  disabled={formData.discountType === "none"}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
                 {errors.discountValue && <p className="text-red-500 text-sm mt-1">{errors.discountValue}</p>}
@@ -263,10 +263,10 @@ export default function CreateCoursePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-medium text-gray-700">Final Price:</span>
                   <div className="text-right">
-                    {formData.discountType !== 'none' && formData.discountValue && (
+                    {formData.discountType !== "none" && formData.discountValue && (
                       <span className="text-gray-500 line-through mr-2">₹{parseFloat(formData.actualPrice).toFixed(2)}</span>
                     )}
-                    <span className="text-2xl font-bold text-blue-600">₹{formData.price || '0.00'}</span>
+                    <span className="text-2xl font-bold text-blue-600">₹{formData.price || "0.00"}</span>
                   </div>
                 </div>
               </div>

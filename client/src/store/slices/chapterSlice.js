@@ -1,99 +1,99 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import api from '@/api/axiosConfig.js';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import api from "@/api/axiosConfig.js";
 
 // Fetch chapters for a course
 export const fetchChapters = createAsyncThunk(
-    'chapters/fetchChapters',
+    "chapters/fetchChapters",
     async (courseId, { rejectWithValue }) => {
         try {
             const response = await api.get(`/instructor/courses/${courseId}/chapters`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to fetch chapters' });
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch chapters" });
         }
     }
 );
 
 // Create a new chapter
 export const createChapter = createAsyncThunk(
-    'chapters/createChapter',
+    "chapters/createChapter",
     async ({ courseId, chapterData }, { rejectWithValue }) => {
         try {
             const response = await api.post(`/instructor/courses/${courseId}/chapters`, chapterData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to create chapter' });
+            return rejectWithValue(error.response?.data || { message: "Failed to create chapter" });
         }
     }
 );
 
 // Update a chapter
 export const updateChapter = createAsyncThunk(
-    'chapters/updateChapter',
+    "chapters/updateChapter",
     async ({ courseId, chapterId, chapterData }, { rejectWithValue }) => {
         try {
             const response = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}`, chapterData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to update chapter' });
+            return rejectWithValue(error.response?.data || { message: "Failed to update chapter" });
         }
     }
 );
 
 // Delete a chapter
 export const deleteChapter = createAsyncThunk(
-    'chapters/deleteChapter',
+    "chapters/deleteChapter",
     async ({ courseId, chapterId }, { rejectWithValue }) => {
         try {
             const response = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}`);
             return { ...response.data, chapterId };
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to delete chapter' });
+            return rejectWithValue(error.response?.data || { message: "Failed to delete chapter" });
         }
     }
 );
 
 // Add a lesson to a chapter
 export const addLesson = createAsyncThunk(
-    'chapters/addLesson',
+    "chapters/addLesson",
     async ({ courseId, chapterId, lessonData }, { rejectWithValue }) => {
         try {
             const response = await api.post(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons`, lessonData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to add lesson' });
+            return rejectWithValue(error.response?.data || { message: "Failed to add lesson" });
         }
     }
 );
 
 // Update a lesson
 export const updateLesson = createAsyncThunk(
-    'chapters/updateLesson',
+    "chapters/updateLesson",
     async ({ courseId, chapterId, lessonId, lessonData }, { rejectWithValue }) => {
         try {
             const response = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, lessonData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to update lesson' });
+            return rejectWithValue(error.response?.data || { message: "Failed to update lesson" });
         }
     }
 );
 
 // Delete a lesson
 export const deleteLesson = createAsyncThunk(
-    'chapters/deleteLesson',
+    "chapters/deleteLesson",
     async ({ courseId, chapterId, lessonId }, { rejectWithValue }) => {
         try {
             const response = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to delete lesson' });
+            return rejectWithValue(error.response?.data || { message: "Failed to delete lesson" });
         }
     }
 );
 
 const chapterSlice = createSlice({
-    name: 'chapters',
+    name: "chapters",
     initialState: {
         chapters: [],
         loading: false,
@@ -138,7 +138,7 @@ const chapterSlice = createSlice({
             })
             .addCase(fetchChapters.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload?.message || 'Failed to fetch chapters';
+                state.error = action.payload?.message || "Failed to fetch chapters";
             })
 
             // Create chapter
@@ -154,7 +154,7 @@ const chapterSlice = createSlice({
             })
             .addCase(createChapter.rejected, (state, action) => {
                 state.createLoading = false;
-                state.createError = action.payload?.message || 'Failed to create chapter';
+                state.createError = action.payload?.message || "Failed to create chapter";
             })
 
             // Update chapter
@@ -173,7 +173,7 @@ const chapterSlice = createSlice({
             })
             .addCase(updateChapter.rejected, (state, action) => {
                 state.updateLoading = false;
-                state.updateError = action.payload?.message || 'Failed to update chapter';
+                state.updateError = action.payload?.message || "Failed to update chapter";
             })
 
             // Delete chapter
@@ -187,7 +187,7 @@ const chapterSlice = createSlice({
             })
             .addCase(deleteChapter.rejected, (state, action) => {
                 state.deleteLoading = false;
-                state.deleteError = action.payload?.message || 'Failed to delete chapter';
+                state.deleteError = action.payload?.message || "Failed to delete chapter";
             })
 
             // Add lesson

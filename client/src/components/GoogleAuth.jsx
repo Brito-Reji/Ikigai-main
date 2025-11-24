@@ -1,8 +1,8 @@
-import api from '@/api/axiosConfig.js';
-import { GoogleLogin } from '@react-oauth/google';
-import React from 'react'
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import api from "@/api/axiosConfig.js";
+import { GoogleLogin } from "@react-oauth/google";
+import React from "react"
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 function GoogleAuth({role}) {
 let navigate = useNavigate()
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -18,10 +18,10 @@ let navigate = useNavigate()
     console.log("sucess? ",success)
     if (success && role === "student") {
       
-      localStorage.setItem('accessToken',accessToken)
-      navigate('/course', { replace: true })
+      localStorage.setItem("accessToken",accessToken)
+      navigate("/courses", { replace: true })
     } else if (success && role === "instructor") {
-      localStorage.setItem('accessToken',accessToken)
+      localStorage.setItem("accessToken",accessToken)
       navigate("/instructor/dashboard", { replace: true })
     }
   }

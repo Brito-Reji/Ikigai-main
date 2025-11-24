@@ -14,13 +14,13 @@ export default function CoursesPage() {
 
   // Fetch instructor courses on component mount
   useEffect(() => {
-    console.log('Fetching instructor courses...');
+    console.log("Fetching instructor courses...");
     dispatch(fetchInstructorCourses());
   }, [dispatch]);
 
   // Debug logging
   useEffect(() => {
-    console.log('Courses state:', { instructorCourses, loading, error });
+    console.log("Courses state:", { instructorCourses, loading, error });
   }, [instructorCourses, loading, error]);
 
   // Transform backend data to match component expectations

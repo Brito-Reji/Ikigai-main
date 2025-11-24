@@ -1,26 +1,26 @@
-import api from '@/api/axiosConfig.js';
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, ArrowRight, Clock } from 'lucide-react';
+import api from "@/api/axiosConfig.js";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Lock, Eye, EyeOff, CheckCircle, ArrowRight, Clock } from "lucide-react";
 
 function InstructorResetPassword() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [email] = useState(location.state?.email || '');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email] = useState(location.state?.email || "");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [otpTimer, setOtpTimer] = useState(120);
   const [resendingOtp, setResendingOtp] = useState(false);
 
   useEffect(() => {
     if (!email) {
-      navigate('/instructor/forget-password');
+      navigate("/instructor/forget-password");
       return;
     }
 
@@ -34,7 +34,7 @@ function InstructorResetPassword() {
   const formatTimer = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleOtpChange = (index, value) => {
@@ -50,18 +50,18 @@ function InstructorResetPassword() {
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
     if (!/^\d+$/.test(pastedData)) return;
 
     const newOtp = [...otp];
-    pastedData.split('').forEach((char, index) => {
+    pastedData.split("").forEach((char, index) => {
       if (index < 6) newOtp[index] = char;
     });
     setOtp(newOtp);
@@ -72,18 +72,18 @@ function InstructorResetPassword() {
 
   const handleResendOtp = async () => {
     setResendingOtp(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await api.post('/auth/forget-password', { email });
+      const response = await api.post("/auth/forget-password", { email });
       
       if (response.data.success) {
         setOtpTimer(120);
-        setOtp(['', '', '', '', '', '']);
-        document.getElementById('otp-0')?.focus();
+        setOtp(["", "", "", "", "", ""]);
+        document.getElementById("otp-0")?.focus();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend OTP');
+      setError(err.response?.data?.message || "Failed to resend OTP");
     } finally {
       setResendingOtp(false);
     }
@@ -91,34 +91,34 @@ function InstructorResetPassword() {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    const otpValue = otp.join('');
+    const otpValue = otp.join("");
 
     if (otpValue.length !== 6) {
-      setError('Please enter the complete 6-digit OTP');
+      setError("Please enter the complete 6-digit OTP");
       return;
     }
 
     if (!password) {
-      setError('Please enter a new password');
+      setError("Please enter a new password");
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/reset-password', {
+      const response = await api.post("/auth/reset-password", {
         email,
         otp: otpValue,
         newPassword: password
@@ -127,13 +127,13 @@ function InstructorResetPassword() {
       if (response.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/instructor/signin', { replace: true });
+          navigate("/instructor/signin", { replace: true });
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
-      setOtp(['', '', '', '', '', '']);
-      document.getElementById('otp-0')?.focus();
+      setError(err.response?.data?.message || "Failed to reset password. Please try again.");
+      setOtp(["", "", "", "", "", ""]);
+      document.getElementById("otp-0")?.focus();
     } finally {
       setLoading(false);
     }
@@ -216,7 +216,7 @@ function InstructorResetPassword() {
                     disabled={resendingOtp}
                     className="text-indigo-600 text-sm font-medium hover:underline disabled:opacity-50"
                   >
-                    {resendingOtp ? 'Resending...' : 'Resend OTP'}
+                    {resendingOtp ? "Resending..." : "Resend OTP"}
                   </button>
                 )}
               </div>
@@ -228,7 +228,7 @@ function InstructorResetPassword() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -252,7 +252,7 @@ function InstructorResetPassword() {
               </label>
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -278,21 +278,21 @@ function InstructorResetPassword() {
 
             <button
               type="submit"
-              disabled={loading || otp.join('').length !== 6}
+              disabled={loading || otp.join("").length !== 6}
               className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium transition flex items-center justify-center space-x-2 ${
-                loading || otp.join('').length !== 6
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-indigo-700'
+                loading || otp.join("").length !== 6
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-indigo-700"
               }`}
             >
-              <span>{loading ? 'Resetting...' : 'Reset Password'}</span>
+              <span>{loading ? "Resetting..." : "Reset Password"}</span>
               {!loading && <ArrowRight className="w-5 h-5" />}
             </button>
           </form>
         </div>
 
         <p className="text-center text-gray-500 text-sm mt-6">
-          Need help?{' '}
+          Need help?{" "}
           <a href="#" className="text-indigo-600 hover:underline">
             Contact support
           </a>

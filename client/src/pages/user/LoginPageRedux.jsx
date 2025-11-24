@@ -28,14 +28,14 @@ export default function LoginPageRedux() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated || localStorage.getItem("accessToken")) {
-      navigate("/course", { replace: true });
+      navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
   // Handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/course", { replace: true });
+      navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -99,7 +99,7 @@ export default function LoginPageRedux() {
       dispatch(loginUser({
         email: formData.email,
         password: formData.password,
-        role: 'student' // or determine based on route/context
+        role: "student" // or determine based on route/context
       }));
     }
   };

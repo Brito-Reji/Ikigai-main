@@ -1,7 +1,7 @@
-import api from '@/api/axiosConfig';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import api from "@/api/axiosConfig";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Students = () => {
   const navigate = useNavigate();
@@ -10,9 +10,9 @@ const Students = () => {
   const [loading, setLoading] = useState(true);
   
   // Get initial values from URL or defaults
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
-  const [itemsPerPage, setItemsPerPage] = useState(Number(searchParams.get('limit')) || 10);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
+  const [itemsPerPage, setItemsPerPage] = useState(Number(searchParams.get("limit")) || 10);
 
   // Helper function to get full name
   const getFullName = (student) => {
@@ -21,18 +21,18 @@ const Students = () => {
       return `${student.firstName} ${student.lastName}`;
     }
     if (student.firstName) return student.firstName;
-    return student.username || 'N/A';
+    return student.username || "N/A";
   };
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/admin/students');
+        const response = await api.get("/admin/students");
         console.log(response.data.data);
         setStudents(response.data.data);
       } catch (error) {
-        console.error('Error fetching students:', error);
+        console.error("Error fetching students:", error);
       } finally {
         setLoading(false);
       }
@@ -42,19 +42,19 @@ const Students = () => {
 
   const handleBlockToggle = async (studentId) => {
     const student = students.find(s => s._id === studentId);
-    const action = student.isBlocked ? 'unblock' : 'block';
+    const action = student.isBlocked ? "unblock" : "block";
     
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} Student?`,
+      title: `${action === "block" ? "Block" : "Unblock"} Student?`,
       html: `
         <p>Are you sure you want to ${action} <strong>${getFullName(student)}</strong>?</p>
       `,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -69,19 +69,19 @@ const Students = () => {
         ));
         
         Swal.fire({
-          title: 'Success!',
+          title: "Success!",
           text: `Student has been ${action}ed successfully.`,
-          icon: 'success',
-          confirmButtonColor: '#3b82f6',
+          icon: "success",
+          confirmButtonColor: "#3b82f6",
           timer: 2000
         });
       } catch (error) {
-        console.error('Error toggling block status:', error);
+        console.error("Error toggling block status:", error);
         Swal.fire({
-          title: 'Error!',
-          text: 'Failed to update student status.',
-          icon: 'error',
-          confirmButtonColor: '#dc2626'
+          title: "Error!",
+          text: "Failed to update student status.",
+          icon: "error",
+          confirmButtonColor: "#dc2626"
         });
       }
     }
@@ -145,21 +145,21 @@ const Students = () => {
         for (let i = 1; i <= 4; i++) {
           pageNumbers.push(i);
         }
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         pageNumbers.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pageNumbers.push(1);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pageNumbers.push(i);
         }
       } else {
         pageNumbers.push(1);
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pageNumbers.push(i);
         }
-        pageNumbers.push('...');
+        pageNumbers.push("...");
         pageNumbers.push(totalPages);
       }
     }
@@ -169,12 +169,12 @@ const Students = () => {
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString("en-US", { 
+      day: "2-digit", 
+      month: "short", 
+      year: "numeric" 
     });
   };
 
@@ -287,10 +287,10 @@ const Students = () => {
                       {getFullName(student)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {student.username || 'N/A'}
+                      {student.username || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {student.email || 'N/A'}
+                      {student.email || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {formatDate(student.createdAt)}
@@ -299,11 +299,11 @@ const Students = () => {
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           student.isBlocked
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-green-100 text-green-800'
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
                         }`}
                       >
-                        {student.isBlocked ? 'Blocked' : 'Active'}
+                        {student.isBlocked ? "Blocked" : "Active"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -318,11 +318,11 @@ const Students = () => {
                           onClick={() => handleBlockToggle(student._id)}
                           className={`px-4 py-1.5 rounded transition-colors ${
                             student.isBlocked
-                              ? 'bg-green-500 text-white hover:bg-green-600'
-                              : 'bg-red-500 text-white hover:bg-red-600'
+                              ? "bg-green-500 text-white hover:bg-green-600"
+                              : "bg-red-500 text-white hover:bg-red-600"
                           }`}
                         >
-                          {student.isBlocked ? 'Unblock' : 'Block'}
+                          {student.isBlocked ? "Unblock" : "Block"}
                         </button>
                       </div>
                     </td>
@@ -354,8 +354,8 @@ const Students = () => {
                   disabled={currentPage === 1}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     currentPage === 1
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
                 >
                   Previous
@@ -364,7 +364,7 @@ const Students = () => {
                 {/* Page Numbers */}
                 <div className="flex gap-1">
                   {getPageNumbers().map((pageNum, index) => (
-                    pageNum === '...' ? (
+                    pageNum === "..." ? (
                       <span
                         key={`ellipsis-${index}`}
                         className="px-3 py-2 text-gray-500"
@@ -377,8 +377,8 @@ const Students = () => {
                         onClick={() => handlePageChange(pageNum)}
                         className={`px-4 py-2 rounded-lg transition-colors ${
                           currentPage === pageNum
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            ? "bg-teal-500 text-white"
+                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                         }`}
                       >
                         {pageNum}
@@ -393,8 +393,8 @@ const Students = () => {
                   disabled={currentPage === totalPages}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     currentPage === totalPages
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                   }`}
                 >
                   Next

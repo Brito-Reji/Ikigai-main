@@ -5,7 +5,6 @@ import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
 
-
 // import { User } from './model/'
 
 export const studentRegister = asyncHandler(async (req, res) => {
@@ -78,7 +77,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
     await sendOTPToEmail(email);
     console.log("OTP sent successfully to", email);
 
-    let {  refreshToken } = generateTokens({
+    let { refreshToken } = generateTokens({
       userId: user._id,
       role: user.role,
     });
@@ -134,9 +133,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
   if (user.isBlocked) {
     return res.status(400).json({
       success: false,
-      message:'user is blocked by the admin. please reach the customer care'
-  })
-}
+      message: "user is blocked by the admin. please reach the customer care",
+    });
+  }
   if (user.authType == "google") {
     return res.status(401).json({
       success: false,
@@ -319,4 +318,3 @@ export const googleAuth = asyncHandler(async (req, res) => {
     });
   }
 });
-

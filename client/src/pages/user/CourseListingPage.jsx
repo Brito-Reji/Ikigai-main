@@ -17,25 +17,31 @@ import api from "@/api/axiosConfig.js";
 export default function CoursesPage() {
   const { dispatch: categoryDispatch } = useCategory();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({});
-  
+
   const [selectedChapters, setSelectedChapters] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState(() => {
-    const cat = searchParams.get('category');
+    const cat = searchParams.get("category");
     return cat ? [cat] : [];
   });
   const [selectedPriceRanges, setSelectedPriceRanges] = useState(() => {
-    const price = searchParams.get('priceRange');
-    return price ? price.split(',') : [];
+    const price = searchParams.get("priceRange");
+    return price ? price.split(",") : [];
   });
-  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || '');
-  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || 'newest');
-  const [currentPage, setCurrentPage] = useState(() => Number(searchParams.get('page')) || 1);
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get("search") || ""
+  );
+  const [sortBy, setSortBy] = useState(
+    () => searchParams.get("sort") || "newest"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    () => Number(searchParams.get("page")) || 1
+  );
   const [expandedSections, setExpandedSections] = useState({
     rating: true,
     chapters: true,
@@ -46,17 +52,17 @@ export default function CoursesPage() {
 
   // Sync filters from URL on mount
   useEffect(() => {
-    const urlSearch = searchParams.get('search');
-    const urlCategory = searchParams.get('category');
-    const urlSort = searchParams.get('sort');
-    const urlPage = searchParams.get('page');
-    const urlPriceRange = searchParams.get('priceRange');
-    
+    const urlSearch = searchParams.get("search");
+    const urlCategory = searchParams.get("category");
+    const urlSort = searchParams.get("sort");
+    const urlPage = searchParams.get("page");
+    const urlPriceRange = searchParams.get("priceRange");
+
     if (urlSearch) setSearchQuery(urlSearch);
     if (urlCategory) setSelectedCategories([urlCategory]);
     if (urlSort) setSortBy(urlSort);
     if (urlPage) setCurrentPage(Number(urlPage));
-    if (urlPriceRange) setSelectedPriceRanges(urlPriceRange.split(','));
+    if (urlPriceRange) setSelectedPriceRanges(urlPriceRange.split(","));
   }, [searchParams]);
 
   // Update URL when filters change
@@ -64,22 +70,30 @@ export default function CoursesPage() {
     const params = {};
     if (searchQuery) params.search = searchQuery;
     if (selectedCategories.length > 0) params.category = selectedCategories[0];
-    if (selectedPriceRanges.length > 0) params.priceRange = selectedPriceRanges.join(',');
-    if (sortBy !== 'newest') params.sort = sortBy;
+    if (selectedPriceRanges.length > 0)
+      params.priceRange = selectedPriceRanges.join(",");
+    if (sortBy !== "newest") params.sort = sortBy;
     if (currentPage > 1) params.page = currentPage;
-    
+
     setSearchParams(params);
-  }, [searchQuery, selectedCategories, selectedPriceRanges, sortBy, currentPage, setSearchParams]);
+  }, [
+    searchQuery,
+    selectedCategories,
+    selectedPriceRanges,
+    sortBy,
+    currentPage,
+    setSearchParams,
+  ]);
 
   // Fetch categories
   const fetchCategoriesData = async () => {
     try {
-      const response = await api.get('/public');
+      const response = await api.get("/public");
       if (response.data.success) {
         setCategories(response.data.categories);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -89,22 +103,24 @@ export default function CoursesPage() {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '12',
-        sort: sortBy
+        limit: "12",
+        sort: sortBy,
       });
-      
-      if (searchQuery) params.append('search', searchQuery);
-      if (selectedCategories.length > 0) params.append('category', selectedCategories[0]);
-      if (selectedPriceRanges.length > 0) params.append('priceRange', selectedPriceRanges.join(','));
+
+      if (searchQuery) params.append("search", searchQuery);
+      if (selectedCategories.length > 0)
+        params.append("category", selectedCategories[0]);
+      if (selectedPriceRanges.length > 0)
+        params.append("priceRange", selectedPriceRanges.join(","));
 
       const response = await api.get(`/public/courses?${params.toString()}`);
-      
+
       if (response.data.success) {
         setCourses(response.data.data);
         setPagination(response.data.pagination);
       }
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error("Error fetching courses:", error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +134,13 @@ export default function CoursesPage() {
   // Fetch courses when filters change
   useEffect(() => {
     fetchCoursesData();
-  }, [searchQuery, selectedCategories, selectedPriceRanges, sortBy, currentPage]);
+  }, [
+    searchQuery,
+    selectedCategories,
+    selectedPriceRanges,
+    sortBy,
+    currentPage,
+  ]);
 
   // Transform courses for CourseCard component
   const transformedCourses = courses.map(course => ({
@@ -130,7 +152,7 @@ export default function CoursesPage() {
     price: `₹${course.price}`,
     thumbnail: course.thumbnail,
     description: course.description,
-    category: course.category?.name
+    category: course.category?.name,
   }));
 
   function toggleSection(section) {
@@ -142,7 +164,7 @@ export default function CoursesPage() {
 
   function toggleChapter(chapter) {
     if (selectedChapters.includes(chapter)) {
-      setSelectedChapters(selectedChapters.filter((c) => c !== chapter));
+      setSelectedChapters(selectedChapters.filter(c => c !== chapter));
     } else {
       setSelectedChapters([...selectedChapters, chapter]);
     }
@@ -151,7 +173,7 @@ export default function CoursesPage() {
   function toggleRating(rating) {
     setCurrentPage(1);
     if (selectedRatings.includes(rating)) {
-      setSelectedRatings(selectedRatings.filter((r) => r !== rating));
+      setSelectedRatings(selectedRatings.filter(r => r !== rating));
     } else {
       setSelectedRatings([...selectedRatings, rating]);
     }
@@ -169,7 +191,7 @@ export default function CoursesPage() {
   function togglePriceRange(range) {
     setCurrentPage(1);
     if (selectedPriceRanges.includes(range)) {
-      setSelectedPriceRanges(selectedPriceRanges.filter((r) => r !== range));
+      setSelectedPriceRanges(selectedPriceRanges.filter(r => r !== range));
     } else {
       setSelectedPriceRanges([...selectedPriceRanges, range]);
     }
@@ -186,8 +208,6 @@ export default function CoursesPage() {
     setCurrentPage(1);
   }
 
-
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content - Removed max-w-7xl to use full width */}
@@ -198,21 +218,26 @@ export default function CoursesPage() {
             All Courses
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            {loading ? 'Loading courses...' : `${pagination.totalCourses || 0} courses available`}
+            {loading
+              ? "Loading courses..."
+              : `${pagination.totalCourses || 0} courses available`}
           </p>
         </div>
 
         {/* Filter and Sort Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => setSidebarOpen(true)}
               className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition w-full sm:w-auto justify-center sm:justify-start lg:hidden"
             >
               <Filter className="w-4 h-4" />
               <span className="text-sm">Filter</span>
             </button>
-            {(selectedCategories.length > 0 || selectedRatings.length > 0 || selectedPriceRanges.length > 0 || searchQuery) && (
+            {(selectedCategories.length > 0 ||
+              selectedRatings.length > 0 ||
+              selectedPriceRanges.length > 0 ||
+              searchQuery) && (
               <button
                 onClick={clearAllFilters}
                 className="text-sm text-blue-600 hover:text-blue-700 underline"
@@ -225,7 +250,7 @@ export default function CoursesPage() {
             <span className="text-sm text-gray-600">Sort By</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={e => setSortBy(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
               <option value="newest">Newest</option>
@@ -281,7 +306,7 @@ export default function CoursesPage() {
                 </button>
                 {expandedSections.rating && (
                   <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((rating) => (
+                    {[5, 4, 3, 2, 1].map(rating => (
                       <label
                         key={rating}
                         className="flex items-center space-x-2 cursor-pointer"
@@ -303,7 +328,9 @@ export default function CoursesPage() {
                               }`}
                             />
                           ))}
-                          <span className="ml-2 text-sm text-gray-600">& up</span>
+                          <span className="ml-2 text-sm text-gray-600">
+                            & up
+                          </span>
                         </div>
                       </label>
                     ))}
@@ -328,7 +355,7 @@ export default function CoursesPage() {
                 </button>
                 {expandedSections.chapters && (
                   <div className="space-y-2">
-                    {["1-10", "10-15", "15-20", "20-25"].map((range) => (
+                    {["1-10", "10-15", "15-20", "20-25"].map(range => (
                       <label
                         key={range}
                         className="flex items-center space-x-2 cursor-pointer"
@@ -356,7 +383,9 @@ export default function CoursesPage() {
                   onClick={() => toggleSection("price")}
                   className="flex justify-between items-center w-full mb-4"
                 >
-                  <h3 className="font-semibold text-gray-900 text-sm">Price Range</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm">
+                    Price Range
+                  </h3>
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
                       expandedSections.price ? "rotate-180" : ""
@@ -366,12 +395,12 @@ export default function CoursesPage() {
                 {expandedSections.price && (
                   <div className="space-y-2">
                     {[
-                      { label: 'Free', value: 'free' },
-                      { label: 'Under ₹500', value: '0-500' },
-                      { label: '₹500 - ₹1000', value: '500-1000' },
-                      { label: '₹1000 - ₹2000', value: '1000-2000' },
-                      { label: 'Above ₹2000', value: '2000+' }
-                    ].map((range) => (
+                      { label: "Free", value: "free" },
+                      { label: "Under ₹500", value: "0-500" },
+                      { label: "₹500 - ₹1000", value: "500-1000" },
+                      { label: "₹1000 - ₹2000", value: "1000-2000" },
+                      { label: "Above ₹2000", value: "2000+" },
+                    ].map(range => (
                       <label
                         key={range.value}
                         className="flex items-center space-x-2 cursor-pointer"
@@ -382,7 +411,9 @@ export default function CoursesPage() {
                           checked={selectedPriceRanges.includes(range.value)}
                           onChange={() => togglePriceRange(range.value)}
                         />
-                        <span className="text-gray-700 text-sm">{range.label}</span>
+                        <span className="text-gray-700 text-sm">
+                          {range.label}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -406,7 +437,7 @@ export default function CoursesPage() {
                 </button>
                 {expandedSections.category && (
                   <div className="space-y-2">
-                    {categories.map((category) => (
+                    {categories.map(category => (
                       <label
                         key={category._id}
                         className="flex items-center space-x-2 cursor-pointer"
@@ -417,7 +448,9 @@ export default function CoursesPage() {
                           checked={selectedCategories.includes(category._id)}
                           onChange={() => toggleCategory(category._id)}
                         />
-                        <span className="text-gray-700 text-sm">{category.name}</span>
+                        <span className="text-gray-700 text-sm">
+                          {category.name}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -431,29 +464,34 @@ export default function CoursesPage() {
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
+                  <div
+                    key={i}
+                    className="bg-gray-200 animate-pulse rounded-lg h-64"
+                  ></div>
                 ))}
               </div>
             ) : transformedCourses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-                    {transformedCourses.map((course, idx) => (
+                {transformedCourses.map((course, idx) => (
                   <>
-                        <Link to={`/course/${course.id}`} key={course.id || idx}>
-                        
-                  <CourseCard  course={course} />
-                        </Link>
+                    <Link to={`/course/${course.id}`} key={course.id || idx}>
+                      <CourseCard course={course} />
+                    </Link>
                   </>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">
-                  {searchQuery || selectedCategories.length > 0 || selectedRatings.length > 0
+                  {searchQuery ||
+                  selectedCategories.length > 0 ||
+                  selectedRatings.length > 0
                     ? "No courses match your filters."
-                    : "No courses available at the moment."
-                  }
+                    : "No courses available at the moment."}
                 </p>
-                {(searchQuery || selectedCategories.length > 0 || selectedRatings.length > 0) && (
+                {(searchQuery ||
+                  selectedCategories.length > 0 ||
+                  selectedRatings.length > 0) && (
                   <button
                     onClick={clearAllFilters}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -467,14 +505,14 @@ export default function CoursesPage() {
             {/* Pagination */}
             {pagination.totalPages > 1 && (
               <div className="flex justify-center items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2">
-                <button 
+                <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={!pagination.hasPrev}
                   className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                
+
                 {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -486,7 +524,7 @@ export default function CoursesPage() {
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   return (
                     <button
                       key={pageNum}
@@ -501,9 +539,13 @@ export default function CoursesPage() {
                     </button>
                   );
                 })}
-                
-                <button 
-                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage(
+                      Math.min(pagination.totalPages, currentPage + 1)
+                    )
+                  }
                   disabled={!pagination.hasNext}
                   className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

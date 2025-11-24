@@ -1,9 +1,9 @@
-import asyncHandler from 'express-async-handler';
-import bcrypt from 'bcrypt';
-import { User } from '../../models/User.js';
-import { Instructor } from '../../models/Instructor.js';
-import { Otp } from '../../models/Otp.js';
-import { sendOTPToEmail } from '../../utils/OTPServices.js';
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+import { User } from "../../models/User.js";
+import { Instructor } from "../../models/Instructor.js";
+import { Otp } from "../../models/Otp.js";
+import { sendOTPToEmail } from "../../utils/OTPServices.js";
 
 export const forgetPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
@@ -113,6 +113,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Password reset successfully",
-    role: isInstructor ? 'instructor' : 'student',
+    role: isInstructor ? "instructor" : "student",
   });
 });

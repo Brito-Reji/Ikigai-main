@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const loadFromStorage = () => {
     try {
-        const cart = localStorage.getItem('cart');
+        const cart = localStorage.getItem("cart");
         return cart ? JSON.parse(cart) : [];
     } catch (error) {
         console.error("Error loading cart from storage:", error);
@@ -12,7 +12,7 @@ const loadFromStorage = () => {
 
 const saveCartToStorage = (cart) => {
     try {
-        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem("cart", JSON.stringify(cart));
     } catch (error) {
         console.error("Error saving cart to storage:", error);
     }
@@ -42,7 +42,7 @@ const cartSlice = createSlice({
         clearCart: (state) => {
                 
             state.items = [];
-            localStorage.removeItem('cart');
+            localStorage.removeItem("cart");
         }
     }
 });

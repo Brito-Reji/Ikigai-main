@@ -1,5 +1,5 @@
-import React from 'react';
-import { Star, Clock, Users, Globe, Award } from 'lucide-react';
+import React from "react";
+import { Star, Clock, Users, Globe, Award } from "lucide-react";
 
 const CourseHero = ({ course }) => {
   if (!course) return null;
@@ -84,11 +84,11 @@ const CourseHero = ({ course }) => {
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <div className="relative group cursor-pointer">
                 <img
-                  src={course.thumbnail || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80'}
+                  src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
                   alt={course.title}
                   className="w-full h-48 object-cover"
                   onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80';
+                    e.target.src = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80";
                   }}
                 />
                 <div className="absolute inset-0 bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all" >

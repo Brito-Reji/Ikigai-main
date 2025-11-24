@@ -2,11 +2,11 @@ import api from "@/api/axiosConfig";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchCategories = createAsyncThunk(
-    'categories/fetchCategories',
+    "categories/fetchCategories",
     async (_, thunkAPI) => {
         try {
-            const res = await api.get('/public')
-            console.log('category thunk ->', res)
+            const res = await api.get("/public")
+            console.log("category thunk ->", res)
             return res.data
         } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
@@ -16,10 +16,10 @@ export const fetchCategories = createAsyncThunk(
 
 
 export const createCategory = createAsyncThunk(
-    'categories/createCategory',
+    "categories/createCategory",
     async (category, thunkAPI) => {
         try {
-            const res = await api.post('/categories', category)
+            const res = await api.post("/categories", category)
             return res.data
         } catch (err) {
             return thunkAPI.rejectWithValue(err.message)
@@ -27,7 +27,7 @@ export const createCategory = createAsyncThunk(
     }
 )
 export const updateCategory = createAsyncThunk(
-    'categories/updateCategory',
+    "categories/updateCategory",
     async (category, thunkAPI) => {
         try {
             const res = await api.put(`/categories/${category._id}`, category)
@@ -38,7 +38,7 @@ export const updateCategory = createAsyncThunk(
     }
 )
 export const deleteCategory = createAsyncThunk(
-    'categories/deleteCategory',
+    "categories/deleteCategory",
     async (_id, thunkAPI) => {
         try {
             await api.patch(`/categories/${_id}`)
@@ -50,7 +50,7 @@ export const deleteCategory = createAsyncThunk(
 )
 
 export const toggleCategoryBlock = createAsyncThunk(
-    'categories/toggleCategoryBlock',
+    "categories/toggleCategoryBlock",
     async (categoryId, thunkAPI) => {
         try {
             const res = await api.patch(`/categories/${categoryId}/toggle-block`)
@@ -63,7 +63,7 @@ export const toggleCategoryBlock = createAsyncThunk(
 
 
 const categorySlice = createSlice({
-    name: 'categories',
+    name: "categories",
     initialState: {
         categories: [],
         loading: false,

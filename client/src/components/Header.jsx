@@ -15,7 +15,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
 
   console.log("Header auth state:", { isAuthenticated, user });
 

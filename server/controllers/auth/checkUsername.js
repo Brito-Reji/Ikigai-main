@@ -1,6 +1,6 @@
-import asyncHandler from 'express-async-handler';
-import { User } from '../../models/User.js';
-import { Instructor } from '../../models/Instructor.js';
+import asyncHandler from "express-async-handler";
+import { User } from "../../models/User.js";
+import { Instructor } from "../../models/Instructor.js";
 
 export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
   try {

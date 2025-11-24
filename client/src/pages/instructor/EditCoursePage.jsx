@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import { useCourse, useCategory } from '@/hooks/useRedux.js';
-import { fetchCourseById, updateCourse, clearUpdateState } from '@/store/slices/courseSlice.js';
-import { fetchCategories } from '@/store/slices/categorySlice.js';
-import ChapterManager from '@/components/instructor/ChapterManager.jsx';
-import SearchableSelect from '@/components/SearchableSelect.jsx';
-import ImageUpload from '@/components/ImageUpload.jsx';
-import Swal from 'sweetalert2';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import { useCourse, useCategory } from "@/hooks/useRedux.js";
+import { fetchCourseById, updateCourse, clearUpdateState } from "@/store/slices/courseSlice.js";
+import { fetchCategories } from "@/store/slices/categorySlice.js";
+import ChapterManager from "@/components/instructor/ChapterManager.jsx";
+import SearchableSelect from "@/components/SearchableSelect.jsx";
+import ImageUpload from "@/components/ImageUpload.jsx";
+import Swal from "sweetalert2";
 
 const EditCoursePage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { currentCourse, courseLoading, updateLoading, updateSuccess, updateError, dispatch } = useCourse();
   const { categories, dispatch: categoryDispatch } = useCategory();
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState({
-    category: '',
-    title: '',
-    description: '',
-    overview: '',
-    actualPrice: '',
-    discountType: 'none',
-    discountValue: '',
-    price: '',
-    thumbnail: '',
+    category: "",
+    title: "",
+    description: "",
+    overview: "",
+    actualPrice: "",
+    discountType: "none",
+    discountValue: "",
+    price: "",
+    thumbnail: "",
     published: false,
   });
   const [errors, setErrors] = useState({});
@@ -42,15 +42,15 @@ const EditCoursePage = () => {
   useEffect(() => {
     if (currentCourse) {
       setFormData({
-        category: currentCourse.category?._id || '',
-        title: currentCourse.title || '',
-        description: currentCourse.description || '',
-        overview: currentCourse.overview || '',
-        actualPrice: currentCourse.actualPrice || '',
-        discountType: currentCourse.discountType || 'none',
-        discountValue: currentCourse.discountValue || '',
-        price: currentCourse.price || '',
-        thumbnail: currentCourse.thumbnail || '',
+        category: currentCourse.category?._id || "",
+        title: currentCourse.title || "",
+        description: currentCourse.description || "",
+        overview: currentCourse.overview || "",
+        actualPrice: currentCourse.actualPrice || "",
+        discountType: currentCourse.discountType || "none",
+        discountValue: currentCourse.discountValue || "",
+        price: currentCourse.price || "",
+        thumbnail: currentCourse.thumbnail || "",
         published: currentCourse.published || false,
       });
     }
@@ -60,10 +60,10 @@ const EditCoursePage = () => {
   useEffect(() => {
     if (updateSuccess) {
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Course updated successfully',
-        confirmButtonColor: '#4f46e5',
+        icon: "success",
+        title: "Success!",
+        text: "Course updated successfully",
+        confirmButtonColor: "#4f46e5",
         timer: 2000
       });
       dispatch(clearUpdateState());
@@ -73,10 +73,10 @@ const EditCoursePage = () => {
   useEffect(() => {
     if (updateError) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error!',
+        icon: "error",
+        title: "Error!",
         text: updateError,
-        confirmButtonColor: '#ef4444'
+        confirmButtonColor: "#ef4444"
       });
       dispatch(clearUpdateState());
     }
@@ -84,13 +84,13 @@ const EditCoursePage = () => {
 
   // Calculate final price
   useEffect(() => {
-    if (formData.actualPrice && formData.discountType !== 'none' && formData.discountValue) {
+    if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
       let finalPrice = parseFloat(formData.actualPrice);
       
-      if (formData.discountType === 'percentage') {
+      if (formData.discountType === "percentage") {
         const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
         finalPrice = finalPrice - discount;
-      } else if (formData.discountType === 'fixed') {
+      } else if (formData.discountType === "fixed") {
         finalPrice = finalPrice - parseFloat(formData.discountValue);
       }
       
@@ -103,10 +103,10 @@ const EditCoursePage = () => {
   const handleSave = async () => {
     if (!validateForm()) {
       Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Please fix the errors before saving',
-        confirmButtonColor: '#ef4444'
+        icon: "error",
+        title: "Validation Error",
+        text: "Please fix the errors before saving",
+        confirmButtonColor: "#ef4444"
       });
       return;
     }
@@ -124,12 +124,12 @@ const EditCoursePage = () => {
     if (formData.description && formData.description.length > 2000) newErrors.description = "Description cannot exceed 2000 characters";
     if (!formData.overview || !formData.overview.trim()) newErrors.overview = "Overview is required";
     if (formData.overview && formData.overview.length > 1000) newErrors.overview = "Overview cannot exceed 1000 characters";
-    if (!formData.actualPrice || formData.actualPrice === '') newErrors.actualPrice = "Actual price is required";
+    if (!formData.actualPrice || formData.actualPrice === "") newErrors.actualPrice = "Actual price is required";
     if (formData.actualPrice && parseFloat(formData.actualPrice) < 0) newErrors.actualPrice = "Actual price cannot be negative";
-    if (formData.discountType !== 'none' && (!formData.discountValue || formData.discountValue === '')) {
+    if (formData.discountType !== "none" && (!formData.discountValue || formData.discountValue === "")) {
       newErrors.discountValue = "Discount value is required";
     }
-    if (formData.discountType === 'percentage' && formData.discountValue && parseFloat(formData.discountValue) > 100) {
+    if (formData.discountType === "percentage" && formData.discountValue && parseFloat(formData.discountValue) > 100) {
       newErrors.discountValue = "Percentage cannot exceed 100%";
     }
     if (!formData.thumbnail) newErrors.thumbnail = "Thumbnail is required";
@@ -138,7 +138,7 @@ const EditCoursePage = () => {
     
     // Log errors for debugging
     if (Object.keys(newErrors).length > 0) {
-      console.log('Validation errors:', newErrors);
+      console.log("Validation errors:", newErrors);
     }
     
     return Object.keys(newErrors).length === 0;
@@ -158,7 +158,7 @@ const EditCoursePage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h2>
           <button
-            onClick={() => navigate('/instructor/courses')}
+            onClick={() => navigate("/instructor/courses")}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             Back to Courses
@@ -169,10 +169,10 @@ const EditCoursePage = () => {
   }
 
   const tabs = [
-    { id: 'details', label: 'Course Details' },
-    { id: 'curriculum', label: 'Curriculum' },
-    { id: 'pricing', label: 'Pricing' },
-    { id: 'settings', label: 'Settings' }
+    { id: "details", label: "Course Details" },
+    { id: "curriculum", label: "Curriculum" },
+    { id: "pricing", label: "Pricing" },
+    { id: "settings", label: "Settings" }
   ];
 
   return (
@@ -181,7 +181,7 @@ const EditCoursePage = () => {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate('/instructor/courses')}
+            onClick={() => navigate("/instructor/courses")}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -198,7 +198,7 @@ const EditCoursePage = () => {
               className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
             >
               <Save className="w-5 h-5 mr-2" />
-              {updateLoading ? 'Saving...' : 'Save Changes'}
+              {updateLoading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
@@ -213,8 +213,8 @@ const EditCoursePage = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   {tab.label}
@@ -225,7 +225,7 @@ const EditCoursePage = () => {
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'details' && (
+            {activeTab === "details" && (
               <CourseDetailsTab 
                 formData={formData}
                 setFormData={setFormData}
@@ -235,11 +235,11 @@ const EditCoursePage = () => {
               />
             )}
 
-            {activeTab === 'curriculum' && (
+            {activeTab === "curriculum" && (
               <ChapterManager courseId={courseId} />
             )}
 
-            {activeTab === 'pricing' && (
+            {activeTab === "pricing" && (
               <PricingTab 
                 formData={formData}
                 setFormData={setFormData}
@@ -248,7 +248,7 @@ const EditCoursePage = () => {
               />
             )}
 
-            {activeTab === 'settings' && (
+            {activeTab === "settings" && (
               <SettingsTab 
                 formData={formData}
                 setFormData={setFormData}
@@ -267,14 +267,14 @@ const CourseDetailsTab = ({ formData, setFormData, errors, setErrors, categories
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleThumbnailChange = (url) => {
     setFormData(prev => ({ ...prev, thumbnail: url }));
     if (errors.thumbnail) {
-      setErrors(prev => ({ ...prev, thumbnail: '' }));
+      setErrors(prev => ({ ...prev, thumbnail: "" }));
     }
   };
 
@@ -365,7 +365,7 @@ const PricingTab = ({ formData, setFormData, errors, setErrors }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -411,7 +411,7 @@ const PricingTab = ({ formData, setFormData, errors, setErrors }) => {
         {/* Discount Value */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Discount Value {formData.discountType !== 'none' && <span className="text-red-500">*</span>}
+            Discount Value {formData.discountType !== "none" && <span className="text-red-500">*</span>}
           </label>
           <input
             type="number"
@@ -420,7 +420,7 @@ const PricingTab = ({ formData, setFormData, errors, setErrors }) => {
             onChange={handleInputChange}
             min={0}
             step="0.01"
-            disabled={formData.discountType === 'none'}
+            disabled={formData.discountType === "none"}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
           />
           {errors.discountValue && <p className="text-red-500 text-sm mt-1">{errors.discountValue}</p>}
@@ -433,10 +433,10 @@ const PricingTab = ({ formData, setFormData, errors, setErrors }) => {
           <div className="flex items-center justify-between">
             <span className="text-lg font-medium text-gray-700">Final Price:</span>
             <div className="text-right">
-              {formData.discountType !== 'none' && formData.discountValue && (
+              {formData.discountType !== "none" && formData.discountValue && (
                 <span className="text-gray-500 line-through mr-2">₹{parseFloat(formData.actualPrice).toFixed(2)}</span>
               )}
-              <span className="text-2xl font-bold text-indigo-600">₹{formData.price || '0.00'}</span>
+              <span className="text-2xl font-bold text-indigo-600">₹{formData.price || "0.00"}</span>
             </div>
           </div>
         </div>

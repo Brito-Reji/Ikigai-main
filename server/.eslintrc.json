@@ -12,6 +12,7 @@
     "ecmaVersion": "latest"
   },
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": ["error", { "singleQuote": false }],
+    "quotes": ["error", "double", { "avoidEscape": true, "allowTemplateLiterals": true }]
   }
 }

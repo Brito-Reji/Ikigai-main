@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '@/api/axiosConfig';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import api from "@/api/axiosConfig";
 import { 
   ArrowLeft, 
   Mail, 
@@ -11,9 +11,9 @@ import {
   XCircle,
   ChevronRight,
   Home
-} from 'lucide-react';
-import ThreeDotLoader from '@/components/ThreeDotLoader';
-import Swal from 'sweetalert2';
+} from "lucide-react";
+import ThreeDotLoader from "@/components/ThreeDotLoader";
+import Swal from "sweetalert2";
 
 const StudentDetail = () => {
   const { id } = useParams();
@@ -32,26 +32,26 @@ const StudentDetail = () => {
       console.log(response)
       setStudent(response.data.data);
     } catch (error) {
-      console.error('Error fetching student details:', error);
+      console.error("Error fetching student details:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleBlockToggle = async () => {
-    const action = student.isBlocked ? 'unblock' : 'block';
+    const action = student.isBlocked ? "unblock" : "block";
     const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} Student?`,
+      title: `${action === "block" ? "Block" : "Unblock"} Student?`,
       html: `
         <p>Are you sure you want to ${action} <strong>${getFullName(student)}</strong>?</p>
-        ${action === 'block' ? '<p class="text-sm text-gray-600 mt-2">This student will not be able to access their account.</p>' : '<p class="text-sm text-gray-600 mt-2">This student will regain access to their account.</p>'}
+        ${action === "block" ? '<p class="text-sm text-gray-600 mt-2">This student will not be able to access their account.</p>' : '<p class="text-sm text-gray-600 mt-2">This student will regain access to their account.</p>'}
       `,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#dc2626' : '#16a34a',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
+      cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel'
+      cancelButtonText: "Cancel"
     });
 
     if (result.isConfirmed) {
@@ -60,42 +60,42 @@ const StudentDetail = () => {
         setStudent({ ...student, isBlocked: !student.isBlocked });
         
         Swal.fire({
-          title: `Student ${action === 'block' ? 'Blocked' : 'Unblocked'}!`,
+          title: `Student ${action === "block" ? "Blocked" : "Unblocked"}!`,
           text: `${getFullName(student)} has been ${action}ed successfully.`,
-          icon: 'success',
-          confirmButtonColor: '#3b82f6'
+          icon: "success",
+          confirmButtonColor: "#3b82f6"
         });
       } catch (error) {
-        console.error('Error toggling block status:', error);
+        console.error("Error toggling block status:", error);
         Swal.fire({
-          title: 'Error!',
-          text: 'Failed to update student status. Please try again.',
-          icon: 'error',
-          confirmButtonColor: '#dc2626'
+          title: "Error!",
+          text: "Failed to update student status. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#dc2626"
         });
       }
     }
   };
 
   const getFullName = (student) => {
-    if (!student) return 'N/A';
+    if (!student) return "N/A";
     if (student.fullName) return student.fullName;
     if (student.firstName && student.lastName) {
       return `${student.firstName} ${student.lastName}`;
     }
     if (student.firstName) return student.firstName;
-    return student.username || 'N/A';
+    return student.username || "N/A";
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", { 
+      day: "2-digit", 
+      month: "long", 
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -112,7 +112,7 @@ const StudentDetail = () => {
       <div className="flex flex-col items-center justify-center h-screen">
         <p className="text-xl text-gray-600 mb-4">Student not found</p>
         <button
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate("/admin/students")}
           className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
         >
           Back to Students
@@ -140,7 +140,7 @@ const StudentDetail = () => {
 
       {/* Back Button */}
       <button
-        onClick={() => navigate('/admin/students')}
+        onClick={() => navigate("/admin/students")}
         className="flex items-center text-teal-600 hover:text-teal-700 mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -158,25 +158,25 @@ const StudentDetail = () => {
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {getFullName(student)}
               </h1>
-              <p className="text-gray-600 text-lg mb-3">@{student.username || 'N/A'}</p>
+              <p className="text-gray-600 text-lg mb-3">@{student.username || "N/A"}</p>
               <div className="flex items-center space-x-3">
                 <span
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
                     student.isBlocked
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-green-100 text-green-800'
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800"
                   }`}
                 >
-                  {student.isBlocked ? 'Blocked' : 'Active'}
+                  {student.isBlocked ? "Blocked" : "Active"}
                 </span>
                 <span
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
                     student.isVerified
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {student.isVerified ? 'Verified' : 'Not Verified'}
+                  {student.isVerified ? "Verified" : "Not Verified"}
                 </span>
               </div>
             </div>
@@ -185,11 +185,11 @@ const StudentDetail = () => {
             onClick={handleBlockToggle}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               student.isBlocked
-                ? 'bg-green-500 text-white hover:bg-green-600'
-                : 'bg-red-500 text-white hover:bg-red-600'
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-red-500 text-white hover:bg-red-600"
             }`}
           >
-            {student.isBlocked ? 'Unblock Student' : 'Block Student'}
+            {student.isBlocked ? "Unblock Student" : "Block Student"}
           </button>
         </div>
       </div>
@@ -206,14 +206,14 @@ const StudentDetail = () => {
               <Mail className="w-5 h-5 text-teal-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Email Address</p>
-                <p className="text-gray-800 font-medium">{student.email || 'N/A'}</p>
+                <p className="text-gray-800 font-medium">{student.email || "N/A"}</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <User className="w-5 h-5 text-teal-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Username</p>
-                <p className="text-gray-800 font-medium">{student.username || 'N/A'}</p>
+                <p className="text-gray-800 font-medium">{student.username || "N/A"}</p>
               </div>
             </div>
           </div>
@@ -248,7 +248,7 @@ const StudentDetail = () => {
               <div>
                 <p className="text-sm text-gray-500">Email Verification</p>
                 <p className="text-gray-800 font-medium">
-                  {student.isVerified ? 'Verified' : 'Not Verified'}
+                  {student.isVerified ? "Verified" : "Not Verified"}
                 </p>
               </div>
             </div>
@@ -295,7 +295,7 @@ const StudentDetail = () => {
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <p className="text-3xl font-bold text-purple-600">
-              {student.isBlocked ? 'Blocked' : 'Active'}
+              {student.isBlocked ? "Blocked" : "Active"}
             </p>
             <p className="text-sm text-gray-600 mt-1">Account Status</p>
           </div>

@@ -48,7 +48,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   let role = "instructor";
-   await Instructor.create({
+  await Instructor.create({
     email: email.toLowerCase(),
     password: hashedPassword,
     username,
@@ -56,7 +56,6 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     lastName,
     role,
   });
-
 
   try {
     let response = await api.post("/auth/send-otp", { email });
@@ -98,7 +97,8 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   if (user.authType == "google") {
     return res.status(401).json({
       success: false,
-      message: "This account was created with Google. Please use Google Sign-In to continue.",
+      message:
+        "This account was created with Google. Please use Google Sign-In to continue.",
     });
   }
   // Check if user is an instructor
@@ -163,7 +163,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
   const { token } = req.body;
   console.log(token);
   const ticket = await client.verifyIdToken({
-    idToken: token, 
+    idToken: token,
     audience: process.env.VITE_GOOGLE_ID,
   });
   console.log(ticket);
@@ -211,7 +211,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
-      authType: 'google'
+      authType: "google",
     });
 
     let { accessToken, refreshToken } = generateTokens({
@@ -231,7 +231,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     // Set refresh token in HttpOnly cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-     
+
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });

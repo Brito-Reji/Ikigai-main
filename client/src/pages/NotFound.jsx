@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Home, Search, BookOpen, ArrowLeft } from 'lucide-react';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Home, Search, BookOpen, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -98,9 +98,9 @@ const NotFound = () => {
 
         {/* Decorative Elements */}
         <div className="mt-12 flex justify-center space-x-2">
-          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
         </div>
       </div>
     </div>

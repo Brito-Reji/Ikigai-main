@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Search, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, Search, X } from "lucide-react";
 
 const SearchableSelect = ({ 
   options = [], 
@@ -11,7 +11,7 @@ const SearchableSelect = ({
   error 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -28,12 +28,12 @@ const SearchableSelect = ({
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
-        setSearchTerm('');
+        setSearchTerm("");
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Focus search input when dropdown opens
@@ -51,7 +51,7 @@ const SearchableSelect = ({
       }
     });
     setIsOpen(false);
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   const handleClear = (e) => {
@@ -59,7 +59,7 @@ const SearchableSelect = ({
     onChange({
       target: {
         name,
-        value: ''
+        value: ""
       }
     });
   };
@@ -71,10 +71,10 @@ const SearchableSelect = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:border-gray-400 bg-white text-left flex items-center justify-between ${
-          error ? 'border-red-500' : 'border-gray-300'
+          error ? "border-red-500" : "border-gray-300"
         }`}
       >
-        <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
+        <span className={selectedOption ? "text-gray-900" : "text-gray-500"}>
           {selectedOption ? selectedOption.name : placeholder}
         </span>
         <div className="flex items-center space-x-2">
@@ -87,7 +87,7 @@ const SearchableSelect = ({
               <X className="w-4 h-4" />
             </button>
           )}
-          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
         </div>
       </button>
 
@@ -118,7 +118,7 @@ const SearchableSelect = ({
                   type="button"
                   onClick={() => handleSelect(option)}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                    value === option._id ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                    value === option._id ? "bg-blue-50 text-blue-600" : "text-gray-900"
                   }`}
                 >
                   {option.name}
@@ -126,7 +126,7 @@ const SearchableSelect = ({
               ))
             ) : (
               <div className="px-4 py-3 text-gray-500 text-center">
-                {searchTerm ? `No results found for "${searchTerm}"` : 'No options available'}
+                {searchTerm ? `No results found for "${searchTerm}"` : "No options available"}
               </div>
             )}
           </div>

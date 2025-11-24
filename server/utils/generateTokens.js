@@ -1,5 +1,5 @@
 // utils/generateTokens.js
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken"
 
 const generateTokens = ({userId,email,username,firstName,role,profileImageUrl,isVerified}) => {
   // Short-lived access token (15min - 1hr)

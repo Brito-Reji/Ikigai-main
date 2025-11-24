@@ -20,7 +20,7 @@ export const loginUser = createAsyncThunk(
       if (response.data.success) {
         const accessToken = response.data.accessToken;
         // Ensure we're storing a string, not an object
-        if (typeof accessToken === 'object') {
+        if (typeof accessToken === "object") {
           console.error("AccessToken is an object, extracting token string");
           localStorage.setItem("accessToken", accessToken.accessToken || JSON.stringify(accessToken));
         } else {
@@ -51,7 +51,7 @@ export const loginUser = createAsyncThunk(
       }
 
       // Check if user is blocked
-      if (error.response?.data?.isBlocked || error.response?.data?.message?.toLowerCase().includes('blocked')) {
+      if (error.response?.data?.isBlocked || error.response?.data?.message?.toLowerCase().includes("blocked")) {
         return rejectWithValue({
           message: error.response?.data?.message || "Your account has been blocked",
           isBlocked: true,
@@ -97,7 +97,7 @@ export const verifyOTP = createAsyncThunk(
       const response = await api.post("/auth/verify-otp", { email, otp });
 
       console.log("response-> verify OTP redux", response)
-      localStorage.setItem("userAuth", 'hello world');
+      localStorage.setItem("userAuth", "hello world");
       localStorage.setItem("accessToken", response.data.accessToken);
       if (response.data.success) {
         return {

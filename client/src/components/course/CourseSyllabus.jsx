@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Play, FileText, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import { ChevronDown, ChevronRight, Play, FileText, Clock } from "lucide-react";
 
 const CourseSyllabus = ({ course }) => {
   const [expandedSections, setExpandedSections] = useState({});
@@ -70,9 +70,9 @@ const CourseSyllabus = ({ course }) => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'video':
+      case "video":
         return <Play className="w-4 h-4" />;
-      case 'resource':
+      case "resource":
         return <FileText className="w-4 h-4" />;
       default:
         return <Play className="w-4 h-4" />;

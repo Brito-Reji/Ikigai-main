@@ -1,9 +1,14 @@
 import React from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "@/store/slices/authSlice.js";
+import { LogOut } from "lucide-react";
+import Swal from "sweetalert2";
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
@@ -14,8 +19,32 @@ const AdminLayout = () => {
     { name: "Orders", path: "/admin/orders" },
     { name: "Coupons", path: "/admin/coupons" },
     { name: "Reports", path: "/admin/reports" },
-    { name: "Logout", path: "/admin/logout" },
   ];
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Logout?',
+      text: "Are you sure you want to logout?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#14b8a6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      dispatch(logout());
+      navigate('/admin/login');
+      Swal.fire({
+        icon: 'success',
+        title: 'Logged Out',
+        text: 'You have been logged out successfully',
+        confirmButtonColor: '#14b8a6',
+        timer: 2000
+      });
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -48,7 +77,15 @@ const AdminLayout = () => {
               {item.name}
             </Link>
           ))}
-        
+          
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 mt-4 border-t pt-4"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
         </nav>
       </aside>
 

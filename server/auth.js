@@ -36,9 +36,9 @@ router.post("/send-otp", sentOTP);
 router.post("/verify-otp", verifyOTP);
 
 // Forget Password
-router.post('/forget-password', forgetPassword);
-router.post('/verify-forget-password-otp', verifyForgetPasswordOTP);
-router.post('/reset-password', resetPassword);
+router.post("/forget-password", forgetPassword);
+router.post("/verify-forget-password-otp", verifyForgetPasswordOTP);
+router.post("/reset-password", resetPassword);
 
 // Check username availability using query params
 router.get("/check-username", checkUsernameAvailabilty);

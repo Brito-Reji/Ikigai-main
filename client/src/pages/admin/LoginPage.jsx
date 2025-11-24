@@ -107,7 +107,7 @@ function LoginPage() {
     if (!emailError && !passwordError) {
       try {
         console.log("Login submitted:", formData);
-        const response = await api.post('/auth/admin/login', {
+        const response = await api.post("/auth/admin/login", {
           email: formData.email,
           password: formData.password
         });
@@ -115,7 +115,7 @@ function LoginPage() {
         console.log("response", response);
         
         if (response.data.success) {
-          localStorage.setItem('accessToken', response.data.accessToken);
+          localStorage.setItem("accessToken", response.data.accessToken);
           toast.success("Login successful!");
           navigate("/admin/dashboard");
         } else {

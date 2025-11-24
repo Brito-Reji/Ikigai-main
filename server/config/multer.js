@@ -44,19 +44,19 @@ const generalStorage = new CloudinaryStorage({
 // File filter
 const fileFilter = (req, file, cb) => {
     const allowedMimes = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/webp',
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];
 
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only JPEG, PNG, WEBP, PDF, and DOC files are allowed.'), false);
+        cb(new Error("Invalid file type. Only JPEG, PNG, WEBP, PDF, and DOC files are allowed."), false);
     }
 };
 

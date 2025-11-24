@@ -20,7 +20,7 @@ export default function Hero() {
               guide you on your journey to success.
             </p>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base">
-            <Link to={'/signup'}>
+            <Link to={"/signup"}>
                 Start your learning journey
             </Link>
               </Button>

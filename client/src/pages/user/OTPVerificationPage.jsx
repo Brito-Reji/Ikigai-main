@@ -148,7 +148,7 @@ export default function OTPVerificationPage() {
       // Redirect to course list page after successful verification
       // For student signup, redirect directly to course page
       setTimeout(() => {
-        navigate("/course", {
+        navigate("/courses", {
           replace: true,
         });
       }, 1500);
@@ -176,7 +176,7 @@ export default function OTPVerificationPage() {
 
   // Handle continue after verification
   const handleContinue = () => {
-    navigate("/course", {
+    navigate("/courses", {
       replace: true,
     });
   };

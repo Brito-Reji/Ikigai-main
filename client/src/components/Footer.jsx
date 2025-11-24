@@ -1,8 +1,8 @@
 "use client";
 
-import {FaFacebookF,FaLinkedin,FaInstagram,FaTwitter } from 'react-icons/fa'
+import {FaFacebookF,FaLinkedin,FaInstagram,FaTwitter } from "react-icons/fa"
 
-import logo from '../assets/images/logo.png'
+import logo from "../assets/images/logo.png"
 
 
 export default function Footer() {

@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
-import { X, Check } from 'lucide-react';
+import React, { useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
+import { X, Check } from "lucide-react";
 
 const ImageCropModal = ({ image, onCropComplete, onClose, aspectRatio = 16 / 9 }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });

@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Star,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-} from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
@@ -12,16 +7,25 @@ import { useCourse, useCategory } from "@/hooks/useRedux.js";
 import { fetchFeaturedCourses } from "@/store/slices/courseSlice.js";
 import { fetchCategories } from "@/store/slices/categorySlice";
 
-import bannerOne from '../../assets/images/banner/one.png'
-import bannerTwo from '../../assets/images/banner/two.png'
+import bannerOne from "../../assets/images/banner/one.png";
+import bannerTwo from "../../assets/images/banner/two.png";
 
 export default function LandingPage() {
-  const { featuredCourses, featuredLoading, featuredError, dispatch: courseDispatch } = useCourse();
+  const {
+    featuredCourses,
+    featuredLoading,
+    featuredError,
+    dispatch: courseDispatch,
+  } = useCourse();
   const categoryState = useCategory();
-  const { categories, loading: categoriesLoading, dispatch: categoryDispatch } = categoryState;
+  const {
+    categories,
+    loading: categoriesLoading,
+    dispatch: categoryDispatch,
+  } = categoryState;
 
-  console.log('Category state:', categoryState);
-  console.log('Categories array:', categories);
+  console.log("Category state:", categoryState);
+  console.log("Categories array:", categories);
 
   // Fetch featured courses and categories on component mount
   useEffect(() => {
@@ -38,14 +42,14 @@ export default function LandingPage() {
 
   // Gradient colors for categories
   const gradients = [
-    'from-blue-500 to-indigo-600',
-    'from-purple-500 to-pink-600',
-    'from-green-500 to-teal-600',
-    'from-orange-500 to-red-600',
-    'from-cyan-500 to-blue-600',
-    'from-yellow-500 to-orange-600',
-    'from-rose-500 to-pink-600',
-    'from-emerald-500 to-green-600',
+    "from-blue-500 to-indigo-600",
+    "from-purple-500 to-pink-600",
+    "from-green-500 to-teal-600",
+    "from-orange-500 to-red-600",
+    "from-cyan-500 to-blue-600",
+    "from-yellow-500 to-orange-600",
+    "from-rose-500 to-pink-600",
+    "from-emerald-500 to-green-600",
   ];
 
   // Transform featured courses data for CourseCard component
@@ -57,7 +61,7 @@ export default function LandingPage() {
     rating: course.rating || 0,
     thumbnail: course.thumbnail,
     description: course.description,
-    category: course.category?.name
+    category: course.category?.name,
   }));
 
   const instructors = [
@@ -113,7 +117,6 @@ export default function LandingPage() {
 
   return (
     <>
-    
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
         <section className="py-16 bg-linear-to-br from-gray-50 to-white">
@@ -138,21 +141,30 @@ export default function LandingPage() {
                 </Link>
               </div>
               <div className="relative h-96 hidden md:block">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-red-400 rounded-full"   style={{
-    backgroundImage: `url(${bannerOne})`,
-    backgroundPosition: "-17px 0px", 
-    backgroundSize: "200px",
-  }}></div>
-                <div className="absolute top-10 right-48 w-48 h-48 bg-blue-500 rounded-full"  style={{
-    backgroundImage: `url(${bannerTwo})`,
-    backgroundPosition: "-17px 0px", 
-    backgroundSize: "200px", 
-  }}></div>
-                <div className="absolute bottom-0 right-24 w-48 h-48 bg-yellow-400 rounded-full" style={{
-                  backgroundImage: `url(${bannerOne})`,
-                  backgroundPosition: "-17px 0px", 
-                  backgroundSize: "200px", 
-                }}></div>
+                <div
+                  className="absolute top-0 right-0 w-48 h-48 bg-red-400 rounded-full"
+                  style={{
+                    backgroundImage: `url(${bannerOne})`,
+                    backgroundPosition: "-17px 0px",
+                    backgroundSize: "200px",
+                  }}
+                ></div>
+                <div
+                  className="absolute top-10 right-48 w-48 h-48 bg-blue-500 rounded-full"
+                  style={{
+                    backgroundImage: `url(${bannerTwo})`,
+                    backgroundPosition: "-17px 0px",
+                    backgroundSize: "200px",
+                  }}
+                ></div>
+                <div
+                  className="absolute bottom-0 right-24 w-48 h-48 bg-yellow-400 rounded-full"
+                  style={{
+                    backgroundImage: `url(${bannerOne})`,
+                    backgroundPosition: "-17px 0px",
+                    backgroundSize: "200px",
+                  }}
+                ></div>
               </div>
             </div>
           </div>
@@ -182,7 +194,9 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
                   Explore Top Categories
                 </h2>
-                <p className="text-gray-600">Discover courses across various fields</p>
+                <p className="text-gray-600">
+                  Discover courses across various fields
+                </p>
               </div>
               <Link
                 to={"/courses"}
@@ -192,11 +206,14 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-            
+
             {categoriesLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-2xl h-40"></div>
+                {[1, 2, 3, 4].map(i => (
+                  <div
+                    key={i}
+                    className="bg-gray-200 animate-pulse rounded-2xl h-40"
+                  ></div>
                 ))}
               </div>
             ) : categories && categories.length > 0 ? (
@@ -208,24 +225,29 @@ export default function LandingPage() {
                     className="group relative overflow-hidden bg-white rounded-2xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100"
                   >
                     {/* Gradient background on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                    
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                    ></div>
+
                     {/* Content */}
                     <div className="relative z-10">
                       {/* Decorative element */}
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradients[idx % gradients.length]} mb-4 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform duration-300`}>
+                      <div
+                        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradients[idx % gradients.length]} mb-4 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform duration-300`}
+                      >
                         {cat.name.charAt(0).toUpperCase()}
                       </div>
-                      
+
                       <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">
                         {cat.name}
                       </h3>
-                      
+
                       <p className="text-gray-500 text-sm">
-                        {cat.courseCount || 0} {cat.courseCount === 1 ? 'Course' : 'Courses'}
+                        {cat.courseCount || 0}{" "}
+                        {cat.courseCount === 1 ? "Course" : "Courses"}
                       </p>
                     </div>
-                    
+
                     {/* Arrow indicator */}
                     <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ArrowRight className="w-5 h-5 text-blue-600" />
@@ -235,7 +257,9 @@ export default function LandingPage() {
               </div>
             ) : (
               <div className="text-center py-12 bg-white rounded-2xl">
-                <p className="text-gray-500">No categories available at the moment.</p>
+                <p className="text-gray-500">
+                  No categories available at the moment.
+                </p>
               </div>
             )}
           </div>
@@ -255,14 +279,19 @@ export default function LandingPage() {
             </div>
             {featuredLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
+                {[1, 2, 3, 4].map(i => (
+                  <div
+                    key={i}
+                    className="bg-gray-200 animate-pulse rounded-lg h-64"
+                  ></div>
                 ))}
               </div>
             ) : featuredError ? (
               <div className="text-center py-8">
-                <p className="text-red-500 mb-4">Error loading courses: {featuredError}</p>
-                <button 
+                <p className="text-red-500 mb-4">
+                  Error loading courses: {featuredError}
+                </p>
+                <button
                   onClick={() => dispatch(fetchFeaturedCourses({ limit: 4 }))}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
@@ -277,7 +306,9 @@ export default function LandingPage() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">No courses available at the moment.</p>
+                <p className="text-gray-500">
+                  No courses available at the moment.
+                </p>
               </div>
             )}
           </div>
@@ -378,12 +409,11 @@ export default function LandingPage() {
                   on Ikigai. We provide the tools and skills to teach what you
                   love.
                 </p>
-                <Link to={'/instructor/signup'}>
-                <button className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
-                  Start Your Instructor Journey →
-                </button>
+                <Link to={"/instructor/signup"}>
+                  <button className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                    Start Your Instructor Journey →
+                  </button>
                 </Link>
-                
               </div>
             </div>
           </div>
