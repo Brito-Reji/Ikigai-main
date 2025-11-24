@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const courseSchema = new mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
+    ref:'Category',
     required: [true, 'Category is required'],
     trim: true,
   },

@@ -24,9 +24,6 @@ router.post('/courses/:courseId/chapters', createChapter)
 router.put('/courses/:courseId/chapters/:chapterId', updateChapter)
 router.delete('/courses/:courseId/chapters/:chapterId', deleteChapter)
 
-// Lesson routes
-router.post('/courses/:courseId/chapters/:chapterId/lessons', addLesson)
-router.put('/courses/:courseId/chapters/:chapterId/lessons/:lessonId', updateLesson)
-router.delete('/courses/:courseId/chapters/:chapterId/lessons/:lessonId', deleteLesson)
+
 
 export default router

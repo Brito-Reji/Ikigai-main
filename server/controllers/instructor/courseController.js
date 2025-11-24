@@ -189,7 +189,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     try {
         const { courseId } = req.params;
         const user = req.user;
-        let { title, description, overview, category, price, thumbnail, published } = req.body;
+        let { title, description, overview, category, actualPrice, discountType, discountValue, price, thumbnail, published } = req.body;
 
         console.log('Updating course:', courseId, 'for instructor:', user.id);
 
@@ -210,7 +210,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
         }
 
         // Validation
-        if (!title || !description || !overview || !category || !price) {
+        if (!title || !description || !overview || !category || !actualPrice) {
             return res.status(400).json({
                 success: false,
                 message: "All required fields must be provided",
@@ -241,14 +241,51 @@ export const updateCourse = asyncHandler(async (req, res) => {
             });
         }
 
-        // Validate price
-        const numericPrice = parseFloat(price);
-        if (isNaN(numericPrice) || numericPrice < 0) {
+        // Validate actual price
+        const numericActualPrice = parseFloat(actualPrice);
+        if (isNaN(numericActualPrice) || numericActualPrice < 0) {
             return res.status(400).json({
                 success: false,
-                message: "Price must be a valid positive number",
+                message: "Actual price must be a valid positive number",
             });
         }
+
+        // Validate discount
+        const validDiscountTypes = ['percentage', 'fixed', 'none'];
+        const finalDiscountType = discountType || 'none';
+
+        if (!validDiscountTypes.includes(finalDiscountType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid discount type",
+            });
+        }
+
+        let numericDiscountValue = 0;
+        if (finalDiscountType !== 'none') {
+            numericDiscountValue = parseFloat(discountValue) || 0;
+            if (numericDiscountValue < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Discount value cannot be negative",
+                });
+            }
+            if (finalDiscountType === 'percentage' && numericDiscountValue > 100) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Percentage discount cannot exceed 100%",
+                });
+            }
+        }
+
+        // Calculate final price
+        let finalPrice = numericActualPrice;
+        if (finalDiscountType === 'percentage') {
+            finalPrice = numericActualPrice - (numericActualPrice * numericDiscountValue / 100);
+        } else if (finalDiscountType === 'fixed') {
+            finalPrice = numericActualPrice - numericDiscountValue;
+        }
+        finalPrice = Math.max(0, finalPrice);
 
         // Check if category exists
         const categoryExists = await Category.findById(category);
@@ -267,7 +304,10 @@ export const updateCourse = asyncHandler(async (req, res) => {
                 description: description.trim(),
                 overview: overview.trim(),
                 category,
-                price: numericPrice,
+                actualPrice: numericActualPrice,
+                discountType: finalDiscountType,
+                discountValue: numericDiscountValue,
+                price: finalPrice,
                 thumbnail: thumbnail || existingCourse.thumbnail,
                 published: published !== undefined ? published : existingCourse.published
             },
