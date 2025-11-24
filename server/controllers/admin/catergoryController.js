@@ -1,4 +1,5 @@
 import { Category } from "../../models/Category.js";
+import { Course } from "../../models/Course.js";
 
 export const getCategories = async (req, res) => {
   try {
@@ -22,12 +23,28 @@ export const getCategories = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
+    // Add course count for each category
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (category) => {
+        const courseCount = await Course.countDocuments({
+          category: category._id,
+          published: true,
+          blocked: false,
+          deleted: { $ne: true }
+        });
+        return {
+          ...category.toObject(),
+          courseCount
+        };
+      })
+    );
+
     const totalCategories = await Category.countDocuments(query);
     const totalPages = Math.ceil(totalCategories / parseInt(limit));
 
     return res.status(200).json({
       success: true,
-      categories,
+      categories: categoriesWithCount,
       pagination: {
         currentPage: parseInt(page),
         totalPages,
@@ -37,7 +54,7 @@ export const getCategories = async (req, res) => {
       }
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to fetch categories" , error: error.message });
+    return res.status(500).json({ success: false, message: "Failed to fetch categories", error: error.message });
   }
 };
 
