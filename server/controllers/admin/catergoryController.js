@@ -1,154 +1,57 @@
-import { Category } from "../../models/Category.js";
-import { Course } from "../../models/Course.js";
+import asyncHandler from "express-async-handler";
+import {
+  getCategoriesService,
+  createCategoryService,
+  editCategoryService,
+  toggleCategoryBlockService,
+} from "../../services/admin/categoryService.js";
 
-export const getCategories = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, search } = req.query;
+//  GET CATEGORIES
+export const getCategories = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page || 1);
+  const limit = parseInt(req.query.limit || 10);
+  const search = req.query.search || "";
 
-    // Build query
-    let query = {};
+  const result = await getCategoriesService({ page, limit, search });
 
-    // Search filter
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
-      ];
-    }
+  res.status(200).json({ success: true, ...result });
+});
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+// CREATE CATEGORY
+export const createCategory = asyncHandler(async (req, res) => {
+  const { name, description } = req.body;
 
-    const categories = await Category.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+  const category = await createCategoryService({ name, description });
 
-    // Add course count for each category
-    const categoriesWithCount = await Promise.all(
-      categories.map(async (category) => {
-        const courseCount = await Course.countDocuments({
-          category: category._id,
-          published: true,
-          blocked: false,
-          deleted: { $ne: true }
-        });
-        return {
-          ...category.toObject(),
-          courseCount
-        };
-      })
-    );
+  res.status(201).json({
+    success: true,
+    message: "Category created successfully",
+    category,
+  });
+});
 
-    const totalCategories = await Category.countDocuments(query);
-    const totalPages = Math.ceil(totalCategories / parseInt(limit));
+// EDIT CATEGORY
+export const editCategory = asyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
+  const { name, description } = req.body;
 
-    return res.status(200).json({
-      success: true,
-      categories: categoriesWithCount,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalCategories,
-        hasNext: parseInt(page) < totalPages,
-        hasPrev: parseInt(page) > 1
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to fetch categories", error: error.message });
-  }
-};
+  await editCategoryService(categoryId, { name, description });
 
-export const createCategory = async (req, res) => {
-  let { name, description } = req.body;
+  res.status(200).json({
+    success: true,
+    message: "Category updated successfully",
+  });
+});
 
-  if (!name || !description) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Name and description are required" });
-  }
-  let category = await Category.findOne({ name: name.trim() })
+// TOGGLE BLOCK
+export const toggleCategoryBlock = asyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
 
-  if (category) {
-    return res
-      .status(409)
-      .json({ success: false, message: "Category already exists" });
-  }
+  const category = await toggleCategoryBlockService(categoryId);
 
-  await Category.create({ name: name.trim(), description: description.trim() });
-  return res
-    .status(201)
-    .json({ success: true, message: "Category created successfully", category: { name: name, description: description } });
-}
-
-export const editCategory = async (req, res) => {
-  let { categoryId } = req.params;
-  let { name, description } = req.body;
-
-  if (!name || !description) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Name and description are required" });
-  }
-  if (!categoryId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Category ID is required" });
-  }
-
-  if (name.trim().length === 0 || description.trim().length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Name and description cannot be empty" });
-  }
-
-  if (await Category.findOne({ name: name.trim(), _id: { $ne: categoryId } })) {
-    return res
-      .status(409)
-      .json({ success: false, message: "Another category with this name already exists" });
-  }
-
-
-  let category = await Category.findById(categoryId);
-
-  if (!category) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Category not found" });
-  }
-
-  category.name = name.trim();
-  category.description = description.trim();
-  await category.save();
-
-  return res
-    .status(200)
-    .json({ success: true, message: "Category updated successfully" });
-}
-
-export const toggleCategoryBlock = async (req, res) => {
-  try {
-    const { categoryId } = req.params;
-
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found"
-      });
-    }
-
-    category.isBlocked = !category.isBlocked;
-    await category.save();
-
-    return res.status(200).json({
-      success: true,
-      message: `Category ${category.isBlocked ? "blocked" : "unblocked"} successfully`,
-      category
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update category status"
-    });
-  }
-}
+  res.status(200).json({
+    success: true,
+    message: `Category ${category.isBlocked ? "blocked" : "unblocked"} successfully`,
+    category,
+  });
+});

@@ -91,7 +91,7 @@ export const getPublishedCourses = asyncHandler(async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    courses = courses.filter(course => course.category.isBlocked === false);
+    courses = courses.filter(course => course.category.isBlocked === false );
 
     console.log("cat->", courses);
 
