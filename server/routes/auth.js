@@ -3,14 +3,14 @@ import {
   googleAuth,
   studentLogin,
   studentRegister,
-} from "../controllers/students/studentController.js";
+} from "../controllers/auth/studentAuthController.js";
 // import jwt from "jsonwebtoken";
-import { adminLogin } from "../controllers/admin/adminController.js";
+import { adminLogin } from "../controllers/auth/adminAuthController.js";
 import {
   instructorGoogleAuth,
   instructorRegister,
   instructorSignin,
-} from "../controllers/instructor/instructorController.js";
+} from "../controllers/auth/instructorAuthController.js";
 // import { User } from "../models/User.js";
 // import { Instructor } from "../models/Instructor.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
