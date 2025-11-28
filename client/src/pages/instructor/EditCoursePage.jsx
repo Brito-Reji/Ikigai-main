@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
-import { useCourse, useCategory } from "@/hooks/useRedux.js";
-import { fetchCourseById, updateCourse, clearUpdateState } from "@/store/slices/courseSlice.js";
+import { useCourse, useUpdateCourse } from "@/hooks/useCourses.js";
+import { useCategory } from "@/hooks/useRedux.js";
 import { fetchCategories } from "@/store/slices/categorySlice.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
@@ -12,7 +12,8 @@ import Swal from "sweetalert2";
 const EditCoursePage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { currentCourse, courseLoading, updateLoading, updateSuccess, updateError, dispatch } = useCourse();
+  const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
+  const updateCourseMutation = useUpdateCourse();
   const { categories, dispatch: categoryDispatch } = useCategory();
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState({
@@ -30,17 +31,15 @@ const EditCoursePage = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (courseId) {
-      dispatch(fetchCourseById(courseId));
-    }
     if (categories.length === 0) {
       categoryDispatch(fetchCategories());
     }
-  }, [courseId, dispatch, categoryDispatch, categories.length]);
+  }, [categoryDispatch, categories.length]);
 
   // Populate form when course loads
   useEffect(() => {
-    if (currentCourse) {
+    if (courseData?.data) {
+      const currentCourse = courseData.data;
       setFormData({
         category: currentCourse.category?._id || "",
         title: currentCourse.title || "",
@@ -54,33 +53,7 @@ const EditCoursePage = () => {
         published: currentCourse.published || false,
       });
     }
-  }, [currentCourse]);
-
-  // Handle update success/error
-  useEffect(() => {
-    if (updateSuccess) {
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Course updated successfully",
-        confirmButtonColor: "#4f46e5",
-        timer: 2000
-      });
-      dispatch(clearUpdateState());
-    }
-  }, [updateSuccess, dispatch]);
-
-  useEffect(() => {
-    if (updateError) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: updateError,
-        confirmButtonColor: "#ef4444"
-      });
-      dispatch(clearUpdateState());
-    }
-  }, [updateError, dispatch]);
+  }, [courseData]);
 
   // Calculate final price
   useEffect(() => {
@@ -111,7 +84,23 @@ const EditCoursePage = () => {
       return;
     }
 
-    dispatch(updateCourse({ courseId, courseData: formData }));
+    try {
+      await updateCourseMutation.mutateAsync({ courseId, courseData: formData });
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Course updated successfully",
+        confirmButtonColor: "#4f46e5",
+        timer: 2000
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.response?.data?.message || "Failed to update course",
+        confirmButtonColor: "#ef4444"
+      });
+    }
   };
 
   const validateForm = () => {

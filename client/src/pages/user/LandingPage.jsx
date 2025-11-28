@@ -1,22 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
-import { useCourse, useCategory } from "@/hooks/useRedux.js";
-import { fetchFeaturedCourses } from "@/store/slices/courseSlice.js";
+import { useFeaturedCourses } from "@/hooks/useCourses.js";
+import { useCategory } from "@/hooks/useRedux.js";
 import { fetchCategories } from "@/store/slices/categorySlice";
+import { useEffect } from "react";
 
 import bannerOne from "../../assets/images/banner/one.png";
 import bannerTwo from "../../assets/images/banner/two.png";
 
 export default function LandingPage() {
-  const {
-    featuredCourses,
-    featuredLoading,
-    featuredError,
-    dispatch: courseDispatch,
-  } = useCourse();
+  const { data: featuredData, isLoading: featuredLoading, error: featuredError } = useFeaturedCourses({ limit: 4 });
   const categoryState = useCategory();
   const {
     categories,
@@ -24,14 +20,11 @@ export default function LandingPage() {
     dispatch: categoryDispatch,
   } = categoryState;
 
-  console.log("Category state:", categoryState);
-  console.log("Categories array:", categories);
-
-  // Fetch featured courses and categories on component mount
   useEffect(() => {
-    courseDispatch(fetchFeaturedCourses({ limit: 4 }));
     categoryDispatch(fetchCategories());
-  }, [courseDispatch, categoryDispatch]);
+  }, [categoryDispatch]);
+
+  const featuredCourses = featuredData?.data || [];
 
   const stats = [
     { number: "250+", label: "Courses by our best mentors" },
@@ -289,14 +282,8 @@ export default function LandingPage() {
             ) : featuredError ? (
               <div className="text-center py-8">
                 <p className="text-red-500 mb-4">
-                  Error loading courses: {featuredError}
+                  Error loading courses: {featuredError.message}
                 </p>
-                <button
-                  onClick={() => dispatch(fetchFeaturedCourses({ limit: 4 }))}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Retry
-                </button>
               </div>
             ) : courses.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

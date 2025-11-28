@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Edit,
   Trash2,
   Users,
-
   Star,
   BookOpen,
   Video,
@@ -14,60 +13,114 @@ import {
   MoreVertical,
   Eye,
   EyeOff,
+  CheckCircle,
+  Clock,
+  XCircle,
+  AlertCircle,
 } from "lucide-react";
+import { useCourse, useApplyForVerification } from "@/hooks/useCourses.js";
+import Swal from "sweetalert2";
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
+  const applyVerificationMutation = useApplyForVerification();
 
-  const [course] = useState({
-    id: courseId,
-    title: "Complete Web Development Bootcamp",
-    description:
-      "Master web development from scratch. Learn HTML, CSS, JavaScript, React, Node.js, and more in this comprehensive bootcamp.",
-    price: "₹2,999",
-    status: "Published",
-    thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80",
-    rating: 4.8,
-    totalReviews: 342,
-    totalStudents: 1254,
-    totalRevenue: "₹37,54,746",
-    chapters: [
-      {
-        id: 1,
-        title: "Introduction to Web Development",
-        lessons: 5,
-        duration: "45 min",
-        isPublished: true,
+  const handleApplyForVerification = async () => {
+    const result = await Swal.fire({
+      title: "Apply for Verification?",
+      text: "Your course will be reviewed by our admin team for verification.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3b82f6",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, apply!",
+      cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await applyVerificationMutation.mutateAsync(courseId);
+        
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Verification request submitted successfully",
+          confirmButtonColor: "#14b8a6",
+          timer: 2000
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: error.response?.data?.message || "Failed to submit verification request",
+          confirmButtonColor: "#ef4444"
+        });
+      }
+    }
+  };
+
+  const getVerificationBadge = () => {
+    if (!course) return null;
+    
+    const status = course.verificationStatus;
+    
+    const badges = {
+      pending: {
+        icon: <AlertCircle className="w-4 h-4" />,
+        text: "Not Verified",
+        className: "bg-gray-100 text-gray-800"
       },
-      {
-        id: 2,
-        title: "HTML Fundamentals",
-        lessons: 8,
-        duration: "1h 20min",
-        isPublished: true,
+      inprocess: {
+        icon: <Clock className="w-4 h-4" />,
+        text: "Verification Pending",
+        className: "bg-blue-100 text-blue-800"
       },
-      {
-        id: 3,
-        title: "CSS Styling",
-        lessons: 10,
-        duration: "1h 45min",
-        isPublished: true,
+      verified: {
+        icon: <CheckCircle className="w-4 h-4" />,
+        text: "Verified",
+        className: "bg-green-100 text-green-800"
       },
-      {
-        id: 4,
-        title: "JavaScript Basics",
-        lessons: 12,
-        duration: "2h 10min",
-        isPublished: false,
-      },
-    ],
-    recentStudents: [
-      { id: 1, name: "John Doe", avatar: "https://i.pravatar.cc/150?img=1", enrolledDate: "2 days ago" },
-      { id: 2, name: "Jane Smith", avatar: "https://i.pravatar.cc/150?img=2", enrolledDate: "3 days ago" },
-      { id: 3, name: "Mike Johnson", avatar: "https://i.pravatar.cc/150?img=3", enrolledDate: "5 days ago" },
-    ],
-  });
+      rejected: {
+        icon: <XCircle className="w-4 h-4" />,
+        text: "Verification Rejected",
+        className: "bg-red-100 text-red-800"
+      }
+    };
+    
+    const badge = badges[status] || badges.pending;
+    
+    return (
+      <span className={`px-3 py-1 text-sm font-semibold rounded-full flex items-center gap-1 ${badge.className}`}>
+        {badge.icon}
+        {badge.text}
+      </span>
+    );
+  };
+
+  if (courseLoading) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading course...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!courseData?.data) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center min-h-screen">
+        <div className="text-center text-gray-600">
+          <p>Course not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  const course = courseData.data;
 
   const handleBack = () => {
     navigate("/instructor/courses");
@@ -96,21 +149,38 @@ export default function CourseDetailPage() {
 
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
                 <span
                   className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                    course.status === "Published"
+                    course.published
                       ? "bg-green-100 text-green-800"
                       : "bg-yellow-100 text-yellow-800"
                   }`}
                 >
-                  {course.status}
+                  {course.published ? "Published" : "Draft"}
                 </span>
+                {getVerificationBadge()}
               </div>
               <p className="text-gray-600">{course.description}</p>
+              {course.verificationStatus === "rejected" && course.rejectionReason && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800">
+                    <strong>Rejection Reason:</strong> {course.rejectionReason}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2 ml-4">
+              {course.published && (course.verificationStatus === "pending" || course.verificationStatus === "rejected") && (
+                <button
+                  onClick={handleApplyForVerification}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Apply for Verification
+                </button>
+              )}
               <button
                 onClick={handleEditCourse}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center"
@@ -130,23 +200,11 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Students</p>
-                <p className="text-2xl font-bold text-gray-900">{course.totalStudents}</p>
-              </div>
-              <div className="p-3 bg-indigo-100 rounded-full">
-                <Users className="w-6 h-6 text-indigo-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">{course.totalRevenue}</p>
+                <p className="text-sm text-gray-600 mb-1">Price</p>
+                <p className="text-2xl font-bold text-gray-900">₹{course.price}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
-               
+                <FileText className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </div>
@@ -154,11 +212,23 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Average Rating</p>
-                <p className="text-2xl font-bold text-gray-900">{course.rating}</p>
+                <p className="text-sm text-gray-600 mb-1">Category</p>
+                <p className="text-lg font-bold text-gray-900">{course.category?.name || "N/A"}</p>
+              </div>
+              <div className="p-3 bg-indigo-100 rounded-full">
+                <BookOpen className="w-6 h-6 text-indigo-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Status</p>
+                <p className="text-lg font-bold text-gray-900">{course.published ? "Published" : "Draft"}</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
-                <Star className="w-6 h-6 text-yellow-600" />
+                <Eye className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
           </div>
@@ -166,11 +236,15 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Reviews</p>
-                <p className="text-2xl font-bold text-gray-900">{course.totalReviews}</p>
+                <p className="text-sm text-gray-600 mb-1">Verification</p>
+                <p className="text-sm font-bold text-gray-900 capitalize">{course.verificationStatus}</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
-                <FileText className="w-6 h-6 text-purple-600" />
+                {course.verificationStatus === "verified" ? (
+                  <CheckCircle className="w-6 h-6 text-purple-600" />
+                ) : (
+                  <Clock className="w-6 h-6 text-purple-600" />
+                )}
               </div>
             </div>
           </div>
@@ -194,54 +268,45 @@ export default function CourseDetailPage() {
               </div>
 
               <div className="divide-y divide-gray-200">
-                {course.chapters.map((chapter, index) => (
-                  <div key={chapter.id} className="p-6 hover:bg-gray-50 transition">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start flex-1">
-                        <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full font-semibold text-sm mr-4">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">
-                            {chapter.title}
-                          </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center">
-                              <Video className="w-4 h-4 mr-1" />
-                              {chapter.lessons} lessons
-                            </span>
-                            <span>{chapter.duration}</span>
-                            <span
-                              className={`flex items-center ${
-                                chapter.isPublished ? "text-green-600" : "text-gray-400"
-                              }`}
-                            >
-                              {chapter.isPublished ? (
-                                <>
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  Published
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="w-4 h-4 mr-1" />
-                                  Draft
-                                </>
-                              )}
-                            </span>
+                {(!course.chapters || course.chapters.length === 0) ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                    <p>No chapters added yet</p>
+                    <p className="text-sm mt-1">Click "Add Chapter" to create your first chapter</p>
+                  </div>
+                ) : (
+                  course.chapters.map((chapter, index) => (
+                    <div key={chapter._id || chapter.id} className="p-6 hover:bg-gray-50 transition">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start flex-1">
+                          <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full font-semibold text-sm mr-4">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 mb-1">
+                              {chapter.title}
+                            </h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span className="flex items-center">
+                                <Video className="w-4 h-4 mr-1" />
+                                {chapter.lessons || 0} lessons
+                              </span>
+                              <span>{chapter.duration || "N/A"}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                          <Edit className="w-4 h-4 text-gray-600" />
-                        </button>
-                        <button className="p-2 hover:bg-red-50 rounded-lg transition">
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                            <Edit className="w-4 h-4 text-gray-600" />
+                          </button>
+                          <button className="p-2 hover:bg-red-50 rounded-lg transition">
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -262,27 +327,33 @@ export default function CourseDetailPage() {
               </div>
             </div>
 
-            {/* Recent Students */}
+            {/* Course Info */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Students</h3>
-              <div className="space-y-3">
-                {course.recentStudents.map((student) => (
-                  <div key={student.id} className="flex items-center">
-                    <img
-                      src={student.avatar}
-                      alt={student.name}
-                      className="w-10 h-10 rounded-full mr-3"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{student.name}</p>
-                      <p className="text-xs text-gray-500">{student.enrolledDate}</p>
-                    </div>
-                  </div>
-                ))}
+              <h3 className="font-semibold text-gray-900 mb-4">Course Information</h3>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-gray-600">Actual Price</p>
+                  <p className="font-semibold text-gray-900">₹{course.actualPrice}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Discount</p>
+                  <p className="font-semibold text-gray-900">
+                    {course.discountType === "none" ? "No discount" : 
+                     course.discountType === "percentage" ? `${course.discountValue}%` : 
+                     `₹${course.discountValue}`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Final Price</p>
+                  <p className="font-semibold text-gray-900">₹{course.price}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Created</p>
+                  <p className="font-semibold text-gray-900">
+                    {new Date(course.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-              <button className="w-full mt-4 text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                View All Students
-              </button>
             </div>
 
             {/* Quick Actions */}

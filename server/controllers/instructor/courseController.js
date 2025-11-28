@@ -59,3 +59,42 @@ export const getCourseById = asyncHandler(async (req, res) => {
     data: course,
   });
 });
+
+// APPLY FOR VERIFICATION
+export const applyForVerification = asyncHandler(async (req, res) => {
+  const instructorId = req.user.id;
+  const { courseId } = req.params;
+
+  const course = await getCourseByIdService(courseId, instructorId);
+
+  if (!course.published) {
+    return res.status(400).json({
+      success: false,
+      message: "Course must be published before applying for verification"
+    });
+  }
+
+  if (course.verificationStatus === "inprocess") {
+    return res.status(400).json({
+      success: false,
+      message: "Verification request already in process"
+    });
+  }
+
+  if (course.verificationStatus === "verified") {
+    return res.status(400).json({
+      success: false,
+      message: "Course is already verified"
+    });
+  }
+
+  course.verificationStatus = "inprocess";
+  course.rejectionReason = null;
+  await course.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Verification request submitted successfully",
+    data: course,
+  });
+});
