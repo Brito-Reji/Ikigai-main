@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
 import ImageUpload from "@/components/ImageUpload.jsx";
-import { useCourse } from "@/hooks/useRedux.js";
-import { useCategory } from "@/hooks/useRedux.js";
-import { createCourse, clearCreateState } from "@/store/slices/courseSlice.js";
-import { fetchCategories } from "@/store/slices/categorySlice.js";
+import { useCreateCourse } from "@/hooks/useCourses.js";
+import { useCategories } from "@/hooks/useCategories.js";
 import Swal from "sweetalert2";
 
 export default function CreateCoursePage() {
   const navigate = useNavigate();
-  const { createLoading, createError, createSuccess, dispatch: courseDispatch } = useCourse();
-  const { categories, loading: categoriesLoading, dispatch: categoryDispatch } = useCategory();
+  const createMutation = useCreateCourse();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const categories = categoriesData?.categories || [];
   const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
@@ -27,41 +26,7 @@ export default function CreateCoursePage() {
     published: false,
   });
 
-  // Fetch categories on component mount
-  useEffect(() => {
-    if (categories.length === 0) {
-      categoryDispatch(fetchCategories());
-    }
-  }, [categoryDispatch, categories.length]);
 
-  // Handle course creation success
-  useEffect(() => {
-    if (createSuccess) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Course created successfully!',
-        confirmButtonColor: '#4f46e5',
-        timer: 2000
-      }).then(() => {
-        navigate("/instructor/courses");
-        courseDispatch(clearCreateState());
-      });
-    }
-  }, [createSuccess, navigate, courseDispatch]);
-
-  // Handle course creation error
-  useEffect(() => {
-    if (createError) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: createError,
-        confirmButtonColor: '#ef4444'
-      });
-      courseDispatch(clearCreateState());
-    }
-  }, [createError, courseDispatch]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -126,18 +91,30 @@ export default function CreateCoursePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log("Form submitted with data:", formData);
-    console.log("Validation result:", validateForm());
 
     if (!validateForm()) {
-      console.log("Validation failed, errors:", errors);
       return;
     }
 
-    console.log("Dispatching createCourse action...");
-    // Dispatch the createCourse action
-    courseDispatch(createCourse(formData));
+    try {
+      await createMutation.mutateAsync(formData);
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Course created successfully!',
+        confirmButtonColor: '#4f46e5',
+        timer: 2000
+      }).then(() => {
+        navigate("/instructor/courses");
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: error.response?.data?.message || 'Failed to create course',
+        confirmButtonColor: '#ef4444'
+      });
+    }
   };
 
   return (
@@ -323,10 +300,10 @@ export default function CreateCoursePage() {
               </button>
               <button
                 type="submit"
-                disabled={createLoading}
+                disabled={createMutation.isPending}
                 className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
               >
-                {createLoading ? "Creating..." : (formData.published ? "Create & Publish" : "Save as Draft")}
+                {createMutation.isPending ? "Creating..." : (formData.published ? "Create & Publish" : "Save as Draft")}
               </button>
             </div>
           </div>

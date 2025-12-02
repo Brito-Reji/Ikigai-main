@@ -4,27 +4,17 @@ import Footer from "@/components/Footer.jsx";
 import CourseCard from "@/components/CourseCard.jsx";
 import { Link } from "react-router-dom";
 import { useFeaturedCourses } from "@/hooks/useCourses.js";
-import { useCategory } from "@/hooks/useRedux.js";
-import { fetchCategories } from "@/store/slices/categorySlice";
-import { useEffect } from "react";
+import { useCategories } from "@/hooks/useCategories.js";
 
 import bannerOne from "../../assets/images/banner/one.png";
 import bannerTwo from "../../assets/images/banner/two.png";
 
 export default function LandingPage() {
   const { data: featuredData, isLoading: featuredLoading, error: featuredError } = useFeaturedCourses({ limit: 4 });
-  const categoryState = useCategory();
-  const {
-    categories,
-    loading: categoriesLoading,
-    dispatch: categoryDispatch,
-  } = categoryState;
-
-  useEffect(() => {
-    categoryDispatch(fetchCategories());
-  }, [categoryDispatch]);
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
 
   const featuredCourses = featuredData?.data || [];
+  const categories = categoriesData?.categories || [];
 
   const stats = [
     { number: "250+", label: "Courses by our best mentors" },

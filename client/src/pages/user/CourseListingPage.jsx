@@ -10,17 +10,13 @@ import {
   X,
 } from "lucide-react";
 import CourseCard from "../../components/CourseCard.jsx";
-import { useCategory } from "@/hooks/useRedux.js";
 import { Link, useSearchParams } from "react-router-dom";
-import api from "@/api/axiosConfig.js";
+import { usePublishedCourses } from "@/hooks/useCourses.js";
+import { useCategories } from "@/hooks/useCategories.js";
 
 export default function CoursesPage() {
-  const { dispatch: categoryDispatch } = useCategory();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({});
 
   const [selectedChapters, setSelectedChapters] = useState([]);
@@ -85,62 +81,37 @@ export default function CoursesPage() {
     setSearchParams,
   ]);
 
-  // Fetch categories
-  const fetchCategoriesData = async () => {
-    try {
-      const response = await api.get("/public");
-      if (response.data.success) {
-        setCategories(response.data.categories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
+  // Fetch courses with TanStack Query
+  const courseParams = {
+    page: currentPage,
+    limit: 12,
+    sort: sortBy,
+    ...(searchQuery && { search: searchQuery }),
+    ...(selectedCategories.length > 0 && { category: selectedCategories[0] }),
+    ...(selectedPriceRanges.length > 0 && { priceRange: selectedPriceRanges.join(",") }),
   };
 
-  // Fetch courses
-  const fetchCoursesData = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "12",
-        sort: sortBy,
-      });
+  const { data: coursesData, isLoading: loading, error: coursesError } = usePublishedCourses(courseParams);
+  const { data: categoriesData } = useCategories();
 
-      if (searchQuery) params.append("search", searchQuery);
-      if (selectedCategories.length > 0)
-        params.append("category", selectedCategories[0]);
-      if (selectedPriceRanges.length > 0)
-        params.append("priceRange", selectedPriceRanges.join(","));
+  const courses = coursesData?.data || [];
+  const categories = categoriesData?.categories || [];
 
-      const response = await api.get(`/public/courses?${params.toString()}`);
+  // Debug logging
+  useEffect(() => {
+    console.log("Course Params:", courseParams);
+    console.log("Courses Data:", coursesData);
+    console.log("Courses Array:", courses);
+    console.log("Loading:", loading);
+    console.log("Error:", coursesError);
+  }, [coursesData, courses, loading, coursesError]);
 
-      if (response.data.success) {
-        setCourses(response.data.data);
-        setPagination(response.data.pagination);
-      }
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-    } finally {
-      setLoading(false);
+  // Update pagination when data changes
+  useEffect(() => {
+    if (coursesData?.pagination) {
+      setPagination(coursesData.pagination);
     }
-  };
-
-  // Fetch categories on mount
-  useEffect(() => {
-    fetchCategoriesData();
-  }, []);
-
-  // Fetch courses when filters change
-  useEffect(() => {
-    fetchCoursesData();
-  }, [
-    searchQuery,
-    selectedCategories,
-    selectedPriceRanges,
-    sortBy,
-    currentPage,
-  ]);
+  }, [coursesData]);
 
   // Transform courses for CourseCard component
   const transformedCourses = courses.map(course => ({

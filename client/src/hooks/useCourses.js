@@ -44,7 +44,7 @@ export const useUpdateCourse = () => {
 }
 
 // Apply for verification
-export const useApplyForVerification = () => {
+export const useApplyVerification = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
@@ -73,7 +73,7 @@ export const useFeaturedCourses = (params) => {
 }
 
 // Fetch public course details
-export const usePublicCourseDetails = (courseId) => {
+export const usePublicCourse = (courseId) => {
     return useQuery({
         queryKey: ['public-course', courseId],
         queryFn: () => courseApi.getPublicCourseDetails(courseId),

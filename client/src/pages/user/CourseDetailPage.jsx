@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useCourse } from "@/hooks/useRedux.js";
-import { fetchPublicCourses, fetchPublicCourseDetails, clearPublicDetailsState } from "@/store/slices/courseSlice.js";
+import { usePublicCourse } from "@/hooks/useCourses.js";
 
 // Components
 import CourseHero from "@/components/course/CourseHero.jsx";
@@ -13,30 +12,10 @@ import Footer from "@/components/Footer.jsx";
 
 const CourseDetailPage = () => {
   const { courseId } = useParams();
-  const { 
-    publicCourseDetails, 
-    publicDetailsLoading, 
-    publicDetailsError, 
-    dispatch 
-  } = useCourse();
+  const { data: courseData, isLoading: publicDetailsLoading, error: publicDetailsError } = usePublicCourse(courseId);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    if (courseId) {
-      dispatch(clearPublicDetailsState());
-      dispatch(fetchPublicCourseDetails(courseId));
-    }
-  }, [courseId, dispatch]);
-
-  useEffect(() => {
-    dispatch(fetchPublicCourses({ limit: 4 }));
-  }, [dispatch]);
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearPublicDetailsState());
-    };
-  }, [dispatch]);
+  const publicCourseDetails = courseData?.data;
 
   if (publicDetailsLoading) {
     return (

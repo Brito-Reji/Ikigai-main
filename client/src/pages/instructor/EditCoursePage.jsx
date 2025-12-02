@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { useCourse, useUpdateCourse } from "@/hooks/useCourses.js";
-import { useCategory } from "@/hooks/useRedux.js";
-import { fetchCategories } from "@/store/slices/categorySlice.js";
+import { useCategories } from "@/hooks/useCategories.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
 import ImageUpload from "@/components/ImageUpload.jsx";
@@ -13,8 +12,12 @@ const EditCoursePage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
-  const updateCourseMutation = useUpdateCourse();
-  const { categories, dispatch: categoryDispatch } = useCategory();
+  const { data: categoriesData } = useCategories();
+  const updateMutation = useUpdateCourse();
+  
+  const currentCourse = courseData?.data;
+  const categories = categoriesData?.categories || [];
+  
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState({
     category: "",
@@ -30,16 +33,9 @@ const EditCoursePage = () => {
   });
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (categories.length === 0) {
-      categoryDispatch(fetchCategories());
-    }
-  }, [categoryDispatch, categories.length]);
-
   // Populate form when course loads
   useEffect(() => {
-    if (courseData?.data) {
-      const currentCourse = courseData.data;
+    if (currentCourse) {
       setFormData({
         category: currentCourse.category?._id || "",
         title: currentCourse.title || "",
@@ -53,7 +49,9 @@ const EditCoursePage = () => {
         published: currentCourse.published || false,
       });
     }
-  }, [courseData]);
+  }, [currentCourse]);
+
+
 
   // Calculate final price
   useEffect(() => {
@@ -85,12 +83,12 @@ const EditCoursePage = () => {
     }
 
     try {
-      await updateCourseMutation.mutateAsync({ courseId, courseData: formData });
+      await updateMutation.mutateAsync({ courseId, courseData: formData });
       Swal.fire({
         icon: "success",
         title: "Success!",
         text: "Course updated successfully",
-        confirmButtonColor: "#4f46e5",
+        confirmButtonColor: "#14b8a6",
         timer: 2000
       });
     } catch (error) {

@@ -69,13 +69,16 @@ export const getPublishedCoursesService = asyncHandler(async (queryParams) => {
     const skip = (page - 1) * limit;
 
     let courses = await Course.find(query)
-        .populate("category", "name")
+        .populate("category", "name isBlocked")
         .populate("instructor", "firstName lastName email profileImageUrl headline description")
         .sort(sortOption)
         .skip(skip)
         .limit(limit);
 
-    courses = courses.filter(course => course.category?.isBlocked === false);
+    courses = courses.filter(course => {
+        if (!course.category) return false;
+        return course.category.isBlocked === false;
+    });
 
     const totalCourses = await Course.countDocuments(query);
     const totalPages = Math.ceil(totalCourses / limit);

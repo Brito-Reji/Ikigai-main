@@ -18,14 +18,14 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useCourse, useApplyForVerification } from "@/hooks/useCourses.js";
+import { useCourse, useApplyVerification } from "@/hooks/useCourses.js";
 import Swal from "sweetalert2";
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
-  const applyVerificationMutation = useApplyForVerification();
+  const applyVerificationMutation = useApplyVerification();
 
   const handleApplyForVerification = async () => {
     const result = await Swal.fire({
@@ -113,9 +113,7 @@ export default function CourseDetailPage() {
   if (!courseData?.data) {
     return (
       <div className="flex-1 bg-gray-50 flex items-center justify-center min-h-screen">
-        <div className="text-center text-gray-600">
-          <p>Course not found</p>
-        </div>
+        <div className="text-center text-gray-600">Course not found</div>
       </div>
     );
   }

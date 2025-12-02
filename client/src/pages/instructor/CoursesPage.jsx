@@ -1,27 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Plus, Search, Filter, Grid, List, MoreVertical, Edit, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CourseCard from "@/components/instructor/CourseCard.jsx";
-import { useCourse } from "@/hooks/useRedux.js";
-import { fetchInstructorCourses } from "@/store/slices/courseSlice.js";
+import { useInstructorCourses } from "@/hooks/useCourses.js";
 
 export default function CoursesPage() {
   const navigate = useNavigate();
-  const { instructorCourses, loading, error, dispatch } = useCourse();
+  const { data: coursesData, isLoading: loading, error } = useInstructorCourses();
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // Fetch instructor courses on component mount
-  useEffect(() => {
-    console.log("Fetching instructor courses...");
-    dispatch(fetchInstructorCourses());
-  }, [dispatch]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log("Courses state:", { instructorCourses, loading, error });
-  }, [instructorCourses, loading, error]);
+  const instructorCourses = coursesData?.data || [];
 
   // Transform backend data to match component expectations
   const courses = instructorCourses.map(course => ({
@@ -169,9 +159,9 @@ export default function CoursesPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Error loading courses
             </h3>
-            <p className="text-gray-500 mb-4">{error}</p>
+            <p className="text-gray-500 mb-4">{error?.message || "Failed to load courses"}</p>
             <button
-              onClick={() => dispatch(fetchInstructorCourses())}
+              onClick={() => window.location.reload()}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
             >
               Retry
