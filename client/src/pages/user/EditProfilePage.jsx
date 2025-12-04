@@ -169,7 +169,22 @@ export default function EditStudentProfilePage() {
                     disabled
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                  {profileData?.data?.authType === "email" ? (
+                    <p className="text-xs text-blue-600 mt-1">
+                      To change your email, go to{" "}
+                      <button
+                        type="button"
+                        onClick={() => navigate("/profile")}
+                        className="underline hover:text-blue-800"
+                      >
+                        your profile page
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Email cannot be changed for Google accounts
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
