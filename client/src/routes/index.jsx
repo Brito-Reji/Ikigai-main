@@ -17,6 +17,7 @@ import UserCourseDetailPage from "@/pages/user/CourseDetailPage.jsx";
 import CartPage from "@/pages/user/CartPage.jsx";
 import CheckoutPage from "@/pages/user/CheckoutPage.jsx";
 import StudentProfilePage from "@/pages/user/ProfilePage.jsx";
+import EditStudentProfilePage from "@/pages/user/EditProfilePage.jsx";
 import StudentSettingsPage from "@/pages/user/SettingsPage.jsx";
 
 // Instructor routes
@@ -88,6 +89,14 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
               <StudentProfilePage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="profile/edit"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <EditStudentProfilePage />
             </AuthGuard>
           }
         />

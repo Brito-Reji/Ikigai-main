@@ -13,7 +13,7 @@ import uploadRoute from "./routes/uploadRoute.js"
 import isAdmin from "./middlewares/admin.js";
 import isInstructor from "./middlewares/instructor.js"
 import instructorRoute from "./routes/instructorRoute.js"
-import profileRoute from "./routes/profileRoute.js"
+
 
 
 const app = express()
@@ -35,7 +35,7 @@ app.use("/api/public", publicRoute)
 app.use("/api/upload", uploadRoute)
 app.use("/api/admin", isAdmin, adminRoute)
 app.use("/api/instructor", isInstructor, instructorRoute)
-app.use("/api/profile", profileRoute)
+
 
 // Global error handler
 

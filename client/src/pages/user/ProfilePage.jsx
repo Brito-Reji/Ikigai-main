@@ -1,65 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Save, BookOpen, ShoppingBag } from "lucide-react";
-import ProfileImageUpload from "@/components/ProfileImageUpload.jsx";
-import { useProfile, useUpdateProfile } from "@/hooks/useProfile.js";
-import Swal from "sweetalert2";
+import React from "react";
+import { Mail, Phone, MapPin, Edit, BookOpen, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/useProfile.js";
+import ChangeEmailSection from "@/components/ChangeEmailSection.jsx";
+import ChangePasswordSection from "@/components/ChangePasswordSection.jsx";
 
 export default function StudentProfilePage() {
+  const navigate = useNavigate();
   const { data: profileData, isLoading } = useProfile();
-  const updateMutation = useUpdateProfile();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    profileImageUrl: "",
-    address: "",
-  });
-
-  useEffect(() => {
-    if (profileData?.data) {
-      setFormData({
-        firstName: profileData.data.firstName || "",
-        lastName: profileData.data.lastName || "",
-        email: profileData.data.email || "",
-        phone: profileData.data.phone || "",
-        profileImageUrl: profileData.data.profileImageUrl || "",
-        address: profileData.data.address || "",
-      });
-    }
-  }, [profileData]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleImageChange = (url) => {
-    setFormData({ ...formData, profileImageUrl: url });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await updateMutation.mutateAsync(formData);
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Profile updated successfully",
-        confirmButtonColor: "#14b8a6",
-        timer: 2000,
-      });
-      setIsEditing(false);
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.response?.data?.message || "Failed to update profile",
-        confirmButtonColor: "#ef4444",
-      });
-    }
-  };
+  const profile = profileData?.data;
 
   if (isLoading) {
     return (
@@ -76,59 +25,35 @@ export default function StudentProfilePage() {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-            {!isEditing ? (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Edit Profile
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => navigate("/profile/edit")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </button>
           </div>
 
           {/* Profile Image */}
           <div className="flex items-center gap-6 mb-6">
             <div className="relative">
-              {formData.profileImageUrl ? (
+              {profile?.profileImageUrl ? (
                 <img
-                  src={formData.profileImageUrl}
+                  src={profile.profileImageUrl}
                   alt="Profile"
                   className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-lg">
                   <span className="text-3xl font-bold text-blue-600">
-                    {formData.firstName?.[0] || "S"}
+                    {profile?.firstName?.[0] || "S"}
                   </span>
                 </div>
-              )}
-              {isEditing && (
-                <ProfileImageUpload
-                  currentImage={formData.profileImageUrl}
-                  onImageUpload={handleImageChange}
-                  disabled={updateMutation.isPending}
-                />
               )}
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {formData.firstName} {formData.lastName}
+                {profile?.firstName} {profile?.lastName}
               </h2>
               <p className="text-gray-600">Student</p>
             </div>
@@ -160,93 +85,34 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
-        {/* Profile Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
-          <div className="space-y-6">
-            {/* Basic Info */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  />
-                </div>
-              </div>
+        {/* Profile Info */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Email:</span>
+              <span className="font-medium">{profile?.email}</span>
             </div>
-
-            {/* Contact Info */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="w-4 h-4 inline mr-2" />
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    disabled
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Phone className="w-4 h-4 inline mr-2" />
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Address
-                  </label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    rows="3"
-                    placeholder="Enter your address"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  />
-                </div>
-              </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Phone:</span>
+              <span className="font-medium">{profile?.phone || "Not provided"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Address:</span>
+              <span className="font-medium">{profile?.address || "Not provided"}</span>
             </div>
           </div>
-        </form>
+        </div>
+
+        {/* Account Security - Only for email/password users */}
+        {profile?.authType === "email" && (
+          <>
+            <ChangeEmailSection currentEmail={profile?.email} authType={profile?.authType} />
+            <div className="mt-6">
+              <ChangePasswordSection authType={profile?.authType} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

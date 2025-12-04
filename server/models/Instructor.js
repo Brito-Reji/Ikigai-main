@@ -60,6 +60,7 @@ const instructorSchema = new Schema(
     },
     profileImageUrl: {
       type: String,
+      default:"https://ikigai-firstproject.s3.eu-north-1.amazonaws.com/public/defalt-profile.jpg",
       trim: true,
     },
     social: {

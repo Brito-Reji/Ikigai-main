@@ -13,6 +13,7 @@ import Footer from "@/components/Footer.jsx";
 const CourseDetailPage = () => {
   const { courseId } = useParams();
   const { data: courseData, isLoading: publicDetailsLoading, error: publicDetailsError } = usePublicCourse(courseId);
+  console.log("course dataaa-->",courseData)
   const [activeTab, setActiveTab] = useState("overview");
 
   const publicCourseDetails = courseData?.data;

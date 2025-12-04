@@ -22,6 +22,15 @@ router.post("/courses/:courseId/chapters", createChapter)
 router.put("/courses/:courseId/chapters/:chapterId", updateChapter)
 router.delete("/courses/:courseId/chapters/:chapterId", deleteChapter)
 
+// Profile Routes
+router.get("/profile", (req, res) => {
+    res.send("Instructor Profile")
+})
+
+router.put('/profile', (req, res) => {
+    res.send('Update Instructor Profile')
+})
+
 
 
 export default router

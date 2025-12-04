@@ -181,11 +181,11 @@ const EditCoursePage = () => {
             </div>
             <button
               onClick={handleSave}
-              disabled={updateLoading}
+              disabled={updateMutation.isPending}
               className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
             >
               <Save className="w-5 h-5 mr-2" />
-              {updateLoading ? "Saving..." : "Save Changes"}
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
