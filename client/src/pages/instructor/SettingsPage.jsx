@@ -9,6 +9,7 @@ export default function InstructorSettingsPage() {
   const navigate = useNavigate();
   const { data: profileData } = useProfile();
   const profile = profileData?.data;
+  const baseEndpoint = "/instructor/profile";
 
   const [emailData, setEmailData] = useState({
     newEmail: "",
@@ -31,14 +32,32 @@ export default function InstructorSettingsPage() {
     setLoading({ ...loading, email: true });
 
     try {
-      const response = await api.put("/profile/change-email", emailData);
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
+      const response = await api.post(`${baseEndpoint}/request-email-change`, emailData);
+      
+      const { value: otp } = await Swal.fire({
+        title: "Enter OTP",
         text: response.data.message,
+        input: "text",
+        inputPlaceholder: "Enter 6-digit OTP",
+        showCancelButton: true,
         confirmButtonColor: "#14b8a6",
+        cancelButtonColor: "#ef4444",
       });
-      setEmailData({ newEmail: "", password: "" });
+
+      if (otp) {
+        const verifyResponse = await api.post(`${baseEndpoint}/verify-email-change`, {
+          newEmail: emailData.newEmail,
+          otp,
+        });
+        
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: verifyResponse.data.message,
+          confirmButtonColor: "#14b8a6",
+        });
+        setEmailData({ newEmail: "", password: "" });
+      }
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -67,7 +86,7 @@ export default function InstructorSettingsPage() {
     setLoading({ ...loading, password: true });
 
     try {
-      const response = await api.put("/profile/change-password", {
+      const response = await api.put(`${baseEndpoint}/change-password`, {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });

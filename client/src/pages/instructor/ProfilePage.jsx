@@ -9,6 +9,8 @@ export default function InstructorProfilePage() {
   const navigate = useNavigate();
   const { data: profileData, isLoading } = useProfile();
   const profile = profileData?.data;
+  console.log("profile->", profile);
+  console.log(profileData)
 
   if (isLoading) {
     return (

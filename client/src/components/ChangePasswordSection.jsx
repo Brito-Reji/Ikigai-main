@@ -27,7 +27,10 @@ export default function ChangePasswordSection({ authType }) {
     setLoading(true);
 
     try {
-      const response = await api.put("/profile/change-password", {
+      const endpoint = window.location.pathname.includes('/instructor/') 
+        ? "/instructor/profile/change-password" 
+        : "/student/profile/change-password";
+      const response = await api.put(endpoint, {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });

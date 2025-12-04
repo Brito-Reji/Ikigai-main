@@ -12,8 +12,9 @@ import publicRoute from "./routes/publicRoute.js"
 import uploadRoute from "./routes/uploadRoute.js"
 import isAdmin from "./middlewares/admin.js";
 import isInstructor from "./middlewares/instructor.js"
+import isStudent from "./middlewares/student.js"
 import instructorRoute from "./routes/instructorRoute.js"
-
+import studentRoute from "./routes/studentRoute.js"
 
 
 const app = express()
@@ -35,10 +36,13 @@ app.use("/api/public", publicRoute)
 app.use("/api/upload", uploadRoute)
 app.use("/api/admin", isAdmin, adminRoute)
 app.use("/api/instructor", isInstructor, instructorRoute)
-
+app.use("/api/student", isStudent, studentRoute)
 
 // Global error handler
+import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 
+app.use(notFound);
+app.use(errorHandler);
 
 console.log("ENV TEST:", process.env.CLOUDINARY_API_KEY);
 

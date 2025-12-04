@@ -17,7 +17,10 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
     setLoading(true);
 
     try {
-      const response = await api.post("/profile/request-email-change", {
+      const endpoint = window.location.pathname.includes('/instructor/') 
+        ? "/instructor/profile/request-email-change" 
+        : "/student/profile/request-email-change";
+      const response = await api.post(endpoint, {
         newEmail: formData.newEmail,
         password: formData.password,
       });
@@ -45,7 +48,10 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
     setLoading(true);
 
     try {
-      const response = await api.post("/profile/verify-email-change", {
+      const endpoint = window.location.pathname.includes('/instructor/') 
+        ? "/instructor/profile/verify-email-change" 
+        : "/student/profile/verify-email-change";
+      const response = await api.post(endpoint, {
         newEmail: formData.newEmail,
         otp: formData.otp,
       });

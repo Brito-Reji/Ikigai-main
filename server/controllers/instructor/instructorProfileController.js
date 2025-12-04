@@ -1,37 +1,45 @@
-import asyncHandler from 'express-async-handler'
+import asyncHandler from "express-async-handler";
 import {
-    getInstructorProfileSerice,
-    updateInstructorProfileService,
+    getProfileService,
+    updateProfileService,
     requestEmailChangeOTPService,
     verifyEmailChangeOTPService,
-    changePasswordService
-} from '../../services/instructor/profileService.js'
+    changePasswordService,
+} from "../../services/instructor/instructorProfileService.js";
 
-export const getInstructorProfile = asyncHandler(async (req, res) => {
-    let instructorProfile = getInstructorProfileSerice(req)
+// GET INSTRUCTOR PROFILE
+export const getProfile = asyncHandler(async (req, res) => {
+    const user = await getProfileService(req.user.id);
 
-    res.status(200).json(instructorProfile)
-})
-
-export const updateInstructorProfile = asyncHandler(async (req, res) => {
-    const updatedinstructorProfile = updateInstructorProfileService(req)
     res.status(200).json({
         success: true,
-        message: 'instuctor profile updated successfuly',
-        data: {
-            _id: updatedinstructorProfile._id,
-            name: updatedinstructorProfile.name,
-            email: updatedinstructorProfile.email,
-            phone: updatedinstructorProfile.phone,
-            bio: updatedinstructorProfile.bio,
-            socialLinks: updatedinstructorProfile.socialLinks,
-            profileImage: updatedinstructorProfile.profileImage,
-            coverImage: updatedinstructorProfile.coverImage,
-        }
+        message: "Profile fetched successfully",
+        data: user,
+    });
+});
 
-    })
+// UPDATE INSTRUCTOR PROFILE
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { firstName, lastName, headline, description, profileImageUrl, social, phone, address } = req.body;
 
-})
+    const updateData = {};
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (headline) updateData.headline = headline;
+    if (description) updateData.description = description;
+    if (profileImageUrl) updateData.profileImageUrl = profileImageUrl;
+    if (social) updateData.social = social;
+    if (phone) updateData.phone = phone;
+    if (address) updateData.address = address;
+
+    const user = await updateProfileService(req.user.id, updateData);
+
+    res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        data: user,
+    });
+});
 
 // REQUEST EMAIL CHANGE OTP
 export const requestEmailChangeOTP = asyncHandler(async (req, res) => {

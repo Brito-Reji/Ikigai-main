@@ -1,51 +1,43 @@
-import { Instructor } from "../../models/Instructor.js"
-import { Otp } from "../../models/Otp.js"
-import bcrypt from "bcrypt"
-import { sendOtpEmail } from "../../utils/emailService.js"
+import { Instructor } from "../../models/Instructor.js";
+import { Otp } from "../../models/Otp.js";
+import bcrypt from "bcrypt";
+import { sendOtpEmail } from "../../utils/emailService.js";
 
-export const getInstructorProfileSerice = async (req) => {
+export const getProfileService = async (userId) => {
+    const user = await Instructor.findById(userId).select("-password -refreshToken");
 
-    let InstructorProfile = await Instructor.findById(req.user.id).select('-password')
-    console.log(InstructorProfile)
-    return InstructorProfile
-
-
-}
-
-export const updateInstructorProfileService = async (req) => {
-    const { name, email, password, bio, website } = req.body
-    const user = req.user
-
-    if (user) {
-        user.name = name || user.name
-        user.email = email || user.email
-        user.bio = bio || user.bio
-        user.website = website || user.website
-
-        if (password) {
-            user.password = password
-        }
-
-        const updatedUser = await user.save()
-        return updatedUser
-    } else {
-        res.status(404)
-        throw new Error('User not found')
+    if (!user) {
+        throw new Error("User not found");
     }
-}
+
+    return user;
+};
+
+export const updateProfileService = async (userId, updateData) => {
+    const user = await Instructor.findByIdAndUpdate(userId, updateData, {
+        new: true,
+        runValidators: true,
+    }).select("-password -refreshToken");
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return user;
+};
 
 export const requestEmailChangeOTPService = async (userId, newEmail, password) => {
-    const instructor = await Instructor.findById(userId).select("+password");
+    const user = await Instructor.findById(userId).select("+password");
 
-    if (!instructor) {
-        throw new Error("Instructor not found");
+    if (!user) {
+        throw new Error("User not found");
     }
 
-    if (instructor.authType !== "email") {
+    if (user.authType !== "email") {
         throw new Error("Cannot change email for Google authenticated users");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, instructor.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
         const error = new Error("Invalid password");
         error.statusCode = 401;
@@ -85,15 +77,15 @@ export const verifyEmailChangeOTPService = async (userId, newEmail, otp) => {
         throw new Error("OTP has expired");
     }
 
-    const instructor = await Instructor.findById(userId);
+    const user = await Instructor.findById(userId);
 
-    if (!instructor) {
-        throw new Error("Instructor not found");
+    if (!user) {
+        throw new Error("User not found");
     }
 
-    instructor.email = newEmail;
-    instructor.isVerified = true;
-    await instructor.save();
+    user.email = newEmail;
+    user.isVerified = true;
+    await user.save();
 
     await Otp.findByIdAndDelete(otpRecord._id);
 
@@ -105,17 +97,17 @@ export const changePasswordService = async (userId, currentPassword, newPassword
         throw new Error("New password must be at least 6 characters long");
     }
 
-    const instructor = await Instructor.findById(userId).select("+password");
+    const user = await Instructor.findById(userId).select("+password");
 
-    if (!instructor) {
-        throw new Error("Instructor not found");
+    if (!user) {
+        throw new Error("User not found");
     }
 
-    if (instructor.authType !== "email") {
+    if (user.authType !== "email") {
         throw new Error("Cannot change password for Google authenticated users");
     }
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, instructor.password);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
         const error = new Error("Current password is incorrect");
         error.statusCode = 401;
@@ -123,8 +115,8 @@ export const changePasswordService = async (userId, currentPassword, newPassword
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    instructor.password = hashedPassword;
-    await instructor.save();
+    user.password = hashedPassword;
+    await user.save();
 
     return { message: "Password changed successfully" };
 };

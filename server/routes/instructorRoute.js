@@ -6,6 +6,7 @@ import {
     updateChapter,
     deleteChapter,
 } from "../controllers/instructor/chapterController.js"
+import { getInstructorProfile } from "../controllers/instructor/profileController.js"
 
 const router = Router()
 
@@ -23,13 +24,13 @@ router.put("/courses/:courseId/chapters/:chapterId", updateChapter)
 router.delete("/courses/:courseId/chapters/:chapterId", deleteChapter)
 
 // Profile Routes
-router.get("/profile", (req, res) => {
-    res.send("Instructor Profile")
-})
+import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP, changePassword } from "../controllers/instructor/instructorProfileController.js";
 
-router.put('/profile', (req, res) => {
-    res.send('Update Instructor Profile')
-})
+router.get("/profile", getProfile)
+router.put("/profile", updateProfile)
+router.post("/profile/request-email-change", requestEmailChangeOTP)
+router.post("/profile/verify-email-change", verifyEmailChangeOTP)
+router.put("/profile/change-password", changePassword)
 
 
 
