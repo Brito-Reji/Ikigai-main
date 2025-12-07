@@ -5,7 +5,15 @@ import {
     createChapter,
     updateChapter,
     deleteChapter,
+    getLessons,
+    addLesson,
+    updateLesson,
+    deleteLesson,
 } from "../controllers/instructor/chapterController.js"
+import { uploadVideo, getVideoUrl } from "../controllers/instructor/videoController.js"
+import multer from "multer"
+
+const upload = multer({ dest: "uploads/" })
 import { getInstructorProfile } from "../controllers/instructor/profileController.js"
 
 const router = Router()
@@ -22,6 +30,16 @@ router.get("/courses/:courseId/chapters", getCourseChapters)
 router.post("/courses/:courseId/chapters", createChapter)
 router.put("/courses/:courseId/chapters/:chapterId", updateChapter)
 router.delete("/courses/:courseId/chapters/:chapterId", deleteChapter)
+
+// Lesson routes
+router.get("/courses/:courseId/chapters/:chapterId/lessons", getLessons)
+router.post("/courses/:courseId/chapters/:chapterId/lessons", addLesson)
+router.put("/courses/:courseId/chapters/:chapterId/lessons/:lessonId", updateLesson)
+router.delete("/courses/:courseId/chapters/:chapterId/lessons/:lessonId", deleteLesson)
+
+// Video upload
+router.post("/upload-video", upload.single("video"), uploadVideo)
+router.get("/video-url", getVideoUrl)
 
 // Profile Routes
 import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP, changePassword } from "../controllers/instructor/instructorProfileController.js";
