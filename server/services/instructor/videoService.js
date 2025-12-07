@@ -1,11 +1,18 @@
 import { uploadVideoToS3 } from "../../utils/s3Upload.js";
 import { generateSignedUrl } from "../../utils/cloudfrontSignedUrl.js";
 import fs from "fs";
+import path from "path";
 
 // Upload video
 export const uploadVideoService = async (file, courseId, chapterId) => {
     const timestamp = Date.now();
-    const s3Key = `courses/${courseId}/chapters/${chapterId}/${timestamp}-${file.originalname}`;
+    const ext = path.extname(file.originalname);
+    const cleanName = path.basename(file.originalname, ext)
+        .replace(/[^a-zA-Z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .toLowerCase();
+
+    const s3Key = `courses/${courseId}/chapters/${chapterId}/${timestamp}-${cleanName}${ext}`;
 
     await uploadVideoToS3(file.path, s3Key);
 

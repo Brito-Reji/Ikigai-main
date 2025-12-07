@@ -11,7 +11,7 @@ import {
 export const getCourseChapters = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const chapters = await getChaptersService(courseId);
 
   res.status(200).json({
@@ -26,7 +26,7 @@ export const createChapter = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { title, description, order } = req.body;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const chapter = await createChapterService(courseId, { title, description, order });
 
   res.status(201).json({
@@ -41,7 +41,7 @@ export const updateChapter = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
   const { title, description, order } = req.body;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const chapter = await updateChapterService(chapterId, courseId, { title, description, order });
 
   res.status(200).json({
@@ -55,7 +55,7 @@ export const updateChapter = asyncHandler(async (req, res) => {
 export const deleteChapter = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   await deleteChapterService(chapterId, courseId);
 
   res.status(200).json({
@@ -76,7 +76,7 @@ import {
 export const getLessons = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const lessons = await getLessonsService(chapterId);
 
   res.status(200).json({
@@ -91,7 +91,7 @@ export const addLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
   const { title, description, videoUrl, duration, order, isFree, resources } = req.body;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const lesson = await createLessonService(chapterId, courseId, {
     title,
     description,
@@ -114,7 +114,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId, lessonId } = req.params;
   const { title, description, videoUrl, duration, order, isFree, resources } = req.body;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   const lesson = await updateLessonService(lessonId, chapterId, courseId, {
     title,
     description,
@@ -136,7 +136,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
 export const deleteLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId, lessonId } = req.params;
 
-  await verifyCourseOwnership(courseId, req.user._id);
+  await verifyCourseOwnership(courseId, req.user.id);
   await deleteLessonService(lessonId, chapterId, courseId);
 
   res.status(200).json({

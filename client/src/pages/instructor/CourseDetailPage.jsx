@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useCourse, useApplyVerification } from "@/hooks/useCourses.js";
+import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import Swal from "sweetalert2";
 
 export default function CourseDetailPage() {
@@ -251,62 +252,7 @@ export default function CourseDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Course Content */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Course Content</h2>
-                  <button
-                    onClick={handleAddChapter}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center text-sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Chapter
-                  </button>
-                </div>
-              </div>
-
-              <div className="divide-y divide-gray-200">
-                {(!course.chapters || course.chapters.length === 0) ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p>No chapters added yet</p>
-                    <p className="text-sm mt-1">Click "Add Chapter" to create your first chapter</p>
-                  </div>
-                ) : (
-                  course.chapters.map((chapter, index) => (
-                    <div key={chapter._id || chapter.id} className="p-6 hover:bg-gray-50 transition">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start flex-1">
-                          <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full font-semibold text-sm mr-4">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-1">
-                              {chapter.title}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span className="flex items-center">
-                                <Video className="w-4 h-4 mr-1" />
-                                {chapter.lessons || 0} lessons
-                              </span>
-                              <span>{chapter.duration || "N/A"}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                            <Edit className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-2 hover:bg-red-50 rounded-lg transition">
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <ChapterManager courseId={courseId} />
           </div>
 
           {/* Sidebar */}

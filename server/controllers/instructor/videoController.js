@@ -5,7 +5,7 @@ import { Course } from "../../models/Course.js";
 // Upload video
 export const uploadVideo = asyncHandler(async (req, res) => {
     const { courseId, chapterId } = req.body;
-    const instructorId = req.user._id;
+    const instructorId = req.user.id;
 
     if (!req.file) {
         return res.status(400).json({

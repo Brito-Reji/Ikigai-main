@@ -4,22 +4,29 @@ import { Course } from "../../models/Course.js";
 
 // Verify course ownership
 export const verifyCourseOwnership = async (courseId, instructorId) => {
+    console.log('Verifying course ownership:');
+    console.log('courseId:', courseId);
+    console.log('instructorId:', instructorId);
+    console.log('instructorId type:', typeof instructorId);
 
-    console.log(courseId)
-    const course = await Course.findOne({
+    const course = await Course.findOne({ _id: courseId });
+    console.log('Found course:', course);
+    console.log('Course instructor:', course?.instructor);
+    console.log('Course instructor type:', typeof course?.instructor);
+
+    const courseWithInstructor = await Course.findOne({
         _id: courseId,
-      
+        instructor: instructorId,
     });
+    console.log('Course with instructor match:', courseWithInstructor);
 
-    console.log('course-> ',course)
-
-    if (!course) {
+    if (!courseWithInstructor) {
         const error = new Error("Course not found or you don't have permission");
         error.statusCode = 404;
         throw error;
     }
 
-    return course;
+    return courseWithInstructor;
 };
 
 // Get chapters
