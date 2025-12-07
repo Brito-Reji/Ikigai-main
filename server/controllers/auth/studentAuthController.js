@@ -8,20 +8,16 @@ import { sendOTPToEmail } from "../../utils/OTPServices.js";
 // import { User } from './model/'
 
 export const studentRegister = asyncHandler(async (req, res) => {
-    console.log("Student registration endpoint hit!");
-    console.log("Request body:", req.body);
 
     let { email, username, firstName, lastName, password } = req.body;
 
     if (!email || !username || !firstName || !lastName || !password) {
-        console.log("Missing required fields");
         return res
             .status(400)
             .json({ success: false, message: "Please provide all required fields" });
     }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    console.log(existingUser, " existing user student");
 
     // if verified user already exists -> block registration
     if (existingUser && existingUser.isVerified) {
@@ -60,7 +56,6 @@ export const studentRegister = asyncHandler(async (req, res) => {
         existingUser.password = hashedPassword;
         existingUser.role = role;
         user = await existingUser.save();
-        console.log("Updated unverified user:", user.email);
     } else {
         // create new user
         user = await User.create({
@@ -75,7 +70,6 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
     try {
         await sendOTPToEmail(email);
-        console.log("OTP sent successfully to", email);
 
         let { refreshToken } = generateTokens({
             userId: user._id,
@@ -110,7 +104,6 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
 export const studentLogin = asyncHandler(async (req, res) => {
     let { email, password } = req.body;
-    console.log("login response ->", email);
     if (!email || !password) {
         return res.status(400).json({
             success: false,
@@ -148,7 +141,6 @@ export const studentLogin = asyncHandler(async (req, res) => {
     if (!user.isVerified) {
         try {
             await sendOTPToEmail(user.email);
-            console.log("OTP sent for verification to", user.email);
 
             return res.status(200).json({
                 success: true,
@@ -161,8 +153,6 @@ export const studentLogin = asyncHandler(async (req, res) => {
                 .json({ success: false, message: "Failed to send OTP. Try again." });
         }
     }
-    console.log(user);
-    console.log(password, user?.password);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
@@ -208,17 +198,14 @@ export const studentLogin = asyncHandler(async (req, res) => {
 export const googleAuth = asyncHandler(async (req, res) => {
     const client = new OAuth2Client();
     const { token } = req.body;
-    console.log(token);
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.VITE_GOOGLE_ID,
     });
-    console.log(ticket);
     let { email, name, picture } = ticket.payload;
     let [firstName, ...lastName] = name.split(" ");
     lastName = lastName.join();
     let user = await User.findOne({ email });
-    console.log(!!user);
     if (user) {
         if (user.isBlocked) {
             return res.status(403).json({
@@ -275,8 +262,6 @@ export const googleAuth = asyncHandler(async (req, res) => {
         });
     }
     if (!user) {
-        // console.log(lastName.join())
-        console.log(firstName);
         user = await User.create({
             email,
             firstName,

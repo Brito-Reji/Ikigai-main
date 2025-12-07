@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import logger from "../../utils/logger.js";
 import {
   verifyCourseOwnership,
   getChaptersService,
@@ -10,10 +11,12 @@ import {
 // Get chapters
 export const getCourseChapters = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
+  logger.info(`Fetching chapters for course: ${courseId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const chapters = await getChaptersService(courseId);
 
+  logger.info(`Retrieved ${chapters.length} chapters for course: ${courseId}`);
   res.status(200).json({
     success: true,
     message: "Chapters fetched successfully",
@@ -25,10 +28,12 @@ export const getCourseChapters = asyncHandler(async (req, res) => {
 export const createChapter = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { title, description, order } = req.body;
+  logger.info(`Creating chapter "${title}" for course: ${courseId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const chapter = await createChapterService(courseId, { title, description, order });
 
+  logger.info(`Chapter created successfully: ${chapter._id}`);
   res.status(201).json({
     success: true,
     message: "Chapter created successfully",
@@ -40,10 +45,12 @@ export const createChapter = asyncHandler(async (req, res) => {
 export const updateChapter = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
   const { title, description, order } = req.body;
+  logger.info(`Updating chapter: ${chapterId} in course: ${courseId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const chapter = await updateChapterService(chapterId, courseId, { title, description, order });
 
+  logger.info(`Chapter updated successfully: ${chapterId}`);
   res.status(200).json({
     success: true,
     message: "Chapter updated successfully",
@@ -54,10 +61,12 @@ export const updateChapter = asyncHandler(async (req, res) => {
 // Delete chapter
 export const deleteChapter = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
+  logger.info(`Deleting chapter: ${chapterId} from course: ${courseId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   await deleteChapterService(chapterId, courseId);
 
+  logger.info(`Chapter deleted successfully: ${chapterId}`);
   res.status(200).json({
     success: true,
     message: "Chapter deleted successfully",
@@ -75,10 +84,12 @@ import {
 // Get lessons
 export const getLessons = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
+  logger.info(`Fetching lessons for chapter: ${chapterId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const lessons = await getLessonsService(chapterId);
 
+  logger.info(`Retrieved ${lessons.length} lessons for chapter: ${chapterId}`);
   res.status(200).json({
     success: true,
     message: "Lessons fetched successfully",
@@ -90,6 +101,7 @@ export const getLessons = asyncHandler(async (req, res) => {
 export const addLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId } = req.params;
   const { title, description, videoUrl, duration, order, isFree, resources } = req.body;
+  logger.info(`Adding lesson "${title}" to chapter: ${chapterId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const lesson = await createLessonService(chapterId, courseId, {
@@ -102,6 +114,7 @@ export const addLesson = asyncHandler(async (req, res) => {
     resources,
   });
 
+  logger.info(`Lesson created successfully: ${lesson._id}`);
   res.status(201).json({
     success: true,
     message: "Lesson added successfully",
@@ -113,6 +126,7 @@ export const addLesson = asyncHandler(async (req, res) => {
 export const updateLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId, lessonId } = req.params;
   const { title, description, videoUrl, duration, order, isFree, resources } = req.body;
+  logger.info(`Updating lesson: ${lessonId} in chapter: ${chapterId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   const lesson = await updateLessonService(lessonId, chapterId, courseId, {
@@ -125,6 +139,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
     resources,
   });
 
+  logger.info(`Lesson updated successfully: ${lessonId}`);
   res.status(200).json({
     success: true,
     message: "Lesson updated successfully",
@@ -135,10 +150,12 @@ export const updateLesson = asyncHandler(async (req, res) => {
 // Delete lesson
 export const deleteLesson = asyncHandler(async (req, res) => {
   const { courseId, chapterId, lessonId } = req.params;
+  logger.info(`Deleting lesson: ${lessonId} from chapter: ${chapterId}`);
 
   await verifyCourseOwnership(courseId, req.user.id);
   await deleteLessonService(lessonId, chapterId, courseId);
 
+  logger.info(`Lesson deleted successfully: ${lessonId}`);
   res.status(200).json({
     success: true,
     message: "Lesson deleted successfully",

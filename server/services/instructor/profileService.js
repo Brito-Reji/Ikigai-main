@@ -6,7 +6,6 @@ import { sendOtpEmail } from "../../utils/emailService.js"
 export const getInstructorProfileSerice = async (req) => {
 
     let InstructorProfile = await Instructor.findById(req.user.id).select('-password')
-    console.log(InstructorProfile)
     return InstructorProfile
 
 

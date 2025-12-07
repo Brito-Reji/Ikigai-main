@@ -27,8 +27,6 @@ export function generateSignedUrl(objectPath, expiresIn = 1800) {
 
     const sign = crypto.createSign("RSA-SHA1");
     sign.update(policy);
-    console.log("Node version:", process.version);
-    console.log("NODE_OPTIONS:", process.env.NODE_OPTIONS);
 
     const signature = sign.sign({
         key: privateKey,

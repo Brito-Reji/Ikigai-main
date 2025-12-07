@@ -44,6 +44,5 @@ import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 app.use(notFound);
 app.use(errorHandler);
 
-console.log("ENV TEST:", process.env.CLOUDINARY_API_KEY);
 
 export default app

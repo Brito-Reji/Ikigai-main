@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import logger from "../../utils/logger.js";
 import { uploadVideoService, getSignedVideoUrlService } from "../../services/instructor/videoService.js";
 import { Course } from "../../models/Course.js";
 
@@ -6,8 +7,10 @@ import { Course } from "../../models/Course.js";
 export const uploadVideo = asyncHandler(async (req, res) => {
     const { courseId, chapterId } = req.body;
     const instructorId = req.user.id;
+    logger.info(`Video upload initiated for course: ${courseId}, chapter: ${chapterId}`);
 
     if (!req.file) {
+        logger.warn(`Video upload failed: No file provided`);
         return res.status(400).json({
             success: false,
             message: "No video file provided",
@@ -20,6 +23,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     });
 
     if (!course) {
+        logger.warn(`Video upload failed: Course ${courseId} not found or unauthorized`);
         return res.status(404).json({
             success: false,
             message: "Course not found or you don't have permission",
@@ -27,6 +31,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     }
 
     const result = await uploadVideoService(req.file, courseId, chapterId);
+    logger.info(`Video uploaded successfully: ${result.s3Key}`);
 
     res.status(200).json({
         success: true,

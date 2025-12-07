@@ -14,14 +14,12 @@ export const currentUser = async (req, res) => {
     }
 
     if (!accessToken) {
-      console.log("No token provided in request");
       return res
         .status(401)
         .json({ success: false, message: "No token provided" });
     }
 
     const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-    // console.log("Decoded token:", decoded);
 
     // Check user in database to verify blocked status
     let user = await User.findById(decoded.id);
@@ -30,7 +28,6 @@ export const currentUser = async (req, res) => {
     }
 
     if (!user) {
-      console.log("User not found in database");
       return res.status(401).json({
         success: false,
         message: "User not found",
@@ -39,7 +36,6 @@ export const currentUser = async (req, res) => {
 
     // Check if user is blocked
     if (user.isBlocked) {
-      console.log("User is blocked:", user.email);
       return res.status(403).json({
         success: false,
         message: "Your account has been blocked. Please contact support.",
@@ -61,7 +57,6 @@ export const currentUser = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log("Token verification error:", err);
     return res.status(401).json({ success: false, message: "Invalid token" });
   }
 };

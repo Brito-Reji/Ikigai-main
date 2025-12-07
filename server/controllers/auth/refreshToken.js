@@ -9,10 +9,8 @@ export const refreshToken = async (req, res) => {
       req.cookies?.refreshToken ||
       req.headers["x-refresh-token"] ||
       req.query.refreshToken;
-    console.log("Refresh token from request:", incomingToken);
 
     if (!incomingToken) {
-      console.log("No refresh token provided");
       return res
         .status(403)
         .json({ success: false, message: "No refresh token provided" });
@@ -22,9 +20,7 @@ export const refreshToken = async (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
-      console.log("Refresh token decoded:", decoded);
     } catch (e) {
-      console.log("Invalid refresh token:", e);
       return res
         .status(403)
         .json({ success: false, message: "Invalid refresh token" });
@@ -37,14 +33,12 @@ export const refreshToken = async (req, res) => {
     }
 
     if (!user) {
-      console.log("User not found for refresh token");
       return res
         .status(403)
         .json({ success: false, message: "User not found" });
     }
 
     if (user.isBlocked) {
-      console.log("User is blocked");
       return res
         .status(403)
         .json({ success: false, message: "Account is blocked" });
@@ -52,7 +46,6 @@ export const refreshToken = async (req, res) => {
 
     // Check if the refresh token matches the one stored in the database
     if (user.refreshToken !== incomingToken) {
-      console.log("Refresh token mismatch");
       return res
         .status(403)
         .json({ success: false, message: "Invalid refresh token" });
@@ -81,7 +74,6 @@ export const refreshToken = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    console.log("New access token generated:", accessToken);
     return res.status(200).json({ success: true, accessToken });
   } catch (err) {
     console.error("Refresh token error:", err);

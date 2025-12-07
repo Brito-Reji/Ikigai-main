@@ -7,13 +7,10 @@ import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
-    console.log("Instructor registration endpoint hit!");
-    console.log("Request body:", req.body);
 
     let { email, username, firstName, lastName, password } = req.body;
 
     if (!email || !username || !firstName || !lastName || !password) {
-        console.log("Missing required fields");
         return res
             .status(400)
             .json({ success: false, message: "Please provide all required fields" });
@@ -21,9 +18,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     const existingUser = await Instructor.findOne({
         $or: [{ email }, { username }],
     });
-    console.log(existingUser, " existing user instructor");
     if (existingUser) {
-        console.log("user already exist");
         return res
             .status(400)
             .json({ success: false, message: "email or username  already exist" });
@@ -60,7 +55,6 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     try {
         let response = await api.post("/auth/send-otp", { email });
         if (response.data.success) {
-            console.log("AFter sending the Otp", response.data);
             res.status(200).json({ success: true, message: "otp " });
         }
     } catch (err) {
@@ -86,7 +80,6 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     const user = await Instructor.findOne({ email: email.toLowerCase() }).select(
         "+password"
     );
-    console.log(user);
 
     if (!user) {
         return res.status(401).json({
@@ -110,7 +103,6 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     }
 
     // Verify password
-    console.log(
         "password from the from ->",
         password,
         "  hashed password from the db->",
@@ -161,14 +153,11 @@ export const instructorSignin = asyncHandler(async (req, res) => {
 export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     const client = new OAuth2Client();
     const { token } = req.body;
-    console.log(token);
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.VITE_GOOGLE_ID,
     });
-    console.log(ticket);
     let { email, name, picture } = ticket.payload;
-    console.log("name of the instructor is: ", name);
     let [firstName, ...lastName] = name.split(" ");
     lastName = lastName.join(" ");
     let user = await Instructor.findOne({ email });

@@ -5,7 +5,6 @@ import { Instructor } from "../../models/Instructor.js";
 import { generateTokens } from "../../utils/generateTokens.js";
 
 export const adminLogin = asyncHandler(async (req, res) => {
-    console.log("adminLogin controller called");
     try {
         const { email, password } = req.body;
 
@@ -61,49 +60,38 @@ export const adminLogin = asyncHandler(async (req, res) => {
 });
 
 export const getStudents = asyncHandler(async (req, res) => {
-    console.log("getStudents controller called");
     const students = await User.find({ role: "student", isVerified: true });
-    // console.log(students)
 
     res.status(200).json({ success: true, data: students });
 });
 
 export const blockStudent = asyncHandler(async (req, res) => {
-    console.log("block students");
     let { studentId } = req.params;
     const student = await User.findOne({ _id: studentId });
-    console.log(student);
     student.isBlocked = !student.isBlocked;
     await student.save();
     res.status(200).json({ success: true });
 });
 
 export const getInstructors = asyncHandler(async (req, res) => {
-    console.log("get instructors called");
     const instructor = await Instructor.find({
         role: "instructor",
         isVerified: true,
     });
-    console.log(instructor);
     return res.status(200).json({ success: true, data: instructor });
 });
 
 export const blockInstructor = asyncHandler(async (req, res) => {
-    console.log("block instructor");
     let { instructorId } = req.params;
     const instructor = await Instructor.findOne({ _id: instructorId });
-    console.log(instructor);
     instructor.isBlocked = !instructor.isBlocked;
     await instructor.save();
     return res.status(200).json({ success: true });
 });
 
 export const getStudentDetails = asyncHandler(async (req, res) => {
-    console.log("get student details");
-    // console.log(req.params.id)
     let { id } = req.params;
     const student = await User.findOne({ _id: id });
-    console.log(student);
     return res.status(200).json({ success: true, data: student });
 });
 

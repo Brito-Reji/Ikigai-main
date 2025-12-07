@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import logger from "../../utils/logger.js";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "../../config/s3Client.js";
 import { Course } from "../../models/Course.js";
@@ -7,6 +8,7 @@ import jwt from "jsonwebtoken";
 // Stream video
 export const streamVideo = asyncHandler(async (req, res) => {
     const { courseId, videoPath, token } = req.query;
+    logger.info(`Video stream requested for course: ${courseId}`);
 
     let instructorId;
 
@@ -15,6 +17,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
             instructorId = decoded.id;
         } catch (error) {
+            logger.warn(`Video stream failed: Invalid token`);
             return res.status(401).json({
                 success: false,
                 message: "Invalid token",
@@ -23,6 +26,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
     } else if (req.user) {
         instructorId = req.user.id;
     } else {
+        logger.warn(`Video stream failed: Unauthorized`);
         return res.status(401).json({
             success: false,
             message: "Unauthorized",
@@ -35,6 +39,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
     });
 
     if (!course) {
+        logger.warn(`Video stream failed: Course ${courseId} not found`);
         return res.status(404).json({
             success: false,
             message: "Course not found or you don't have permission",
@@ -55,9 +60,10 @@ export const streamVideo = asyncHandler(async (req, res) => {
         res.setHeader('Content-Length', s3Response.ContentLength);
         res.setHeader('Accept-Ranges', 'bytes');
 
+        logger.info(`Video streaming: ${s3Key}`);
         s3Response.Body.pipe(res);
     } catch (error) {
-        console.error('Error streaming video:', error);
+        logger.error(`Error streaming video: ${error.message}`);
         res.status(500).json({
             success: false,
             message: "Failed to stream video",

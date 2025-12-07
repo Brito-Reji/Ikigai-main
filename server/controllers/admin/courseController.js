@@ -47,7 +47,6 @@ export const getAllCourses = asyncHandler(async (req, res) => {
     const totalCourses = await Course.countDocuments(query);
     const totalPages = Math.ceil(totalCourses / parseInt(limit));
 
-    console.log(
       `Admin fetched ${courses.length} courses (page ${page}/${totalPages})`
     );
 
@@ -92,7 +91,6 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
       });
     }
 
-    console.log(`Admin viewing course details: ${course.title}`);
 
     return res.status(200).json({
       success: true,
@@ -132,7 +130,6 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
         "firstName lastName email profileImageUrl headline"
       );
 
-    console.log(
       `Admin ${course.blocked ? "blocked" : "unblocked"} course: ${course.title}`
     );
 
@@ -174,7 +171,6 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     course.deleted = true;
     await course.save();
 
-    console.log(`Admin soft deleted course: ${course.title}`);
 
     return res.status(200).json({
       success: true,

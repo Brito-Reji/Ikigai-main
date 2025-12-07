@@ -22,5 +22,4 @@ export const sendOtpEmail = async (email, otp) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("OTP sent to", email);
 };

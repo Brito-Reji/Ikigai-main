@@ -4,9 +4,6 @@ import cloudinary from "../../config/cloudinary.js";
 // Upload single image
 export const uploadImage = asyncHandler(async (req, res) => {
   try {
-    console.log("Upload request received");
-    console.log("User:", req.user);
-    console.log("File:", req.file);
 
     if (!req.file) {
       console.error("No file in request");
@@ -16,7 +13,6 @@ export const uploadImage = asyncHandler(async (req, res) => {
       });
     }
 
-    console.log("File uploaded successfully to:", req.file.path);
 
     res.status(200).json({
       success: true,

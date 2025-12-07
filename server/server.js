@@ -8,7 +8,6 @@ dotenv.config();
 const PORT = 3000;
 
 // Add this at the top of your main file
-const originalLog = console.log;
 
 // ANSI color codes
 const colors = {
@@ -22,7 +21,6 @@ const colors = {
   gray: "\x1b[90m",
 };
 
-console.log = function (...args) {
   const error = new Error();
   const stack = error.stack.split("\n")[2];
   const match = stack.match(/at\s+(.+):(\d+):(\d+)/);
@@ -36,11 +34,7 @@ console.log = function (...args) {
   }
 };
 
-// Now all console.logs will show line numbers in cyan
-console.log("Hello world");
-console.log("Testing", 123);
 
 connectDB();
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });

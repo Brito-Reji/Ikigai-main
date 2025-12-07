@@ -37,7 +37,6 @@ export const sendOTPToEmail = async email => {
   };
   await transporter.sendMail(mailOptions);
 
-  console.log("OTP generated for", email, " ", otp);
   return { otp, success: true };
 };
 
@@ -55,24 +54,16 @@ export const sentOTP = asyncHandler(async (req, res) => {
       .status(200)
       .json({ message: "OTP generated", otp: result.otp, success: true });
   } catch (err) {
-    console.log(err.message);
     res.status(500).json({ message: err.message });
   }
 });
 
 export const verifyOTP = asyncHandler(async (req, res) => {
   let { email, otp } = req.body;
-  console.log("req.body->", req.body);
   let data = await Otp.findOne({ otp, email });
-  console.log(data);
-  console.log(email, ":", data?.email, "    ", otp, ":", data?.otp);
-  console.log("data from the db ->", data);
   const resl = await User.findOne({ email });
-  console.log("resl->", resl);
   if (data?.email === email && data?.otp === otp) {
-    console.log("User verfied", resl);
     if (resl) {
-      console.log("user verfied");
       let student = await User.findOneAndUpdate(
         { email },
         { isVerified: true }
@@ -105,12 +96,10 @@ export const verifyOTP = asyncHandler(async (req, res) => {
           "user verified succesfully Email verified! Redirecting to dashboard...",
       });
     } else {
-      console.log("instructor verfied");
       let instructor = await Instructor.findOneAndUpdate(
         { email },
         { isVerified: true }
       );
-      console.log("instructor->", instructor);
       let { accessToken, refreshToken } = generateTokens({
         userId: instructor._id,
         email: instructor.email,
