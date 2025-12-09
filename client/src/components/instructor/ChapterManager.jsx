@@ -516,11 +516,18 @@ function VideoPreviewModal({ lesson, onClose }) {
 
   useEffect(() => {
     if (lesson.videoUrl) {
-      setLoading(false);
       const courseId = window.location.pathname.split('/')[3];
       const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        setError('Authentication token not found. Please login again.');
+        setLoading(false);
+        return;
+      }
+      
       const streamUrl = `http://localhost:3000/api/instructor/stream-video?courseId=${courseId}&videoPath=${encodeURIComponent(lesson.videoUrl)}&token=${token}`;
       setVideoUrl(streamUrl);
+      setLoading(false);
     }
   }, [lesson.videoUrl]);
 

@@ -6,7 +6,7 @@ dotenv.config();
 
   "API Secret:",
   process.env.CLOUDINARY_API_SECRET ? "***set***" : "MISSING"
-);
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDNARY_CLOUD_NAME,

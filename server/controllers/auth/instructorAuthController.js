@@ -103,11 +103,6 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     }
 
     // Verify password
-        "password from the from ->",
-        password,
-        "  hashed password from the db->",
-        user.password
-    );
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {

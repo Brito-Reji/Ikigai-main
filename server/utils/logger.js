@@ -1,6 +1,8 @@
 import winston from "winston";
 
- const logger = winston.createLogger({
+const isProd = process.env.NODE_ENV === "production";
+
+const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp({
@@ -9,12 +11,20 @@ import winston from "winston";
     winston.format.json()
   ),
   transports: [
-    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
-    new winston.transports.File({ filename: "logs/combined.log" }),
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
+      options: isProd ? {} : { flags: "w" } // overwrite in dev
+    }),
+
+    new winston.transports.File({
+      filename: "logs/combined.log",
+      options: isProd ? {} : { flags: "w" } // overwrite in dev
+    }),
   ],
 });
 
-if (process.env.NODE_ENV !== "production") {
+if (!isProd) {
   logger.add(
     new winston.transports.Console({
       format: winston.format.simple(),

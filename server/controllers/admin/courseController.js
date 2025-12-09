@@ -47,9 +47,6 @@ export const getAllCourses = asyncHandler(async (req, res) => {
     const totalCourses = await Course.countDocuments(query);
     const totalPages = Math.ceil(totalCourses / parseInt(limit));
 
-      `Admin fetched ${courses.length} courses (page ${page}/${totalPages})`
-    );
-
     return res.status(200).json({
       success: true,
       message: "Courses fetched successfully",
@@ -129,9 +126,6 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
         "instructor",
         "firstName lastName email profileImageUrl headline"
       );
-
-      `Admin ${course.blocked ? "blocked" : "unblocked"} course: ${course.title}`
-    );
 
     return res.status(200).json({
       success: true,

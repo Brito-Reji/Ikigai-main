@@ -49,6 +49,8 @@ export const streamVideo = asyncHandler(async (req, res) => {
     const s3Key = videoPath.startsWith('/') ? videoPath.substring(1) : videoPath;
 
     try {
+        logger.info(`Attempting to stream from S3: ${s3Key}`);
+
         const command = new GetObjectCommand({
             Bucket: process.env.S3_BUCKET,
             Key: s3Key,
@@ -60,13 +62,22 @@ export const streamVideo = asyncHandler(async (req, res) => {
         res.setHeader('Content-Length', s3Response.ContentLength);
         res.setHeader('Accept-Ranges', 'bytes');
 
-        logger.info(`Video streaming: ${s3Key}`);
+        logger.info(`Video streaming started: ${s3Key}`);
         s3Response.Body.pipe(res);
     } catch (error) {
-        logger.error(`Error streaming video: ${error.message}`);
+        logger.error(`Error streaming video from S3: ${error.message}, Key: ${s3Key}`);
+
+        if (error.name === 'NoSuchKey') {
+            return res.status(404).json({
+                success: false,
+                message: "Video file not found in storage",
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: "Failed to stream video",
+            error: error.message,
         });
     }
 });
