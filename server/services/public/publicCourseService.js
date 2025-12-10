@@ -112,6 +112,26 @@ export const getFeaturedCoursesService = asyncHandler(async (limit = 4) => {
 
 // GET PUBLIC COURSE DETAILS
 export const getPublicCourseDetailsService = asyncHandler(async (courseId) => {
+    // First check if course exists at all
+    const courseExists = await Course.findOne({
+        _id: courseId,
+        deleted: { $ne: true },
+    });
+
+    if (!courseExists) {
+        throw new Error("Course not found");
+    }
+
+    // Check if course is blocked
+    if (courseExists.blocked) {
+        throw new Error("This course has been temporarily blocked by the administrator");
+    }
+
+    // Check if course is published
+    if (!courseExists.published) {
+        throw new Error("This course is not yet published");
+    }
+
     const course = await Course.findOne({
         _id: courseId,
         published: true,
@@ -120,10 +140,6 @@ export const getPublicCourseDetailsService = asyncHandler(async (courseId) => {
     })
         .populate("category", "name description")
         .populate("instructor", "firstName lastName email profileImageUrl headline description social");
-
-    if (!course) {
-        throw new Error("Course not found or not available");
-    }
 
     return course;
 });

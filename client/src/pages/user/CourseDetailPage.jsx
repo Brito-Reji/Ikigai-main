@@ -29,20 +29,66 @@ const CourseDetailPage = () => {
   }
 
   if (publicDetailsError || !publicCourseDetails) {
+    const errorMessage = publicDetailsError?.response?.data?.message || publicDetailsError?.message || "The course you are looking for does not exist or is no longer available.";
+    const isBlocked = errorMessage.includes("blocked by the administrator");
+    const isNotPublished = errorMessage.includes("not yet published");
+    
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h1>
-            <p className="text-gray-600 mb-6">
-              {publicDetailsError || "The course you are looking for does not exist or is no longer available."}
+            <div className="mb-6">
+              {isBlocked ? (
+                <div className="w-24 h-24 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636 5.636 18.364" />
+                  </svg>
+                </div>
+              ) : isNotPublished ? (
+                <div className="w-24 h-24 mx-auto mb-4 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+              ) : (
+                <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 6.306a7.962 7.962 0 00-6 0m6 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v1.306m6 0V7a2 2 0 01-2 2H9a2 2 0 01-2-2V6.306" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            <h1 className={`text-2xl font-bold mb-4 ${isBlocked ? 'text-red-900' : isNotPublished ? 'text-yellow-900' : 'text-gray-900'}`}>
+              {isBlocked ? 'Course Temporarily Unavailable' : isNotPublished ? 'Course Not Published' : 'Course Not Found'}
+            </h1>
+            
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              {errorMessage}
             </p>
-            <button
-              onClick={() => window.history.back()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go Back
-            </button>
+            
+            {isBlocked && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                <p className="text-sm text-red-800">
+                  This course has been temporarily blocked for review. Please check back later or contact support if you have questions.
+                </p>
+              </div>
+            )}
+            
+            <div className="space-x-4">
+              <button
+                onClick={() => window.history.back()}
+                className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.href = '/courses'}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Browse Courses
+              </button>
+            </div>
           </div>
         </div>
       </div>

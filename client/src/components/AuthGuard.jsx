@@ -17,6 +17,12 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
 
   useEffect(() => {
     // Fetch current user if token exists but no user data and haven't tried yet
+
+    if (!hasToken) {
+      navigate('/')
+    }
+
+
     if (hasToken && !user && !loading && !fetchAttempted) {
       console.log("Fetching current user...");
       setFetchAttempted(true);
