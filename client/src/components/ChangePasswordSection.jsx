@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock, Save } from "lucide-react";
+import { Lock, Save, Eye, EyeOff } from "lucide-react";
 import api from "@/api/axiosConfig.js";
 import Swal from "sweetalert2";
 
@@ -8,6 +8,10 @@ export default function ChangePasswordSection({ authType }) {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
+  });
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -69,32 +73,50 @@ export default function ChangePasswordSection({ authType }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Current Password <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              value={formData.currentPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, currentPassword: e.target.value })
-              }
-              required
-              placeholder="Enter your current password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="relative">
+              <input
+                type={showPassword.currentPassword ? "text" : "password"}
+                value={formData.currentPassword}
+                onChange={(e) =>
+                  setFormData({ ...formData, currentPassword: e.target.value })
+                }
+                required
+                placeholder="Enter your current password"
+                className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword({ ...showPassword, currentPassword: !showPassword.currentPassword })}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword.currentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               New Password <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              value={formData.newPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, newPassword: e.target.value })
-              }
-              required
-              placeholder="Enter new password (min 6 characters)"
-              minLength={6}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="relative">
+              <input
+                type={showPassword.newPassword ? "text" : "password"}
+                value={formData.newPassword}
+                onChange={(e) =>
+                  setFormData({ ...formData, newPassword: e.target.value })
+                }
+                required
+                placeholder="Enter new password (min 6 characters)"
+                minLength={6}
+                className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword({ ...showPassword, newPassword: !showPassword.newPassword })}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword.newPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
