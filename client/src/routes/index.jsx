@@ -185,8 +185,9 @@ export default function AppRoutes() {
       </Route>
 
       {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/admin" element={<AdminLayout />}>
-        <Route path="login" element={<AdminLoginPage />} />
+        
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="categories" element={<Categories />} />
