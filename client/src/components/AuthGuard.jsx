@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useAuth } from "../hooks/useRedux.js";
 import { fetchCurrentUser } from "../store/slices/authSlice.js";
 import ThreeDotLoader from "./ThreeDotLoader.jsx";
+import { useNavigate } from "react-router-dom";
 
 const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   // Changed to use Redux hook instead of Context
@@ -10,6 +11,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   const [fetchAttempted, setFetchAttempted] = React.useState(false);
   const [isValidating, setIsValidating] = React.useState(false);
   const hasToken = !!localStorage.getItem("accessToken");
+  const navigate = useNavigate()
 
   console.log("AuthGuard state:", { isAuthenticated, user, loading, hasToken, fetchAttempted, isValidating });
 
@@ -46,46 +48,12 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   console.log("isAuthenticated", isAuthenticated);
   if (requireAuth && !isAuthenticated) {
     console.log("User not authenticated, showing login prompt");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Authentication Required
-          </h2>
-          <p className="text-gray-600 mb-6">
-            You need to be logged in to access this page.
-          </p>
-          <button
-            onClick={() => (window.location.href = "/login")}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
+      navigate('/')
   }
 
   // If specific roles are required but user doesn't have the right role
   if (requireAuth && isAuthenticated && roles.length > 0 && user && !roles.includes(user.role)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Access Denied
-          </h2>
-          <p className="text-gray-600 mb-6">
-            You don't have permission to access this page.
-          </p>
-          <button
-            onClick={() => window.history.back()}
-            className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
+   navigate('/')
   }
   if (requireAuth && isAuthenticated && user?.isBlocked) {
     return (

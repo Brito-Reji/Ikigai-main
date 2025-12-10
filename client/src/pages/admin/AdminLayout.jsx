@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice.js";
 import { LogOut } from "lucide-react";
 import Swal from "sweetalert2";
+import useUser from "@/hooks/useUser";
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const user = useUser()
+
+   useEffect(() => {
+      if(user && user.role !== "admin") {
+    navigate("/")
+  }
+  },[])
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
