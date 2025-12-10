@@ -170,7 +170,7 @@ function LoginPage() {
             // Small delay to ensure Redux state is fully updated
             // Use replace: true to prevent going back to login page
             setTimeout(() => {
-              navigate("/course", { replace: true });
+              navigate("/courses", { replace: true });
             }, 100);
           }
         } else if (loginUser.rejected.match(resultAction)) {
