@@ -7,6 +7,7 @@ import {
   DollarSign,
   Settings,
   ChevronLeft,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useRedux.js";
 
@@ -36,21 +37,21 @@ export default function Sidebar() {
       icon: DollarSign,
     },
     {
+      name: "Profile",
+      path: "/instructor/profile",
+      icon: User,
+    },
+    {
       name: "Setting",
       path: "/instructor/settings",
       icon: Settings,
-    },
-    {
-      name: "Communication",
-      path: "/instructor/messages",
-      icon: MessageSquare,
     },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="w-64 bg-slate-900 min-h-screen flex flex-col">
+    <div className="w-64 bg-slate-900 h-screen max-h-screen sticky top-0 flex flex-col overflow-y-auto">
       {/* Logo */}
       <div className="p-6 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center space-x-3">
@@ -74,11 +75,10 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                active
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
-              }`}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${active
+                ? "bg-indigo-600 text-white"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
             >
               <Icon className="w-5 h-5" />
               <span className="font-medium">{item.name}</span>
@@ -100,9 +100,9 @@ export default function Sidebar() {
               Hi, {user?.firstName || "Instructor"}
             </p>
           </div>
-          <button className="text-slate-400 hover:text-white">
-            <Settings className="w-5 h-5" />
-          </button>
+          <Link to="/instructor/profile" className="text-slate-400 hover:text-white">
+            <User className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </div>

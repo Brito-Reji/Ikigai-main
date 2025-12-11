@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { createCourse, getAllCourseByInstructor, updateCourse, getCourseById, applyForVerification } from "../controllers/instructor/courseController.js"
+import { createCourse, getAllCourseByInstructor, updateCourse, getCourseById, applyForVerification, togglePublish } from "../controllers/instructor/courseController.js"
 import {
     getCourseChapters,
     createChapter,
@@ -25,6 +25,7 @@ router.get("/courses", getAllCourseByInstructor)
 router.get("/courses/:courseId", getCourseById)
 router.put("/courses/:courseId", updateCourse)
 router.post("/courses/:courseId/apply-verification", applyForVerification)
+router.patch("/courses/:courseId/toggle-publish", togglePublish)
 
 // Chapter routes
 router.get("/courses/:courseId/chapters", getCourseChapters)

@@ -13,7 +13,9 @@ function InstructorLayout() {
   let user = useUser()
 
   useEffect(() => {
-      if(!user && user.role !== "instructor") {
+
+      if(!user || user.role !== "instructor") {
+
     navigate("/")
   }
   },[])

@@ -18,7 +18,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useCourse, useApplyVerification } from "@/hooks/useCourses.js";
+import { useCourse, useApplyVerification, useTogglePublish } from "@/hooks/useCourses.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import Swal from "sweetalert2";
 
@@ -27,6 +27,7 @@ export default function CourseDetailPage() {
   const navigate = useNavigate();
   const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
   const applyVerificationMutation = useApplyVerification();
+  const togglePublishMutation = useTogglePublish();
 
   const handleApplyForVerification = async () => {
     const result = await Swal.fire({
@@ -43,19 +44,55 @@ export default function CourseDetailPage() {
     if (result.isConfirmed) {
       try {
         await applyVerificationMutation.mutateAsync(courseId);
-        
+
         Swal.fire({
           icon: "success",
-          title: "Success!",
-          text: "Verification request submitted successfully",
+          title: "Done!",
+          text: "Verification request submitted",
           confirmButtonColor: "#14b8a6",
           timer: 2000
         });
       } catch (error) {
         Swal.fire({
           icon: "error",
-          title: "Error!",
-          text: error.response?.data?.message || "Failed to submit verification request",
+          title: "Oops!",
+          text: error.response?.data?.message || "Something went wrong",
+          confirmButtonColor: "#ef4444"
+        });
+      }
+    }
+  };
+
+  const handleTogglePublish = async () => {
+    const result = await Swal.fire({
+      title: course.published ? "Unpublish Course?" : "Publish Course?",
+      text: course.published
+        ? "Students won't be able to see this course anymore"
+        : "Your course will be visible to students",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: course.published ? "#ef4444" : "#10b981",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: course.published ? "Yes, unpublish" : "Yes, publish",
+      cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await togglePublishMutation.mutateAsync(courseId);
+
+        Swal.fire({
+          icon: "success",
+          title: "Done!",
+          text: course.published ? "Course unpublished" : "Course published successfully",
+          confirmButtonColor: "#10b981",
+          timer: 2000
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: error.response?.data?.message || "Something went wrong",
           confirmButtonColor: "#ef4444"
         });
       }
@@ -64,9 +101,9 @@ export default function CourseDetailPage() {
 
   const getVerificationBadge = () => {
     if (!course) return null;
-    
+
     const status = course.verificationStatus;
-    
+
     const badges = {
       pending: {
         icon: <AlertCircle className="w-4 h-4" />,
@@ -89,9 +126,9 @@ export default function CourseDetailPage() {
         className: "bg-red-100 text-red-800"
       }
     };
-    
+
     const badge = badges[status] || badges.pending;
-    
+
     return (
       <span className={`px-3 py-1 text-sm font-semibold rounded-full flex items-center gap-1 ${badge.className}`}>
         {badge.icon}
@@ -151,11 +188,10 @@ export default function CourseDetailPage() {
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
                 <span
-                  className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                    course.published
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
+                  className={`px-3 py-1 text-sm font-semibold rounded-full ${course.published
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                    }`}
                 >
                   {course.published ? "Published" : "Draft"}
                 </span>
@@ -171,6 +207,7 @@ export default function CourseDetailPage() {
               )}
             </div>
             <div className="flex items-center gap-2 ml-4">
+              {/* Apply for Verification - shows when published but not verified */}
               {course.published && (course.verificationStatus === "pending" || course.verificationStatus === "rejected") && (
                 <button
                   onClick={handleApplyForVerification}
@@ -180,6 +217,18 @@ export default function CourseDetailPage() {
                   Apply for Verification
                 </button>
               )}
+
+              {/* Publish - shows when verified but not published */}
+              {!course.published && course.verificationStatus === "verified" && (
+                <button
+                  onClick={handleTogglePublish}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium flex items-center"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Publish
+                </button>
+              )}
+
               <button
                 onClick={handleEditCourse}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center"
@@ -282,9 +331,9 @@ export default function CourseDetailPage() {
                 <div>
                   <p className="text-gray-600">Discount</p>
                   <p className="font-semibold text-gray-900">
-                    {course.discountType === "none" ? "No discount" : 
-                     course.discountType === "percentage" ? `${course.discountValue}%` : 
-                     `₹${course.discountValue}`}
+                    {course.discountType === "none" ? "No discount" :
+                      course.discountType === "percentage" ? `${course.discountValue}%` :
+                        `₹${course.discountValue}`}
                   </p>
                 </div>
                 <div>

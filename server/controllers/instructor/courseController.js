@@ -98,3 +98,20 @@ export const applyForVerification = asyncHandler(async (req, res) => {
     data: course,
   });
 });
+
+// TOGGLE PUBLISH STATUS
+export const togglePublish = asyncHandler(async (req, res) => {
+  const instructorId = req.user.id;
+  const { courseId } = req.params;
+
+  const course = await getCourseByIdService(courseId, instructorId);
+
+  course.published = !course.published;
+  await course.save();
+
+  res.status(200).json({
+    success: true,
+    message: course.published ? "Course published" : "Course unpublished",
+    data: course,
+  });
+});

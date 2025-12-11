@@ -51,14 +51,14 @@ export default function CreateCoursePage() {
   useEffect(() => {
     if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
       let finalPrice = parseFloat(formData.actualPrice);
-      
+
       if (formData.discountType === "percentage") {
         const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
         finalPrice = finalPrice - discount;
       } else if (formData.discountType === "fixed") {
         finalPrice = finalPrice - parseFloat(formData.discountValue);
       }
-      
+
       setFormData(prev => ({ ...prev, price: Math.max(0, finalPrice).toFixed(2) }));
     } else if (formData.actualPrice) {
       setFormData(prev => ({ ...prev, price: parseFloat(formData.actualPrice).toFixed(2) }));
@@ -68,22 +68,22 @@ export default function CreateCoursePage() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.category) newErrors.category = "Category is required";
-    if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (formData.title.length > 200) newErrors.title = "Title cannot exceed 200 characters";
-    if (!formData.description.trim()) newErrors.description = "Description is required";
-    if (formData.description.length > 2000) newErrors.description = "Description cannot exceed 2000 characters";
-    if (!formData.overview.trim()) newErrors.overview = "Overview is required";
-    if (formData.overview.length > 1000) newErrors.overview = "Overview cannot exceed 1000 characters";
-    if (!formData.actualPrice) newErrors.actualPrice = "Actual price is required";
-    if (formData.actualPrice < 0) newErrors.actualPrice = "Actual price cannot be negative";
+    if (!formData.category) newErrors.category = "Please select a category";
+    if (!formData.title.trim()) newErrors.title = "Please add a course title";
+    if (formData.title.length > 200) newErrors.title = "Title is too long (max 200 characters)";
+    if (!formData.description.trim()) newErrors.description = "Please add a description";
+    if (formData.description.length > 2000) newErrors.description = "Description is too long (max 2000 characters)";
+    if (!formData.overview.trim()) newErrors.overview = "Please add an overview";
+    if (formData.overview.length > 1000) newErrors.overview = "Overview is too long (max 1000 characters)";
+    if (!formData.actualPrice) newErrors.actualPrice = "Please enter the price";
+    if (formData.actualPrice < 0) newErrors.actualPrice = "Price must be a positive number";
     if (formData.discountType !== "none" && !formData.discountValue) {
-      newErrors.discountValue = "Discount value is required";
+      newErrors.discountValue = "Please enter discount amount";
     }
     if (formData.discountType === "percentage" && formData.discountValue > 100) {
-      newErrors.discountValue = "Percentage cannot exceed 100%";
+      newErrors.discountValue = "Discount can't be more than 100%";
     }
-    if (!formData.thumbnail) newErrors.thumbnail = "Thumbnail is required";
+    if (!formData.thumbnail) newErrors.thumbnail = "Please upload a thumbnail";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -100,8 +100,8 @@ export default function CreateCoursePage() {
       await createMutation.mutateAsync(formData);
       Swal.fire({
         icon: 'success',
-        title: 'Success!',
-        text: 'Course created successfully!',
+        title: 'Done!',
+        text: 'Your course has been created',
         confirmButtonColor: '#4f46e5',
         timer: 2000
       }).then(() => {
@@ -110,8 +110,8 @@ export default function CreateCoursePage() {
     } catch (error) {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: error.response?.data?.message || 'Failed to create course',
+        title: 'Oops!',
+        text: error.response?.data?.message || 'Something went wrong. Please try again',
         confirmButtonColor: '#ef4444'
       });
     }
@@ -202,7 +202,6 @@ export default function CreateCoursePage() {
                   name="actualPrice"
                   value={formData.actualPrice}
                   onChange={handleInputChange}
-                  min={0}
                   step="0.01"
                   placeholder="0.00"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
@@ -237,7 +236,6 @@ export default function CreateCoursePage() {
                   name="discountValue"
                   value={formData.discountValue}
                   onChange={handleInputChange}
-                  min={0}
                   step="0.01"
                   placeholder="0.00"
                   disabled={formData.discountType === "none"}

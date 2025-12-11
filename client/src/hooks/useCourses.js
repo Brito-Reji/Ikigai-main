@@ -56,6 +56,19 @@ export const useApplyVerification = () => {
     })
 }
 
+// Toggle publish status
+export const useTogglePublish = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: courseApi.togglePublish,
+        onSuccess: (data, courseId) => {
+            queryClient.invalidateQueries({ queryKey: ['courses', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
+        },
+    })
+}
+
 // Fetch published courses (public)
 export const usePublishedCourses = (params) => {
     return useQuery({

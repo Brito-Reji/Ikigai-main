@@ -27,6 +27,11 @@ export const courseApi = {
         return data
     },
 
+    togglePublish: async (courseId) => {
+        const { data } = await api.patch(`/instructor/courses/${courseId}/toggle-publish`)
+        return data
+    },
+
     // Public courses
     getPublishedCourses: async (params) => {
         const { data } = await api.get('/public/courses', { params })
