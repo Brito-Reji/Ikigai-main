@@ -67,10 +67,11 @@ export const applyForVerification = asyncHandler(async (req, res) => {
 
   const course = await getCourseByIdService(courseId, instructorId);
 
-  if (!course.published) {
+  // Course should be in draft (not published yet)
+  if (course.published) {
     return res.status(400).json({
       success: false,
-      message: "Course must be published before applying for verification"
+      message: "Cannot apply for verification on already published course"
     });
   }
 
@@ -84,7 +85,7 @@ export const applyForVerification = asyncHandler(async (req, res) => {
   if (course.verificationStatus === "verified") {
     return res.status(400).json({
       success: false,
-      message: "Course is already verified"
+      message: "Course is already verified. You can now publish it."
     });
   }
 
@@ -106,12 +107,21 @@ export const togglePublish = asyncHandler(async (req, res) => {
 
   const course = await getCourseByIdService(courseId, instructorId);
 
+  // Can only publish if course is verified
+  if (!course.published && course.verificationStatus !== "verified") {
+    return res.status(400).json({
+      success: false,
+      message: "Course must be verified before publishing. Please apply for verification first."
+    });
+  }
+
   course.published = !course.published;
   await course.save();
 
   res.status(200).json({
     success: true,
-    message: course.published ? "Course published" : "Course unpublished",
+    message: course.published ? "Course published successfully" : "Course unpublished",
     data: course,
   });
 });
+

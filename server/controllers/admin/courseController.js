@@ -1,93 +1,41 @@
 import asyncHandler from "express-async-handler";
-import { Course } from "../../models/Course.js";
+import {
+  getAllCoursesService,
+  getCourseDetailsService,
+  toggleCourseBlockService,
+  deleteCourseService,
+  getCourseStatisticsService,
+  updateVerificationStatusService,
+  getPendingVerificationsService,
+  getVerificationStatisticsService,
+  getAdminCourseChaptersService,
+} from "../../services/admin/courseService.js";
 
-
-// Get all courses for admin (published and unpublished)
+// Get all courses
 export const getAllCourses = asyncHandler(async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, category, status } = req.query;
-
-    // Build query - exclude deleted courses
-    let query = { deleted: { $ne: true } };
-
-    // Search filter
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    // Category filter
-    if (category) {
-      query.category = category;
-    }
-
-    // Status filter
-    if (status === "published") {
-      query.published = true;
-    } else if (status === "draft") {
-      query.published = false;
-    } else if (status === "blocked") {
-      query.blocked = true;
-    }
-
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    const courses = await Course.find(query)
-      .populate("category", "name")
-      .populate(
-        "instructor",
-        "firstName lastName email profileImageUrl headline"
-      )
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    const totalCourses = await Course.countDocuments(query);
-    const totalPages = Math.ceil(totalCourses / parseInt(limit));
+    const result = await getAllCoursesService(req.query);
 
     return res.status(200).json({
       success: true,
       message: "Courses fetched successfully",
-      data: courses,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalCourses,
-        hasNext: parseInt(page) < totalPages,
-        hasPrev: parseInt(page) > 1,
-      },
+      data: result.courses,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error("Error fetching courses for admin:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Error fetching courses",
-      error: error.message,
+      message: error.message || "Error fetching courses",
     });
   }
 });
 
-// Get single course details for admin
+// Get course details
 export const getCourseDetails = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
-
-    const course = await Course.findById(courseId)
-      .populate("category", "name description")
-      .populate(
-        "instructor",
-        "firstName lastName email profileImageUrl headline description social"
-      );
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
+    const course = await getCourseDetailsService(courseId);
 
     return res.status(200).json({
       success: true,
@@ -96,75 +44,38 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching course details:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Error fetching course details",
-      error: error.message,
+      message: error.message || "Error fetching course details",
     });
   }
 });
 
-// Block/Unblock course
+// Toggle course block
 export const toggleCourseBlock = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    course.blocked = !course.blocked;
-    await course.save();
-
-    const updatedCourse = await Course.findById(courseId)
-      .populate("category", "name")
-      .populate(
-        "instructor",
-        "firstName lastName email profileImageUrl headline"
-      );
+    const result = await toggleCourseBlockService(courseId);
 
     return res.status(200).json({
       success: true,
-      message: `Course ${course.blocked ? "blocked" : "unblocked"} successfully`,
-      data: updatedCourse,
+      message: `Course ${result.action} successfully`,
+      data: result.course,
     });
   } catch (error) {
     console.error("Error toggling course block status:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Error updating course status",
-      error: error.message,
+      message: error.message || "Error updating course status",
     });
   }
 });
 
-// Soft delete course (admin only)
+// Delete course
 export const deleteCourse = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    if (course.deleted) {
-      return res.status(400).json({
-        success: false,
-        message: "Course is already deleted",
-      });
-    }
-
-    course.deleted = true;
-    await course.save();
-
+    await deleteCourseService(courseId);
 
     return res.status(200).json({
       success: true,
@@ -172,67 +83,17 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting course:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Error deleting course",
-      error: error.message,
+      message: error.message || "Error deleting course",
     });
   }
 });
 
-// Get course statistics for admin dashboard
+// Get course statistics
 export const getCourseStatistics = asyncHandler(async (req, res) => {
   try {
-    const totalCourses = await Course.countDocuments({
-      deleted: { $ne: true },
-    });
-    const publishedCourses = await Course.countDocuments({
-      published: true,
-      deleted: { $ne: true },
-    });
-    const draftCourses = await Course.countDocuments({
-      published: false,
-      deleted: { $ne: true },
-    });
-    const blockedCourses = await Course.countDocuments({
-      blocked: true,
-      deleted: { $ne: true },
-    });
-
-    // Get courses by category (exclude deleted)
-    const coursesByCategory = await Course.aggregate([
-      {
-        $match: { deleted: { $ne: true } },
-      },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "categoryInfo",
-        },
-      },
-      {
-        $unwind: "$categoryInfo",
-      },
-      {
-        $group: {
-          _id: "$categoryInfo.name",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { count: -1 },
-      },
-    ]);
-
-    const statistics = {
-      totalCourses,
-      publishedCourses,
-      draftCourses,
-      blockedCourses,
-      coursesByCategory,
-    };
+    const statistics = await getCourseStatisticsService();
 
     return res.status(200).json({
       success: true,
@@ -241,10 +102,95 @@ export const getCourseStatistics = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching course statistics:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Error fetching statistics",
-      error: error.message,
+      message: error.message || "Error fetching statistics",
+    });
+  }
+});
+
+// Update verification status
+export const updateVerificationStatus = asyncHandler(async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    const updatedCourse = await updateVerificationStatusService(
+      courseId,
+      status,
+      rejectionReason
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Course ${status === "verified" ? "verified" : "rejected"} successfully`,
+      data: updatedCourse,
+    });
+  } catch (error) {
+    console.error("Error updating verification status:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Error updating verification status",
+    });
+  }
+});
+
+// Get pending verifications
+export const getPendingVerifications = asyncHandler(async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    const result = await getPendingVerificationsService(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Pending verifications fetched successfully",
+      data: result.courses,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    console.error("Error fetching pending verifications:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Error fetching pending verifications",
+    });
+  }
+});
+
+// Get verification statistics
+export const getVerificationStatistics = asyncHandler(async (req, res) => {
+  try {
+    const statistics = await getVerificationStatisticsService();
+
+    return res.status(200).json({
+      success: true,
+      message: "Verification statistics fetched successfully",
+      data: statistics,
+    });
+  } catch (error) {
+    console.error("Error fetching verification statistics:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Error fetching verification statistics",
+    });
+  }
+});
+
+// Get course chapters
+export const getAdminCourseChapters = asyncHandler(async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const chapters = await getAdminCourseChaptersService(courseId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Chapters fetched successfully",
+      data: chapters,
+    });
+  } catch (error) {
+    console.error("Error fetching chapters:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Error fetching chapters",
     });
   }
 });

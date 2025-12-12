@@ -207,8 +207,8 @@ export default function CourseDetailPage() {
               )}
             </div>
             <div className="flex items-center gap-2 ml-4">
-              {/* Apply for Verification - shows when published but not verified */}
-              {course.published && (course.verificationStatus === "pending" || course.verificationStatus === "rejected") && (
+              {/* Apply for Verification - shows when in draft and not yet applied or rejected */}
+              {!course.published && (course.verificationStatus === "pending" || course.verificationStatus === "rejected") && (
                 <button
                   onClick={handleApplyForVerification}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center"
@@ -226,6 +226,17 @@ export default function CourseDetailPage() {
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   Publish
+                </button>
+              )}
+
+              {/* Unpublish - shows when course is published */}
+              {course.published && (
+                <button
+                  onClick={handleTogglePublish}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium flex items-center"
+                >
+                  <EyeOff className="w-4 h-4 mr-2" />
+                  Unpublish
                 </button>
               )}
 

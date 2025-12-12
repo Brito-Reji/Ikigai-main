@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Search, 
-  Eye, 
-  Ban, 
-  Trash2, 
-  CheckCircle, 
+import {
+  Search,
+  Eye,
+  Ban,
+  Trash2,
+  CheckCircle,
   Clock,
   BookOpen,
   DollarSign,
-  Calendar
+  Calendar,
+  AlertCircle,
+  XCircle,
+  CheckCheck
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useCourse, useCategory } from "@/hooks/useRedux.js";
-import { 
-  fetchAdminCourses, 
-  fetchCourseStatistics, 
-  toggleCourseBlock, 
-  deleteAdminCourse 
+import {
+  fetchAdminCourses,
+  fetchCourseStatistics,
+  toggleCourseBlock,
+  deleteAdminCourse
 } from "@/store/slices/courseSlice.js";
 import { fetchCategories } from "@/store/slices/categorySlice.js";
 import Swal from "sweetalert2";
@@ -52,7 +55,7 @@ const Courses = () => {
   const handleToggleBlock = async (courseId) => {
     const course = adminCourses.find(c => c._id === courseId);
     const action = course?.blocked ? "unblock" : "block";
-    
+
     const result = await Swal.fire({
       title: `${action === "block" ? "Block" : "Unblock"} this course?`,
       text: `Are you sure you want to ${action} this course?`,
@@ -67,7 +70,7 @@ const Courses = () => {
     if (result.isConfirmed) {
       try {
         const response = await courseDispatch(toggleCourseBlock(courseId)).unwrap();
-        
+
         Swal.fire({
           icon: "success",
           title: "Success!",
@@ -102,7 +105,7 @@ const Courses = () => {
     if (result.isConfirmed) {
       try {
         await courseDispatch(deleteAdminCourse(courseId)).unwrap();
-        
+
         Swal.fire({
           icon: "success",
           title: "Deleted!",
@@ -159,12 +162,34 @@ const Courses = () => {
     </span>;
   };
 
+  const getVerificationBadge = (course) => {
+    if (course.verificationStatus === 'verified') {
+      return <span className="px-2 py-1 bg-teal-100 text-teal-800 text-xs rounded-full flex items-center">
+        <CheckCheck className="w-3 h-3 mr-1" />
+        Approved
+      </span>;
+    }
+    if (course.verificationStatus === 'inprocess') {
+      return <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full flex items-center">
+        <AlertCircle className="w-3 h-3 mr-1" />
+        Awaiting Approval
+      </span>;
+    }
+    if (course.verificationStatus === 'rejected') {
+      return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full flex items-center">
+        <XCircle className="w-3 h-3 mr-1" />
+        Rejected
+      </span>;
+    }
+    return null;
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-800 mb-8">Course Management</h1>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
             <BookOpen className="w-8 h-8 text-blue-600" />
@@ -176,22 +201,35 @@ const Courses = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+            <Clock className="w-8 h-8 text-yellow-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Published</p>
+              <p className="text-sm font-medium text-gray-600">Awaiting Approval</p>
               <p className="text-2xl font-semibold text-gray-900">{statistics.publishedCourses || 0}</p>
             </div>
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <Clock className="w-8 h-8 text-yellow-600" />
+            <CheckCheck className="w-8 h-8 text-teal-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Drafts</p>
-              <p className="text-2xl font-semibold text-gray-900">{statistics.draftCourses || 0}</p>
+              <p className="text-sm font-medium text-gray-600">Approved</p>
+              <p className="text-2xl font-semibold text-gray-900">{statistics.approvedCourses || 0}</p>
             </div>
           </div>
         </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex items-center">
+            <XCircle className="w-8 h-8 text-red-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Rejected</p>
+              <p className="text-2xl font-semibold text-gray-900">{statistics.rejectedCourses || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Blocked Courses */}
+      <div className="grid grid-cols-1 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
             <Ban className="w-8 h-8 text-red-600" />
@@ -213,9 +251,9 @@ const Courses = () => {
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -243,8 +281,9 @@ const Courses = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
+            <option value="published">Awaiting Approval</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
             <option value="blocked">Blocked</option>
           </select>
           <button
@@ -271,7 +310,7 @@ const Courses = () => {
       ) : adminError ? (
         <div className="text-center py-8">
           <p className="text-red-500 mb-4">{adminError}</p>
-          <button 
+          <button
             onClick={() => fetchCourses(currentPage)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
@@ -289,8 +328,9 @@ const Courses = () => {
                     alt={course.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex flex-col gap-1">
                     {getStatusBadge(course)}
+                    {getVerificationBadge(course)}
                   </div>
                 </div>
                 <div className="p-4">
@@ -299,7 +339,7 @@ const Courses = () => {
                     by {course.instructor?.firstName} {course.instructor?.lastName}
                   </p>
                   <p className="text-sm text-gray-500 mb-3">{course.category?.name}</p>
-                  
+
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <span className="flex items-center">
                       <DollarSign className="w-4 h-4 mr-1" />
@@ -321,11 +361,10 @@ const Courses = () => {
                     </button>
                     <button
                       onClick={() => handleToggleBlock(course._id)}
-                      className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${
-                        course.blocked 
-                          ? "bg-green-600 text-white hover:bg-green-700" 
-                          : "bg-yellow-600 text-white hover:bg-yellow-700"
-                      }`}
+                      className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${course.blocked
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-yellow-600 text-white hover:bg-yellow-700"
+                        }`}
                     >
                       {course.blocked ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
                     </button>
