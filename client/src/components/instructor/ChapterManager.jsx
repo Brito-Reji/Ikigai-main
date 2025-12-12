@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, GripVertical, Video, Upload } from "lucide-react";
 import { useChapter } from "@/hooks/useRedux.js";
-import { 
-  fetchChapters, 
-  createChapter, 
-  updateChapter, 
+import {
+  fetchChapters,
+  createChapter,
+  updateChapter,
   deleteChapter,
-  clearChapterState 
+  clearChapterState
 } from "@/store/slices/chapterSlice.js";
 import { useLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons.js";
 import Swal from "sweetalert2";
@@ -35,7 +35,7 @@ const ChapterManager = ({ courseId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (editingChapter) {
       await dispatch(updateChapter({
         courseId,
@@ -50,7 +50,7 @@ const ChapterManager = ({ courseId }) => {
       }));
       setShowAddChapter(false);
     }
-    
+
     setFormData({ title: "", description: "" });
   };
 
@@ -217,7 +217,7 @@ function ChapterItem({ chapter, index, courseId, isExpanded, onToggle, onEdit, o
         <button className="text-gray-400 hover:text-gray-600 mr-3 cursor-move">
           <GripVertical className="w-5 h-5" />
         </button>
-        
+
         <button
           onClick={onToggle}
           className="flex-1 flex items-center text-left"
@@ -257,7 +257,7 @@ function ChapterItem({ chapter, index, courseId, isExpanded, onToggle, onEdit, o
           {chapter.description && (
             <p className="text-gray-600 mb-4">{chapter.description}</p>
           )}
-          
+
           <div className="flex justify-between items-center mb-4">
             <h4 className="font-semibold text-gray-900">Lessons</h4>
             <button
@@ -347,8 +347,8 @@ function LessonItem({ lesson, index, onEdit, courseId, chapterId }) {
         </div>
         <div className="flex gap-2">
           {lesson.videoUrl && (
-            <button 
-              onClick={() => setShowVideoModal(true)} 
+            <button
+              onClick={() => setShowVideoModal(true)}
               className="p-1.5 text-green-600 hover:bg-green-50 rounded"
               title="Preview video"
             >
@@ -509,27 +509,321 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
   );
 }
 
+// function VideoPreviewModal({ lesson, onClose }) {
+//   const [videoUrl, setVideoUrl] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   useEffect(() => {
+//     const loadVideo = async () => {
+//       if (!lesson.videoUrl) {
+//         setError('No video URL provided');
+//         setLoading(false);
+//         return;
+//       }
+
+//       try {
+//         const courseId = window.location.pathname.split('/')[3];
+//         const token = localStorage.getItem('accessToken');
+
+//         console.log('[VideoPreview] Loading video:', {
+//           lessonTitle: lesson.title,
+//           videoPath: lesson.videoUrl,
+//           courseId,
+//           hasToken: !!token
+//         });
+
+//         if (!token) {
+//           setError('Authentication token not found. Please login again.');
+//           setLoading(false);
+//           return;
+//         }
+
+//         if (!courseId) {
+//           setError('Course ID not found in URL');
+//           setLoading(false);
+//           return;
+//         }
+
+//         const API_BASE_URL = 'http://localhost:3000/api';
+//         // Use token in URL for video element (can't send custom headers)
+//         // Use Authorization header for HEAD request (can send custom headers)
+//         const streamUrl = `${API_BASE_URL}/instructor/stream-video?courseId=${courseId}&videoPath=${encodeURIComponent(lesson.videoUrl)}&token=${token}`;
+
+//         console.log('[VideoPreview] Stream URL constructed:', streamUrl);
+
+//         const response = await fetch(streamUrl, {
+//           method: 'HEAD',
+//           headers: {
+//             'Authorization': `Bearer ${token}`
+//           }
+//         });
+
+//         console.log('[VideoPreview] HEAD request response:', {
+//           status: response.status,
+//           statusText: response.statusText,
+//           contentType: response.headers.get('content-type')
+//         });
+
+//         if (!response.ok) {
+//           const errorText = await response.text();
+//           console.error('[VideoPreview] Video not accessible:', errorText);
+//           throw new Error(`Failed to access video: ${response.status} ${response.statusText}`);
+//         }
+
+//         setVideoUrl(streamUrl);
+//         setLoading(false);
+//       } catch (err) {
+//         console.error('[VideoPreview] Error loading video:', err);
+//         setError(err.message || 'Failed to load video. Please try again.');
+//         setLoading(false);
+//       }
+//     };
+
+//     loadVideo();
+//   }, [lesson.videoUrl, lesson.title]);
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+//       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
+//         <div className="p-4 border-b flex justify-between items-center">
+//           <h3 className="text-lg font-semibold">{lesson.title}</h3>
+//           <button
+//             onClick={onClose}
+//             className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+//           >
+//             ×
+//           </button>
+//         </div>
+
+//         <div className="p-4">
+//           {loading && (
+//             <div className="flex items-center justify-center h-96">
+//               <div className="text-center">
+//                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+//                 <p className="mt-3 text-gray-600">Loading video...</p>
+//               </div>
+//             </div>
+//           )}
+
+//           {error && (
+//             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
+//               <div className="flex items-start">
+//                 <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+//                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+//                 </svg>
+//                 <div>
+//                   <p className="text-sm font-medium text-red-800">Failed to load video</p>
+//                   <p className="text-sm text-red-700 mt-1">{error}</p>
+//                   <p className="text-xs text-red-600 mt-2">
+//                     Video path: {lesson.videoUrl}
+//                   </p>
+//                   <p className="text-xs text-gray-600 mt-1">
+//                     Check browser console for detailed error information.
+//                   </p>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
+
+//           {videoUrl && !loading && !error && (
+//             <div>
+//               <video
+//                 controls
+//                 className="w-full rounded-lg bg-black"
+//                 style={{ maxHeight: '70vh' }}
+//                 src={videoUrl}
+//                 onError={(e) => {
+//                   const video = e.target;
+//                   const errorDetails = {
+//                     error: video.error?.code,
+//                     errorMessage: video.error?.message,
+//                     currentSrc: video.currentSrc,
+//                     networkState: video.networkState,
+//                     readyState: video.readyState,
+//                     // Network states: 0=EMPTY, 1=IDLE, 2=LOADING, 3=NO_SOURCE
+//                     // Ready states: 0=NOTHING, 1=METADATA, 2=CURRENT_DATA, 3=FUTURE_DATA, 4=ENOUGH_DATA
+//                     // Error codes: 1=ABORTED, 2=NETWORK, 3=DECODE, 4=SRC_NOT_SUPPORTED
+//                   };
+
+//                   console.error('[VideoPreview] Video element error:', errorDetails);
+
+//                   let errorMsg = 'Failed to play video. ';
+//                   if (video.error) {
+//                     switch (video.error.code) {
+//                       case 1:
+//                         errorMsg += 'Video loading was aborted.';
+//                         break;
+//                       case 2:
+//                         errorMsg += 'Network error while loading video.';
+//                         break;
+//                       case 3:
+//                         errorMsg += 'Video format not supported or file is corrupted.';
+//                         break;
+//                       case 4:
+//                         errorMsg += 'Video source not supported by your browser.';
+//                         break;
+//                       default:
+//                         errorMsg += 'Unknown error occurred.';
+//                     }
+//                   } else {
+//                     errorMsg += 'Could not load video source.';
+//                   }
+
+//                   setError(errorMsg);
+//                 }}
+//                 onLoadStart={() => console.log('[VideoPreview] Video load started')}
+//                 onLoadedMetadata={(e) => {
+//                   console.log('[VideoPreview] Video metadata loaded:', {
+//                     duration: e.target.duration,
+//                     videoWidth: e.target.videoWidth,
+//                     videoHeight: e.target.videoHeight
+//                   });
+//                 }}
+//                 onCanPlay={() => console.log('[VideoPreview] Video can play')}
+//                 onPlaying={() => console.log('[VideoPreview] Video is playing')}
+//                 onWaiting={() => console.log('[VideoPreview] Video is buffering')}
+//                 onStalled={() => console.log('[VideoPreview] Video stalled')}
+//               >
+//                 Your browser does not support the video tag.
+//               </video>
+//               <div className="mt-2 text-xs text-gray-500 space-y-1">
+//                 <p>Video path: {lesson.videoUrl}</p>
+//                 {lesson.duration && <p>Duration: {lesson.duration} minutes</p>}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+
+//         {lesson.description && (
+//           <div className="p-4 border-t bg-gray-50">
+//             <p className="text-sm text-gray-600">{lesson.description}</p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
 function VideoPreviewModal({ lesson, onClose }) {
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    if (lesson.videoUrl) {
-      const courseId = window.location.pathname.split('/')[3];
-      const token = localStorage.getItem('accessToken');
-      
-      if (!token) {
-        setError('Authentication token not found. Please login again.');
+    const loadVideo = async () => {
+      if (!lesson.videoUrl) {
+        setError('No video URL provided');
         setLoading(false);
         return;
       }
-      
-      const streamUrl = `http://localhost:3000/api/instructor/stream-video?courseId=${courseId}&videoPath=${encodeURIComponent(lesson.videoUrl)}&token=${token}`;
-      setVideoUrl(streamUrl);
-      setLoading(false);
+
+      try {
+        const courseId = window.location.pathname.split('/')[3];
+        const token = localStorage.getItem('accessToken');
+
+        console.log('[VideoPreview] Loading video:', {
+          lessonTitle: lesson.title,
+          videoPath: lesson.videoUrl,
+          courseId,
+          hasToken: !!token
+        });
+
+        if (!token) {
+          setError('Authentication token not found. Please login again.');
+          setLoading(false);
+          return;
+        }
+
+        if (!courseId) {
+          setError('Course ID not found in URL');
+          setLoading(false);
+          return;
+        }
+
+        const API_BASE_URL = 'http://localhost:3000/api';
+        // Include token in query string for video element (it can't send Authorization headers)
+        const streamUrl = `${API_BASE_URL}/instructor/stream-video?courseId=${courseId}&videoPath=${encodeURIComponent(lesson.videoUrl)}&token=${token}`;
+
+        console.log('[VideoPreview] Stream URL constructed:', streamUrl);
+
+        // Test the endpoint with a HEAD request first
+        const response = await fetch(streamUrl, {
+          method: 'HEAD',
+          credentials: 'include', // Important for CORS with credentials
+        });
+
+        console.log('[VideoPreview] HEAD request response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get('content-type'),
+          contentLength: response.headers.get('content-length'),
+          acceptRanges: response.headers.get('accept-ranges')
+        });
+
+        if (!response.ok) {
+          let errorMessage = `Failed to access video: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // Response is not JSON, use status text
+          }
+          throw new Error(errorMessage);
+        }
+
+        setVideoUrl(streamUrl);
+        setLoading(false);
+      } catch (err) {
+        console.error('[VideoPreview] Error loading video:', err);
+        setError(err.message || 'Failed to load video. Please try again.');
+        setLoading(false);
+      }
+    };
+
+    loadVideo();
+  }, [lesson.videoUrl, lesson.title]);
+
+  const handleVideoError = (e) => {
+    const video = e.target;
+    const errorDetails = {
+      error: video.error?.code,
+      errorMessage: video.error?.message,
+      currentSrc: video.currentSrc,
+      networkState: video.networkState,
+      readyState: video.readyState,
+      // Network states: 0=EMPTY, 1=IDLE, 2=LOADING, 3=NO_SOURCE
+      // Ready states: 0=NOTHING, 1=METADATA, 2=CURRENT_DATA, 3=FUTURE_DATA, 4=ENOUGH_DATA
+      // Error codes: 1=ABORTED, 2=NETWORK, 3=DECODE, 4=SRC_NOT_SUPPORTED
+    };
+
+    console.error('[VideoPreview] Video element error:', errorDetails);
+
+    let errorMsg = 'Failed to play video. ';
+    if (video.error) {
+      switch (video.error.code) {
+        case 1:
+          errorMsg += 'Video loading was aborted. Try refreshing the page.';
+          break;
+        case 2:
+          errorMsg += 'Network error while loading video. Check your connection.';
+          break;
+        case 3:
+          errorMsg += 'Video format not supported or file is corrupted.';
+          break;
+        case 4:
+          errorMsg += 'Video source not supported by your browser. The file may be corrupted or in an unsupported format.';
+          break;
+        default:
+          errorMsg += 'Unknown error occurred.';
+      }
+    } else {
+      errorMsg += 'Could not load video source.';
     }
-  }, [lesson.videoUrl]);
+
+    setError(errorMsg);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -539,44 +833,79 @@ function VideoPreviewModal({ lesson, onClose }) {
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            aria-label="Close"
           >
             ×
           </button>
         </div>
-        
+
         <div className="p-4">
           {loading && (
             <div className="flex items-center justify-center h-96">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-              <p className="ml-3 text-gray-600">Loading video...</p>
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <p className="mt-3 text-gray-600">Loading video...</p>
+              </div>
             </div>
           )}
-          
+
           {error && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
-              <p className="text-sm text-yellow-800">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-800">Failed to load video</p>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                  <details className="mt-2">
+                    <summary className="text-xs text-red-600 cursor-pointer">Technical details</summary>
+                    <div className="mt-1 text-xs text-gray-600 space-y-1">
+                      <p>Video path: {lesson.videoUrl}</p>
+                      <p>Check browser console for more information</p>
+                    </div>
+                  </details>
+                </div>
+              </div>
             </div>
           )}
-          
-          {videoUrl && !loading && (
+
+          {videoUrl && !loading && !error && (
             <div>
               <video
+                ref={videoRef}
                 controls
+                crossOrigin="use-credentials"
                 className="w-full rounded-lg bg-black"
                 style={{ maxHeight: '70vh' }}
-                onError={(e) => {
-                  console.error('Video playback error:', e);
-                  setError('Failed to load video. The file may not exist or is not accessible.');
+                onError={handleVideoError}
+                onLoadStart={() => console.log('[VideoPreview] Video load started')}
+                onLoadedMetadata={(e) => {
+                  console.log('[VideoPreview] Video metadata loaded:', {
+                    duration: e.target.duration,
+                    videoWidth: e.target.videoWidth,
+                    videoHeight: e.target.videoHeight
+                  });
                 }}
+                onCanPlay={() => {
+                  console.log('[VideoPreview] Video can play');
+                  setLoading(false);
+                }}
+                onPlaying={() => console.log('[VideoPreview] Video is playing')}
+                onWaiting={() => console.log('[VideoPreview] Video is buffering')}
+                onStalled={() => console.warn('[VideoPreview] Video stalled')}
               >
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-              <p className="text-xs text-gray-500 mt-2">Video path: {lesson.videoUrl}</p>
+              <div className="mt-2 text-xs text-gray-500 space-y-1">
+                <p>Video path: {lesson.videoUrl}</p>
+                {lesson.duration && <p>Duration: {lesson.duration} minutes</p>}
+              </div>
             </div>
           )}
         </div>
-        
+
         {lesson.description && (
           <div className="p-4 border-t bg-gray-50">
             <p className="text-sm text-gray-600">{lesson.description}</p>

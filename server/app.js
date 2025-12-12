@@ -18,10 +18,19 @@ import studentRoute from "./routes/studentRoute.js"
 
 
 const app = express()
-app.use(express.json({ limit: "50mb" })) // Increase JSON payload limit for image uploads
-app.use(helmet());
+app.use(express.json({ limit: "50mb" }))
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+    origin: 'http://localhost:5173', // Your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['authorization', 'content-type', 'range'],
+    exposedHeaders: ['content-range', 'accept-ranges', 'content-length', 'content-type']
+}));
 
-app.use(express.urlencoded({ extended: true, limit: "50mb" })) // Increase URL encoded payload limit
+app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 
 app.use(cookieParser())
 app.use(
