@@ -18,13 +18,7 @@ export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
     const userExists = await User.findOne({ username: username.toLowerCase() });
     const instructorExists = await Instructor.findOne({ username: username.toLowerCase() });
 
-    if (username.includes("admin")) {
-      return res.status(200).json({
-        success: false,
-         available: false,
-        message:"usercannot have the word admin"
-      })
-    }
+ 
 
     if (userExists || instructorExists) {
       return res.status(200).json({

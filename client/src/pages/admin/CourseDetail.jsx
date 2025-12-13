@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -7,68 +7,43 @@ import {
   Trash2,
   CheckCheck,
   XCircle,
-  BookOpen,
-  User,
-  Mail,
-  Calendar,
-  DollarSign,
   Tag,
-  FileText,
+  Calendar,
+  Mail,
   PlayCircle,
   ChevronDown,
   ChevronRight,
   Clock
 } from 'lucide-react';
-import api from '@/api/axiosConfig.js';
+import {
+  useAdminCourseDetails,
+  useAdminCourseChapters,
+  useToggleCourseBlock,
+  useDeleteAdminCourse,
+  useUpdateVerificationStatus
+} from '@/hooks/useAdminCourses.js';
 import Swal from 'sweetalert2';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const [course, setCourse] = useState(null);
-  const [chapters, setChapters] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [expandedChapters, setExpandedChapters] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  useEffect(() => {
-    fetchCourseDetails();
-    fetchChapters();
-  }, [courseId]);
+  // Fetch data using TanStack Query
+  const { data: courseData, isLoading: courseLoading } = useAdminCourseDetails(courseId);
+  const { data: chaptersData } = useAdminCourseChapters(courseId);
 
-  const fetchCourseDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/admin/courses/${courseId}`);
-      if (response.data.success) {
-        setCourse(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching course:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Failed to fetch course details',
-        confirmButtonColor: '#ef4444'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Mutations
+  const toggleBlockMutation = useToggleCourseBlock();
+  const deleteMutation = useDeleteAdminCourse();
+  const updateVerificationMutation = useUpdateVerificationStatus();
 
-  const fetchChapters = async () => {
-    try {
-      const response = await api.get(`/admin/courses/${courseId}/chapters`);
-      if (response.data.success) {
-        setChapters(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching chapters:', error);
-    }
-  };
+  const course = courseData?.data;
+  const chapters = chaptersData?.data || [];
 
   const toggleChapter = (chapterId) => {
     setExpandedChapters(prev => ({
@@ -93,17 +68,14 @@ const CourseDetail = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await api.patch(`/admin/courses/${courseId}/toggle-block`);
-        if (response.data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: response.data.message,
-            confirmButtonColor: '#14b8a6',
-            timer: 2000
-          });
-          fetchCourseDetails();
-        }
+        const response = await toggleBlockMutation.mutateAsync(courseId);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message,
+          confirmButtonColor: '#14b8a6',
+          timer: 2000
+        });
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -129,17 +101,15 @@ const CourseDetail = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await api.delete(`/admin/courses/${courseId}`);
-        if (response.data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Course has been deleted successfully.',
-            confirmButtonColor: '#14b8a6',
-            timer: 2000
-          });
-          navigate('/admin/courses');
-        }
+        const response = await deleteMutation.mutateAsync(courseId);
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Course has been deleted successfully.',
+          confirmButtonColor: '#14b8a6',
+          timer: 2000
+        });
+        navigate('/admin/courses');
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -163,34 +133,32 @@ const CourseDetail = () => {
     }
 
     const result = await Swal.fire({
-      title: `${status === 'verified' ? 'Verify' : 'Reject'} this course?`,
-      text: `Are you sure you want to ${status} this course?`,
+      title: `${status === 'verified' ? 'Approve' : 'Reject'} this course?`,
+      text: `Are you sure you want to ${status === 'verified' ? 'approve' : 'reject'} this course?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: status === 'verified' ? '#14b8a6' : '#ef4444',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: `Yes, ${status} it!`,
+      confirmButtonText: `Yes, ${status === 'verified' ? 'approve' : 'reject'} it!`,
       cancelButtonText: 'Cancel'
     });
 
     if (result.isConfirmed) {
       try {
-        const response = await api.patch(`/admin/courses/${courseId}/verification`, {
+        const response = await updateVerificationMutation.mutateAsync({
+          courseId,
           status,
           rejectionReason: status === 'rejected' ? rejectionReason : undefined
         });
-        if (response.data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: response.data.message,
-            confirmButtonColor: '#14b8a6',
-            timer: 2000
-          });
-          setShowRejectModal(false);
-          setRejectionReason('');
-          fetchCourseDetails();
-        }
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message,
+          confirmButtonColor: '#14b8a6',
+          timer: 2000
+        });
+        setShowRejectModal(false);
+        setRejectionReason('');
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -209,7 +177,7 @@ const CourseDetail = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
+  if (courseLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
@@ -254,8 +222,8 @@ const CourseDetail = () => {
               <button
                 onClick={handleToggleBlock}
                 className={`flex items-center px-4 py-2 rounded-lg transition-colors ${course.blocked
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-yellow-600 text-white hover:bg-yellow-700'
                   }`}
               >
                 {course.blocked ? (
@@ -393,8 +361,8 @@ const CourseDetail = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 {tab.label}
@@ -451,7 +419,6 @@ const CourseDetail = () => {
                 <div className="divide-y divide-gray-200">
                   {chapters.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
-                      <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                       <p>No chapters added yet</p>
                     </div>
                   ) : (
@@ -574,9 +541,9 @@ const CourseDetail = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Verification:</span>
                     <span className={`font-medium capitalize ${course.verificationStatus === 'verified' ? 'text-teal-600' :
-                      course.verificationStatus === 'rejected' ? 'text-red-600' :
-                        course.verificationStatus === 'inprocess' ? 'text-orange-600' :
-                          'text-gray-600'
+                        course.verificationStatus === 'rejected' ? 'text-red-600' :
+                          course.verificationStatus === 'inprocess' ? 'text-orange-600' :
+                            'text-gray-600'
                       }`}>
                       {course.verificationStatus === 'inprocess' ? 'Pending' : course.verificationStatus}
                     </span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Search,
   Eye,
@@ -7,27 +7,23 @@ import {
   CheckCircle,
   Clock,
   BookOpen,
-  DollarSign,
-  Calendar,
   AlertCircle,
   XCircle,
   CheckCheck
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-import { useCourse, useCategory } from "@/hooks/useRedux.js";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  fetchAdminCourses,
-  fetchCourseStatistics,
-  toggleCourseBlock,
-  deleteAdminCourse
-} from "@/store/slices/courseSlice.js";
-import { fetchCategories } from "@/store/slices/categorySlice.js";
+  useAdminCourses,
+  useAdminCourseStatistics,
+  useToggleCourseBlock,
+  useDeleteAdminCourse
+} from "@/hooks/useAdminCourses.js";
+import { useCategories } from "@/hooks/useCategories.js";
 import Swal from "sweetalert2";
 
 const Courses = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { adminCourses, pagination, statistics, adminLoading, adminError, dispatch: courseDispatch } = useCourse();
-  const { categories, dispatch: categoryDispatch } = useCategory();
 
   // Get initial values from URL
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
@@ -35,25 +31,45 @@ const Courses = () => {
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get("status") || "");
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
 
-  // Fetch courses with filters
-  const fetchCourses = (page = 1) => {
-    courseDispatch(fetchAdminCourses({
-      page,
-      limit: 12,
-      search: searchTerm,
-      category: selectedCategory,
-      status: selectedStatus
-    }));
+  // Fetch data using TanStack Query
+  const { data: coursesData, isLoading: coursesLoading } = useAdminCourses({
+    page: currentPage,
+    limit: 12,
+    search: searchTerm,
+    category: selectedCategory,
+    status: selectedStatus
+  });
+
+  const { data: statisticsData } = useAdminCourseStatistics();
+  const { data: categoriesData } = useCategories();
+
+  // Mutations
+  const toggleBlockMutation = useToggleCourseBlock();
+  const deleteMutation = useDeleteAdminCourse();
+
+  const courses = coursesData?.data || [];
+  const pagination = coursesData?.pagination || {};
+  const statistics = statisticsData?.data || {};
+  const categories = categoriesData?.data || [];
+
+  // Update URL params
+  const updateFilters = (newFilters) => {
+    const params = new URLSearchParams();
+    if (newFilters.search) params.set("search", newFilters.search);
+    if (newFilters.category) params.set("category", newFilters.category);
+    if (newFilters.status) params.set("status", newFilters.status);
+    if (newFilters.page) params.set("page", newFilters.page);
+    setSearchParams(params);
   };
 
   // Navigate to course details
   const viewCourseDetails = (courseId) => {
-    window.location.href = `/admin/courses/${courseId}`;
+    navigate(`/admin/courses/${courseId}`);
   };
 
   // Toggle course block status
   const handleToggleBlock = async (courseId) => {
-    const course = adminCourses.find(c => c._id === courseId);
+    const course = courses.find(c => c._id === courseId);
     const action = course?.blocked ? "unblock" : "block";
 
     const result = await Swal.fire({
@@ -69,7 +85,7 @@ const Courses = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await courseDispatch(toggleCourseBlock(courseId)).unwrap();
+        const response = await toggleBlockMutation.mutateAsync(courseId);
 
         Swal.fire({
           icon: "success",
@@ -82,7 +98,7 @@ const Courses = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: error.message || "Failed to update course status",
+          text: error.response?.data?.message || "Failed to update course status",
           confirmButtonColor: "#ef4444"
         });
       }
@@ -104,12 +120,12 @@ const Courses = () => {
 
     if (result.isConfirmed) {
       try {
-        await courseDispatch(deleteAdminCourse(courseId)).unwrap();
+        const response = await deleteMutation.mutateAsync(courseId);
 
         Swal.fire({
           icon: "success",
           title: "Deleted!",
-          text: "Course has been deleted successfully.",
+          text: response.message || "Course has been deleted",
           confirmButtonColor: "#3b82f6",
           timer: 2000
         });
@@ -117,49 +133,21 @@ const Courses = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: error.message || "Failed to delete course",
+          text: error.response?.data?.message || "Failed to delete course",
           confirmButtonColor: "#ef4444"
         });
       }
     }
   };
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = {};
-    if (searchTerm) params.search = searchTerm;
-    if (selectedCategory) params.category = selectedCategory;
-    if (selectedStatus) params.status = selectedStatus;
-    if (currentPage > 1) params.page = currentPage;
-    setSearchParams(params);
-  }, [searchTerm, selectedCategory, selectedStatus, currentPage, setSearchParams]);
-
-  useEffect(() => {
-    fetchCourses(currentPage);
-  }, [searchTerm, selectedCategory, selectedStatus, currentPage]);
-
-  useEffect(() => {
-    categoryDispatch(fetchCategories());
-    courseDispatch(fetchCourseStatistics());
-  }, []);
-
   const getStatusBadge = (course) => {
     if (course.blocked) {
-      return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full flex items-center">
-        <Ban className="w-3 h-3 mr-1" />
-        Blocked
-      </span>;
+      return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Blocked</span>;
     }
     if (course.published) {
-      return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        Published
-      </span>;
+      return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Published</span>;
     }
-    return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full flex items-center">
-      <Clock className="w-3 h-3 mr-1" />
-      Draft
-    </span>;
+    return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Draft</span>;
   };
 
   const getVerificationBadge = (course) => {
@@ -184,9 +172,25 @@ const Courses = () => {
     return null;
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    setSelectedStatus("");
+    setCurrentPage(1);
+    setSearchParams({});
+  };
+
+  if (coursesLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-8">Course Management</h1>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Course Management</h1>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -250,9 +254,12 @@ const Courses = () => {
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setCurrentPage(1);
+                  updateFilters({ search: searchTerm, category: selectedCategory, status: selectedStatus, page: 1 });
+                }
               }}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -262,6 +269,7 @@ const Courses = () => {
             onChange={(e) => {
               setSelectedCategory(e.target.value);
               setCurrentPage(1);
+              updateFilters({ search: searchTerm, category: e.target.value, status: selectedStatus, page: 1 });
             }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -277,6 +285,7 @@ const Courses = () => {
             onChange={(e) => {
               setSelectedStatus(e.target.value);
               setCurrentPage(1);
+              updateFilters({ search: searchTerm, category: selectedCategory, status: e.target.value, page: 1 });
             }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -287,90 +296,67 @@ const Courses = () => {
             <option value="blocked">Blocked</option>
           </select>
           <button
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory("");
-              setSelectedStatus("");
-              setCurrentPage(1);
-            }}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            onClick={handleClearFilters}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
           >
             Clear Filters
           </button>
         </div>
       </div>
 
-      {/* Course Cards */}
-      {adminLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-64"></div>
-          ))}
+      {/* Courses Grid */}
+      {courses.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
+          <p className="text-gray-600">Try adjusting your filters</p>
         </div>
-      ) : adminError ? (
-        <div className="text-center py-8">
-          <p className="text-red-500 mb-4">{adminError}</p>
-          <button
-            onClick={() => fetchCourses(currentPage)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      ) : adminCourses.length > 0 ? (
+      ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {adminCourses.map((course) => (
+            {courses.map((course) => (
               <div key={course._id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
-                    src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
+                    src={course.thumbnail || "/placeholder-course.jpg"}
                     alt={course.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />
-                  <div className="absolute top-2 right-2 flex flex-col gap-1">
+                  <div className="absolute top-2 right-2 flex gap-2">
                     {getStatusBadge(course)}
                     {getVerificationBadge(course)}
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{course.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    by {course.instructor?.firstName} {course.instructor?.lastName}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-3">{course.category?.name}</p>
-
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      ₹{course.price}
-                    </span>
-                    <span className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(course.createdAt).toLocaleDateString()}
-                    </span>
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{course.title}</h3>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500">{course.category?.name}</span>
+                    <span className="text-lg font-bold text-blue-600">₹{course.price}</span>
                   </div>
-
-                  <div className="flex space-x-2">
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span>{course.instructor?.firstName} {course.instructor?.lastName}</span>
+                  </div>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => viewCourseDetails(course._id)}
-                      className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center justify-center"
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
                     >
-                      <Eye className="w-4 h-4 mr-1" />
+                      <Eye className="w-4 h-4 mr-2" />
                       View
                     </button>
                     <button
                       onClick={() => handleToggleBlock(course._id)}
-                      className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${course.blocked
-                        ? "bg-green-600 text-white hover:bg-green-700"
-                        : "bg-yellow-600 text-white hover:bg-yellow-700"
+                      className={`px-4 py-2 rounded-lg transition ${course.blocked
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : "bg-yellow-600 text-white hover:bg-yellow-700"
                         }`}
                     >
-                      {course.blocked ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                      <Ban className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteCourse(course._id)}
-                      className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -382,36 +368,36 @@ const Courses = () => {
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-2">
+            <div className="flex items-center justify-center gap-2">
               <button
-                onClick={() => setCurrentPage(currentPage - 1)}
+                onClick={() => {
+                  const newPage = currentPage - 1;
+                  setCurrentPage(newPage);
+                  updateFilters({ search: searchTerm, category: selectedCategory, status: selectedStatus, page: newPage });
+                }}
                 disabled={!pagination.hasPrev}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
-              <span className="px-4 py-2 text-sm text-gray-600">
+              <span className="px-4 py-2 text-gray-700">
                 Page {pagination.currentPage} of {pagination.totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage(currentPage + 1)}
+                onClick={() => {
+                  const newPage = currentPage + 1;
+                  setCurrentPage(newPage);
+                  updateFilters({ search: searchTerm, category: selectedCategory, status: selectedStatus, page: newPage });
+                }}
                 disabled={!pagination.hasNext}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
             </div>
           )}
         </>
-      ) : (
-        <div className="text-center py-12">
-          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-          <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
       )}
-
-
     </div>
   );
 };
