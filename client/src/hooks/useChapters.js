@@ -1,59 +1,61 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/api/axiosConfig';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { chapterApi } from '@/api/chapterApi'
 
-// Get chapters
-export const useChapters = (courseId) => {
+// Instructor hooks
+export const useInstructorChapters = (courseId) => {
     return useQuery({
-        queryKey: ['chapters', courseId],
-        queryFn: async () => {
-            const { data } = await api.get(`/instructor/courses/${courseId}/chapters`);
-            return data;
-        },
+        queryKey: ['instructor-chapters', courseId],
+        queryFn: () => chapterApi.instructor.getChapters(courseId),
         enabled: !!courseId,
-    });
-};
+    })
+}
 
-// Create chapter
 export const useCreateChapter = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterData }) => {
-            const { data } = await api.post(`/instructor/courses/${courseId}/chapters`, chapterData);
-            return data;
-        },
+        mutationFn: chapterApi.instructor.createChapter,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['chapters', variables.courseId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-chapters', variables.courseId] })
         },
-    });
-};
+    })
+}
 
-// Update chapter
 export const useUpdateChapter = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterId, chapterData }) => {
-            const { data } = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}`, chapterData);
-            return data;
-        },
+        mutationFn: chapterApi.instructor.updateChapter,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['chapters', variables.courseId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-chapters', variables.courseId] })
         },
-    });
-};
+    })
+}
 
-// Delete chapter
 export const useDeleteChapter = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterId }) => {
-            const { data } = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}`);
-            return data;
-        },
+        mutationFn: chapterApi.instructor.deleteChapter,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['chapters', variables.courseId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-chapters', variables.courseId] })
         },
-    });
-};
+    })
+}
+
+// Student hooks
+export const useStudentChapters = (courseId) => {
+    return useQuery({
+        queryKey: ['student-chapters', courseId],
+        queryFn: () => chapterApi.student.getChapters(courseId),
+        enabled: !!courseId,
+    })
+}
+
+export const useStudentChapter = (courseId, chapterId) => {
+    return useQuery({
+        queryKey: ['student-chapter', courseId, chapterId],
+        queryFn: () => chapterApi.student.getChapterById(courseId, chapterId),
+        enabled: !!courseId && !!chapterId,
+    })
+}

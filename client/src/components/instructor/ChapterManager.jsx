@@ -8,7 +8,7 @@ import {
   deleteChapter,
   clearChapterState
 } from "@/store/slices/chapterSlice.js";
-import { useLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons.js";
+import { useInstructorLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons.js";
 import Swal from "sweetalert2";
 
 const ChapterManager = ({ courseId }) => {
@@ -205,7 +205,7 @@ const ChapterManager = ({ courseId }) => {
 };
 
 function ChapterItem({ chapter, index, courseId, isExpanded, onToggle, onEdit, onDelete }) {
-  const { data: lessonsData } = useLessons(courseId, chapter._id);
+  const { data: lessonsData } = useInstructorLessons(courseId, chapter._id);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
 

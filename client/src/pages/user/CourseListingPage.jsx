@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import CourseCard from "../../components/CourseCard.jsx";
 import { Link, useSearchParams } from "react-router-dom";
-import { usePublishedCourses } from "@/hooks/useCourses.js";
+import { usePublicCourses } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
 
 export default function CoursesPage() {
@@ -91,7 +91,7 @@ export default function CoursesPage() {
     ...(selectedPriceRanges.length > 0 && { priceRange: selectedPriceRanges.join(",") }),
   };
 
-  const { data: coursesData, isLoading: loading, error: coursesError } = usePublishedCourses(courseParams);
+  const { data: coursesData, isLoading: loading, error: coursesError } = usePublicCourses(courseParams);
   const { data: categoriesData } = useCategories();
 
   const courses = coursesData?.data || [];
@@ -209,13 +209,13 @@ export default function CoursesPage() {
               selectedRatings.length > 0 ||
               selectedPriceRanges.length > 0 ||
               searchQuery) && (
-              <button
-                onClick={clearAllFilters}
-                className="text-sm text-blue-600 hover:text-blue-700 underline"
-              >
-                Clear all filters
-              </button>
-            )}
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Clear all filters
+                </button>
+              )}
           </div>
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <span className="text-sm text-gray-600">Sort By</span>
@@ -237,19 +237,17 @@ export default function CoursesPage() {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters - Mobile Overlay */}
           <div
-            className={`fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity ${
-              sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+            className={`fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity ${sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
             onClick={() => setSidebarOpen(false)}
           />
 
           {/* Sidebar Filters */}
           <div
-            className={`fixed left-0 top-0 h-full w-64 bg-white z-40 transform transition-transform duration-300 lg:relative lg:w-64 lg:transform-none lg:top-auto lg:h-auto lg:bg-transparent lg:z-auto overflow-y-auto ${
-              sidebarOpen
+            className={`fixed left-0 top-0 h-full w-64 bg-white z-40 transform transition-transform duration-300 lg:relative lg:w-64 lg:transform-none lg:top-auto lg:h-auto lg:bg-transparent lg:z-auto overflow-y-auto ${sidebarOpen
                 ? "translate-x-0"
                 : "-translate-x-full lg:translate-x-0"
-            }`}
+              }`}
           >
             <div className="p-4 lg:p-0 space-y-4">
               {/* Close Button for Mobile */}
@@ -270,9 +268,8 @@ export default function CoursesPage() {
                     Rating
                   </h3>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      expandedSections.rating ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${expandedSections.rating ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 {expandedSections.rating && (
@@ -292,11 +289,10 @@ export default function CoursesPage() {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-4 h-4 ${
-                                i < rating
+                              className={`w-4 h-4 ${i < rating
                                   ? "fill-yellow-400 text-yellow-400"
                                   : "text-gray-300"
-                              }`}
+                                }`}
                             />
                           ))}
                           <span className="ml-2 text-sm text-gray-600">
@@ -319,9 +315,8 @@ export default function CoursesPage() {
                     Number of Chapters
                   </h3>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      expandedSections.chapters ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${expandedSections.chapters ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 {expandedSections.chapters && (
@@ -358,9 +353,8 @@ export default function CoursesPage() {
                     Price Range
                   </h3>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      expandedSections.price ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${expandedSections.price ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 {expandedSections.price && (
@@ -401,9 +395,8 @@ export default function CoursesPage() {
                     Category
                   </h3>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      expandedSections.category ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${expandedSections.category ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 {expandedSections.category && (
@@ -455,21 +448,21 @@ export default function CoursesPage() {
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">
                   {searchQuery ||
-                  selectedCategories.length > 0 ||
-                  selectedRatings.length > 0
+                    selectedCategories.length > 0 ||
+                    selectedRatings.length > 0
                     ? "No courses match your filters."
                     : "No courses available at the moment."}
                 </p>
                 {(searchQuery ||
                   selectedCategories.length > 0 ||
                   selectedRatings.length > 0) && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Clear Filters
-                  </button>
-                )}
+                    <button
+                      onClick={clearAllFilters}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
               </div>
             )}
 
@@ -500,11 +493,10 @@ export default function CoursesPage() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition shrink-0 text-sm ${
-                        currentPage === pageNum
+                      className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition shrink-0 text-sm ${currentPage === pageNum
                           ? "bg-gray-900 text-white hover:bg-gray-800"
                           : "border border-gray-300 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

@@ -18,14 +18,14 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useCourse, useApplyVerification, useTogglePublish } from "@/hooks/useCourses.js";
+import { useInstructorCourse, useApplyVerification, useTogglePublish } from "@/hooks/useCourses.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import Swal from "sweetalert2";
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
+  const { data: courseData, isLoading: courseLoading } = useInstructorCourse(courseId);
   const applyVerificationMutation = useApplyVerification();
   const togglePublishMutation = useTogglePublish();
 

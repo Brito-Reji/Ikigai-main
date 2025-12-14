@@ -1,76 +1,67 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/api/axiosConfig';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { lessonApi } from '@/api/lessonApi'
 
-// Get lessons
-export const useLessons = (courseId, chapterId) => {
+// Instructor hooks
+export const useInstructorLessons = (courseId, chapterId) => {
     return useQuery({
-        queryKey: ['lessons', courseId, chapterId],
-        queryFn: async () => {
-            const { data } = await api.get(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons`);
-            return data;
-        },
+        queryKey: ['instructor-lessons', courseId, chapterId],
+        queryFn: () => lessonApi.instructor.getLessons(courseId, chapterId),
         enabled: !!courseId && !!chapterId,
-    });
-};
+    })
+}
 
-// Create lesson
 export const useCreateLesson = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterId, lessonData }) => {
-            const { data } = await api.post(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons`, lessonData);
-            return data;
-        },
+        mutationFn: lessonApi.instructor.createLesson,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId, variables.chapterId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
         },
-    });
-};
+    })
+}
 
-// Update lesson
 export const useUpdateLesson = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterId, lessonId, lessonData }) => {
-            const { data } = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, lessonData);
-            return data;
-        },
+        mutationFn: lessonApi.instructor.updateLesson,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId, variables.chapterId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
         },
-    });
-};
+    })
+}
 
-// Delete lesson
 export const useDeleteLesson = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ courseId, chapterId, lessonId }) => {
-            const { data } = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
-            return data;
-        },
+        mutationFn: lessonApi.instructor.deleteLesson,
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId, variables.chapterId] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
         },
-    });
-};
+    })
+}
 
-// Upload video
 export const useUploadVideo = () => {
     return useMutation({
-        mutationFn: async ({ file, courseId, chapterId }) => {
-            const formData = new FormData();
-            formData.append('video', file);
-            formData.append('courseId', courseId);
-            formData.append('chapterId', chapterId);
+        mutationFn: lessonApi.instructor.uploadVideo,
+    })
+}
 
-            const { data } = await api.post('/instructor/upload-video', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            return data;
-        },
-    });
-};
+// Student hooks
+export const useStudentLessons = (courseId, chapterId) => {
+    return useQuery({
+        queryKey: ['student-lessons', courseId, chapterId],
+        queryFn: () => lessonApi.student.getLessons(courseId, chapterId),
+        enabled: !!courseId && !!chapterId,
+    })
+}
+
+export const useStudentLesson = (courseId, chapterId, lessonId) => {
+    return useQuery({
+        queryKey: ['student-lesson', courseId, chapterId, lessonId],
+        queryFn: () => lessonApi.student.getLessonById(courseId, chapterId, lessonId),
+        enabled: !!courseId && !!chapterId && !!lessonId,
+    })
+}

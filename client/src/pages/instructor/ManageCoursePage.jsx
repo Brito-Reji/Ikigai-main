@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Edit, Trash2, Video, ChevronDown, ChevronUp } from "lucide-react";
-import { useChapters, useCreateChapter, useUpdateChapter, useDeleteChapter } from "@/hooks/useChapters";
-import { useLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons";
+import { useInstructorChapters, useCreateChapter, useUpdateChapter, useDeleteChapter } from "@/hooks/useChapters";
+import { useInstructorLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons";
 import Swal from "sweetalert2";
 
 export default function ManageCoursePage() {
@@ -15,7 +15,7 @@ export default function ManageCoursePage() {
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedChapterId, setSelectedChapterId] = useState(null);
 
-  const { data: chaptersData, isLoading } = useChapters(courseId);
+  const { data: chaptersData, isLoading } = useInstructorChapters(courseId);
   const createChapterMutation = useCreateChapter();
   const updateChapterMutation = useUpdateChapter();
   const deleteChapterMutation = useDeleteChapter();
@@ -29,7 +29,7 @@ export default function ManageCoursePage() {
   const handleCreateChapter = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    
+
     try {
       await createChapterMutation.mutateAsync({
         courseId,
@@ -38,7 +38,7 @@ export default function ManageCoursePage() {
           description: formData.get("description"),
         },
       });
-      
+
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -169,7 +169,7 @@ export default function ManageCoursePage() {
 }
 
 function ChapterItem({ chapter, courseId, isExpanded, onToggle, onEdit, onDelete, onAddLesson }) {
-  const { data: lessonsData } = useLessons(courseId, chapter._id);
+  const { data: lessonsData } = useInstructorLessons(courseId, chapter._id);
   const lessons = lessonsData?.data || [];
 
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
-import { useCourse, useUpdateCourse } from "@/hooks/useCourses.js";
+import { useInstructorCourse, useUpdateCourse } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import SearchableSelect from "@/components/SearchableSelect.jsx";
@@ -11,13 +11,13 @@ import Swal from "sweetalert2";
 const EditCoursePage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { data: courseData, isLoading: courseLoading } = useCourse(courseId);
+  const { data: courseData, isLoading: courseLoading } = useInstructorCourse(courseId);
   const { data: categoriesData } = useCategories();
   const updateMutation = useUpdateCourse();
-  
+
   const currentCourse = courseData?.data;
   const categories = categoriesData?.categories || [];
-  
+
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState({
     category: "",
@@ -57,14 +57,14 @@ const EditCoursePage = () => {
   useEffect(() => {
     if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
       let finalPrice = parseFloat(formData.actualPrice);
-      
+
       if (formData.discountType === "percentage") {
         const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
         finalPrice = finalPrice - discount;
       } else if (formData.discountType === "fixed") {
         finalPrice = finalPrice - parseFloat(formData.discountValue);
       }
-      
+
       setFormData(prev => ({ ...prev, price: Math.max(0, finalPrice).toFixed(2) }));
     } else if (formData.actualPrice) {
       setFormData(prev => ({ ...prev, price: parseFloat(formData.actualPrice).toFixed(2) }));
@@ -122,12 +122,12 @@ const EditCoursePage = () => {
     if (!formData.thumbnail) newErrors.thumbnail = "Thumbnail is required";
 
     setErrors(newErrors);
-    
+
     // Log errors for debugging
     if (Object.keys(newErrors).length > 0) {
       console.log("Validation errors:", newErrors);
     }
-    
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -198,11 +198,10 @@ const EditCoursePage = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                       ? "border-indigo-500 text-indigo-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -213,7 +212,7 @@ const EditCoursePage = () => {
           {/* Tab Content */}
           <div className="p-6">
             {activeTab === "details" && (
-              <CourseDetailsTab 
+              <CourseDetailsTab
                 formData={formData}
                 setFormData={setFormData}
                 errors={errors}
@@ -227,7 +226,7 @@ const EditCoursePage = () => {
             )}
 
             {activeTab === "pricing" && (
-              <PricingTab 
+              <PricingTab
                 formData={formData}
                 setFormData={setFormData}
                 errors={errors}
@@ -236,7 +235,7 @@ const EditCoursePage = () => {
             )}
 
             {activeTab === "settings" && (
-              <SettingsTab 
+              <SettingsTab
                 formData={formData}
                 setFormData={setFormData}
               />

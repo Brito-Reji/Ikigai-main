@@ -1,95 +1,104 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { courseApi } from '@/api/courseApi'
 
-// Fetch instructor courses
+// Instructor hooks
 export const useInstructorCourses = () => {
     return useQuery({
         queryKey: ['instructor-courses'],
-        queryFn: courseApi.getCourses,
+        queryFn: courseApi.instructor.getCourses,
     })
 }
 
-// Fetch single course
-export const useCourse = (courseId) => {
+export const useInstructorCourse = (courseId) => {
     return useQuery({
-        queryKey: ['courses', courseId],
-        queryFn: () => courseApi.getCourseById(courseId),
+        queryKey: ['instructor-course', courseId],
+        queryFn: () => courseApi.instructor.getCourseById(courseId),
         enabled: !!courseId,
     })
 }
 
-// Create course
 export const useCreateCourse = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: courseApi.createCourse,
+        mutationFn: courseApi.instructor.createCourse,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }
 
-// Update course
 export const useUpdateCourse = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: courseApi.updateCourse,
+        mutationFn: courseApi.instructor.updateCourse,
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
-            queryClient.invalidateQueries({ queryKey: ['courses', variables.courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', variables.courseId] })
         },
     })
 }
 
-// Apply for verification
 export const useApplyVerification = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: courseApi.applyForVerification,
+        mutationFn: courseApi.instructor.applyForVerification,
         onSuccess: (data, courseId) => {
-            queryClient.invalidateQueries({ queryKey: ['courses', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', courseId] })
             queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }
 
-// Toggle publish status
 export const useTogglePublish = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: courseApi.togglePublish,
+        mutationFn: courseApi.instructor.togglePublish,
         onSuccess: (data, courseId) => {
-            queryClient.invalidateQueries({ queryKey: ['courses', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', courseId] })
             queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }
 
-// Fetch published courses (public)
-export const usePublishedCourses = (params) => {
+// Student hooks
+export const useStudentCourses = (params) => {
     return useQuery({
-        queryKey: ['published-courses', params],
-        queryFn: () => courseApi.getPublishedCourses(params),
+        queryKey: ['student-courses', params],
+        queryFn: () => courseApi.student.getCourses(params),
     })
 }
 
-// Fetch featured courses
+export const useStudentCourse = (courseId) => {
+    return useQuery({
+        queryKey: ['student-course', courseId],
+        queryFn: () => courseApi.student.getCourseById(courseId),
+        enabled: !!courseId,
+    })
+}
+
+// Public hooks
+export const usePublicCourses = (params) => {
+    return useQuery({
+        queryKey: ['public-courses', params],
+        queryFn: () => courseApi.public.getCourses(params),
+    })
+}
+
 export const useFeaturedCourses = (params) => {
     return useQuery({
         queryKey: ['featured-courses', params],
-        queryFn: () => courseApi.getFeaturedCourses(params),
+        queryFn: () => courseApi.public.getFeaturedCourses(params),
     })
 }
 
-// Fetch public course details
 export const usePublicCourse = (courseId) => {
     return useQuery({
         queryKey: ['public-course', courseId],
-        queryFn: () => courseApi.getPublicCourseDetails(courseId),
+        queryFn: () => courseApi.public.getCourseDetails(courseId),
         enabled: !!courseId,
     })
 }
