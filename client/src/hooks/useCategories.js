@@ -3,7 +3,7 @@ import api from '@/api/axiosConfig'
 
 const categoryApi = {
     getCategories: async (params) => {
-        const { data } = await api.get('/public', { params })
+        const { data } = await api.get('/categories', { params })
         return data
     },
 }

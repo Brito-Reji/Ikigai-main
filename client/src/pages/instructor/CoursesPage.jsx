@@ -23,6 +23,7 @@ export default function CoursesPage() {
     reviews: course.reviews || 0,
     rating: course.rating || 0,
     status: course.published ? "Published" : "Draft",
+    verificationStatus: course.verificationStatus || "pending",
     students: course.enrollments || 0,
     revenue: `₹${(course.price * (course.enrollments || 0)).toLocaleString()}`,
     thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80",
@@ -34,7 +35,9 @@ export default function CoursesPage() {
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === "all" || course.status.toLowerCase() === filterStatus;
+    const matchesFilter = filterStatus === "all" ||
+      course.status.toLowerCase() === filterStatus ||
+      course.verificationStatus === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -121,6 +124,10 @@ export default function CoursesPage() {
                 <option value="all">All Status</option>
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>
+                <option value="pending">Pending Verification</option>
+                <option value="inprocess">Awaiting Approval</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
               </select>
 
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
@@ -177,7 +184,7 @@ export default function CoursesPage() {
                   </div>
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                     <div className="bg-white rounded-lg shadow-lg p-1">
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/instructor/courses/${course.id}/edit`);
@@ -187,7 +194,7 @@ export default function CoursesPage() {
                       >
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleViewCourse(course.id);
@@ -252,11 +259,10 @@ export default function CoursesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            course.status === "Published"
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${course.status === "Published"
                               ? "bg-green-100 text-green-800"
                               : "bg-yellow-100 text-yellow-800"
-                          }`}
+                            }`}
                         >
                           {course.status}
                         </span>
@@ -271,7 +277,7 @@ export default function CoursesPage() {
                         ⭐ {course.rating}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
+                        <button
                           onClick={() => navigate(`/instructor/courses/${course.id}/edit`)}
                           className="text-indigo-600 hover:text-indigo-900 mr-3"
                         >
@@ -296,8 +302,8 @@ export default function CoursesPage() {
               {searchQuery || filterStatus !== "all" ? "No courses found" : "No courses yet"}
             </h3>
             <p className="text-gray-500 mb-4">
-              {searchQuery || filterStatus !== "all" 
-                ? "Try adjusting your search or filter criteria" 
+              {searchQuery || filterStatus !== "all"
+                ? "Try adjusting your search or filter criteria"
                 : "Create your first course to get started"
               }
             </p>

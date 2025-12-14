@@ -6,28 +6,60 @@ import { Lesson } from "../../models/Lesson.js";
 export const getAllCoursesService = async (filters) => {
     const { page = 1, limit = 20, search, category, status } = filters;
 
-    // Admin should only see published courses (not drafts)
-    let query = { deleted: { $ne: true }, published: true };
+    // Base query: Admin should see published courses AND courses awaiting verification
+    let query = {
+        deleted: { $ne: true }
+    };
+
+    // Add visibility filter (published OR awaiting verification)
+    const visibilityFilter = {
+        $or: [
+            { published: true },
+            { verificationStatus: "inprocess" }
+        ]
+    };
 
     if (search) {
-        query.$or = [
-            { title: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
+        // Combine visibility filter with search filter using $and
+        query.$and = [
+            visibilityFilter,
+            {
+                $or: [
+                    { title: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
+                ]
+            }
         ];
+    } else {
+        // Just apply visibility filter
+        Object.assign(query, visibilityFilter);
     }
 
     if (category) {
         query.category = category;
     }
 
-    // Status filters for admin
-    if (status === "published") {
-        query.verificationStatus = "inprocess"; // Published but not yet approved
+    // Status filters for admin - these override the visibility filter
+    if (status === "inprocess") {
+        delete query.$or;
+        delete query.$and;
+        query.verificationStatus = "inprocess"; // Awaiting approval
+    } else if (status === "published") {
+        delete query.$or;
+        delete query.$and;
+        query.verificationStatus = "inprocess"; // Published but not yet approved (legacy support)
     } else if (status === "approved") {
+        delete query.$or;
+        delete query.$and;
         query.verificationStatus = "verified"; // Approved courses
+        query.published = true; // Only show published verified courses
     } else if (status === "rejected") {
+        delete query.$or;
+        delete query.$and;
         query.verificationStatus = "rejected";
     } else if (status === "blocked") {
+        delete query.$or;
+        delete query.$and;
         query.blocked = true;
     }
 
@@ -178,7 +210,10 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
         throw error;
     }
 
-    course.verificationStatus = status;
+    if (status === "verified") {
+        course.published = true;
+        course.verificationStatus = status;
+    }
 
     if (status === "rejected") {
         if (!rejectionReason || rejectionReason.trim() === "") {

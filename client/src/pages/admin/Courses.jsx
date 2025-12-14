@@ -290,7 +290,7 @@ const Courses = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
-            <option value="published">Awaiting Approval</option>
+            <option value="inprocess">Awaiting Approval</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
             <option value="blocked">Blocked</option>
@@ -348,8 +348,8 @@ const Courses = () => {
                     <button
                       onClick={() => handleToggleBlock(course._id)}
                       className={`px-4 py-2 rounded-lg transition ${course.blocked
-                          ? "bg-green-600 text-white hover:bg-green-700"
-                          : "bg-yellow-600 text-white hover:bg-yellow-700"
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-yellow-600 text-white hover:bg-yellow-700"
                         }`}
                     >
                       <Ban className="w-4 h-4" />

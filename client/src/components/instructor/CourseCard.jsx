@@ -1,12 +1,49 @@
 import { BookOpen, Users, ShoppingCart, Star } from "lucide-react";
 
 export default function CourseCard({ course }) {
+  // Get verification badge
+  const getVerificationBadge = () => {
+    const status = course.verificationStatus;
+
+    const badges = {
+      pending: {
+        text: "Pending",
+        className: "bg-gray-100 text-gray-800"
+      },
+      inprocess: {
+        text: "Awaiting Approval",
+        className: "bg-blue-100 text-blue-800"
+      },
+      verified: {
+        text: "Verified",
+        className: "bg-green-100 text-green-800"
+      },
+      rejected: {
+        text: "Rejected",
+        className: "bg-red-100 text-red-800"
+      }
+    };
+
+    const badge = badges[status] || badges.pending;
+    return { text: badge.text, className: badge.className };
+  };
+
+  const verificationBadge = getVerificationBadge();
+
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
       <div className="relative">
-        <span className="absolute top-2 left-2 px-2 py-1 bg-white rounded text-xs font-medium text-gray-700">
-          {course.status || "Free"}
-        </span>
+        <div className="absolute top-2 left-2 flex gap-2">
+          <span className={`px-2 py-1 rounded text-xs font-medium ${course.status === "Published"
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
+            }`}>
+            {course.status}
+          </span>
+          <span className={`px-2 py-1 rounded text-xs font-medium ${verificationBadge.className}`}>
+            {verificationBadge.text}
+          </span>
+        </div>
         <img
           src={course.thumbnail || "https://via.placeholder.com/400x200"}
           alt={course.title}
