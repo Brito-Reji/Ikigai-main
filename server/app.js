@@ -23,7 +23,7 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
   allowedHeaders: ['authorization', 'content-type', 'range'],
@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(cookieParser())
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
   })
 );
