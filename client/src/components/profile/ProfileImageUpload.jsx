@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "../api/axiosConfig";
+import api from "../../api/axiosConfig";
 
 const ProfileImageUpload = ({ currentImage, onImageUpload, disabled = false }) => {
   const [uploading, setUploading] = useState(false);
@@ -59,9 +59,8 @@ const ProfileImageUpload = ({ currentImage, onImageUpload, disabled = false }) =
       />
       <label
         htmlFor="profile-image-upload"
-        className={`absolute bottom-0 right-0 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-lg ${
-          uploading || disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-        }`}
+        className={`absolute bottom-0 right-0 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-lg ${uploading || disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          }`}
       >
         {uploading ? (
           <Loader2 className="w-4 h-4 animate-spin" />

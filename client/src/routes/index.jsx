@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import AuthGuard from "@/components/AuthGuard.jsx";
-import Layout from "@/components/Layout.jsx";
-import InstructorLayout from "@/components/InstructorLayout.jsx";
+import AuthGuard from "@/components/common/AuthGuard.jsx";
+import Layout from "@/components/layout/Layout.jsx";
+import InstructorLayout from "@/components/layout/InstructorLayout.jsx";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import NotFound from "@/pages/NotFound.jsx";
 
@@ -58,7 +58,7 @@ export default function AppRoutes() {
         <Route path="verify-otp" element={<UserOTPVerificationPage />} />
         <Route path="student/forget-password" element={<StudentForgetPassword />} />
         <Route path="student/reset-password" element={<StudentResetPassword />} />
-        
+
         <Route
           path="courses"
           element={
@@ -113,12 +113,12 @@ export default function AppRoutes() {
       {/* Instructor Routes */}
       <Route path="/instructor/login" element={<InstructorLoginPage />} />
       <Route path="/instructor" element={<InstructorLayout />}>
-      
+
         <Route path="signup" element={<InstructorSignupPage />} />
         <Route path="verify-otp" element={<InstructorOTPVerificationPage />} />
         <Route path="forget-password" element={<InstructorForgetPassword />} />
         <Route path="reset-password" element={<InstructorResetPassword />} />
-        
+
         <Route
           path="dashboard"
           element={
@@ -188,7 +188,7 @@ export default function AppRoutes() {
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/admin" element={<AdminLayout />}>
-        
+
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="categories" element={<Categories />} />

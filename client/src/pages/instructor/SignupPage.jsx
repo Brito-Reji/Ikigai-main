@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
-import GoogleAuth from "@/components/GoogleAuth.jsx";
+import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import logo from "../../assets/images/logo.png";
 import { useUsernameCheck } from "@/hooks/useUsernameCheck.js";
 
@@ -212,7 +212,7 @@ export default function SignUpPage() {
             <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
             <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
           </div>
-          
+
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
               Become an Instructor
@@ -220,221 +220,214 @@ export default function SignUpPage() {
             <p className="text-gray-600">Join our community of expert instructors</p>
           </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Full Name
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="First Name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.firstName ? "border-red-500" : "border-gray-300"
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Full Name
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${errors.firstName ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                      disabled={loading}
-                    />
-                    {errors.firstName && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.firstName}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last Name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.lastName ? "border-red-500" : "border-gray-300"
+                    disabled={loading}
+                  />
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Last Name"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${errors.lastName ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                      disabled={loading}
-                    />
-                    {errors.lastName && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {errors.lastName}
-                      </p>
-                    )}   
-                  </div>
+                    disabled={loading}
+                  />
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Username */}
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border ${errors.username
+                      ? "border-red-500"
+                      : isAvailable === false
+                        ? "border-red-500"
+                        : isAvailable === true
+                          ? "border-green-500"
+                          : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10`}
+                  disabled={loading}
+                />
+                {/* Username availability indicator */}
+                {formData.username.length >= 3 && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isChecking ? (
+                      <Loader className="w-5 h-5 text-gray-400 animate-spin" />
+                    ) : isAvailable === true ? (
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                    ) : isAvailable === false ? (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    ) : null}
+                  </div>
+                )}
+              </div>
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-500">{errors.username}</p>
+              )}
+              {!errors.username && formData.username.length >= 3 && message && (
+                <p className={`mt-1 text-sm ${isAvailable ? "text-green-600" : "text-red-600"}`}>
+                  {message}
+                </p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email ID"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 border ${errors.email ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                disabled={loading}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Username
+                  Password
                 </label>
                 <div className="relative">
                   <input
-                    type="text"
-                    name="username"
-                    placeholder="Username"
-                    value={formData.username}
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Enter Password"
+                    value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.username 
-                        ? "border-red-500" 
-                        : isAvailable === false 
-                        ? "border-red-500" 
-                        : isAvailable === true 
-                        ? "border-green-500" 
-                        : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10`}
+                    className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12`}
                     disabled={loading}
                   />
-                  {/* Username availability indicator */}
-                  {formData.username.length >= 3 && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {isChecking ? (
-                        <Loader className="w-5 h-5 text-gray-400 animate-spin" />
-                      ) : isAvailable === true ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : isAvailable === false ? (
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      ) : null}
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-500">{errors.username}</p>
-                )}
-                {!errors.username && formData.username.length >= 3 && message && (
-                  <p className={`mt-1 text-sm ${isAvailable ? "text-green-600" : "text-red-600"}`}>
-                    {message}
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.password}
                   </p>
                 )}
               </div>
-
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Email
+                  Confirm Password
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="Email ID"
-                  value={formData.email}
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  className={`w-full px-4 py-3 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                   disabled={loading}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.confirmPassword}
+                  </p>
                 )}
               </div>
+            </div>
 
-              {/* Password */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Enter Password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.password ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12`}
-                      disabled={loading}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                    disabled={loading}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading || isAvailable === false || isChecking}
-                className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg transition flex items-center justify-center space-x-2 font-medium ${
-                  loading || isAvailable === false || isChecking
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || isAvailable === false || isChecking}
+              className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg transition flex items-center justify-center space-x-2 font-medium ${loading || isAvailable === false || isChecking
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-indigo-700 shadow-lg hover:shadow-xl"
                 }`}
-                >
-                <span>
-                  {loading ? "Creating Account..." : "Create Account"}
+            >
+              <span>
+                {loading ? "Creating Account..." : "Create Account"}
+              </span>
+              {!loading && <ArrowRight className="w-5 h-5" />}
+            </button>
+
+            {/* Login Link */}
+            <div className="text-center text-sm text-gray-600">
+              Already have an account?{" "}
+              <a
+                href="/instructor/login"
+                className="text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Sign in
+              </a>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">
+                  Sign up with
                 </span>
-                {!loading && <ArrowRight className="w-5 h-5" />}
-              </button>
-              
-              {/* Login Link */}
-              <div className="text-center text-sm text-gray-600">
-                Already have an account?{" "}
-                <a
-                  href="/instructor/login"
-                  className="text-indigo-600 hover:text-indigo-700 font-medium"
-                  >
-                  Sign in
-                </a>
               </div>
+            </div>
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">
-                    Sign up with
-                  </span>
-                </div>
-              </div>
-
-              {/* Google Sign Up */}
-              <GoogleAuth role={"instructor"} />
-            </form>
-          </div>
+            {/* Google Sign Up */}
+            <GoogleAuth role={"instructor"} />
+          </form>
+        </div>
       </div>
     </div>
   );

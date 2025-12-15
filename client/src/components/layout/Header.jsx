@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { Search, Heart, Bell, User, Menu, X } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../hooks/useRedux.js";
-import { logout } from "../store/slices/authSlice.js";
+import { useAuth } from "@/hooks/useRedux.js";
+import { logout } from "@/store/slices/authSlice.js";
 import { useDispatch } from "react-redux";
-import logo from "../assets/images/logo.png";
-import CartIcon from "./CartIcon.jsx";
+import logo from "@/assets/images/logo.png";
+import CartIcon from "../common/CartIcon.jsx";
 
 
 export default function Header({ onMenuToggle, menuOpen }) {
@@ -56,14 +56,14 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
             {/* Logo */}
             <Link to='/'>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8  rounded-full flex items-center justify-center">
-              <img src={logo} className="text-white font-bold text-sm"></img>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8  rounded-full flex items-center justify-center">
+                  <img src={logo} className="text-white font-bold text-sm"></img>
+                </div>
+                <span className="text-lg sm:text-xl font-bold text-gray-900">
+                  Ikigai
+                </span>
               </div>
-              <span className="text-lg sm:text-xl font-bold text-gray-900">
-                Ikigai
-              </span>
-            </div>
             </Link>
 
             {/* Desktop Categories Link */}

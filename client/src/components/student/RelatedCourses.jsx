@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import CourseCard from "../CourseCard.jsx";
+import CourseCard from "./CourseCard.jsx";
 import api from "@/api/axiosConfig.js";
 
 const RelatedCourses = ({ currentCourse, category }) => {

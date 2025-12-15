@@ -1,7 +1,5 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import React from "react";
+import Button from "@/components/ui/Button";
 
 export default function InstructorCTA() {
   return (
@@ -10,13 +8,11 @@ export default function InstructorCTA() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left - Image */}
           <div className="relative h-96 hidden md:block">
-            <div className="w-64 h-64 mx-auto bg-purple-300 rounded-3xl flex items-center justify-center">
-              <Image
-                src="/man-instructor-portrait.jpg"
+            <div className="w-64 h-64 mx-auto bg-purple-300 rounded-3xl flex items-center justify-center overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"
                 alt="Instructor"
-                width={256}
-                height={256}
-                className="rounded-3xl"
+                className="w-full h-full object-cover rounded-3xl"
               />
             </div>
           </div>
@@ -30,7 +26,7 @@ export default function InstructorCTA() {
               Instructors from around the world teach millions of students on
               Ikigai. We provide the tools and skills to teach what you love.
             </p>
-            <Button className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 text-base">
+            <Button variant="primary" className="px-8 py-3 text-base">
               Start Your Instructor Journey →
             </Button>
           </div>

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Upload, X, Loader2, Crop } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "../api/axiosConfig";
+import api from "@/api/axiosConfig";
 import ImageCropModal from "./ImageCropModal";
-import { createCroppedImage } from "../utils/cropImage";
+import { createCroppedImage } from "@/utils/cropImage";
 
 const ImageUpload = ({
   value,
@@ -56,14 +56,14 @@ const ImageUpload = ({
     try {
       const croppedBlob = await createCroppedImage(originalImage, croppedAreaPixels);
       const croppedFile = new File([croppedBlob], "cropped-image.jpg", { type: "image/jpeg" });
-      
+
       // Show preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
       };
       reader.readAsDataURL(croppedFile);
-      
+
       setShowCropModal(false);
       uploadImage(croppedFile);
     } catch (error) {
@@ -76,7 +76,7 @@ const ImageUpload = ({
 
     setUploading(true);
     const uploadToast = toast.loading("Uploading image to Cloudinary...");
-    
+
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -93,7 +93,7 @@ const ImageUpload = ({
       }
     } catch (error) {
       console.error("Upload error:", error);
-      
+
       let errorMessage = "Error uploading image";
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
@@ -104,7 +104,7 @@ const ImageUpload = ({
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast.error(errorMessage, { id: uploadToast });
       setPreview(null);
     } finally {
@@ -125,7 +125,7 @@ const ImageUpload = ({
           {label}
         </label>
       )}
-      
+
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-gray-400 transition-colors">
         <input
           type="file"
@@ -135,7 +135,7 @@ const ImageUpload = ({
           id="image-upload"
           disabled={uploading}
         />
-        
+
         {!preview ? (
           <label
             htmlFor="image-upload"
@@ -172,9 +172,9 @@ const ImageUpload = ({
           </div>
         )}
       </div>
-      
+
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-      
+
       {/* Crop Modal */}
       {showCropModal && originalImage && (
         <ImageCropModal

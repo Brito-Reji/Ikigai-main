@@ -3,17 +3,17 @@ import { useParams } from "react-router-dom";
 import { usePublicCourse } from "@/hooks/useCourses.js";
 
 // Components
-import CourseHero from "@/components/course/CourseHero.jsx";
-import CourseSyllabus from "@/components/course/CourseSyllabus.jsx";
-import CourseReviews from "@/components/course/CourseReviews.jsx";
-import InstructorInfo from "@/components/course/InstructorInfo.jsx";
-import RelatedCourses from "@/components/course/RelatedCourses.jsx";
-import Footer from "@/components/Footer.jsx";
+import CourseHero from "@/components/student/CourseHero.jsx";
+import CourseSyllabus from "@/components/student/CourseSyllabus.jsx";
+import CourseReviews from "@/components/student/CourseReviews.jsx";
+import InstructorInfo from "@/components/student/InstructorInfo.jsx";
+import RelatedCourses from "@/components/student/RelatedCourses.jsx";
+import Footer from "@/components/layout/Footer.jsx";
 
 const CourseDetailPage = () => {
   const { courseId } = useParams();
   const { data: courseData, isLoading: publicDetailsLoading, error: publicDetailsError } = usePublicCourse(courseId);
-  console.log("course dataaa-->",courseData)
+  console.log("course dataaa-->", courseData)
   const [activeTab, setActiveTab] = useState("overview");
 
   const publicCourseDetails = courseData?.data;
@@ -32,7 +32,7 @@ const CourseDetailPage = () => {
     const errorMessage = publicDetailsError?.response?.data?.message || publicDetailsError?.message || "The course you are looking for does not exist or is no longer available.";
     const isBlocked = errorMessage.includes("blocked by the administrator");
     const isNotPublished = errorMessage.includes("not yet published");
-    
+
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -58,15 +58,15 @@ const CourseDetailPage = () => {
                 </div>
               )}
             </div>
-            
+
             <h1 className={`text-2xl font-bold mb-4 ${isBlocked ? 'text-red-900' : isNotPublished ? 'text-yellow-900' : 'text-gray-900'}`}>
               {isBlocked ? 'Course Temporarily Unavailable' : isNotPublished ? 'Course Not Published' : 'Course Not Found'}
             </h1>
-            
+
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
               {errorMessage}
             </p>
-            
+
             {isBlocked && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
                 <p className="text-sm text-red-800">
@@ -74,7 +74,7 @@ const CourseDetailPage = () => {
                 </p>
               </div>
             )}
-            
+
             <div className="space-x-4">
               <button
                 onClick={() => window.history.back()}
@@ -115,11 +115,10 @@ const CourseDetailPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -138,7 +137,7 @@ const CourseDetailPage = () => {
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Course</h2>
                   <p className="text-gray-700 leading-relaxed mb-6">{publicCourseDetails.overview}</p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600 mb-2">24</div>
@@ -154,7 +153,7 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <CourseSyllabus course={publicCourseDetails} />
               </div>
             )}
@@ -167,7 +166,7 @@ const CourseDetailPage = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
-    
+
 
               {/* Course Features */}
               <div className="bg-white rounded-lg shadow-lg p-6">

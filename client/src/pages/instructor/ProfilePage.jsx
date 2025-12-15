@@ -2,8 +2,8 @@ import React from "react";
 import { Mail, Phone, Briefcase, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile.js";
-import ChangeEmailSection from "@/components/ChangeEmailSection.jsx";
-import ChangePasswordSection from "@/components/ChangePasswordSection.jsx";
+import ChangeEmailSection from "@/components/profile/ChangeEmailSection.jsx";
+import ChangePasswordSection from "@/components/profile/ChangePasswordSection.jsx";
 
 export default function InstructorProfilePage() {
   const navigate = useNavigate();
