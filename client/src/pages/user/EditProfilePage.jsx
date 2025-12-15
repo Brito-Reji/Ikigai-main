@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Save, Mail, Phone, MapPin } from "lucide-react";
+import { ArrowLeft, Save, Mail, Phone, MapPin, User, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProfileImageUpload from "@/components/ProfileImageUpload.jsx";
+import ProfileImageUpload from "@/components/profile/ProfileImageUpload.jsx";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile.js";
 import Swal from "sweetalert2";
+import ChangeEmailSection from "@/components/profile/ChangeEmailSection.jsx";
+import ChangePasswordSection from "@/components/profile/ChangePasswordSection.jsx";
 
 export default function EditStudentProfilePage() {
   const navigate = useNavigate();
   const { data: profileData, isLoading } = useProfile();
   const updateMutation = useUpdateProfile();
-  
+  const profile = profileData?.data;
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -54,6 +57,7 @@ export default function EditStudentProfilePage() {
       });
       navigate("/profile");
     } catch (error) {
+      console.error(error);
       Swal.fire({
         icon: "error",
         title: "Error!",
@@ -73,170 +77,201 @@ export default function EditStudentProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header Navigation */}
         <div className="mb-6">
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-2 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Profile
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
         </div>
 
-        {/* Profile Image Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h3>
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              {formData.profileImageUrl ? (
-                <img
-                  src={formData.profileImageUrl}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-lg">
-                  <span className="text-3xl font-bold text-blue-600">
-                    {formData.firstName?.[0] || "S"}
-                  </span>
-                </div>
-              )}
-              <ProfileImageUpload
-                currentImage={formData.profileImageUrl}
-                onImageUpload={handleImageChange}
-                disabled={updateMutation.isPending}
-              />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">
-                Upload a profile photo. Recommended size: 400x400px
-              </p>
-            </div>
-          </div>
-        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-        {/* Profile Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
-          <div className="space-y-6">
-            {/* Basic Info */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          {/* Horizontal Profile Header */}
+          <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row items-center gap-6">
+            <div className="relative group flex-shrink-0">
+              <div className="w-20 h-20 rounded-full relative overflow-hidden ring-4 ring-white shadow-sm">
+                {formData.profileImageUrl ? (
+                  <img
+                    src={formData.profileImageUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                ) : (
+                  <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <User className="w-8 h-8" />
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1">
+                <ProfileImageUpload
+                  currentImage={formData.profileImageUrl}
+                  onImageUpload={handleImageChange}
+                  disabled={updateMutation.isPending}
+                />
               </div>
             </div>
 
-            {/* Contact Info */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="w-4 h-4 inline mr-2" />
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-                  />
-                  {profileData?.data?.authType === "email" ? (
-                    <p className="text-xs text-blue-600 mt-1">
-                      To change your email, go to{" "}
-                      <button
-                        type="button"
-                        onClick={() => navigate("/profile")}
-                        className="underline hover:text-blue-800"
-                      >
-                        your profile page
-                      </button>
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Email cannot be changed for Google accounts
-                    </p>
-                  )}
+            <div className="text-center md:text-left flex-1">
+              <h3 className="text-lg font-bold text-gray-900">{formData.firstName} {formData.lastName}</h3>
+              <p className="text-sm text-gray-500">{formData.email}</p>
+              <p className="text-xs text-blue-600 mt-1 font-medium">Student Account</p>
+            </div>
+
+            {/* Pro Tip Box (Horizontal) */}
+            <div className="bg-blue-50/80 rounded-lg p-3 border border-blue-100 max-w-md hidden lg:block">
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 bg-blue-100 rounded-md text-blue-600 mt-0.5">
+                  <Camera className="w-4 h-4" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Phone className="w-4 h-4 inline mr-2" />
-                    Phone
-                  </label>
+                  <p className="text-xs font-semibold text-blue-900">Professional Photo?</p>
+                  <p className="text-xs text-blue-700 leading-tight mt-0.5">
+                    A clear profile picture helps instructors recognize you.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 md:p-8">
+            {/* 3-Column Grid for Desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                  placeholder="John"
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                  placeholder="Doe"
+                />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phone Number
+                </label>
+                <div className="relative">
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="+1 (555) 000-0000"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Address
-                  </label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    rows="3"
-                    placeholder="Enter your address"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
                 </div>
               </div>
             </div>
 
-            {/* Submit Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
+            {/* Second Row: Email & Address */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Email (Read Only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    disabled
+                    className="w-full px-4 py-2.5 pl-10 border border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                  />
+                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                </div>
+                {profileData?.data?.authType === "email" && (
+                  <p className="text-xs text-gray-500 mt-1.5 text-right">
+                    <button type="button" onClick={() => document.getElementById('change-email-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-blue-600 hover:underline">Change Email Below</button>
+                  </p>
+                )}
+              </div>
+
+              {/* Address (Spans 2 columns) */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    placeholder="123 Main St, City, Country"
+                    className="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                  />
+                  <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => navigate("/profile")}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center disabled:opacity-50"
+                className="px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all font-medium shadow-md shadow-blue-100 flex items-center"
               >
-                <Save className="w-4 h-4 mr-2" />
                 {updateMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
+
+          </form>
+        </div>
+
+        {/* Security & Account Settings (Moved from Profile Page) */}
+        {profile?.authType === "email" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8" id="change-email-section">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Password</h3>
+              <ChangePasswordSection authType={profile?.authType} />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Email Address</h3>
+              <ChangeEmailSection currentEmail={profile?.email} authType={profile?.authType} />
+            </div>
           </div>
-        </form>
+        )}
+
       </div>
     </div>
   );

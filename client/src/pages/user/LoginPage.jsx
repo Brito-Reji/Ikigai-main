@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import GoogleAuth from "@/components/GoogleAuth.jsx";
+import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
 import { loginUser, clearError } from "@/store/slices/authSlice.js";
 import logo from "../../assets/images/logo.png";
@@ -176,11 +176,11 @@ function LoginPage() {
         } else if (loginUser.rejected.match(resultAction)) {
           // Handle login error
           console.log("Login failed:", resultAction.payload);
-          
+
           // Clear any existing tokens to prevent stale authentication
           localStorage.removeItem("accessToken");
           localStorage.removeItem("userAuth");
-          
+
           // Check if user is blocked
           if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes("blocked")) {
             Swal.fire({
@@ -230,7 +230,7 @@ function LoginPage() {
             <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
             <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
           </div>
-          
+
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
               Welcome Back
@@ -238,121 +238,119 @@ function LoginPage() {
             <p className="text-gray-600">Sign in to continue your learning journey</p>
           </div>
 
-            {successMessage && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
-                {successMessage}
-              </div>
-            )}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+              {successMessage}
+            </div>
+          )}
 
-            {errors.general && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">
-                {errors.general}
-              </div>
-            )}
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">
+              {errors.general}
+            </div>
+          )}
 
-            <div className="space-y-6">
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Email
-                </label>
+          <div className="space-y-6">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Username or Email ID"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`w-full px-4 py-3 border ${errors.email && touched.email
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+                  } rounded-lg focus:outline-none focus:ring-2`}
+              />
+              {errors.email && touched.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Password
+              </label>
+              <div className="relative">
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="Username or Email ID"
-                  value={formData.email}
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Enter Password"
+                  value={formData.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full px-4 py-3 border ${
-                    errors.email && touched.email
+                  className={`w-full px-4 py-3 border ${errors.password && touched.password
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:ring-indigo-500"
-                  } rounded-lg focus:outline-none focus:ring-2`}
-                />
-                {errors.email && touched.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Enter Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`w-full px-4 py-3 border ${
-                      errors.password && touched.password
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-indigo-500"
                     } rounded-lg focus:outline-none focus:ring-2 pr-12`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && touched.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
-              </div>
-
-              {/* Sign In Button */}
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2 disabled:opacity-50"
-              >
-                <span>{loading ? "Signing In..." : "Sign In"}</span>
-                {!loading && <ArrowRight className="w-5 h-5" />}
-              </button>
-
-              {/* Forgot Password */}
-              <div className="text-left flex justify-between">
-                <Link
-                  to="/student/forget-password"
-                  className="text-gray-900 hover:text-gray-700 font-medium"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  forgot password?
-                </Link>
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
-              <div>
-                <span className="text-gray-900 font-medium text-xs flex justify-center">
-                  Don't have an account?
-                  <span className="text-blue-500 underline ml-1">
-                    <Link to={"/signup"}>Sign up</Link>
-                  </span>
+              {errors.password && touched.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Sign In Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              <span>{loading ? "Signing In..." : "Sign In"}</span>
+              {!loading && <ArrowRight className="w-5 h-5" />}
+            </button>
+
+            {/* Forgot Password */}
+            <div className="text-left flex justify-between">
+              <Link
+                to="/student/forget-password"
+                className="text-gray-900 hover:text-gray-700 font-medium"
+              >
+                forgot password?
+              </Link>
+            </div>
+            <div>
+              <span className="text-gray-900 font-medium text-xs flex justify-center">
+                Don't have an account?
+                <span className="text-blue-500 underline ml-1">
+                  <Link to={"/signup"}>Sign up</Link>
+                </span>
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">
+                  Sign in with
                 </span>
               </div>
-
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">
-                    Sign in with
-                  </span>
-                </div>
-              </div>
-
-              {/* Google Sign In */}
-              <GoogleAuth role={"student"} />
             </div>
+
+            {/* Google Sign In */}
+            <GoogleAuth role={"student"} />
+          </div>
         </div>
       </div>
 

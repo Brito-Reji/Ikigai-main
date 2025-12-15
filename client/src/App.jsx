@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AppRoutes from "./routes";
-import LoadingScreen from "./components/LoadingScreen.jsx";
+import LoadingScreen from "@/components/common/LoadingScreen.jsx";
 import { useAuthCheck } from "./hooks/useAuthCheck.js";
 
 function App() {

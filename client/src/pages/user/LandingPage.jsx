@@ -1,7 +1,7 @@
 import React from "react";
 import { Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import Footer from "@/components/Footer.jsx";
-import CourseCard from "@/components/CourseCard.jsx";
+import Footer from "@/components/layout/Footer.jsx";
+import CourseCard from "@/components/student/CourseCard.jsx";
 import { Link } from "react-router-dom";
 import { useFeaturedCourses } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";

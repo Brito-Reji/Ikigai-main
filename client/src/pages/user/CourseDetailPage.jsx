@@ -4,12 +4,12 @@ import { usePublicCourse } from "@/hooks/useCourses.js";
 import { useStudentChapters } from "@/hooks/useChapters.js";
 
 // Components
-import CourseHero from "@/components/course/CourseHero.jsx";
-import CourseSyllabus from "@/components/course/CourseSyllabus.jsx";
-import CourseReviews from "@/components/course/CourseReviews.jsx";
-import InstructorInfo from "@/components/course/InstructorInfo.jsx";
-import RelatedCourses from "@/components/course/RelatedCourses.jsx";
-import Footer from "@/components/Footer.jsx";
+import CourseHero from "@/components/student/CourseHero.jsx";
+import CourseSyllabus from "@/components/student/CourseSyllabus.jsx";
+import CourseReviews from "@/components/student/CourseReviews.jsx";
+import InstructorInfo from "@/components/student/InstructorInfo.jsx";
+import RelatedCourses from "@/components/student/RelatedCourses.jsx";
+import Footer from "@/components/layout/Footer.jsx";
 
 const CourseDetailPage = () => {
   const { courseId } = useParams();
@@ -118,10 +118,11 @@ const CourseDetailPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
               >
                 {tab.label}
               </button>
@@ -156,8 +157,8 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 </div>
-
-                <CourseSyllabus course={publicCourseDetails} chapters={chapters} isLoading={chaptersLoading} />
+                
+                <CourseSyllabus course={publicCourseDetails} />
               </div>
             )}
 

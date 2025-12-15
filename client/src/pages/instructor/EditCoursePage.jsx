@@ -4,8 +4,8 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useInstructorCourse, useUpdateCourse } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
-import SearchableSelect from "@/components/SearchableSelect.jsx";
-import ImageUpload from "@/components/ImageUpload.jsx";
+import SearchableSelect from "@/components/ui/SearchableSelect.jsx";
+import ImageUpload from "@/components/ui/ImageUpload.jsx";
 import Swal from "sweetalert2";
 
 const EditCoursePage = () => {
@@ -199,8 +199,8 @@ const EditCoursePage = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
                 >
                   {tab.label}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SearchableSelect from "@/components/SearchableSelect.jsx";
-import ImageUpload from "@/components/ImageUpload.jsx";
+import SearchableSelect from "@/components/ui/SearchableSelect.jsx";
+import ImageUpload from "@/components/ui/ImageUpload.jsx";
 import { useCreateCourse } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
 import Swal from "sweetalert2";

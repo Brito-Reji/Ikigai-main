@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 // Changed import to use Redux hook instead of Context
-import { useAuth } from "../hooks/useRedux.js";
-import { fetchCurrentUser } from "../store/slices/authSlice.js";
+import { useAuth } from "@/hooks/useRedux.js";
+import { fetchCurrentUser } from "@/store/slices/authSlice.js";
 import ThreeDotLoader from "./ThreeDotLoader.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +31,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
         setIsValidating(false);
       });
     }
-    
+
     // Reset fetch attempted if token is removed
     if (!hasToken && fetchAttempted) {
       setFetchAttempted(false);
@@ -54,12 +54,12 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   console.log("isAuthenticated", isAuthenticated);
   if (requireAuth && !isAuthenticated) {
     console.log("User not authenticated, showing login prompt");
-      navigate('/')
+    navigate('/')
   }
 
   // If specific roles are required but user doesn't have the right role
   if (requireAuth && isAuthenticated && roles.length > 0 && user && !roles.includes(user.role)) {
-   navigate('/')
+    navigate('/')
   }
   if (requireAuth && isAuthenticated && user?.isBlocked) {
     return (
@@ -73,7 +73,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
           </p>
           <button
             onClick={() => {
-                 console.log("this was tiggered")
+              console.log("this was tiggered")
               localStorage.removeItem("accessToken");
               window.location.href = "/login";
             }}

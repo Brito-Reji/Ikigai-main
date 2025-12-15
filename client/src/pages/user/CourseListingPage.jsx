@@ -9,7 +9,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import CourseCard from "../../components/CourseCard.jsx";
+import CourseCard from "../../components/student/CourseCard.jsx";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePublicCourses } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
@@ -245,8 +245,8 @@ export default function CoursesPage() {
           {/* Sidebar Filters */}
           <div
             className={`fixed left-0 top-0 h-full w-64 bg-white z-40 transform transition-transform duration-300 lg:relative lg:w-64 lg:transform-none lg:top-auto lg:h-auto lg:bg-transparent lg:z-auto overflow-y-auto ${sidebarOpen
-                ? "translate-x-0"
-                : "-translate-x-full lg:translate-x-0"
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
               }`}
           >
             <div className="p-4 lg:p-0 space-y-4">
@@ -290,8 +290,8 @@ export default function CoursesPage() {
                             <Star
                               key={i}
                               className={`w-4 h-4 ${i < rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
                                 }`}
                             />
                           ))}
@@ -494,8 +494,8 @@ export default function CoursesPage() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition shrink-0 text-sm ${currentPage === pageNum
-                          ? "bg-gray-900 text-white hover:bg-gray-800"
-                          : "border border-gray-300 hover:bg-gray-50"
+                        ? "bg-gray-900 text-white hover:bg-gray-800"
+                        : "border border-gray-300 hover:bg-gray-50"
                         }`}
                     >
                       {pageNum}

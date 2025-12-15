@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "../assets/images/logo.png";
+import logo from "../../assets/images/logo.png";
 
 const LoadingScreen = () => {
   const [progress, setProgress] = useState(0);
@@ -56,7 +56,7 @@ const LoadingScreen = () => {
           <div className="absolute inset-0 -m-4">
             <div className="w-32 h-32 border-4 border-indigo-200 rounded-full animate-spin-slow"></div>
           </div>
-          
+
           {/* Middle ring */}
           <div className="absolute inset-0 -m-2">
             <div className="w-28 h-28 border-4 border-purple-200 rounded-full animate-spin-reverse"></div>
@@ -76,7 +76,7 @@ const LoadingScreen = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-2 animate-fade-in">
           Ikigai
         </h1>
-        
+
         {/* Tagline */}
         <p className="text-gray-600 mb-8 animate-fade-in animation-delay-500">
           Find Your Purpose Through Learning

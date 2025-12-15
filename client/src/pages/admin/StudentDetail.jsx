@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "@/api/axiosConfig";
-import { 
-  ArrowLeft, 
-  Mail, 
-  User, 
-  Calendar, 
-  Shield, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Mail,
+  User,
+  Calendar,
+  Shield,
+  CheckCircle,
   XCircle,
   ChevronRight,
   Home
 } from "lucide-react";
-import ThreeDotLoader from "@/components/ThreeDotLoader";
+import ThreeDotLoader from "@/components/common/ThreeDotLoader";
 import Swal from "sweetalert2";
 
 const StudentDetail = () => {
@@ -58,7 +58,7 @@ const StudentDetail = () => {
       try {
         await api.patch(`/admin/students/${id}/toggle-block`);
         setStudent({ ...student, isBlocked: !student.isBlocked });
-        
+
         Swal.fire({
           title: `Student ${action === "block" ? "Blocked" : "Unblocked"}!`,
           text: `${getFullName(student)} has been ${action}ed successfully.`,
@@ -90,9 +90,9 @@ const StudentDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { 
-      day: "2-digit", 
-      month: "long", 
+    return date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "long",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit"
@@ -161,20 +161,18 @@ const StudentDetail = () => {
               <p className="text-gray-600 text-lg mb-3">@{student.username || "N/A"}</p>
               <div className="flex items-center space-x-3">
                 <span
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
-                    student.isBlocked
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${student.isBlocked
                       ? "bg-red-100 text-red-800"
                       : "bg-green-100 text-green-800"
-                  }`}
+                    }`}
                 >
                   {student.isBlocked ? "Blocked" : "Active"}
                 </span>
                 <span
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
-                    student.isVerified
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${student.isVerified
                       ? "bg-blue-100 text-blue-800"
                       : "bg-gray-100 text-gray-800"
-                  }`}
+                    }`}
                 >
                   {student.isVerified ? "Verified" : "Not Verified"}
                 </span>
@@ -183,11 +181,10 @@ const StudentDetail = () => {
           </div>
           <button
             onClick={handleBlockToggle}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              student.isBlocked
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${student.isBlocked
                 ? "bg-green-500 text-white hover:bg-green-600"
                 : "bg-red-500 text-white hover:bg-red-600"
-            }`}
+              }`}
           >
             {student.isBlocked ? "Unblock Student" : "Block Student"}
           </button>

@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { registerUser, clearError } from "@/store/slices/authSlice.js";
 import Swal from "sweetalert2";
-import GoogleAuth from "@/components/GoogleAuth.jsx";
-import Footer from "@/components/Footer.jsx";
+import GoogleAuth from "@/components/common/GoogleAuth.jsx";
+import Footer from "@/components/layout/Footer.jsx";
 import logo from "../../assets/images/logo.png";
 import { useUsernameCheck } from "@/hooks/useUsernameCheck.js";
 
@@ -189,7 +189,7 @@ export default function SignUpPage() {
                 <h2 className="text-2xl font-bold text-gray-900">Ikigai</h2>
                 <p className="text-sm text-gray-500 mt-1">Find Your Purpose Through Learning</p>
               </div>
-              
+
               <div className="mb-8">
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
                   Create Your Account
@@ -218,11 +218,10 @@ export default function SignUpPage() {
                         placeholder="First Name"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.firstName
+                        className={`w-full px-4 py-3 border ${errors.firstName
                             ? "border-red-500"
                             : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         disabled={loading}
                       />
                       {errors.firstName && (
@@ -238,9 +237,8 @@ export default function SignUpPage() {
                         placeholder="Last Name"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.lastName ? "border-red-500" : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                        className={`w-full px-4 py-3 border ${errors.lastName ? "border-red-500" : "border-gray-300"
+                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         disabled={loading}
                       />
                       {errors.lastName && (
@@ -264,15 +262,14 @@ export default function SignUpPage() {
                       placeholder="Username"
                       value={formData.username}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.username 
-                          ? "border-red-500" 
-                          : isAvailable === false 
-                          ? "border-red-500" 
-                          : isAvailable === true 
-                          ? "border-green-500" 
-                          : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10`}
+                      className={`w-full px-4 py-3 border ${errors.username
+                          ? "border-red-500"
+                          : isAvailable === false
+                            ? "border-red-500"
+                            : isAvailable === true
+                              ? "border-green-500"
+                              : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10`}
                       disabled={loading}
                     />
                     {/* Username availability indicator */}
@@ -311,9 +308,8 @@ export default function SignUpPage() {
                     placeholder="Email ID"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                    className={`w-full px-4 py-3 border ${errors.email ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                     disabled={loading}
                   />
                   {errors.email && (
@@ -334,9 +330,8 @@ export default function SignUpPage() {
                         placeholder="Enter Password"
                         value={formData.password}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.password ? "border-red-500" : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12`}
+                        className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"
+                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12`}
                         disabled={loading}
                       />
                       <button
@@ -367,9 +362,8 @@ export default function SignUpPage() {
                       placeholder="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      className={`w-full px-4 py-3 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                       disabled={loading}
                     />
                     {errors.confirmPassword && (
@@ -384,11 +378,10 @@ export default function SignUpPage() {
                 <button
                   type="submit"
                   disabled={loading || isAvailable === false || isChecking}
-                  className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${
-                    loading || isAvailable === false || isChecking
+                  className={`w-full px-6 py-3 bg-gray-900 text-white rounded-lg transition flex items-center justify-center space-x-2 ${loading || isAvailable === false || isChecking
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-gray-800"
-                  }`}
+                    }`}
                 >
                   <span>
                     {loading ? "Creating Account..." : "Create Account"}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Save, Mail, Phone, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProfileImageUpload from "@/components/ProfileImageUpload.jsx";
+import ProfileImageUpload from "@/components/profile/ProfileImageUpload.jsx";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile.js";
 import Swal from "sweetalert2";
 
@@ -9,7 +9,7 @@ export default function EditInstructorProfilePage() {
   const navigate = useNavigate();
   const { data: profileData, isLoading } = useProfile();
   const updateMutation = useUpdateProfile();
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
