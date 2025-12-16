@@ -59,14 +59,7 @@ export default function AppRoutes() {
         <Route path="student/forget-password" element={<StudentForgetPassword />} />
         <Route path="student/reset-password" element={<StudentResetPassword />} />
 
-        <Route
-          path="courses"
-          element={
-            <AuthGuard requireAuth={true} roles={["student"]}>
-              <UserCourseListingPage />
-            </AuthGuard>
-          }
-        />
+        <Route path="courses" element={<UserCourseListingPage />} />
         <Route path="course/:courseId" element={<UserCourseDetailPage />} />
         <Route
           path="cart"

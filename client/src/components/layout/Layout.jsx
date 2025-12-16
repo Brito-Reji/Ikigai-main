@@ -10,8 +10,8 @@ function Layout() {
   const navigate = useNavigate()
   let user = useUser()
    useEffect(() => {
-        if(!user && user?.role !== "student") {
-      navigate("/")
+        if(user && user?.role !== "student") {
+         alert("You are not authorized to access this page")
     }
     },[])
   
