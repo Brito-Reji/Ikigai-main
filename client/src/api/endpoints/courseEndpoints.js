@@ -14,6 +14,8 @@ export const courseEndpoints = {
         list: () => '/public/courses',
         featured: () => '/public/courses/featured',
         details: (courseId) => `/public/courses/${courseId}`,
+        chapters: (courseId) => `/public/courses/${courseId}/chapters`,
+        lessons: (courseId, chapterId) => `/public/courses/${courseId}/chapters/${chapterId}`,
     },
 
     student: {

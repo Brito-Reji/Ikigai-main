@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { getPublishedCourses, getFeaturedCourses, getCourseStats, getPublicCourseDetails, getPublicCourseLessons } from "../controllers/public/courseController.js";
+import { getPublishedCourses, getFeaturedCourses, getCourseStats, getPublicCourseDetails, getPublicCourseLessons, getPublicCourseChapters } from "../controllers/public/courseController.js";
 import { getCategories } from "../controllers/admin/catergoryController.js";
-import { getPublicCourseChapters } from "../controllers/students/studentChapterController.js";
 
 const router = Router();
 

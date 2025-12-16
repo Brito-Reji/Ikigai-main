@@ -61,6 +61,17 @@ export const courseApi = {
             const { data } = await api.get(courseEndpoints.public.details(courseId))
             return data
         },
+
+        getChapters: async (courseId) => {
+            const { data } = await api.get(courseEndpoints.public.chapters(courseId))
+
+            return data
+        },
+
+        getLessons: async (courseId, chapterId) => {
+            const { data } = await api.get(courseEndpoints.public.lessons(courseId, chapterId))
+            return data
+        },
     },
 
     admin: {

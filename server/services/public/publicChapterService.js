@@ -1,4 +1,4 @@
-import { Chapter } from "../../models/Chapter";
+import { Chapter } from "../../models/Chapter.js";
 
 // GET PUBLIC COURSE CHAPTERS
 export const getPublicCourseChaptersService = async (courseId) => {

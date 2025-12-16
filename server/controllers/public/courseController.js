@@ -4,7 +4,9 @@ import {
   getFeaturedCoursesService,
   getPublicCourseDetailsService,
   getCourseStatsService,
-  } from "../../services/public/publicCourseService.js";
+  getPublicCourseLessonsService,
+} from "../../services/public/publicCourseService.js";
+import { getPublicCourseChaptersService } from "../../services/public/publicChapterService.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
@@ -73,9 +75,9 @@ export const getPublicCourseChapters = asyncHandler(async (req, res) => {
 
 // get lessons
 export const getPublicCourseLessons = asyncHandler(async (req, res) => {
-  const { courseId } = req.params;
+  const { chapterId } = req.params;
 
-  const lessons = await getPublicCourseLessonsService(courseId);
+  const lessons = await getPublicCourseLessonsService(chapterId);
 
   res.status(200).json({
     success: true,

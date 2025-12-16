@@ -102,3 +102,20 @@ export const usePublicCourse = (courseId) => {
         enabled: !!courseId,
     })
 }
+
+export const usePublicCourseChapters = (courseId) => {
+    return useQuery({
+        queryKey: ['public-course-chapters', courseId],
+        queryFn: () => courseApi.public.getChapters(courseId),
+        enabled: !!courseId,
+    })
+}
+
+export const usePublicCourseLessons = (courseId, chapterId) => {
+    return useQuery({
+        queryKey: ['public-course-lessons', courseId, chapterId],
+        queryFn: () => courseApi.public.getLessons(courseId, chapterId),
+        enabled: !!courseId && !!chapterId,
+    })
+}
+

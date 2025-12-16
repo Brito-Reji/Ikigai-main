@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { usePublicCourse } from "@/hooks/useCourses.js";
+import { usePublicCourse, usePublicCourseChapters, usePublicCourseLessons } from "@/hooks/useCourses.js";
 import { useStudentChapters } from "@/hooks/useChapters.js";
 
 // Components
@@ -14,7 +14,11 @@ import Footer from "@/components/layout/Footer.jsx";
 const CourseDetailPage = () => {
   const { courseId } = useParams();
   const { data: courseData, isLoading: publicDetailsLoading, error: publicDetailsError } = usePublicCourse(courseId);
+  const { data: chaptersData, isLoading: chaptersLoading } = usePublicCourseChapters(courseId);
+  const { data: lessonsData, isLoading: lessonsLoading } = usePublicCourseLessons(courseId, chaptersData?.data?.chapters?.[0]?.id);
   console.log("course dataaa-->", courseData)
+  console.log("chapters dataaa-->", chaptersData)
+  console.log("lessons dataaa-->", lessonsData)
   const [activeTab, setActiveTab] = useState("overview");
 
   const publicCourseDetails = courseData?.data;
@@ -117,11 +121,10 @@ const CourseDetailPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -156,12 +159,12 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <CourseSyllabus course={publicCourseDetails} />
               </div>
             )}
-
-            {activeTab === "syllabus" && <CourseSyllabus course={publicCourseDetails} chapters={chapters} isLoading={chaptersLoading} />}
+            {console.log(chapters)}
+            {activeTab === "syllabus" && <CourseSyllabus course={publicCourseDetails} chapters={chapters} />}
             {activeTab === "instructor" && <InstructorInfo instructor={publicCourseDetails.instructor} />}
             {activeTab === "reviews" && <CourseReviews course={publicCourseDetails} />}
           </div>

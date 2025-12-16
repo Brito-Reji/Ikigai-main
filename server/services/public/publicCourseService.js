@@ -172,9 +172,9 @@ export const getCourseStatsService = async () => {
 
 
 // GET PUBLIC COURSE LESSONS
-export const getPublicCourseLessonsService = async (courseId) => {
+export const getPublicCourseLessonsService = async (chapterId) => {
     const lessons = await Lesson.find({
-        course: courseId,
+        chapter: chapterId,
         deleted: { $ne: true },
     }).sort({ order: 1 });
 
