@@ -1,11 +1,12 @@
+```javascript
 import { useCart } from "@/hooks/useRedux";
-import { Star, ShoppingCart, Check, Heart } from "lucide-react";
+import { Star, ShoppingCart, Check } from "lucide-react";
 import { useState } from "react";
+import WishlistHeart from "@/components/common/WishlistHeart";
 
 // Course card component for displaying course information
 export default function CourseCard({ course }) {
   const [isInCart, setIsInCart] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const { addToCart,dispatch}  =useCart()
@@ -30,22 +31,6 @@ export default function CourseCard({ course }) {
     }
   };
 
-  const handleToggleWishlist = (e) => {
-    e.stopPropagation(); // Prevent card click event
-    
-    setIsInWishlist(!isInWishlist);
-    setNotificationMessage(isInWishlist ? "Removed from wishlist" : "Added to wishlist!");
-    setShowNotification(true);
-    
-    // Hide notification after 2 seconds
-    setTimeout(() => {
-      setShowNotification(false);
-    }, 2000);
-    
-    // You can add your wishlist logic here
-    console.log(isInWishlist ? "Removed from wishlist:" : "Added to wishlist:", course.title);
-  };
-
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group relative">
       {/* Notification */}
@@ -64,32 +49,20 @@ export default function CourseCard({ course }) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
-        {/* Wishlist Button - Top Left */}
-        <button 
-          onClick={handleToggleWishlist}
-          className={`absolute top-3 left-3 p-2 rounded-full shadow-md transition-all duration-300 ${
-            isInWishlist 
-              ? "bg-red-500 opacity-100 scale-110" 
-              : "bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 hover:bg-white"
-          }`}
-        >
-          <Heart 
-            className={`w-4 h-4 transition-all duration-300 ${
-              isInWishlist 
-                ? "text-white fill-white" 
-                : "text-red-500"
-            }`}
-          />
-        </button>
+        {/* Wishlist Heart - Top Left */}
+        <WishlistHeart 
+          courseId={course._id} 
+          className="absolute top-3 left-3 z-10" 
+        />
 
         {/* Cart Button - Top Right */}
         <button 
           onClick={handleAddToCart}
-          className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-300 ${
-            isInCart 
-              ? "bg-green-500 opacity-100 scale-110" 
-              : "bg-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-700"
-          }`}
+          className={`absolute top - 3 right - 3 p - 2 rounded - full shadow - md transition - all duration - 300 z - 10 ${
+  isInCart
+    ? "bg-green-500 opacity-100 scale-110"
+    : "bg-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-700"
+} `}
         >
           {isInCart ? (
             <Check className="w-4 h-4 text-white" />
@@ -113,11 +86,11 @@ export default function CourseCard({ course }) {
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                i < Math.floor(course.rating || 0) 
-                  ? "fill-yellow-400 text-yellow-400" 
-                  : "text-gray-300"
-              }`}
+              className={`w - 3 h - 3 sm: w - 4 sm: h - 4 ${
+  i < Math.floor(course.rating || 0)
+    ? "fill-yellow-400 text-yellow-400"
+    : "text-gray-300"
+} `}
             />
           ))}
           <span className="text-xs text-gray-600 ml-1">({course.rating || 0})</span>
