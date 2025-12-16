@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
 import { loginUser, clearError } from "@/store/slices/authSlice.js";
+import { setCart, clearCart } from "@/store/slices/cartSlice.js";
+import { useSyncCart } from "@/hooks/useCart.js";
 import logo from "../../assets/images/logo.png";
 import Swal from "sweetalert2";
 
@@ -11,6 +14,8 @@ function LoginPage() {
   let navigate = useNavigate();
   const location = useLocation();
   const { dispatch, loading, isAuthenticated } = useAuth();
+  const cartItems = useSelector((state) => state.cart.items);
+  const { mutate: syncCartMutation } = useSyncCart();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -165,6 +170,19 @@ function LoginPage() {
               },
             });
           } else {
+            // Sync guest cart if exists
+            if (cartItems.length > 0) {
+              const courseIds = cartItems.map(item => item._id);
+              syncCartMutation(courseIds, {
+                onSuccess: () => {
+                  dispatch(clearCart());
+                },
+                onError: (error) => {
+                  console.error("Cart sync failed:", error);
+                }
+              });
+            }
+
             // Clear success message
             setSuccessMessage("");
             // Small delay to ensure Redux state is fully updated
@@ -264,8 +282,8 @@ function LoginPage() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className={`w-full px-4 py-3 border ${errors.email && touched.email
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-indigo-500"
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-indigo-500"
                   } rounded-lg focus:outline-none focus:ring-2`}
               />
               {errors.email && touched.email && (
@@ -287,8 +305,8 @@ function LoginPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={`w-full px-4 py-3 border ${errors.password && touched.password
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-indigo-500"
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-indigo-500"
                     } rounded-lg focus:outline-none focus:ring-2 pr-12`}
                 />
                 <button

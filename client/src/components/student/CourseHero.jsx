@@ -1,8 +1,58 @@
 import React from "react";
 import { Star, Clock, Users, Globe, Award } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart as addToCartRedux } from "@/store/slices/cartSlice";
+import { useAddToCart } from "@/hooks/useCart";
+import toast from "react-hot-toast";
 
 const CourseHero = ({ course }) => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.items);
+  const user = useSelector((state) => state.auth.user);
+  const { mutate: addToCartAPI, isPending } = useAddToCart();
+
   if (!course) return null;
+
+  const isInCart = cartItems.some((item) => item._id === course._id);
+
+  const handleAddToCart = () => {
+    console.log("User state:", user);
+    console.log("Is authenticated:", !!user);
+
+    if (isInCart) {
+      toast.error("Course already in cart");
+      return;
+    }
+
+    const courseData = {
+      _id: course._id,
+      title: course.title,
+      price: course.price,
+      thumbnail: course.thumbnail,
+      instructor: course.instructor,
+      category: course.category
+    };
+
+    if (user && user._id) {
+      // Authenticated user - add to backend
+      console.log("Adding to backend for authenticated user");
+      addToCartAPI(course._id, {
+        onSuccess: () => {
+          dispatch(addToCartRedux(courseData));
+          toast.success("Added to cart!");
+        },
+        onError: (error) => {
+          const message = error.response?.data?.message || "Failed to add to cart";
+          toast.error(message);
+        }
+      });
+    } else {
+      // Guest user - add to localStorage only
+      console.log("Adding to localStorage for guest user");
+      dispatch(addToCartRedux(courseData));
+      toast.success("Added to cart!");
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white">
@@ -15,15 +65,15 @@ const CourseHero = ({ course }) => {
                 {course.category?.name}
               </span>
             </div>
-            
+
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
               {course.title}
             </h1>
-            
+
             <p className="text-xl text-blue-100 mb-6 leading-relaxed">
               {course.description}
             </p>
-            
+
             {/* Course Stats */}
             <div className="flex flex-wrap items-center gap-6 mb-6">
               <div className="flex items-center">
@@ -31,11 +81,10 @@ const CourseHero = ({ course }) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(course.rating || 4.5)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-400"
-                      }`}
+                      className={`w-5 h-5 ${i < Math.floor(course.rating || 4.5)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-400"
+                        }`}
                     />
                   ))}
                 </div>
@@ -46,27 +95,27 @@ const CourseHero = ({ course }) => {
                   ({course.reviews || 234} reviews)
                 </span>
               </div>
-              
+
               <div className="flex items-center text-blue-200">
                 <Users className="w-5 h-5 mr-2" />
                 <span>{course.students || 1254} students</span>
               </div>
-              
+
               <div className="flex items-center text-blue-200">
                 <Clock className="w-5 h-5 mr-2" />
                 <span>{course.duration || 24} hours</span>
               </div>
-              
+
               <div className="flex items-center text-blue-200">
                 <Globe className="w-5 h-5 mr-2" />
                 <span>English</span>
               </div>
             </div>
-            
+
             {/* Instructor */}
             <div className="flex items-center">
-              <img 
-                src={course.instructor?.profileImageUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"} 
+              <img
+                src={course.instructor?.profileImageUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"}
                 alt={`${course.instructor?.firstName} ${course.instructor?.lastName}`}
                 className="w-12 h-12 rounded-full mr-4 object-cover"
               />
@@ -78,7 +127,7 @@ const CourseHero = ({ course }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Course Preview Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
@@ -94,7 +143,7 @@ const CourseHero = ({ course }) => {
                 <div className="absolute inset-0 bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all" >
                   <button className="bg-white bg-opacity-90 hover:bg-opacity-100 hover:scale-110 rounded-full p-5 transition-all shadow-lg">
                     <svg className="w-10 h-10 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                     </svg>
                   </button>
                 </div>
@@ -102,21 +151,28 @@ const CourseHero = ({ course }) => {
                   Preview
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <div className="text-center mb-4">
                   <span className="text-3xl font-bold text-gray-900">₹{course.price}</span>
                   <span className="text-gray-500 line-through ml-2">₹{Math.round(course.price * 1.5)}</span>
                 </div>
-                
-                <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors mb-3">
-                  Add to Cart
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isPending || isInCart}
+                  className={`w-full py-3 rounded-lg font-semibold transition-colors mb-3 ${isInCart
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}
+                >
+                  {isPending ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
                 </button>
-                
+
                 <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
                   Buy Now
                 </button>
-                
+
                 <div className="mt-4 text-center text-sm text-gray-600">
                   <p>30-Day Money-Back Guarantee</p>
                   <p>Full Lifetime Access</p>

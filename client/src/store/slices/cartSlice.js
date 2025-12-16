@@ -26,7 +26,6 @@ const cartSlice = createSlice({
     reducers: {
         addToCart: (state, action) => {
             const course = action.payload;
-            // Check if course already exists in cart
             const existingItem = state.items.find((item) => item._id === course._id);
 
             if (!existingItem) {
@@ -35,17 +34,19 @@ const cartSlice = createSlice({
             }
         },
         removeFromCart: (state, action) => {
-            // Filter out the item with matching _id
             state.items = state.items.filter(item => item._id !== action.payload);
             saveCartToStorage(state.items);
         },
+        setCart: (state, action) => {
+            state.items = action.payload;
+            saveCartToStorage(state.items);
+        },
         clearCart: (state) => {
-                
             state.items = [];
             localStorage.removeItem("cart");
         }
     }
 });
 
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, setCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
