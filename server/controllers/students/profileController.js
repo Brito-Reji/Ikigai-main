@@ -9,7 +9,7 @@ import {
 
 // GET STUDENT PROFILE
 export const getProfile = asyncHandler(async (req, res) => {
-    const user = await getProfileService(req.user.id);
+    const user = await getProfileService(req.user._id);
 
     res.status(200).json({
         success: true,
@@ -32,7 +32,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     if (phone) updateData.phone = phone;
     if (address) updateData.address = address;
 
-    const user = await updateProfileService(req.user.id, updateData);
+    const user = await updateProfileService(req.user._id, updateData);
 
     res.status(200).json({
         success: true,
@@ -52,7 +52,7 @@ export const requestEmailChangeOTP = asyncHandler(async (req, res) => {
         });
     }
 
-    const result = await requestEmailChangeOTPService(req.user.id, newEmail, password);
+    const result = await requestEmailChangeOTPService(req.user._id, newEmail, password);
 
     res.status(200).json({
         success: true,
@@ -71,7 +71,7 @@ export const verifyEmailChangeOTP = asyncHandler(async (req, res) => {
         });
     }
 
-    const result = await verifyEmailChangeOTPService(req.user.id, newEmail, otp);
+    const result = await verifyEmailChangeOTPService(req.user._id, newEmail, otp);
 
     res.status(200).json({
         success: true,
@@ -90,7 +90,7 @@ export const changePassword = asyncHandler(async (req, res) => {
         });
     }
 
-    const result = await changePasswordService(req.user.id, currentPassword, newPassword);
+    const result = await changePasswordService(req.user._id, currentPassword, newPassword);
 
     res.status(200).json({
         success: true,

@@ -109,9 +109,11 @@ export default function Header({ onMenuToggle, menuOpen }) {
             {isAuthenticated ? (
               <>
                 {/* Authenticated User Actions - Always visible on desktop */}
-                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
-                  <Heart className="w-5 h-5" />
-                </button>
+                <Link to="/wishlist">
+                  <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                    <Heart className="w-5 h-5" />
+                  </button>
+                </Link>
                 <div className="hidden md:block">
                   <CartIcon />
                 </div>
@@ -195,13 +197,13 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
             {isAuthenticated ? (
               <>
-                <a
-                  href="#"
+                <Link
+                  to="/wishlist"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <Heart className="w-5 h-5" />
                   <span>Wishlist</span>
-                </a>
+                </Link>
                 <Link
                   to="/cart"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
