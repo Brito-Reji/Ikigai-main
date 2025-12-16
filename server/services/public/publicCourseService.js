@@ -1,8 +1,10 @@
-import asyncHandler from "express-async-handler";
+
 import { Course } from "../../models/Course.js";
+import { Lesson } from "../../models/Lesson.js";
+import { Chapter } from "../../models/Chapter.js";
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
-export const buildPublicCourseQuery = asyncHandler(async (queryParams) => {
+export const buildPublicCourseQuery = async (queryParams) => {
     const { category, search, priceRange } = queryParams;
 
     const query = { published: true, blocked: false, deleted: { $ne: true } };
@@ -37,10 +39,10 @@ export const buildPublicCourseQuery = asyncHandler(async (queryParams) => {
     }
 
     return query;
-});
+};
 
 // GET SORT OPTIONS FOR PUBLIC COURSES
-export const getSortOption = asyncHandler(async (sort) => {
+export const getSortOption = async (sort) => {
     switch (sort) {
         case "price-low":
             return { price: 1 };
@@ -56,10 +58,10 @@ export const getSortOption = asyncHandler(async (sort) => {
         default:
             return { createdAt: -1 };
     }
-});
+};
 
 // GET PUBLISHED COURSES
-export const getPublishedCoursesService = asyncHandler(async (queryParams) => {
+export const getPublishedCoursesService = async (queryParams) => {
     const page = parseInt(queryParams.page || 1);
     const limit = parseInt(queryParams.limit || 12);
 
@@ -93,10 +95,10 @@ export const getPublishedCoursesService = asyncHandler(async (queryParams) => {
             hasPrev: page > 1,
         },
     };
-});
+};
 
 // GET FEATURED COURSES
-export const getFeaturedCoursesService = asyncHandler(async (limit = 4) => {
+export const getFeaturedCoursesService = async (limit = 4) => {
     const courses = await Course.find({
         published: true,
         blocked: false,
@@ -108,10 +110,10 @@ export const getFeaturedCoursesService = asyncHandler(async (limit = 4) => {
         .limit(parseInt(limit));
 
     return courses;
-});
+};
 
 // GET PUBLIC COURSE DETAILS
-export const getPublicCourseDetailsService = asyncHandler(async (courseId) => {
+export const getPublicCourseDetailsService = async (courseId) => {
     // First check if course exists at all
     const courseExists = await Course.findOne({
         _id: courseId,
@@ -142,10 +144,10 @@ export const getPublicCourseDetailsService = asyncHandler(async (courseId) => {
         .populate("instructor", "firstName lastName email profileImageUrl headline description social");
 
     return course;
-});
+};
 
 // GET PUBLIC COURSE STATISTICS
-export const getCourseStatsService = asyncHandler(async () => {
+export const getCourseStatsService = async () => {
     const totalCourses = await Course.countDocuments({
         published: true,
         blocked: false,
@@ -164,4 +166,17 @@ export const getCourseStatsService = asyncHandler(async () => {
         totalStudents: 0,
         totalCategories: 0,
     };
-});
+};
+
+
+
+
+// GET PUBLIC COURSE LESSONS
+export const getPublicCourseLessonsService = async (courseId) => {
+    const lessons = await Lesson.find({
+        course: courseId,
+        deleted: { $ne: true },
+    }).sort({ order: 1 });
+
+    return lessons;
+};

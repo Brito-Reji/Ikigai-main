@@ -1,9 +1,9 @@
-import asyncHandler from "express-async-handler";
+
 import { Category } from "../../models/Category.js";
 import { Course } from "../../models/Course.js";
 
 // GET CATEGORIES
-export const getCategoriesService = asyncHandler(async ({ page, limit, search }) => {
+export const getCategoriesService = async ({ page, limit, search }) => {
     let query = {};
 
     if (search) {
@@ -46,10 +46,10 @@ export const getCategoriesService = asyncHandler(async ({ page, limit, search })
             hasPrev: page > 1,
         },
     };
-});
+};
 
 // CREATE CATEGORIES
-export const createCategoryService = asyncHandler(async ({ name, description }) => {
+export const createCategoryService = async ({ name, description }) => {
     if (!name || !description) {
         throw new Error("Name and description are required");
     }
@@ -63,10 +63,10 @@ export const createCategoryService = asyncHandler(async ({ name, description }) 
     });
 
     return category;
-});
+};
 
 // EDIT CATEGORIES
-export const editCategoryService = asyncHandler(async (categoryId, { name, description }) => {
+export const editCategoryService = async (categoryId, { name, description }) => {
     if (!name || !description) {
         throw new Error("Name and description are required");
     }
@@ -87,10 +87,10 @@ export const editCategoryService = asyncHandler(async (categoryId, { name, descr
     await category.save();
 
     return category;
-});
+};
 
 // TOGGLE BLOCK
-export const toggleCategoryBlockService = asyncHandler(async (categoryId) => {
+export const toggleCategoryBlockService = async (categoryId) => {
     const category = await Category.findById(categoryId);
     if (!category) throw new Error("Category not found");
 
@@ -98,4 +98,4 @@ export const toggleCategoryBlockService = asyncHandler(async (categoryId) => {
     await category.save();
 
     return category;
-});
+};

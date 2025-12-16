@@ -18,7 +18,7 @@ const CourseDetailPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
   const publicCourseDetails = courseData?.data;
-  const chapters = chaptersData?.data || [];
+  const chapters = courseData?.data?.chapters || [];
 
   if (publicDetailsLoading) {
     return (

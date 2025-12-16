@@ -3,8 +3,8 @@ import {
   getPublishedCoursesService,
   getFeaturedCoursesService,
   getPublicCourseDetailsService,
-  getCourseStatsService
-} from "../../services/public/publicCourseService.js";
+  getCourseStatsService,
+  } from "../../services/public/publicCourseService.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
@@ -53,5 +53,34 @@ export const getCourseStats = asyncHandler(async (req, res) => {
     success: true,
     message: "COURSE STATISTICS FETCHED SUCCESSFULLY",
     data: stats,
+  });
+});
+
+// get chapters
+export const getPublicCourseChapters = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  const chapters = await getPublicCourseChaptersService(courseId);
+
+  res.status(200).json({
+    success: true,
+    message: "CHAPTERS FETCHED SUCCESSFULLY",
+    data: chapters,
+    count: chapters.length,
+  });
+});
+
+
+// get lessons
+export const getPublicCourseLessons = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  const lessons = await getPublicCourseLessonsService(courseId);
+
+  res.status(200).json({
+    success: true,
+    message: "LESSONS FETCHED SUCCESSFULLY",
+    data: lessons,
+    count: lessons.length,
   });
 });

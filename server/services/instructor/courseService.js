@@ -1,9 +1,9 @@
-import asyncHandler from "express-async-handler";
+
 import { Course } from "../../models/Course.js";
 import { Category } from "../../models/Category.js";
 
 // GET ALL COURSES BY INSTRUCTOR
-export const getAllCourseByInstructorService = asyncHandler(async (instructorId) => {
+export const getAllCourseByInstructorService = async (instructorId) => {
     const courses = await Course.find({
         instructor: instructorId,
         deleted: { $ne: true },
@@ -13,10 +13,10 @@ export const getAllCourseByInstructorService = asyncHandler(async (instructorId)
         .sort({ createdAt: -1 });
 
     return courses;
-});
+};
 
 // VALIDATE COURSE INPUT
-export const validateCourseInput = asyncHandler(async (data) => {
+export const validateCourseInput = async (data) => {
     const {
         title,
         description,
@@ -83,10 +83,10 @@ export const validateCourseInput = asyncHandler(async (data) => {
         chosenType,
         finalPrice,
     };
-});
+};
 
 // CREATE COURSE
-export const createCourseService = asyncHandler(async (instructorId, data) => {
+export const createCourseService = async (instructorId, data) => {
     const {
         title,
         description,
@@ -116,10 +116,10 @@ export const createCourseService = asyncHandler(async (instructorId, data) => {
     return await Course.findById(course._id)
         .populate("category", "name")
         .populate("instructor", "firstName lastName email profileImageUrl headline");
-});
+};
 
 // UPDATE COURSE
-export const updateCourseService = asyncHandler(async (courseId, instructorId, data) => {
+export const updateCourseService = async (courseId, instructorId, data) => {
     const existing = await Course.findById(courseId);
     if (!existing) throw new Error("Course not found");
 
@@ -154,10 +154,10 @@ export const updateCourseService = asyncHandler(async (courseId, instructorId, d
         .populate("instructor", "firstName lastName email profileImageUrl headline");
 
     return updatedCourse;
-});
+};
 
 // GET COURSE BY ID
-export const getCourseByIdService = asyncHandler(async (courseId, instructorId) => {
+export const getCourseByIdService = async (courseId, instructorId) => {
     const course = await Course.findById(courseId)
         .populate("category", "name")
         .populate("instructor", "firstName lastName email profileImageUrl headline");
@@ -169,4 +169,4 @@ export const getCourseByIdService = asyncHandler(async (courseId, instructorId) 
     }
 
     return course;
-});
+};
