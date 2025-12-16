@@ -15,6 +15,7 @@ import StudentResetPassword from "@/pages/user/Password.jsx";
 import UserCourseListingPage from "@/pages/user/CourseListingPage.jsx";
 import UserCourseDetailPage from "@/pages/user/CourseDetailPage.jsx";
 import CartPage from "@/pages/user/CartPage.jsx";
+import WishlistPage from "@/pages/user/WishlistPage.jsx";
 import CheckoutPage from "@/pages/user/CheckoutPage.jsx";
 import StudentProfilePage from "@/pages/user/ProfilePage.jsx";
 import EditStudentProfilePage from "@/pages/user/EditProfilePage.jsx";
@@ -66,6 +67,14 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
               <CartPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="wishlist"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <WishlistPage />
             </AuthGuard>
           }
         />
