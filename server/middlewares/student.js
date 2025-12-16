@@ -38,7 +38,7 @@ const isStudent = async (req, res, next) => {
     }
 
     req.user = {
-      id: user._id,
+      _id: user._id,
       email: user.email,
       role: user.role,
     };

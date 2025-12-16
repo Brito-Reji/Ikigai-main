@@ -3,6 +3,7 @@ import { Star, Clock, Users, Globe, Award } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart as addToCartRedux } from "@/store/slices/cartSlice";
 import { useAddToCart } from "@/hooks/useCart";
+import WishlistHeart from "@/components/common/WishlistHeart";
 import toast from "react-hot-toast";
 
 const CourseHero = ({ course }) => {
@@ -140,6 +141,10 @@ const CourseHero = ({ course }) => {
                     e.target.src = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80";
                   }}
                 />
+                <WishlistHeart
+                  courseId={course._id}
+                  className="absolute top-3 right-3 z-10"
+                />
                 <div className="absolute inset-0 bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all" >
                   <button className="bg-white bg-opacity-90 hover:bg-opacity-100 hover:scale-110 rounded-full p-5 transition-all shadow-lg">
                     <svg className="w-10 h-10 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
@@ -147,7 +152,7 @@ const CourseHero = ({ course }) => {
                     </svg>
                   </button>
                 </div>
-                <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
+                <div className="absolute top-3 left-3 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
                   Preview
                 </div>
               </div>

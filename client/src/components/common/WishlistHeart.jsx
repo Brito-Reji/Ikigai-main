@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const WishlistHeart = ({ courseId, className = "" }) => {
     const navigate = useNavigate();
     const user = useSelector((state) => state.auth.user);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const { data: wishlistData } = useWishlist();
     const { mutate: toggleWishlist, isPending } = useToggleWishlist();
     const [isInWishlist, setIsInWishlist] = useState(false);
@@ -23,10 +24,23 @@ const WishlistHeart = ({ courseId, className = "" }) => {
 
     const handleClick = (e) => {
         e.stopPropagation();
+        e.preventDefault();
 
-        if (!user || !user._id) {
+        console.log("WishlistHeart - Auth state:", { isAuthenticated, user });
+
+        if (!isAuthenticated) {
+            console.log("WishlistHeart - Not authenticated, redirecting to login");
             toast.error("Please login to add to wishlist");
             navigate("/login");
+            return;
+        }
+
+        console.log("WishlistHeart - courseId prop:", courseId);
+        console.log("WishlistHeart - Toggling wishlist for course:", courseId);
+
+        if (!courseId) {
+            console.error("WishlistHeart - courseId is undefined!");
+            toast.error("Course ID is missing");
             return;
         }
 
@@ -35,7 +49,9 @@ const WishlistHeart = ({ courseId, className = "" }) => {
                 setIsInWishlist(data.data.inWishlist);
                 toast.success(data.data.action === 'added' ? "Added to wishlist!" : "Removed from wishlist");
             },
-            onError: () => {
+            onError: (error) => {
+                console.error("WishlistHeart - Toggle error:", error);
+                console.error("WishlistHeart - Error response:", error.response?.data);
                 toast.error("Failed to update wishlist");
             }
         });
