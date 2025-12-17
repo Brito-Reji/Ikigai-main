@@ -14,7 +14,7 @@ function InstructorLayout() {
 
   useEffect(() => {
 
-    if (!user || user.role !== "instructor") {
+    if (user && user.role !== "instructor") {
 
       navigate("/")
     }

@@ -114,9 +114,9 @@ export default function AppRoutes() {
 
       {/* Instructor Routes */}
       <Route path="/instructor/login" element={<InstructorLoginPage />} />
+      <Route path="/instructor/signup" element={<InstructorSignupPage />} />
       <Route path="/instructor" element={<InstructorLayout />}>
 
-        <Route path="signup" element={<InstructorSignupPage />} />
         <Route path="verify-otp" element={<InstructorOTPVerificationPage />} />
         <Route path="forget-password" element={<InstructorForgetPassword />} />
         <Route path="reset-password" element={<InstructorResetPassword />} />

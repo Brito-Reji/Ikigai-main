@@ -3,9 +3,10 @@ import cors from "cors"
 import helmet from "helmet"
 import authRoute from "./routes/auth.js"
 import cookieParser from "cookie-parser";
-
+import paymentRoute from "./routes/paymentRoute.js"
 
 // import { verifyInstructor } from './middlewares/auth.js'
+import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 import adminRoute from "./routes/adminRoute.js"
 import categoryRoute from "./routes/categoryRoute.js"
 import publicRoute from "./routes/publicRoute.js"
@@ -48,8 +49,8 @@ app.use("/api/instructor", isInstructor, instructorRoute)
 app.use("/api/student", isStudent, studentRoute)
 
 // Global error handler
-import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 
+app.use("/api/payment", paymentRoute);
 app.use(notFound);
 app.use(errorHandler);
 
