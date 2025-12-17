@@ -6,11 +6,6 @@ export const getPublicCourseChaptersService = async (courseId) => {
         course: courseId,
         deleted: { $ne: true },
     })
-        .populate({
-            path: 'lessons',
-            match: { deleted: { $ne: true } },
-            options: { sort: { order: 1 } }
-        })
         .sort({ order: 1 });
 
     return chapters;
