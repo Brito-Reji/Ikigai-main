@@ -46,10 +46,14 @@ export const verifyPaymentService = ({
   razorpayPaymentId,
   razorpaySignature,
 }) => {
+;
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpayOrderId}|${razorpayPaymentId}`)
     .digest("hex");
+
+  console.log("Expected signature:", expectedSignature);
+  console.log("Razorpay signature:", razorpaySignature);
 
   if (expectedSignature !== razorpaySignature) {
     throw new Error("Invalid payment signature");
