@@ -9,6 +9,8 @@ export const createOrderService = async ({ courseIds, userId }) => {
     published: true
   });
 
+  console.log(`Found ${courses.length} courses for IDs: ${courseIds}`);
+
   if (courses.length !== courseIds.length) {
     throw new Error("One or more courses are not published");
   }
@@ -20,12 +22,10 @@ export const createOrderService = async ({ courseIds, userId }) => {
   const amount = courses.reduce((total, course) => total + course.price, 0);
 
   const options = {
-    amount: amount * 100,
+    amount: Math.round(amount * 100),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
-
-
 
   const order = await razorpayInstance.orders.create(options);
   await Payment.create({
@@ -33,8 +33,6 @@ export const createOrderService = async ({ courseIds, userId }) => {
     courseIds,
     amount,
     razorpayOrderId: order.id,
-    razorpayPaymentId: null,
-    razorpaySignature: null,
     status: "PENDING",
   })
   return order;

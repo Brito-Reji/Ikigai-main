@@ -110,10 +110,6 @@ const CartPage = () => {
                   <span>Subtotal ({items.length} items)</span>
                   <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax</span>
-                  <span>₹0.00</span>
-                </div>
                 <div className="border-t pt-3 flex justify-between text-lg font-bold text-gray-900">
                   <span>Total</span>
                   <span>₹{calculateTotal().toFixed(2)}</span>
@@ -134,23 +130,6 @@ const CartPage = () => {
               >
                 Continue Shopping
               </button>
-
-              {/* Promo Code */}
-              <div className="mt-6 pt-6 border-t">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Promo Code
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Enter code"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
-                    Apply
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>

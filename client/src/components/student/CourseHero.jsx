@@ -1,13 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Star, Clock, Users, Globe, Award } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart as addToCartRedux } from "@/store/slices/cartSlice";
 import { useAddToCart } from "@/hooks/useCart";
 import WishlistHeart from "@/components/common/WishlistHeart";
 import toast from "react-hot-toast";
-import { startRazorpayPayment } from "@/services/razorpayService";
 
 const CourseHero = ({ course }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
   const user = useSelector((state) => state.auth.user);
@@ -55,15 +56,8 @@ const CourseHero = ({ course }) => {
       toast.success("Added to cart!");
     }
   };
-  const handleBuy = async () => {
-    try {
-      await startRazorpayPayment([course._id])
-      alert("Payment successful");
-    }
-    catch (error) {
-      alert("Payment failed");
-      console.log("paymenet error ->", error);
-    }
+  const handleBuy = () => {
+    navigate(`/checkout?courseId=${course._id}`);
   }
   return (
     <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white">

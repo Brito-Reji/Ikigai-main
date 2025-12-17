@@ -3,6 +3,7 @@ import logger from "../utils/logger.js";
 // Global error handler
 export const errorHandler = (err, req, res, next) => {
     const statusCode = err.statusCode || 500;
+    console.log('error->', err)
     const message = err.message || "Internal Server Error";
 
     logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method}`);

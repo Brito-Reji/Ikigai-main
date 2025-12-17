@@ -21,7 +21,7 @@ function App() {
 
   return (
     <div>
-      <Toaster position="top-right" />
+      <Toaster position="top-center" />
       <AppRoutes />
     </div>
   );

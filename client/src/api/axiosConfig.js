@@ -21,7 +21,7 @@ api.interceptors.request.use((config) => {
       }
     } catch (e) {
       // Not JSON, use as is (this is the correct case)
-      console.log(e)
+      // console.log(e)
     }
 
     config.headers.Authorization = `Bearer ${accessToken}`
