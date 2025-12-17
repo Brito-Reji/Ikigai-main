@@ -108,7 +108,7 @@ export const createCourseService = async (instructorId, data) => {
         actualPrice: numericActualPrice,
         discountType: chosenType,
         discountValue: numericDiscountValue,
-        price: finalPrice,
+        price: Math.round(finalPrice),
         thumbnail: thumbnail || "",
         published: published || false,
     });

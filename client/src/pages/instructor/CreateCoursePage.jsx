@@ -59,9 +59,9 @@ export default function CreateCoursePage() {
         finalPrice = finalPrice - parseFloat(formData.discountValue);
       }
 
-      setFormData(prev => ({ ...prev, price: Math.max(0, finalPrice).toFixed(2) }));
+      setFormData(prev => ({ ...prev, price: Math.round(finalPrice) }));
     } else if (formData.actualPrice) {
-      setFormData(prev => ({ ...prev, price: parseFloat(formData.actualPrice).toFixed(2) }));
+      setFormData(prev => ({ ...prev, price: Math.round(parseFloat(formData.actualPrice)) }));
     }
   }, [formData.actualPrice, formData.discountType, formData.discountValue]);
 
