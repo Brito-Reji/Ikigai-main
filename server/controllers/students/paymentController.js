@@ -4,15 +4,16 @@ import * as paymentService from '../../services/student/paymentService.js';
 
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { amount } = req.body;
+  const { courseIds } = req.body;
 
-  if (!amount) {
+  if (courseIds.length === 0) {
     res.status(400);
-    throw new Error("Amount is required");
+    throw new Error("Course IDs are required");
   }
 
   // logic is delegated to the service layer
-  const order = await paymentService.createOrderService(amount);
+  console.log(req.user._id);
+  const order = await paymentService.createOrderService({courseIds,userId: req.user._id});
 
   res.status(200).json({
     success: true,

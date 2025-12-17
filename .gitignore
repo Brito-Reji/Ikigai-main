@@ -7,3 +7,5 @@ node_modules
 .github/instructions/snyk_rules.instructions.md
 keys
 .agent
+client/.env
+client/.env.local

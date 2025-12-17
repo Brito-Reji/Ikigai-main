@@ -50,7 +50,7 @@ app.use("/api/student", isStudent, studentRoute)
 
 // Global error handler
 
-app.use("/api/payment", paymentRoute);
+app.use("/api/payments", paymentRoute);
 app.use(notFound);
 app.use(errorHandler);
 

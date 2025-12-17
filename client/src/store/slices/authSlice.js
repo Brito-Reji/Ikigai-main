@@ -200,6 +200,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      // Clear local state immediately
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
@@ -208,6 +209,12 @@ const authSlice = createSlice({
       state.verificationEmail = null;
       localStorage.removeItem("accessToken");
       localStorage.removeItem("userAuth");
+
+      // Call backend to clear refresh token cookie
+      api.post("/auth/logout").catch(err => {
+        console.error("Logout API call failed:", err);
+      });
+
       console.log("User logged out");
     },
     clearError: (state) => {

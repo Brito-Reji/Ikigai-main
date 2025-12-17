@@ -5,6 +5,7 @@ import { addToCart as addToCartRedux } from "@/store/slices/cartSlice";
 import { useAddToCart } from "@/hooks/useCart";
 import WishlistHeart from "@/components/common/WishlistHeart";
 import toast from "react-hot-toast";
+import { startRazorpayPayment } from "@/services/razorpayService";
 
 const CourseHero = ({ course }) => {
   const dispatch = useDispatch();
@@ -54,7 +55,16 @@ const CourseHero = ({ course }) => {
       toast.success("Added to cart!");
     }
   };
-
+  const handleBuy = async () => {
+    try {
+      await startRazorpayPayment([course._id])
+      alert("Payment successful");
+    }
+    catch (error) {
+      alert("Payment failed");
+      console.log("paymenet error ->", error);
+    }
+  }
   return (
     <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -174,7 +184,7 @@ const CourseHero = ({ course }) => {
                   {isPending ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
                 </button>
 
-                <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                <button onClick={handleBuy} className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
                   Buy Now
                 </button>
 

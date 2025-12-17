@@ -19,6 +19,7 @@ import { forgetPassword, verifyForgetPasswordOTP, resetPassword } from "../contr
 import { refreshToken } from "../controllers/auth/refreshToken.js";
 import { checkUsernameAvailabilty } from "../controllers/auth/checkUsername.js";
 import { currentUser } from "../controllers/auth/currentUser.js";
+import { logout } from "../controllers/auth/logout.js";
 
 const router = express.Router();
 
@@ -47,12 +48,15 @@ router.post("/verify-forget-password-otp", verifyForgetPasswordOTP);
 router.post("/reset-password", resetPassword);
 
 // Check username availability using query params
-router.get("/check-username",checkUsernameAvailabilty);
+router.get("/check-username", checkUsernameAvailabilty);
 
 // Refresh token endpoint
 router.post("/refresh", refreshToken);
 
 // Get current user from access token
 router.get("/me", currentUser);
+
+// Logout endpoint
+router.post("/logout", logout);
 
 export default router;
