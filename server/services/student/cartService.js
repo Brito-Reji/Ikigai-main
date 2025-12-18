@@ -1,29 +1,24 @@
 import { Cart } from "../../models/Cart.js";
 import { Course } from "../../models/Course.js";
 
-// GET USER CART
+// get user cart
 export const getCartService = async (userId) => {
-    const cartItems = await Cart.find({ userId })
+    const cart = await Cart.findOne({ userId })
         .populate({
-            path: 'courseId',
+            path: 'courses',
             select: 'title description price thumbnail instructor category',
             populate: [
                 { path: 'instructor', select: 'firstName lastName' },
                 { path: 'category', select: 'name' }
             ]
-        })
-        .sort({ createdAt: -1 });
+        });
 
-    return cartItems;
+    return cart?.courses || [];
 };
 
-// ADD TO CART
+// add to cart
 export const addToCartService = async (userId, courseId) => {
-    const existingItem = await Cart.findOne({ userId, courseId });
-
-    if (existingItem) {
-        throw new Error("Course already in cart");
-    }
+    console.log("addToCartService called with:", { userId, courseId });
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -34,62 +29,78 @@ export const addToCartService = async (userId, courseId) => {
         throw new Error("This course is not available");
     }
 
-    const cartItem = await Cart.create({ userId, courseId });
+    console.log("Course validated, adding to cart...");
 
-    const populatedItem = await Cart.findById(cartItem._id)
-        .populate({
-            path: 'courseId',
-            select: 'title description price thumbnail instructor category',
-            populate: [
-                { path: 'instructor', select: 'firstName lastName' },
-                { path: 'category', select: 'name' }
-            ]
-        });
+    const cart = await Cart.findOneAndUpdate(
+        { userId },
+        { $addToSet: { courses: courseId } },
+        { upsert: true, new: true }
+    ).populate({
+        path: 'courses',
+        select: 'title description price thumbnail instructor category',
+        populate: [
+            { path: 'instructor', select: 'firstName lastName' },
+            { path: 'category', select: 'name' }
+        ]
+    });
 
-    return populatedItem;
+    console.log("Cart after update:", cart);
+
+    return cart.courses;
 };
 
-// REMOVE FROM CART
+// remove from cart
 export const removeFromCartService = async (userId, courseId) => {
-    const result = await Cart.findOneAndDelete({ userId, courseId });
+    const cart = await Cart.findOneAndUpdate(
+        { userId },
+        { $pull: { courses: courseId } },
+        { new: true }
+    );
 
-    if (!result) {
-        throw new Error("Item not found in cart");
+    if (!cart) {
+        throw new Error("Cart not found");
     }
 
-    return result;
+    return cart;
 };
 
-// SYNC GUEST CART
+// sync guest cart
 export const syncCartService = async (userId, courseIds) => {
     if (!Array.isArray(courseIds) || courseIds.length === 0) {
         return [];
     }
 
-    const addedItems = [];
+    // validate courses exist and are available
+    const validCourses = await Course.find({
+        _id: { $in: courseIds },
+        published: true,
+        blocked: { $ne: true }
+    }).select('_id');
 
-    for (const courseId of courseIds) {
-        try {
-            const existingItem = await Cart.findOne({ userId, courseId });
+    const validIds = validCourses.map(c => c._id);
 
-            if (!existingItem) {
-                const course = await Course.findById(courseId);
+    const cart = await Cart.findOneAndUpdate(
+        { userId },
+        { $addToSet: { courses: { $each: validIds } } },
+        { upsert: true, new: true }
+    ).populate({
+        path: 'courses',
+        select: 'title description price thumbnail instructor category',
+        populate: [
+            { path: 'instructor', select: 'firstName lastName' },
+            { path: 'category', select: 'name' }
+        ]
+    });
 
-                if (course && course.published && !course.blocked) {
-                    const cartItem = await Cart.create({ userId, courseId });
-                    addedItems.push(cartItem);
-                }
-            }
-        } catch (error) {
-            console.error(`Error syncing course ${courseId}:`, error);
-        }
-    }
-
-    return addedItems;
+    return cart.courses;
 };
 
-// CLEAR CART
+// clear cart
 export const clearCartService = async (userId) => {
-    const result = await Cart.deleteMany({ userId });
+    const result = await Cart.findOneAndUpdate(
+        { userId },
+        { $set: { courses: [] } },
+        { new: true }
+    );
     return result;
 };

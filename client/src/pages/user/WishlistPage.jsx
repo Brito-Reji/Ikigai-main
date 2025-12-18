@@ -29,7 +29,7 @@ const WishlistPage = () => {
     };
 
     const handleAddToCart = (course) => {
-        const isInCart = cartItems.some((item) => item._id === course.courseId._id);
+        const isInCart = cartItems.some((item) => item._id === course._id);
 
         if (isInCart) {
             toast.error("Already in cart");
@@ -37,15 +37,15 @@ const WishlistPage = () => {
         }
 
         const courseData = {
-            _id: course.courseId._id,
-            title: course.courseId.title,
-            price: course.courseId.price,
-            thumbnail: course.courseId.thumbnail,
-            instructor: course.courseId.instructor,
-            category: course.courseId.category
+            _id: course._id,
+            title: course.title,
+            price: course.price,
+            thumbnail: course.thumbnail,
+            instructor: course.instructor,
+            category: course.category
         };
 
-        addToCartAPI(course.courseId._id, {
+        addToCartAPI(course._id, {
             onSuccess: () => {
                 dispatch(addToCartRedux(courseData));
                 toast.success("Added to cart!");
@@ -94,39 +94,39 @@ const WishlistPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {wishlistItems.map((item) => (
+                    {wishlistItems.map((course) => (
                         <div
-                            key={item._id}
+                            key={course._id}
                             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
                         >
                             <div className="relative">
                                 <img
-                                    src={item.courseId?.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
-                                    alt={item.courseId?.title}
+                                    src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
+                                    alt={course.title}
                                     className="w-full h-48 object-cover cursor-pointer"
-                                    onClick={() => navigate(`/course/${item.courseId._id}`)}
+                                    onClick={() => navigate(`/course/${course._id}`)}
                                 />
                             </div>
 
                             <div className="p-4">
                                 <h3
                                     className="font-semibold text-gray-900 mb-2 line-clamp-2 cursor-pointer hover:text-red-500"
-                                    onClick={() => navigate(`/course/${item.courseId._id}`)}
+                                    onClick={() => navigate(`/course/${course._id}`)}
                                 >
-                                    {item.courseId?.title}
+                                    {course.title}
                                 </h3>
 
                                 <p className="text-sm text-gray-600 mb-3">
-                                    By {item.courseId?.instructor?.firstName} {item.courseId?.instructor?.lastName}
+                                    By {course.instructor?.firstName} {course.instructor?.lastName}
                                 </p>
 
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="text-2xl font-bold text-gray-900">₹{item.courseId?.price}</span>
+                                    <span className="text-2xl font-bold text-gray-900">₹{course.price}</span>
                                 </div>
 
                                 <div className="space-y-2">
                                     <button
-                                        onClick={() => handleAddToCart(item)}
+                                        onClick={() => handleAddToCart(course)}
                                         className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center justify-center space-x-2"
                                     >
                                         <ShoppingCart className="w-4 h-4" />
@@ -134,7 +134,7 @@ const WishlistPage = () => {
                                     </button>
 
                                     <button
-                                        onClick={() => handleRemove(item.courseId._id)}
+                                        onClick={() => handleRemove(course._id)}
                                         className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center space-x-2"
                                     >
                                         <Trash2 className="w-4 h-4" />

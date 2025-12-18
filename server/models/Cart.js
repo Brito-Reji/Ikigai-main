@@ -6,14 +6,14 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      unique: true,
     },
-    courseId: {
+    courses: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
-      required: true,
-    },
+    }],
   },
   { timestamps: true }
 );
 
-export const Cart = mongoose.model("Cart",cartSchema)
+export const Cart = mongoose.model("Cart", cartSchema);

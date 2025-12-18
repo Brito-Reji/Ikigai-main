@@ -1,29 +1,58 @@
 import { useCart } from "@/hooks/useRedux";
+import { useAddToCart } from "@/hooks/useCart";
+import { addToCart as addToCartRedux } from "@/store/slices/cartSlice";
 import { Star, ShoppingCart, Check } from "lucide-react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import WishlistHeart from "@/components/common/WishlistHeart";
+import toast from "react-hot-toast";
 
 export default function CourseCard({ course }) {
-  const [isInCart, setIsInCart] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
-  const { addToCart, dispatch } = useCart();
+  const { items, dispatch } = useCart();
+  const user = useSelector((state) => state.auth.user);
+  const { mutate: addToCartAPI, isPending } = useAddToCart();
+
+  const isInCart = items.some((item) => item._id === course._id);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
 
-    if (!isInCart) {
-      setIsInCart(true);
+    if (isInCart) {
+      toast.error("Already in cart");
+      return;
+    }
+
+    const courseData = {
+      _id: course._id,
+      title: course.title,
+      price: course.price,
+      thumbnail: course.thumbnail,
+      instructor: course.instructor,
+      category: course.category
+    };
+
+    if (user && user.id) {
+      // authenticated - call API
+      addToCartAPI(course._id, {
+        onSuccess: () => {
+          dispatch(addToCartRedux(courseData));
+          setNotificationMessage("Added to cart!");
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 2000);
+        },
+        onError: (error) => {
+          const message = error.response?.data?.message || "Failed to add";
+          toast.error(message);
+        }
+      });
+    } else {
+      // guest - localStorage only
+      dispatch(addToCartRedux(courseData));
       setNotificationMessage("Added to cart!");
       setShowNotification(true);
-
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 2000);
-
-      dispatch(addToCart(course));
-
-      console.log("Added to cart:", course.title);
+      setTimeout(() => setShowNotification(false), 2000);
     }
   };
 
@@ -50,13 +79,16 @@ export default function CourseCard({ course }) {
 
         <button
           onClick={handleAddToCart}
+          disabled={isPending}
           className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-300 z-10 ${isInCart
-              ? "bg-green-500 opacity-100 scale-110"
-              : "bg-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-700"
+            ? "bg-green-500 opacity-100 scale-110"
+            : "bg-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-700"
             }`}
         >
           {isInCart ? (
             <Check className="w-4 h-4 text-white" />
+          ) : isPending ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <ShoppingCart className="w-4 h-4 text-white" />
           )}
@@ -76,8 +108,8 @@ export default function CourseCard({ course }) {
             <Star
               key={i}
               className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(course.rating || 0)
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-300"
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
                 }`}
             />
           ))}

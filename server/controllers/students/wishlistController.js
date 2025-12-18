@@ -6,21 +6,21 @@ import {
     toggleWishlistService
 } from "../../services/student/wishlistService.js";
 
-// GET WISHLIST
+// get wishlist
 export const getWishlist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    const wishlistItems = await getWishlistService(userId);
+    const courses = await getWishlistService(userId);
 
     res.status(200).json({
         success: true,
         message: "WISHLIST FETCHED SUCCESSFULLY",
-        data: wishlistItems,
-        count: wishlistItems.length
+        data: courses,
+        count: courses.length
     });
 });
 
-// TOGGLE WISHLIST
+// toggle wishlist
 export const toggleWishlist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { courseId } = req.body;
@@ -39,7 +39,7 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
     });
 });
 
-// REMOVE FROM WISHLIST
+// remove from wishlist
 export const removeFromWishlist = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { courseId } = req.params;

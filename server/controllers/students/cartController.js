@@ -7,22 +7,26 @@ import {
     clearCartService
 } from "../../services/student/cartService.js";
 
-// GET CART
+// get cart
 export const getCart = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    const cartItems = await getCartService(userId);
+    const courses = await getCartService(userId);
 
     res.status(200).json({
         success: true,
         message: "CART FETCHED SUCCESSFULLY",
-        data: cartItems,
-        count: cartItems.length
+        data: courses,
+        count: courses.length
     });
 });
 
-// ADD TO CART
+// add to cart
 export const addToCart = asyncHandler(async (req, res) => {
+    console.log("=== ADD TO CART REQUEST ===");
+    console.log("User:", req.user?._id);
+    console.log("Body:", req.body);
+
     const userId = req.user._id;
     const { courseId } = req.body;
 
@@ -31,16 +35,17 @@ export const addToCart = asyncHandler(async (req, res) => {
         throw new Error("Course ID is required");
     }
 
-    const cartItem = await addToCartService(userId, courseId);
+    const courses = await addToCartService(userId, courseId);
 
     res.status(201).json({
         success: true,
         message: "COURSE ADDED TO CART",
-        data: cartItem
+        data: courses,
+        count: courses.length
     });
 });
 
-// REMOVE FROM CART
+// remove from cart
 export const removeFromCart = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { courseId } = req.params;
@@ -53,7 +58,7 @@ export const removeFromCart = asyncHandler(async (req, res) => {
     });
 });
 
-// SYNC GUEST CART
+// sync guest cart
 export const syncCart = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { courseIds } = req.body;
@@ -63,17 +68,17 @@ export const syncCart = asyncHandler(async (req, res) => {
         throw new Error("courseIds must be an array");
     }
 
-    const addedItems = await syncCartService(userId, courseIds);
+    const courses = await syncCartService(userId, courseIds);
 
     res.status(200).json({
         success: true,
         message: "CART SYNCED SUCCESSFULLY",
-        data: addedItems,
-        count: addedItems.length
+        data: courses,
+        count: courses.length
     });
 });
 
-// CLEAR CART
+// clear cart
 export const clearCart = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 

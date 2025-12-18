@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
 import { cartApi } from '@/api/cartApi';
 
-// Get cart
+// get cart
 export const useCart = () => {
+    const user = useSelector((state) => state.auth.user);
+
     return useQuery({
         queryKey: ['cart'],
         queryFn: cartApi.getCart,
+        enabled: !!(user && user.id),
         retry: false
     });
 };

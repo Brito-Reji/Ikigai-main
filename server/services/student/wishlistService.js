@@ -1,59 +1,74 @@
 import { Wishlist } from "../../models/Wishlist.js";
 import { Course } from "../../models/Course.js";
 
+// get wishlist
 export const getWishlistService = async (userId) => {
-    const wishlistItems = await Wishlist.find({ userId })
+    const wishlist = await Wishlist.findOne({ userId })
         .populate({
-            path: 'courseId',
+            path: 'courses',
             select: 'title description price thumbnail instructor category rating students',
             populate: [
                 { path: 'instructor', select: 'firstName lastName' },
                 { path: 'category', select: 'name' }
             ]
-        })
-        .sort({ createdAt: -1 });
+        });
 
-    return wishlistItems;
+    return wishlist?.courses || [];
 };
 
+// add to wishlist
 export const addToWishlistService = async (userId, courseId) => {
-    const existingItem = await Wishlist.findOne({ userId, courseId });
-
-    if (existingItem) {
-        return existingItem;
-    }
-
     const course = await Course.findById(courseId);
     if (!course) {
         throw new Error("Course not found");
     }
 
-    const wishlistItem = await Wishlist.create({ userId, courseId });
-    return wishlistItem;
+    const wishlist = await Wishlist.findOneAndUpdate(
+        { userId },
+        { $addToSet: { courses: courseId } },
+        { upsert: true, new: true }
+    );
+
+    return wishlist;
 };
 
+// remove from wishlist
 export const removeFromWishlistService = async (userId, courseId) => {
-    const result = await Wishlist.findOneAndDelete({ userId, courseId });
+    const wishlist = await Wishlist.findOneAndUpdate(
+        { userId },
+        { $pull: { courses: courseId } },
+        { new: true }
+    );
 
-    if (!result) {
-        throw new Error("Item not found in wishlist");
+    if (!wishlist) {
+        throw new Error("Wishlist not found");
     }
 
-    return result;
+    return wishlist;
 };
 
+// toggle wishlist
 export const toggleWishlistService = async (userId, courseId) => {
-    const existingItem = await Wishlist.findOne({ userId, courseId });
+    const wishlist = await Wishlist.findOne({ userId });
 
-    if (existingItem) {
-        await Wishlist.findOneAndDelete({ userId, courseId });
+    const isInWishlist = wishlist?.courses?.some(id => id.toString() === courseId.toString());
+
+    if (isInWishlist) {
+        await Wishlist.findOneAndUpdate(
+            { userId },
+            { $pull: { courses: courseId } }
+        );
         return { action: 'removed', inWishlist: false };
     } else {
         const course = await Course.findById(courseId);
         if (!course) {
             throw new Error("Course not found");
         }
-        await Wishlist.create({ userId, courseId });
+        await Wishlist.findOneAndUpdate(
+            { userId },
+            { $addToSet: { courses: courseId } },
+            { upsert: true }
+        );
         return { action: 'added', inWishlist: true };
     }
 };

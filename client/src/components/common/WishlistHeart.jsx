@@ -15,8 +15,9 @@ const WishlistHeart = ({ courseId, className = "" }) => {
 
     useEffect(() => {
         if (wishlistData?.data && courseId) {
+            // courses are now direct objects, not wrapped in courseId
             const inWishlist = wishlistData.data.some(
-                (item) => item.courseId?._id === courseId
+                (course) => course._id === courseId
             );
             setIsInWishlist(inWishlist);
         }
@@ -26,20 +27,13 @@ const WishlistHeart = ({ courseId, className = "" }) => {
         e.stopPropagation();
         e.preventDefault();
 
-        console.log("WishlistHeart - Auth state:", { isAuthenticated, user });
-
         if (!isAuthenticated) {
-            console.log("WishlistHeart - Not authenticated, redirecting to login");
             toast.error("Please login to add to wishlist");
             navigate("/login");
             return;
         }
 
-        console.log("WishlistHeart - courseId prop:", courseId);
-        console.log("WishlistHeart - Toggling wishlist for course:", courseId);
-
         if (!courseId) {
-            console.error("WishlistHeart - courseId is undefined!");
             toast.error("Course ID is missing");
             return;
         }
@@ -50,8 +44,7 @@ const WishlistHeart = ({ courseId, className = "" }) => {
                 toast.success(data.data.action === 'added' ? "Added to wishlist!" : "Removed from wishlist");
             },
             onError: (error) => {
-                console.error("WishlistHeart - Toggle error:", error);
-                console.error("WishlistHeart - Error response:", error.response?.data);
+                console.error("Toggle error:", error);
                 toast.error("Failed to update wishlist");
             }
         });

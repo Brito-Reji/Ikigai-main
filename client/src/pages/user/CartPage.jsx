@@ -1,31 +1,85 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash2, ShoppingCart, ArrowRight } from "lucide-react";
-import { useCart } from "@/hooks/useRedux";
-import { removeFromCart, clearCart } from "@/store/slices/cartSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { useCart as useCartAPI, useRemoveFromCart, useClearCart } from "@/hooks/useCart";
+import { setCart, removeFromCart as removeFromCartRedux, clearCart as clearCartRedux } from "@/store/slices/cartSlice";
+import toast from "react-hot-toast";
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { items, dispatch } = useCart();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const cartItems = useSelector((state) => state.cart.items);
+
+  // api hooks
+  const { data: apiCartData, isLoading } = useCartAPI();
+  const { mutate: removeFromCartAPI } = useRemoveFromCart();
+  const { mutate: clearCartAPI } = useClearCart();
+
+  // sync api cart to redux for authenticated users
+  useEffect(() => {
+    if (user && user.id && apiCartData?.data) {
+      dispatch(setCart(apiCartData.data));
+    }
+  }, [apiCartData, user, dispatch]);
 
   const handleRemoveItem = (courseId) => {
-    dispatch(removeFromCart(courseId));
+    if (user && user.id) {
+      // authenticated - call api
+      removeFromCartAPI(courseId, {
+        onSuccess: () => {
+          dispatch(removeFromCartRedux(courseId));
+          toast.success("Removed from cart");
+        },
+        onError: () => {
+          toast.error("Failed to remove");
+        }
+      });
+    } else {
+      // guest - redux only
+      dispatch(removeFromCartRedux(courseId));
+      toast.success("Removed from cart");
+    }
   };
 
   const handleClearCart = () => {
     if (window.confirm("Are you sure you want to clear your cart?")) {
-      dispatch(clearCart());
+      if (user && user.id) {
+        // authenticated - call api
+        clearCartAPI(undefined, {
+          onSuccess: () => {
+            dispatch(clearCartRedux());
+            toast.success("Cart cleared");
+          },
+          onError: () => {
+            toast.error("Failed to clear cart");
+          }
+        });
+      } else {
+        // guest - redux only
+        dispatch(clearCartRedux());
+        toast.success("Cart cleared");
+      }
     }
   };
 
   const calculateTotal = () => {
-    return items.reduce((total, item) => {
+    return cartItems.reduce((total, item) => {
       const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
       return total + price;
     }, 0);
   };
 
-  if (items.length === 0) {
+  if (isLoading && user && user.id) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
@@ -60,7 +114,7 @@ const CartPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((course) => (
+            {cartItems.map((course) => (
               <div
                 key={course._id}
                 className="bg-white rounded-lg shadow p-4 flex items-center space-x-4"
@@ -107,7 +161,7 @@ const CartPage = () => {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({items.length} items)</span>
+                  <span>Subtotal ({cartItems.length} items)</span>
                   <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="border-t pt-3 flex justify-between text-lg font-bold text-gray-900">

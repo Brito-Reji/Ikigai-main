@@ -19,9 +19,6 @@ const CourseHero = ({ course }) => {
   const isInCart = cartItems.some((item) => item._id === course._id);
 
   const handleAddToCart = () => {
-    console.log("User state:", user);
-    console.log("Is authenticated:", !!user);
-
     if (isInCart) {
       toast.error("Course already in cart");
       return;
@@ -36,9 +33,8 @@ const CourseHero = ({ course }) => {
       category: course.category
     };
 
-    if (user && user._id) {
+    if (user && user.id) {
       // Authenticated user - add to backend
-      console.log("Adding to backend for authenticated user");
       addToCartAPI(course._id, {
         onSuccess: () => {
           dispatch(addToCartRedux(courseData));
@@ -51,7 +47,6 @@ const CourseHero = ({ course }) => {
       });
     } else {
       // Guest user - add to localStorage only
-      console.log("Adding to localStorage for guest user");
       dispatch(addToCartRedux(courseData));
       toast.success("Added to cart!");
     }
