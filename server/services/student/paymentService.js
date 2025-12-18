@@ -42,20 +42,20 @@ export const createOrderService = async ({ courseIds, userId }) => {
 
 
 export const verifyPaymentService = ({
-  razorpayOrderId,
-  razorpayPaymentId,
-  razorpaySignature,
+  razorpay_payment_id,
+  razorpay_order_id,
+  razorpay_signature,
 }) => {
 ;
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 
   console.log("Expected signature:", expectedSignature);
-  console.log("Razorpay signature:", razorpaySignature);
+  console.log("Razorpay signature:", razorpay_signature);
 
-  if (expectedSignature !== razorpaySignature) {
+  if (expectedSignature !== razorpay_signature) {
     throw new Error("Invalid payment signature");
   }
 

@@ -126,7 +126,10 @@ const CheckoutPage = () => {
       setProcessing(true);
 
       // Initialize Razorpay payment
-      await startRazorpayPayment(courseIds);
+      let res = await startRazorpayPayment(courseIds, navigate);
+      console.log("PAYMENT FORNTEND RESPONSE -->", res);
+
+
 
       // On successful payment (handled in startRazorpayPayment which throws if fails)
       // Only clear cart if this was a cart checkout, not single course buy now
@@ -134,8 +137,7 @@ const CheckoutPage = () => {
         dispatch(clearCart());
       }
 
-      toast.success("Payment successful! Redirecting...");
-      navigate("/my-courses");
+
     } catch (error) {
       console.error("Checkout Payment error:", error);
       toast.error("Payment was cancelled or failed");

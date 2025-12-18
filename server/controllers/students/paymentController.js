@@ -25,10 +25,10 @@ export const createOrder = asyncHandler(async (req, res) => {
 
 
 export const verifyPayment = asyncHandler(async (req, res) => {
-  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
-  // console.log("verifyPayment payload:", JSON.stringify(req.body, null, 2));
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+  console.log("verifyPayment payload:", JSON.stringify(req.body, null, 2));
 
-  if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     res.status(400);
     throw new Error("Missing payment verification details");
   }
@@ -36,9 +36,9 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   // logic is delegated to the service layer
  
   const isValid = paymentService.verifyPaymentService(
-    {razorpayOrderId,
-    razorpayPaymentId,
-    razorpaySignature}
+    {razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature}
   );
 
   if (isValid) {
@@ -47,7 +47,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Payment verified successfully",
-      data: { paymentId: razorpayPaymentId }
+      data: { paymentId: razorpay_payment_id }
     });
   } else {
     res.status(400);
