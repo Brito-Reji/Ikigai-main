@@ -17,10 +17,6 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
 
   useEffect(() => {
     // Fetch current user if token exists but no user data and haven't tried yet
-
-   
-
-
     if (hasToken && !user && !loading && !fetchAttempted) {
       console.log("Fetching current user...");
       setFetchAttempted(true);
@@ -35,7 +31,19 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
       setFetchAttempted(false);
       setIsValidating(false);
     }
-  }, [dispatch, user, loading, hasToken, fetchAttempted]);
+
+    // handle navigation in useEffect
+    if (requireAuth && !isAuthenticated && !loading && !isValidating) {
+      console.log("User not authenticated, redirecting to home");
+      navigate('/');
+    }
+
+    // check role-based access
+    if (requireAuth && isAuthenticated && roles.length > 0 && user && !roles.includes(user.role)) {
+      console.log("User doesn't have required role, redirecting to home");
+      navigate('/');
+    }
+  }, [dispatch, user, loading, hasToken, fetchAttempted, requireAuth, isAuthenticated, roles, navigate, isValidating]);
 
   // Show loading spinner while checking authentication or validating token
   if (loading || (hasToken && !user && isValidating)) {
@@ -44,20 +52,6 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
         <ThreeDotLoader size="lg" color="indigo" />
       </div>
     );
-  }
-
-  // If authentication is required but user is not authenticated
-  // Only trust isAuthenticated from Redux (not just token presence)
-  console.log("requireAuth", requireAuth);
-  console.log("isAuthenticated", isAuthenticated);
-  if (requireAuth && !isAuthenticated) {
-    console.log("User not authenticated, showing login prompt");
-    navigate('/')
-  }
-
-  // If specific roles are required but user doesn't have the right role
-  if (requireAuth && isAuthenticated && roles.length > 0 && user && !roles.includes(user.role)) {
-    navigate('/')
   }
   if (requireAuth && isAuthenticated && user?.isBlocked) {
     return (
