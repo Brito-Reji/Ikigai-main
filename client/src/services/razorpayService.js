@@ -17,29 +17,32 @@ export const startRazorpayPayment = async (courseIds, navigate) => {
 
     handler: async function (response) {
       try {
-        // 1. verify payment
-        await api.post("/payments/verify-payment", response)
+        // verify payment
+        await api.post("/payments/verify-payment", response);
 
-     
+        // navigate to success page AFTER verification
+        navigate("/payment/success");
       } catch (err) {
-        navigate("/payment/failed")
+        console.error("Payment verification failed:", err);
+        navigate("/payment/failed");
       }
     },
 
     modal: {
       ondismiss: function () {
-        navigate("/payment/cancelled")
+        navigate("/payment/cancelled");
       }
     }
-  }
+  };
 
   const rzp = new window.Razorpay(options);
-  rzp.on("payment.failed", function () {
-    navigate("/payment/failed")
-  })
-  rzp.on("payment.success", function () {
-    navigate("/payment/success")
-  })
+
+  // only handle failures via event
+  rzp.on("payment.failed", function (response) {
+    console.error("Payment failed:", response.error);
+    navigate("/payment/failed");
+  });
+
   rzp.open();
   return response;
 };

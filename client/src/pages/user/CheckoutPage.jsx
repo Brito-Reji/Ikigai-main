@@ -126,16 +126,10 @@ const CheckoutPage = () => {
       setProcessing(true);
 
       // Initialize Razorpay payment
-      let res = await startRazorpayPayment(courseIds, navigate);
-      console.log("PAYMENT FORNTEND RESPONSE -->", res);
+      await startRazorpayPayment(courseIds, navigate);
 
-
-
-      // On successful payment (handled in startRazorpayPayment which throws if fails)
-      // Only clear cart if this was a cart checkout, not single course buy now
-      if (!courseId) {
-        dispatch(clearCart());
-      }
+      // Don't clear cart here - it causes redirect issues
+      // Cart will be cleared after successful payment verification
 
 
     } catch (error) {
