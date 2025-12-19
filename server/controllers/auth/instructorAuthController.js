@@ -5,6 +5,7 @@ import { Instructor } from "../../models/Instructor.js";
 import api from "../../config/axiosConfig.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
 
@@ -12,7 +13,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
 
     if (!email || !username || !firstName || !lastName || !password) {
         return res
-            .status(400)
+            .status(HTTP_STATUS.BAD_REQUEST)
             .json({ success: false, message: "Please provide all required fields" });
     }
     const existingUser = await Instructor.findOne({
@@ -20,13 +21,13 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     });
     if (existingUser) {
         return res
-            .status(400)
+            .status(HTTP_STATUS.BAD_REQUEST)
             .json({ success: false, message: "email or username  already exist" });
     }
     // Validate email format
     const emailRegex = /^\S+@\S+\.\S+$/;
     if (!emailRegex.test(email)) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Please provide a valid email address",
         });
@@ -34,7 +35,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
 
     // Validate password length
     if (password.length < 6) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Password must be at least 6 characters long",
         });
@@ -55,12 +56,12 @@ export const instructorRegister = asyncHandler(async (req, res) => {
     try {
         let response = await api.post("/auth/send-otp", { email });
         if (response.data.success) {
-            res.status(200).json({ success: true, message: "otp " });
+            res.status(HTTP_STATUS.OK).json({ success: true, message: "otp " });
         }
     } catch (err) {
         console.error("OTP API failed:", err.message);
         return res
-            .status(500)
+            .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
             .json({ success: false, message: "Failed to send OTP. Try again." });
     }
 });
@@ -70,7 +71,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
 
     // Validate required fields
     if (!email || !password) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Please provide email and password",
         });
@@ -82,13 +83,13 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     );
 
     if (!user) {
-        return res.status(401).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
             success: false,
             message: "Invalid email or password",
         });
     }
     if (user.authType == "google") {
-        return res.status(401).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
             success: false,
             message:
                 "This account was created with Google. Please use Google Sign-In to continue.",
@@ -96,7 +97,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     }
     // Check if user is an instructor
     if (user.role !== "instructor") {
-        return res.status(403).json({
+        return res.status(HTTP_STATUS.FORBIDDEN).json({
             success: false,
             message: "Access denied. Instructor account required",
         });
@@ -106,7 +107,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-        return res.status(401).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
             success: false,
             message: "Invalid email or password",
         });
@@ -135,7 +136,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return res.json({
+    return res.status(HTTP_STATUS.OK).json({
         success: true,
         accessToken,
         user: {
@@ -178,7 +179,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             accessToken,
             user: {
@@ -220,7 +221,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             accessToken,
             user: {

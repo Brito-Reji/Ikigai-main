@@ -2,6 +2,7 @@ import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 import jwt from "jsonwebtoken";
 import { generateTokens } from "../../utils/generateTokens.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const refreshToken = async (req, res) => {
   try {
@@ -12,7 +13,7 @@ export const refreshToken = async (req, res) => {
 
     if (!incomingToken) {
       return res
-        .status(403)
+        .status(HTTP_STATUS.FORBIDDEN)
         .json({ success: false, message: "No refresh token provided" });
     }
 
@@ -22,7 +23,7 @@ export const refreshToken = async (req, res) => {
       decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
     } catch (e) {
       return res
-        .status(403)
+        .status(HTTP_STATUS.FORBIDDEN)
         .json({ success: false, message: "Invalid refresh token" });
     }
 
@@ -34,20 +35,20 @@ export const refreshToken = async (req, res) => {
 
     if (!user) {
       return res
-        .status(403)
+        .status(HTTP_STATUS.FORBIDDEN)
         .json({ success: false, message: "User not found" });
     }
 
     if (user.isBlocked) {
       return res
-        .status(403)
+        .status(HTTP_STATUS.FORBIDDEN)
         .json({ success: false, message: "Account is blocked" });
     }
 
     // Check if the refresh token matches the one stored in the database
     if (user.refreshToken !== incomingToken) {
       return res
-        .status(403)
+        .status(HTTP_STATUS.FORBIDDEN)
         .json({ success: false, message: "Invalid refresh token" });
     }
 
@@ -74,11 +75,11 @@ export const refreshToken = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return res.status(200).json({ success: true, accessToken });
+    return res.status(HTTP_STATUS.OK).json({ success: true, accessToken });
   } catch (err) {
     console.error("Refresh token error:", err);
     return res
-      .status(500)
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "Internal server error" });
   }
 };

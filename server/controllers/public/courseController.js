@@ -7,12 +7,13 @@ import {
   getPublicCourseLessonsService,
 } from "../../services/public/publicCourseService.js";
 import { getPublicCourseChaptersService } from "../../services/public/publicChapterService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
   const result = await getPublishedCoursesService(req.query);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "PUBLISHED COURSES FETCHED SUCCESSFULLY",
     data: result.courses,
@@ -26,7 +27,7 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
 
   const courses = await getFeaturedCoursesService(limit);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "FEATURED COURSES FETCHED SUCCESSFULLY",
     data: courses,
@@ -40,7 +41,7 @@ export const getPublicCourseDetails = asyncHandler(async (req, res) => {
 
   const course = await getPublicCourseDetailsService(courseId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "COURSE DETAILS FETCHED SUCCESSFULLY",
     data: course,
@@ -51,7 +52,7 @@ export const getPublicCourseDetails = asyncHandler(async (req, res) => {
 export const getCourseStats = asyncHandler(async (req, res) => {
   const stats = await getCourseStatsService();
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "COURSE STATISTICS FETCHED SUCCESSFULLY",
     data: stats,
@@ -64,7 +65,7 @@ export const getPublicCourseChapters = asyncHandler(async (req, res) => {
 
   const chapters = await getPublicCourseChaptersService(courseId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "CHAPTERS FETCHED SUCCESSFULLY",
     data: chapters,
@@ -79,7 +80,7 @@ export const getPublicCourseLessons = asyncHandler(async (req, res) => {
 
   const lessons = await getPublicCourseLessonsService(chapterId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "LESSONS FETCHED SUCCESSFULLY",
     data: lessons,

@@ -4,6 +4,7 @@ import { User } from "../../models/User.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // import { User } from './model/'
 
@@ -13,7 +14,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
     if (!email || !username || !firstName || !lastName || !password) {
         return res
-            .status(400)
+            .status(HTTP_STATUS.BAD_REQUEST)
             .json({ success: false, message: "Please provide all required fields" });
     }
 
@@ -22,14 +23,14 @@ export const studentRegister = asyncHandler(async (req, res) => {
     // if verified user already exists -> block registration
     if (existingUser && existingUser.isVerified) {
         return res
-            .status(400)
+            .status(HTTP_STATUS.BAD_REQUEST)
             .json({ success: false, message: "Email or username already exists" });
     }
 
     // Validate email format
     const emailRegex = /^\S+@\S+\.\S+$/;
     if (!emailRegex.test(email)) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Please provide a valid email address",
         });
@@ -37,7 +38,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
 
     // Validate password length
     if (password.length < 6) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Password must be at least 6 characters long",
         });
@@ -88,7 +89,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             message: existingUser
                 ? "Unverified account updated, OTP sent again"
@@ -97,7 +98,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
     } catch (err) {
         console.error("OTP service failed:", err.message);
         return res
-            .status(500)
+            .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
             .json({ success: false, message: "Failed to send OTP. Try again." });
     }
 });
@@ -105,7 +106,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
 export const studentLogin = asyncHandler(async (req, res) => {
     let { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "fields cannot be empty",
         });
@@ -118,19 +119,19 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
     // Check if user exists
     if (!user) {
-        return res.status(401).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
             success: false,
             message: "Invalid credentials",
         });
     }
     if (user.isBlocked) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "user is blocked by the admin. please reach the customer care",
         });
     }
     if (user.authType == "google") {
-        return res.status(401).json({
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
             success: false,
             message:
                 "This account was created with Google. Please use Google Sign-In to continue.",
@@ -142,14 +143,14 @@ export const studentLogin = asyncHandler(async (req, res) => {
         try {
             await sendOTPToEmail(user.email);
 
-            return res.status(200).json({
+            return res.status(HTTP_STATUS.OK).json({
                 success: true,
                 message: "OTP sent for verification",
             });
         } catch (err) {
             console.error("OTP service failed:", err.message);
             return res
-                .status(500)
+                .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
                 .json({ success: false, message: "Failed to send OTP. Try again." });
         }
     }
@@ -158,7 +159,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
     if (!isPasswordValid) {
         return res
-            .status(401)
+            .status(HTTP_STATUS.UNAUTHORIZED)
             .json({ success: false, message: "Invalid credentials" });
     }
 
@@ -185,7 +186,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
     });
 
     // Return response in the expected format
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
         success: true,
         accessToken,
         user: {
@@ -208,7 +209,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
     let user = await User.findOne({ email });
     if (user) {
         if (user.isBlocked) {
-            return res.status(403).json({
+            return res.status(HTTP_STATUS.FORBIDDEN).json({
                 success: false,
                 message: "user is blocked by the admin ",
             });
@@ -252,7 +253,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             accessToken,
             user: {
@@ -293,7 +294,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             accessToken,
             user: {

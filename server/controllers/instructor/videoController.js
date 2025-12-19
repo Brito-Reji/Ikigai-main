@@ -11,7 +11,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 
     if (!req.file) {
         logger.warn(`Video upload failed: No file provided`);
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "No video file provided",
         });
@@ -24,7 +24,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 
     if (!course) {
         logger.warn(`Video upload failed: Course ${courseId} not found or unauthorized`);
-        return res.status(404).json({
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
             message: "Course not found or you don't have permission",
         });
@@ -33,7 +33,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     const result = await uploadVideoService(req.file, courseId, chapterId);
     logger.info(`Video uploaded successfully: ${result.s3Key}`);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: "Video uploaded successfully",
         data: result,
@@ -45,7 +45,7 @@ export const getVideoUrl = asyncHandler(async (req, res) => {
     const { videoPath } = req.query;
 
     if (!videoPath) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Video path is required",
         });
@@ -53,7 +53,7 @@ export const getVideoUrl = asyncHandler(async (req, res) => {
 
     const signedUrl = getSignedVideoUrlService(videoPath);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: "Signed URL generated",
         data: { url: signedUrl },

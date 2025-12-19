@@ -10,13 +10,14 @@ import {
   getVerificationStatisticsService,
   getAdminCourseChaptersService,
 } from "../../services/admin/courseService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all courses
 export const getAllCourses = asyncHandler(async (req, res) => {
   try {
     const result = await getAllCoursesService(req.query);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Courses fetched successfully",
       data: result.courses,
@@ -37,7 +38,7 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
     const course = await getCourseDetailsService(courseId);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Course details fetched successfully",
       data: course,
@@ -57,7 +58,7 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
     const result = await toggleCourseBlockService(courseId);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: `Course ${result.action} successfully`,
       data: result.course,
@@ -77,7 +78,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
     await deleteCourseService(courseId);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Course deleted successfully",
     });
@@ -95,7 +96,7 @@ export const getCourseStatistics = asyncHandler(async (req, res) => {
   try {
     const statistics = await getCourseStatisticsService();
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Course statistics fetched successfully",
       data: statistics,
@@ -121,7 +122,7 @@ export const updateVerificationStatus = asyncHandler(async (req, res) => {
       rejectionReason
     );
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: `Course ${status === "verified" ? "verified" : "rejected"} successfully`,
       data: updatedCourse,
@@ -141,7 +142,7 @@ export const getPendingVerifications = asyncHandler(async (req, res) => {
     const { page, limit } = req.query;
     const result = await getPendingVerificationsService(page, limit);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Pending verifications fetched successfully",
       data: result.courses,
@@ -161,7 +162,7 @@ export const getVerificationStatistics = asyncHandler(async (req, res) => {
   try {
     const statistics = await getVerificationStatisticsService();
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Verification statistics fetched successfully",
       data: statistics,
@@ -181,7 +182,7 @@ export const getAdminCourseChapters = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
     const chapters = await getAdminCourseChaptersService(courseId);
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Chapters fetched successfully",
       data: chapters,

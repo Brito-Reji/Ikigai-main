@@ -6,16 +6,17 @@ import {
     verifyEmailChangeOTPService,
     changePasswordService
 } from '../../services/instructor/profileService.js'
+import { HTTP_STATUS } from '../../utils/httpStatus.js'
 
 export const getInstructorProfile = asyncHandler(async (req, res) => {
     let instructorProfile = getInstructorProfileSerice(req)
 
-    res.status(200).json(instructorProfile)
+    res.status(HTTP_STATUS.OK).json(instructorProfile)
 })
 
 export const updateInstructorProfile = asyncHandler(async (req, res) => {
     const updatedinstructorProfile = updateInstructorProfileService(req)
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: 'instuctor profile updated successfuly',
         data: {
@@ -38,7 +39,7 @@ export const requestEmailChangeOTP = asyncHandler(async (req, res) => {
     const { newEmail, password } = req.body;
 
     if (!newEmail || !password) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "New email and password are required",
         });
@@ -46,7 +47,7 @@ export const requestEmailChangeOTP = asyncHandler(async (req, res) => {
 
     const result = await requestEmailChangeOTPService(req.user.id, newEmail, password);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: result.message,
     });
@@ -57,7 +58,7 @@ export const verifyEmailChangeOTP = asyncHandler(async (req, res) => {
     const { newEmail, otp } = req.body;
 
     if (!newEmail || !otp) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Email and OTP are required",
         });
@@ -65,7 +66,7 @@ export const verifyEmailChangeOTP = asyncHandler(async (req, res) => {
 
     const result = await verifyEmailChangeOTPService(req.user.id, newEmail, otp);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: result.message,
     });
@@ -76,7 +77,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Current password and new password are required",
         });
@@ -84,7 +85,7 @@ export const changePassword = asyncHandler(async (req, res) => {
 
     const result = await changePasswordService(req.user.id, currentPassword, newPassword);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
         message: result.message,
     });

@@ -1,6 +1,7 @@
 import { Course } from "../../models/Course.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all courses
 export const getAllCoursesService = async (filters) => {
@@ -95,7 +96,7 @@ export const getCourseDetailsService = async (courseId) => {
 
     if (!course) {
         const error = new Error("Course not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
@@ -108,7 +109,7 @@ export const toggleCourseBlockService = async (courseId) => {
 
     if (!course) {
         const error = new Error("Course not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
@@ -131,13 +132,13 @@ export const deleteCourseService = async (courseId) => {
 
     if (!course) {
         const error = new Error("Course not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
     if (course.deleted) {
         const error = new Error("Course is already deleted");
-        error.statusCode = 400;
+        error.statusCode = HTTP_STATUS.BAD_REQUEST;
         throw error;
     }
 
@@ -192,7 +193,7 @@ export const getCourseStatisticsService = async () => {
 export const updateVerificationStatusService = async (courseId, status, rejectionReason) => {
     if (!["verified", "rejected"].includes(status)) {
         const error = new Error("Invalid verification status. Must be 'verified' or 'rejected'");
-        error.statusCode = 400;
+        error.statusCode = HTTP_STATUS.BAD_REQUEST;
         throw error;
     }
 
@@ -200,13 +201,13 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
 
     if (!course) {
         const error = new Error("Course not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
     if (course.verificationStatus !== "inprocess") {
         const error = new Error("Course is not in verification process");
-        error.statusCode = 400;
+        error.statusCode = HTTP_STATUS.BAD_REQUEST;
         throw error;
     }
 
@@ -218,7 +219,7 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
     if (status === "rejected") {
         if (!rejectionReason || rejectionReason.trim() === "") {
             const error = new Error("Rejection reason is required when rejecting a course");
-            error.statusCode = 400;
+            error.statusCode = HTTP_STATUS.BAD_REQUEST;
             throw error;
         }
         course.rejectionReason = rejectionReason;

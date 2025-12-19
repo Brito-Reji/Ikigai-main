@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import cloudinary from "../../config/cloudinary.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Upload single image
 export const uploadImage = asyncHandler(async (req, res) => {
@@ -7,14 +8,14 @@ export const uploadImage = asyncHandler(async (req, res) => {
 
     if (!req.file) {
       console.error("No file in request");
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "No file uploaded",
       });
     }
 
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Image uploaded successfully",
       url: req.file.path,
@@ -22,7 +23,7 @@ export const uploadImage = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error uploading image",
       error: error.message,
@@ -34,7 +35,7 @@ export const uploadImage = asyncHandler(async (req, res) => {
 export const uploadMultipleImages = asyncHandler(async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "No files uploaded",
       });
@@ -45,14 +46,14 @@ export const uploadMultipleImages = asyncHandler(async (req, res) => {
       publicId: file.filename,
     }));
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Images uploaded successfully",
       files: uploadedFiles,
     });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error uploading images",
       error: error.message,
@@ -66,7 +67,7 @@ export const deleteImage = asyncHandler(async (req, res) => {
     const { publicId } = req.body;
 
     if (!publicId) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "Public ID is required",
       });
@@ -74,13 +75,13 @@ export const deleteImage = asyncHandler(async (req, res) => {
 
     await cloudinary.uploader.destroy(publicId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Image deleted successfully",
     });
   } catch (error) {
     console.error("Delete error:", error);
-    res.status(500).json({
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error deleting image",
       error: error.message,

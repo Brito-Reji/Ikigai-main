@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
   try {
@@ -8,7 +9,7 @@ export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
 
     // Check if username is provided
     if (!username || username.trim().length < 3) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "Username must be at least 3 characters",
       });
@@ -21,14 +22,14 @@ export const checkUsernameAvailabilty = asyncHandler(async (req, res) => {
  
 
     if (userExists || instructorExists) {
-      return res.status(200).json({
+      return res.status(HTTP_STATUS.OK).json({
         success: true,
         available: false,
         message: "Username is already taken",
       });
     }
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       available: true,
       message: "Username is available",

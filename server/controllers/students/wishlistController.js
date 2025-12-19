@@ -5,6 +5,8 @@ import {
     removeFromWishlistService,
     toggleWishlistService
 } from "../../services/student/wishlistService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { MESSAGES } from "../../utils/messages.js";
 
 // get wishlist
 export const getWishlist = asyncHandler(async (req, res) => {
@@ -12,9 +14,9 @@ export const getWishlist = asyncHandler(async (req, res) => {
 
     const courses = await getWishlistService(userId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "WISHLIST FETCHED SUCCESSFULLY",
+        message: MESSAGES.WISHLIST.FETCHED,
         data: courses,
         count: courses.length
     });
@@ -26,15 +28,15 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
     const { courseId } = req.body;
 
     if (!courseId) {
-        res.status(400);
-        throw new Error("Course ID is required");
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error(MESSAGES.CART.COURSE_ID_REQUIRED);
     }
 
     const result = await toggleWishlistService(userId, courseId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: result.action === 'added' ? "ADDED TO WISHLIST" : "REMOVED FROM WISHLIST",
+        message: result.action === 'added' ? MESSAGES.WISHLIST.ADDED : MESSAGES.WISHLIST.REMOVED,
         data: result
     });
 });
@@ -46,8 +48,8 @@ export const removeFromWishlist = asyncHandler(async (req, res) => {
 
     await removeFromWishlistService(userId, courseId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "REMOVED FROM WISHLIST"
+        message: MESSAGES.WISHLIST.REMOVED
     });
 });

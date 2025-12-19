@@ -6,6 +6,8 @@ import {
     syncCartService,
     clearCartService
 } from "../../services/student/cartService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { MESSAGES } from "../../utils/messages.js";
 
 // get cart
 export const getCart = asyncHandler(async (req, res) => {
@@ -13,9 +15,9 @@ export const getCart = asyncHandler(async (req, res) => {
 
     const courses = await getCartService(userId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "CART FETCHED SUCCESSFULLY",
+        message: MESSAGES.CART.FETCHED,
         data: courses,
         count: courses.length
     });
@@ -31,15 +33,15 @@ export const addToCart = asyncHandler(async (req, res) => {
     const { courseId } = req.body;
 
     if (!courseId) {
-        res.status(400);
-        throw new Error("Course ID is required");
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error(MESSAGES.CART.COURSE_ID_REQUIRED);
     }
 
     const courses = await addToCartService(userId, courseId);
 
-    res.status(201).json({
+    res.status(HTTP_STATUS.CREATED).json({
         success: true,
-        message: "COURSE ADDED TO CART",
+        message: MESSAGES.CART.ADDED,
         data: courses,
         count: courses.length
     });
@@ -52,9 +54,9 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 
     await removeFromCartService(userId, courseId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "COURSE REMOVED FROM CART"
+        message: MESSAGES.CART.REMOVED
     });
 });
 
@@ -64,15 +66,15 @@ export const syncCart = asyncHandler(async (req, res) => {
     const { courseIds } = req.body;
 
     if (!Array.isArray(courseIds)) {
-        res.status(400);
+        res.status(HTTP_STATUS.BAD_REQUEST);
         throw new Error("courseIds must be an array");
     }
 
     const courses = await syncCartService(userId, courseIds);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "CART SYNCED SUCCESSFULLY",
+        message: MESSAGES.CART.SYNCED,
         data: courses,
         count: courses.length
     });
@@ -84,8 +86,8 @@ export const clearCart = asyncHandler(async (req, res) => {
 
     await clearCartService(userId);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "CART CLEARED SUCCESSFULLY"
+        message: MESSAGES.CART.CLEARED
     });
 });

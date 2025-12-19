@@ -1,7 +1,9 @@
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
+import asyncHandler from "express-async-handler";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-export const logout = async (req, res) => {
+export const logout = asyncHandler(async (req, res) => {
     try {
         const refreshToken = req.cookies?.refreshToken;
 
@@ -25,15 +27,15 @@ export const logout = async (req, res) => {
             sameSite: "strict",
         });
 
-        return res.status(200).json({
+        return res.status(HTTP_STATUS.OK).json({
             success: true,
             message: "Logged out successfully",
         });
     } catch (err) {
         console.error("Logout error:", err);
-        return res.status(500).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Internal server error",
         });
     }
-};
+});

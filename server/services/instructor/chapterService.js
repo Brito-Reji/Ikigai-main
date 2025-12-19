@@ -1,6 +1,7 @@
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Course } from "../../models/Course.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Verify course ownership
 export const verifyCourseOwnership = async (courseId, instructorId) => {
@@ -14,7 +15,7 @@ export const verifyCourseOwnership = async (courseId, instructorId) => {
 
     if (!courseWithInstructor) {
         const error = new Error("Course not found or you don't have permission");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
@@ -53,7 +54,7 @@ export const updateChapterService = async (chapterId, courseId, updateData) => {
 
     if (!chapter) {
         const error = new Error("Chapter not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 
@@ -69,7 +70,7 @@ export const deleteChapterService = async (chapterId, courseId) => {
 
     if (!chapter) {
         const error = new Error("Chapter not found");
-        error.statusCode = 404;
+        error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
 

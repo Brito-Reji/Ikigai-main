@@ -5,6 +5,7 @@ import {
   editCategoryService,
   toggleCategoryBlockService,
 } from "../../services/admin/categoryService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 //  GET CATEGORIES
 export const getCategories = asyncHandler(async (req, res) => {
@@ -14,7 +15,7 @@ export const getCategories = asyncHandler(async (req, res) => {
 
   const result = await getCategoriesService({ page, limit, search });
 
-  res.status(200).json({ success: true, ...result });
+  res.status(HTTP_STATUS.OK).json({ success: true, ...result });
 });
 
 // CREATE CATEGORY
@@ -23,7 +24,7 @@ export const createCategory = asyncHandler(async (req, res) => {
 
   const category = await createCategoryService({ name, description });
 
-  res.status(201).json({
+  res.status(HTTP_STATUS.CREATED).json({
     success: true,
     message: "Category created successfully",
     category,
@@ -37,7 +38,7 @@ export const editCategory = asyncHandler(async (req, res) => {
 
   await editCategoryService(categoryId, { name, description });
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Category updated successfully",
   });
@@ -49,7 +50,7 @@ export const toggleCategoryBlock = asyncHandler(async (req, res) => {
 
   const category = await toggleCategoryBlockService(categoryId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: `Category ${category.isBlocked ? "blocked" : "unblocked"} successfully`,
     category,

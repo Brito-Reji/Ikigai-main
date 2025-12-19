@@ -1,6 +1,7 @@
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 import jwt from "jsonwebtoken";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const currentUser = async (req, res) => {
   try {
@@ -15,7 +16,7 @@ export const currentUser = async (req, res) => {
 
     if (!accessToken) {
       return res
-        .status(401)
+        .status(HTTP_STATUS.UNAUTHORIZED)
         .json({ success: false, message: "No token provided" });
     }
 
@@ -28,7 +29,7 @@ export const currentUser = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
         message: "User not found",
       });
@@ -36,14 +37,14 @@ export const currentUser = async (req, res) => {
 
     // Check if user is blocked
     if (user.isBlocked) {
-      return res.status(403).json({
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         message: "Your account has been blocked. Please contact support.",
         isBlocked: true,
       });
     }
 
-    return res.status(200).json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       user: {
         id: user._id,
@@ -57,6 +58,6 @@ export const currentUser = async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(401).json({ success: false, message: "Invalid token" });
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "Invalid token" });
   }
 };

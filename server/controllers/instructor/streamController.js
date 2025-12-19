@@ -4,6 +4,7 @@ import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "../../config/s3Client.js";
 import { Course } from "../../models/Course.js";
 import jwt from "jsonwebtoken";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Stream video with range request support
 export const streamVideo = asyncHandler(async (req, res) => {
@@ -36,7 +37,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             logger.info(`[StreamVideo] Using query token: ${instructorId}`);
         } catch (error) {
             logger.warn(`[StreamVideo] Invalid query token: ${error.message}`);
-            return res.status(401).json({
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({
                 success: false,
                 message: "Invalid or expired authentication token",
             });
@@ -51,7 +52,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             logger.info(`[StreamVideo] Using Authorization header: ${instructorId}`);
         } catch (error) {
             logger.warn(`[StreamVideo] Invalid Authorization header: ${error.message}`);
-            return res.status(401).json({
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({
                 success: false,
                 message: "Invalid or expired authentication token",
             });
@@ -67,7 +68,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
 
     if (!courseId || !videoPath) {
         logger.warn(`[StreamVideo] Missing parameters:`, { courseId, videoPath });
-        return res.status(400).json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
             message: "Course ID and video path are required",
         });
@@ -83,7 +84,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             courseId,
             instructorId
         });
-        return res.status(404).json({
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
             message: "Course not found or you don't have permission to access this video",
         });
@@ -102,7 +103,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
 
         const headResponse = await s3.send(headCommand);
         const videoSize = headResponse.ContentLength;
-        
+
         // Determine content type from file extension if not set
         let contentType = headResponse.ContentType;
         if (!contentType || contentType === 'application/octet-stream') {
@@ -211,7 +212,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
         });
 
         if (error.name === 'NoSuchKey') {
-            return res.status(404).json({
+            return res.status(HTTP_STATUS.NOT_FOUND).json({
                 success: false,
                 message: "Video file not found in storage. The file may have been deleted or moved.",
                 videoPath: s3Key
@@ -219,13 +220,13 @@ export const streamVideo = asyncHandler(async (req, res) => {
         }
 
         if (error.name === 'AccessDenied') {
-            return res.status(403).json({
+            return res.status(HTTP_STATUS.FORBIDDEN).json({
                 success: false,
                 message: "Access denied to video file. Please contact support.",
             });
         }
 
-        res.status(500).json({
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Failed to stream video. Please try again later.",
             error: process.env.NODE_ENV === 'development' ? error.message : undefined,

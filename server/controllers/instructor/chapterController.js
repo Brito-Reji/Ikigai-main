@@ -17,7 +17,7 @@ export const getCourseChapters = asyncHandler(async (req, res) => {
   const chapters = await getChaptersService(courseId);
 
   logger.info(`Retrieved ${chapters.length} chapters for course: ${courseId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Chapters fetched successfully",
     data: chapters,
@@ -34,7 +34,7 @@ export const createChapter = asyncHandler(async (req, res) => {
   const chapter = await createChapterService(courseId, { title, description, order });
 
   logger.info(`Chapter created successfully: ${chapter._id}`);
-  res.status(201).json({
+  res.status(HTTP_STATUS.CREATED).json({
     success: true,
     message: "Chapter created successfully",
     data: chapter,
@@ -51,7 +51,7 @@ export const updateChapter = asyncHandler(async (req, res) => {
   const chapter = await updateChapterService(chapterId, courseId, { title, description, order });
 
   logger.info(`Chapter updated successfully: ${chapterId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Chapter updated successfully",
     data: chapter,
@@ -67,7 +67,7 @@ export const deleteChapter = asyncHandler(async (req, res) => {
   await deleteChapterService(chapterId, courseId);
 
   logger.info(`Chapter deleted successfully: ${chapterId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Chapter deleted successfully",
   });
@@ -80,6 +80,7 @@ import {
   updateLessonService,
   deleteLessonService,
 } from "../../services/instructor/lessonService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get lessons
 export const getLessons = asyncHandler(async (req, res) => {
@@ -90,7 +91,7 @@ export const getLessons = asyncHandler(async (req, res) => {
   const lessons = await getLessonsService(chapterId);
 
   logger.info(`Retrieved ${lessons.length} lessons for chapter: ${chapterId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Lessons fetched successfully",
     data: lessons,
@@ -115,7 +116,7 @@ export const addLesson = asyncHandler(async (req, res) => {
   });
 
   logger.info(`Lesson created successfully: ${lesson._id}`);
-  res.status(201).json({
+  res.status(HTTP_STATUS.CREATED).json({
     success: true,
     message: "Lesson added successfully",
     data: lesson,
@@ -140,7 +141,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
   });
 
   logger.info(`Lesson updated successfully: ${lessonId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Lesson updated successfully",
     data: lesson,
@@ -156,7 +157,7 @@ export const deleteLesson = asyncHandler(async (req, res) => {
   await deleteLessonService(lessonId, chapterId, courseId);
 
   logger.info(`Lesson deleted successfully: ${lessonId}`);
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Lesson deleted successfully",
   });

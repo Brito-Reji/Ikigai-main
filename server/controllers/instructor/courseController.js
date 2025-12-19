@@ -5,6 +5,7 @@ import {
   updateCourseService,
   getCourseByIdService
 } from "../../services/instructor/courseService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL COURSES OF INSTRUCTOR
 export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
@@ -12,7 +13,7 @@ export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
 
   const courses = await getAllCourseByInstructorService(instructorId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "COURSES FETCHED SUCCESSFULLY",
     data: courses,
@@ -25,7 +26,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 
   const course = await createCourseService(instructorId, req.body);
 
-  res.status(201).json({
+  res.status(HTTP_STATUS.CREATED).json({
     success: true,
     message: "COURSE CREATED SUCCESSFULLY",
     data: course,
@@ -39,7 +40,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
   const updatedCourse = await updateCourseService(courseId, instructorId, req.body);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "COURSE UPDATED SUCCESSFULLY",
     data: updatedCourse,
@@ -53,7 +54,7 @@ export const getCourseById = asyncHandler(async (req, res) => {
 
   const course = await getCourseByIdService(courseId, instructorId);
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "COURSE FETCHED SUCCESSFULLY",
     data: course,
@@ -69,21 +70,21 @@ export const applyForVerification = asyncHandler(async (req, res) => {
 
   // Course should be in draft (not published yet)
   if (course.published) {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Cannot apply for verification on already published course"
     });
   }
 
   if (course.verificationStatus === "inprocess") {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Verification request already in process"
     });
   }
 
   if (course.verificationStatus === "verified") {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Course is already verified. You can now publish it."
     });
@@ -93,7 +94,7 @@ export const applyForVerification = asyncHandler(async (req, res) => {
   course.rejectionReason = null;
   await course.save();
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Verification request submitted successfully",
     data: course,
@@ -109,7 +110,7 @@ export const togglePublish = asyncHandler(async (req, res) => {
 
   // Can only publish if course is verified
   if (!course.published && course.verificationStatus !== "verified") {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Course must be verified before publishing. Please apply for verification first."
     });
@@ -118,7 +119,7 @@ export const togglePublish = asyncHandler(async (req, res) => {
   course.published = !course.published;
   await course.save();
 
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: course.published ? "Course published successfully" : "Course unpublished",
     data: course,
