@@ -1,5 +1,5 @@
-import asyncHandler from 'express-async-handler';
-import * as paymentService from '../../services/student/paymentService.js';
+import asyncHandler from "express-async-handler";
+import * as paymentService from "../../services/student/paymentService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
 
@@ -16,7 +16,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   // logic is delegated to the service layer
   console.log(req.user._id);
   const order = await paymentService.createOrderService({ courseIds, userId: req.user._id });
-
+  console.log("order->", order.razorpayOrderId);
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: MESSAGES.PAYMENT.ORDER_CREATED,
@@ -34,23 +34,23 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new Error("Missing payment verification details");
   }
 
-  // logic is delegated to the service layer
+  const isValid = paymentService.verifyPaymentService({
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature
+  });
 
-  const isValid = paymentService.verifyPaymentService(
-    {
+  if (isValid) {
+    const result = await paymentService.updatePaymentStatusService({
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature
-    }
-  );
-
-  if (isValid) {
-    // TODO: Perform database operations here (e.g., set order status to 'paid')
+    });
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: MESSAGES.PAYMENT.VERIFIED,
-      data: { paymentId: razorpay_payment_id }
+      data: result
     });
   } else {
     res.status(HTTP_STATUS.BAD_REQUEST);

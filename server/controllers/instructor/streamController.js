@@ -46,7 +46,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
     // 3. From Authorization header (for HEAD requests)
     else if (req.headers.authorization) {
         try {
-            const headerToken = req.headers.authorization.split(' ')[1];
+            const headerToken = req.headers.authorization.split(" ")[1];
             const decoded = jwt.verify(headerToken, process.env.JWT_ACCESS_SECRET);
             instructorId = decoded.id;
             logger.info(`[StreamVideo] Using Authorization header: ${instructorId}`);
@@ -92,7 +92,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
 
     logger.info(`[StreamVideo] Course verified: ${course.title}`);
 
-    const s3Key = videoPath.startsWith('/') ? videoPath.substring(1) : videoPath;
+    const s3Key = videoPath.startsWith("/") ? videoPath.substring(1) : videoPath;
 
     try {
         // Get video metadata first to know the file size
@@ -106,16 +106,16 @@ export const streamVideo = asyncHandler(async (req, res) => {
 
         // Determine content type from file extension if not set
         let contentType = headResponse.ContentType;
-        if (!contentType || contentType === 'application/octet-stream') {
-            const ext = s3Key.split('.').pop().toLowerCase();
+        if (!contentType || contentType === "application/octet-stream") {
+            const ext = s3Key.split(".").pop().toLowerCase();
             const mimeTypes = {
-                'mp4': 'video/mp4',
-                'webm': 'video/webm',
-                'ogg': 'video/ogg',
-                'mov': 'video/quicktime',
-                'm4v': 'video/x-m4v',
+                "mp4": "video/mp4",
+                "webm": "video/webm",
+                "ogg": "video/ogg",
+                "mov": "video/quicktime",
+                "m4v": "video/x-m4v",
             };
-            contentType = mimeTypes[ext] || 'video/mp4';
+            contentType = mimeTypes[ext] || "video/mp4";
             logger.info(`[StreamVideo] Content type not set, using: ${contentType}`);
         }
 
@@ -145,17 +145,17 @@ export const streamVideo = asyncHandler(async (req, res) => {
             const s3Response = await s3.send(command);
 
             // Set video headers
-            res.setHeader('Content-Range', `bytes 0-${end}/${videoSize}`);
-            res.setHeader('Accept-Ranges', 'bytes');
-            res.setHeader('Content-Length', end + 1);
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader("Content-Range", `bytes 0-${end}/${videoSize}`);
+            res.setHeader("Accept-Ranges", "bytes");
+            res.setHeader("Content-Length", end + 1);
+            res.setHeader("Content-Type", contentType);
+            res.setHeader("Cache-Control", "no-cache");
 
             res.status(206);
             s3Response.Body.pipe(res);
         } else {
             // Parse range header
-            const parts = range.replace(/bytes=/, '').split('-');
+            const parts = range.replace(/bytes=/, "").split("-");
             const start = parseInt(parts[0], 10);
             const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
             const chunkSize = end - start + 1;
@@ -170,7 +170,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             // Validate range
             if (start >= videoSize || end >= videoSize) {
                 logger.warn(`[StreamVideo] Invalid range:`, { start, end, videoSize });
-                res.setHeader('Content-Range', `bytes */${videoSize}`);
+                res.setHeader("Content-Range", `bytes */${videoSize}`);
                 return res.status(416).json({
                     success: false,
                     message: "Requested range not satisfiable",
@@ -187,11 +187,11 @@ export const streamVideo = asyncHandler(async (req, res) => {
             const s3Response = await s3.send(command);
 
             // Set video headers for partial content (CORS handled by middleware)
-            res.setHeader('Content-Range', `bytes ${start}-${end}/${videoSize}`);
-            res.setHeader('Accept-Ranges', 'bytes');
-            res.setHeader('Content-Length', chunkSize);
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader("Content-Range", `bytes ${start}-${end}/${videoSize}`);
+            res.setHeader("Accept-Ranges", "bytes");
+            res.setHeader("Content-Length", chunkSize);
+            res.setHeader("Content-Type", contentType);
+            res.setHeader("Cache-Control", "no-cache");
 
             logger.info(`[StreamVideo] Streaming chunk successfully:`, {
                 key: s3Key,
@@ -211,7 +211,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             stack: error.stack
         });
 
-        if (error.name === 'NoSuchKey') {
+        if (error.name === "NoSuchKey") {
             return res.status(HTTP_STATUS.NOT_FOUND).json({
                 success: false,
                 message: "Video file not found in storage. The file may have been deleted or moved.",
@@ -219,7 +219,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
             });
         }
 
-        if (error.name === 'AccessDenied') {
+        if (error.name === "AccessDenied") {
             return res.status(HTTP_STATUS.FORBIDDEN).json({
                 success: false,
                 message: "Access denied to video file. Please contact support.",
@@ -229,7 +229,7 @@ export const streamVideo = asyncHandler(async (req, res) => {
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Failed to stream video. Please try again later.",
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+            error: process.env.NODE_ENV === "development" ? error.message : undefined,
         });
     }
 });
