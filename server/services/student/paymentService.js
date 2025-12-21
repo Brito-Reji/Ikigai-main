@@ -4,7 +4,7 @@ import { Course } from "../../models/Course.js";
 import { Payment } from "../../models/Payment.js";
 import { Order } from "../../models/Order.js";
 
-export const createOrderService = async ({ courseIds, userId,couponId }) => {
+export const createOrderService = async ({ courseIds, userId }) => {
   const courses = await Course.find({
     _id: { $in: courseIds },
     published: true
@@ -31,35 +31,30 @@ export const createOrderService = async ({ courseIds, userId,couponId }) => {
 
   const razorpayOrder = await razorpayInstance.orders.create(options);
 
-  const payment = await Payment.create({
+  await Order.create({
     userId,
-    amount,
+    courseIds: courseIds,
     razorpayOrderId: razorpayOrder.id,
-    status: "PENDING",
-  })
+    amount,
+    status: "CREATED"
+  });
 
-  const orders = await Order.insertMany(
-    courses.map((course) => ({
-      userId,
-      courseId: course._id,
-      paymentId: payment._id,
-      amount: course.price,
-      currency: "INR",
-      status: "CREATED",
-    }))
-  );
-  let eachPrice = courses.reduce((total, course) => total + course.price, 0)/courses.length;
-  payment.orders = orders.map(o => { return {courseId:o._id,itemCost:eachPrice}});
-  await payment.save();
+  const paymentsData = courses.map((course) => ({
+    courseId: course._id,
+    userId,
+    razorpayOrderId: razorpayOrder.id,
+    amount: course.price,
+    status: "CREATED"
+  }));
+
+  await Payment.insertMany(paymentsData);
 
   return {
     razorpayOrderId: razorpayOrder.id,
     amount,
     currency: "INR",
-    message: "Order created successfully",
+    message: "Order created successfully"
   };
-
-
 };
 
 
@@ -87,23 +82,25 @@ export const verifyPaymentService = ({
 export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
   console.log("payment verified");
 
-  const payment = await Payment.findOne({ razorpayOrderId: razorpay_order_id });
+  const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
 
-  if (!payment) {
-    throw new Error("Payment not found");
+  if (!order) {
+    throw new Error("Order not found");
   }
 
-  payment.status = "SUCCESS";
-  payment.razorpayPaymentId = razorpay_payment_id;
-  payment.razorpaySignature = razorpay_signature;
-  await payment.save();
+  order.status = "PAID";
+  await order.save();
 
-  const orders = await Order.updateMany(
-    { paymentId: payment._id },
-    { status: "PAID" }
+  const payments = await Payment.updateMany(
+    { razorpayOrderId: razorpay_order_id },
+    { 
+      status: "PAID",
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature
+    }
   );
 
-  console.log("orders->", orders);
+  console.log("payments updated->", payments);
 
   return { paymentId: razorpay_payment_id };
 };

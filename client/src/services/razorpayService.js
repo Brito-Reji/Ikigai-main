@@ -10,6 +10,7 @@ export const startRazorpayPayment = async (courseIds, navigate) => {
   const order = response.data.data;
  console.log("order->",order.amount)
 
+ alert(import.meta.env.VITE_RAZORPAY_KEY_ID)
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
     amount: order.amount*100,

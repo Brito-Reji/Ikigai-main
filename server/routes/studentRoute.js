@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP, changePassword } from "../controllers/students/profileController.js";
 import { getCart, addToCart, removeFromCart, syncCart, clearCart } from "../controllers/students/cartController.js";
 import { getWishlist, toggleWishlist, removeFromWishlist } from "../controllers/students/wishlistController.js";
+import { fullRefund, partialRefund, refundHistory } from "../controllers/students/refundController.js";
 
 const router = Router();
 
@@ -23,5 +24,10 @@ router.delete("/cart", clearCart);
 router.get("/wishlist", getWishlist);
 router.post("/wishlist/toggle", toggleWishlist);
 router.delete("/wishlist/:courseId", removeFromWishlist);
+
+// Refunds
+router.post("/refund/full", fullRefund);
+router.post("/refund/partial", partialRefund);
+router.get("/refund/history", refundHistory);
 
 export default router;
