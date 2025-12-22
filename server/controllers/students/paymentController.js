@@ -6,7 +6,6 @@ import { MESSAGES } from "../../utils/messages.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { courseIds } = req.body;
-  console.log("createOrder payload:", JSON.stringify(req.body, null, 2));
 
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
     res.status(HTTP_STATUS.BAD_REQUEST);
@@ -14,9 +13,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 
   // logic is delegated to the service layer
-  console.log(req.user._id);
   const order = await paymentService.createOrderService({ courseIds, userId: req.user._id });
-  console.log("order->", order.razorpayOrderId);
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: MESSAGES.PAYMENT.ORDER_CREATED,
@@ -27,8 +24,6 @@ export const createOrder = asyncHandler(async (req, res) => {
 
 export const verifyPayment = asyncHandler(async (req, res) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-  console.log("verifyPayment payload:", JSON.stringify(req.body, null, 2));
-
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     res.status(HTTP_STATUS.BAD_REQUEST);
     throw new Error("Missing payment verification details");

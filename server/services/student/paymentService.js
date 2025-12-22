@@ -10,7 +10,6 @@ export const createOrderService = async ({ courseIds, userId }) => {
     published: true
   });
 
-  console.log(`Found ${courses.length} courses for IDs: ${courseIds}`);
 
   if (courses.length !== courseIds.length) {
     throw new Error("One or more courses are not published");
@@ -69,8 +68,7 @@ export const verifyPaymentService = ({
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 
-  console.log("Expected signature:", expectedSignature);
-  console.log("Razorpay signature:", razorpay_signature);
+
 
   if (expectedSignature !== razorpay_signature) {
     throw new Error("Invalid payment signature");
@@ -80,7 +78,6 @@ export const verifyPaymentService = ({
 };
 
 export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
-  console.log("payment verified");
 
   const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
 
@@ -91,7 +88,7 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
   order.status = "PAID";
   await order.save();
 
-  const payments = await Payment.updateMany(
+ await Payment.updateMany(
     { razorpayOrderId: razorpay_order_id },
     { 
       status: "PAID",
@@ -100,7 +97,6 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
     }
   );
 
-  console.log("payments updated->", payments);
 
   return { paymentId: razorpay_payment_id };
 };

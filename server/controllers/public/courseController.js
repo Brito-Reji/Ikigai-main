@@ -11,8 +11,10 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
-  const result = await getPublishedCoursesService(req.query);
+  const userId = req.user?._id;
+  const result = await getPublishedCoursesService(req.query, userId);
 
+  
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "PUBLISHED COURSES FETCHED SUCCESSFULLY",
@@ -37,9 +39,10 @@ export const getFeaturedCourses = asyncHandler(async (req, res) => {
 
 // GET PUBLIC COURSE DETAILS
 export const getPublicCourseDetails = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
   const { courseId } = req.params;
 
-  const course = await getPublicCourseDetailsService(courseId);
+  const course = await getPublicCourseDetailsService(courseId, userId);
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
@@ -61,9 +64,10 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 
 // get chapters
 export const getPublicCourseChapters = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
   const { courseId } = req.params;
 
-  const chapters = await getPublicCourseChaptersService(courseId);
+  const chapters = await getPublicCourseChaptersService(courseId, userId);
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
@@ -76,9 +80,10 @@ export const getPublicCourseChapters = asyncHandler(async (req, res) => {
 
 // get lessons
 export const getPublicCourseLessons = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
   const { chapterId } = req.params;
 
-  const lessons = await getPublicCourseLessonsService(chapterId);
+  const lessons = await getPublicCourseLessonsService(chapterId, userId);
 
   res.status(HTTP_STATUS.OK).json({
     success: true,

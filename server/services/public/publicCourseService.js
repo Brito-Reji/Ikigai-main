@@ -2,6 +2,7 @@
 import { Course } from "../../models/Course.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Chapter } from "../../models/Chapter.js";
+import { Payment } from "../../models/Payment.js";
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
 export const buildPublicCourseQuery = async (queryParams) => {
@@ -61,7 +62,7 @@ export const getSortOption = async (sort) => {
 };
 
 // GET PUBLISHED COURSES
-export const getPublishedCoursesService = async (queryParams) => {
+export const getPublishedCoursesService = async (queryParams,userId) => {
     const page = parseInt(queryParams.page || 1);
     const limit = parseInt(queryParams.limit || 12);
 
@@ -69,7 +70,16 @@ export const getPublishedCoursesService = async (queryParams) => {
     const sortOption = await getSortOption(queryParams.sort);
 
     const skip = (page - 1) * limit;
-
+    
+    let enrolledCourseIds = [];
+    if (userId) {
+        const enrolledCourses = await Payment.find({
+            userId,
+            status: "PAID",
+        });
+        enrolledCourseIds = enrolledCourses.map(payment => payment.courseId.toString());
+    }
+    
     let courses = await Course.find(query)
         .populate("category", "name isBlocked")
         .populate("instructor", "firstName lastName email profileImageUrl headline description")
@@ -79,7 +89,7 @@ export const getPublishedCoursesService = async (queryParams) => {
 
     courses = courses.filter(course => {
         if (!course.category) return false;
-        return course.category.isBlocked === false;
+        return course.category.isBlocked === false && !enrolledCourseIds.includes(course._id.toString());
     });
 
     const totalCourses = await Course.countDocuments(query);
@@ -113,7 +123,7 @@ export const getFeaturedCoursesService = async (limit = 4) => {
 };
 
 // GET PUBLIC COURSE DETAILS
-export const getPublicCourseDetailsService = async (courseId) => {
+export const getPublicCourseDetailsService = async (courseId,userId) => {
     // First check if course exists at all
     const courseExists = await Course.findOne({
         _id: courseId,
@@ -134,7 +144,7 @@ export const getPublicCourseDetailsService = async (courseId) => {
         throw new Error("This course is not yet published");
     }
 
-    const course = await Course.findOne({
+    let  course = await Course.findOne({
         _id: courseId,
         published: true,
         blocked: false,

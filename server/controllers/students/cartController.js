@@ -25,9 +25,6 @@ export const getCart = asyncHandler(async (req, res) => {
 
 // add to cart
 export const addToCart = asyncHandler(async (req, res) => {
-    console.log("=== ADD TO CART REQUEST ===");
-    console.log("User:", req.user?._id);
-    console.log("Body:", req.body);
 
     const userId = req.user._id;
     const { courseId } = req.body;

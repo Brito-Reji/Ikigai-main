@@ -5,11 +5,11 @@ import { Course } from "../../models/Course.js";
 export const getCartService = async (userId) => {
     const cart = await Cart.findOne({ userId })
         .populate({
-            path: 'courses',
-            select: 'title description price thumbnail instructor category',
+            path: "courses",
+            select: "title description price thumbnail instructor category",
             populate: [
-                { path: 'instructor', select: 'firstName lastName' },
-                { path: 'category', select: 'name' }
+                { path: "instructor", select: "firstName lastName" },
+                { path: "category", select: "name" }
             ]
         });
 
@@ -18,7 +18,6 @@ export const getCartService = async (userId) => {
 
 // add to cart
 export const addToCartService = async (userId, courseId) => {
-    console.log("addToCartService called with:", { userId, courseId });
 
     const course = await Course.findById(courseId);
     if (!course) {
@@ -29,22 +28,20 @@ export const addToCartService = async (userId, courseId) => {
         throw new Error("This course is not available");
     }
 
-    console.log("Course validated, adding to cart...");
 
     const cart = await Cart.findOneAndUpdate(
         { userId },
         { $addToSet: { courses: courseId } },
         { upsert: true, new: true }
     ).populate({
-        path: 'courses',
-        select: 'title description price thumbnail instructor category',
+        path: "courses",
+        select: "title description price thumbnail instructor category",
         populate: [
-            { path: 'instructor', select: 'firstName lastName' },
-            { path: 'category', select: 'name' }
+            { path: "instructor", select: "firstName lastName" },
+            { path: "category", select: "name" }
         ]
     });
 
-    console.log("Cart after update:", cart);
 
     return cart.courses;
 };
@@ -75,7 +72,7 @@ export const syncCartService = async (userId, courseIds) => {
         _id: { $in: courseIds },
         published: true,
         blocked: { $ne: true }
-    }).select('_id');
+    }).select("_id");
 
     const validIds = validCourses.map(c => c._id);
 
@@ -84,11 +81,11 @@ export const syncCartService = async (userId, courseIds) => {
         { $addToSet: { courses: { $each: validIds } } },
         { upsert: true, new: true }
     ).populate({
-        path: 'courses',
-        select: 'title description price thumbnail instructor category',
+        path: "courses",
+        select: "title description price thumbnail instructor category",
         populate: [
-            { path: 'instructor', select: 'firstName lastName' },
-            { path: 'category', select: 'name' }
+            { path: "instructor", select: "firstName lastName" },
+            { path: "category", select: "name" }
         ]
     });
 
