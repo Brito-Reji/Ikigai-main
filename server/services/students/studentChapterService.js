@@ -23,7 +23,7 @@ export const getPublicCourseChaptersService = async (courseId) => {
         chapters.map(async (chapter) => {
             const lessons = await Lesson.find({ chapter: chapter._id })
                 .sort({ order: 1 })
-                .select('title description duration order isFree resources')
+                .select("title description duration order isFree resources")
                 .lean();
 
             return {

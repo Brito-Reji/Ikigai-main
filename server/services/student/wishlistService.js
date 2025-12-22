@@ -5,11 +5,11 @@ import { Course } from "../../models/Course.js";
 export const getWishlistService = async (userId) => {
     const wishlist = await Wishlist.findOne({ userId })
         .populate({
-            path: 'courses',
-            select: 'title description price thumbnail instructor category rating students',
+            path: "courses",
+            select: "title description price thumbnail instructor category rating students",
             populate: [
-                { path: 'instructor', select: 'firstName lastName' },
-                { path: 'category', select: 'name' }
+                { path: "instructor", select: "firstName lastName" },
+                { path: "category", select: "name" }
             ]
         });
 
@@ -58,7 +58,7 @@ export const toggleWishlistService = async (userId, courseId) => {
             { userId },
             { $pull: { courses: courseId } }
         );
-        return { action: 'removed', inWishlist: false };
+        return { action: "removed", inWishlist: false };
     } else {
         const course = await Course.findById(courseId);
         if (!course) {
@@ -69,6 +69,6 @@ export const toggleWishlistService = async (userId, courseId) => {
             { $addToSet: { courses: courseId } },
             { upsert: true }
         );
-        return { action: 'added', inWishlist: true };
+        return { action: "added", inWishlist: true };
     }
 };

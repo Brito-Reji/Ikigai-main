@@ -36,7 +36,7 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
 
     res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: result.action === 'added' ? MESSAGES.WISHLIST.ADDED : MESSAGES.WISHLIST.REMOVED,
+        message: result.action === "added" ? MESSAGES.WISHLIST.ADDED : MESSAGES.WISHLIST.REMOVED,
         data: result
     });
 });

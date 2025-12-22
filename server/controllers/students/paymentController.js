@@ -13,7 +13,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 
   // logic is delegated to the service layer
-  const order = await paymentService.createOrderService({ courseIds, userId: req.user._id });
+  const order = await paymentService.createOrderService({ courseIds, userId: req.user.id });
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: MESSAGES.PAYMENT.ORDER_CREATED,

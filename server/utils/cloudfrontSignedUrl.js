@@ -7,10 +7,18 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const privateKeyPath = path.resolve(__dirname, "..", cloudfrontConfig.privateKeyPath);
-const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+let privateKey = null;
+
+if (cloudfrontConfig.privateKeyPath) {
+    const privateKeyPath = path.resolve(__dirname, "..", cloudfrontConfig.privateKeyPath);
+    privateKey = fs.readFileSync(privateKeyPath, "utf8");
+}
 
 export function generateSignedUrl(objectPath, expiresIn = 1800) {
+    if (!privateKey || !cloudfrontConfig.domain || !cloudfrontConfig.keyPairId) {
+        throw new Error("CloudFront is not configured. Please set CF_DOMAIN, CF_KEY_PAIR_ID, and CF_PRIVATE_KEY_PATH environment variables.");
+    }
+    
     const url = `https://${cloudfrontConfig.domain}${objectPath}`;
     const expires = Math.floor(Date.now() / 1000) + expiresIn;
 

@@ -5,7 +5,7 @@ import { sendOtpEmail } from "../../utils/emailService.js"
 
 export const getInstructorProfileSerice = async (req) => {
 
-    let InstructorProfile = await Instructor.findById(req.user.id).select('-password')
+    let InstructorProfile = await Instructor.findById(req.user.id).select("-password")
     return InstructorProfile
 
 
@@ -29,7 +29,7 @@ export const updateInstructorProfileService = async (req) => {
         return updatedUser
     } else {
         res.status(404)
-        throw new Error('User not found')
+        throw new Error("User not found")
     }
 }
 
