@@ -19,9 +19,7 @@ export const courseEndpoints = {
   },
 
   student: {
-    list: () => '/courses',
-    byId: courseId => `/courses/${courseId}`,
-    chekout: () => '/api/payments',
+  
     verifyPayment: () => '/payments/verify-payment',
   },
 

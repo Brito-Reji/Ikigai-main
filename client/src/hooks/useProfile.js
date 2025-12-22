@@ -31,7 +31,7 @@ export const useUpdateProfile = () => {
             return data
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['profile'] })
+            queryClient.invalidateQueries({ queryKey: ['profile',user?.role] })
         },
     })
 }
