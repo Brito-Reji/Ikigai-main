@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicCourse, usePublicCourseChapters, usePublicCourseLessons } from "@/hooks/useCourses.js";
-import { useStudentChapters } from "@/hooks/useChapters.js";
-
 // Components
 import CourseHero from "@/components/student/CourseHero.jsx";
 import CourseSyllabus from "@/components/student/CourseSyllabus.jsx";
