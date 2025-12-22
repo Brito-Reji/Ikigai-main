@@ -254,7 +254,7 @@ export default function LandingPage() {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900">Top Courses</h2>
               <Link
-                to={"/course"}
+                to={"/courses"}
                 className="text-blue-600 hover:text-blue-700"
               >
                 See All
@@ -299,7 +299,7 @@ export default function LandingPage() {
                 Top Instructors
               </h2>
               <Link
-                to={"/course"}
+                to={"/courses"}
                 className="text-blue-600 hover:text-blue-700"
               >
                 See All
