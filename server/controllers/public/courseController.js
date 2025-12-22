@@ -11,7 +11,8 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
-  const userId = req.user?._id;
+  const userId = req.user.id;
+
   const result = await getPublishedCoursesService(req.query, userId);
 
   
