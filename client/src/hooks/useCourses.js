@@ -80,6 +80,20 @@ export const useStudentCourse = (courseId) => {
     })
 }
 
+export const useVerifyPayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn:courseApi.student.verifyPayment,
+    onSuccess: () => {
+      
+      queryClient.invalidateQueries({ queryKey: ['public-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['student-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['public-course'] });
+    },
+  });
+};
+
 // Public hooks
 export const usePublicCourses = (params) => {
     return useQuery({

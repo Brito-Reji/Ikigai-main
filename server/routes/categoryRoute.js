@@ -6,7 +6,7 @@ import authorize from "../middlewares/authorize.js";
 const router = Router();
 
 // Public route to get all categories
-router.get("/", authenticate, authorize("admin"), getCategories);
+router.get("/", authenticate, getCategories);
 
 // Admin-only routes for category management
 router.post("/", authenticate, authorize("admin"), createCategory);

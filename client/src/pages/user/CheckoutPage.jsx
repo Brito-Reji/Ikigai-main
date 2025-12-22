@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Tag, X, ShoppingBag, Lock, CreditCard } from "lucide-react";
 import { useCart } from "@/hooks/useRedux";
-import { clearCart } from "@/store/slices/cartSlice";
 import { startRazorpayPayment } from "@/services/razorpayService";
 import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
+import { useVerifyPayment } from "@/hooks/useCourses.js";
 
 const CheckoutPage = () => {
+  const verifyPaymentMutation = useVerifyPayment();
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { items: cartItems, dispatch } = useCart();
@@ -126,10 +128,9 @@ const CheckoutPage = () => {
       setProcessing(true);
 
       // Initialize Razorpay payment
-      await startRazorpayPayment(courseIds, navigate);
+      await startRazorpayPayment(courseIds, navigate, verifyPaymentMutation);
 
-      // Don't clear cart here - it causes redirect issues
-      // Cart will be cleared after successful payment verification
+     
 
 
     } catch (error) {
