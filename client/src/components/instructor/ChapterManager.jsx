@@ -725,7 +725,7 @@ function VideoPreviewModal({ lesson, onClose }) {
           videoPath: lesson.videoUrl
         });
 
-        const API_BASE_URL = 'http://localhost:3000/api';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
         // Use public endpoint - no authentication required since bucket is public
         const streamUrl = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
 

@@ -22,7 +22,8 @@ const { default: app } = await import("./app.js");
 const { connectDB } = await import("./config/db.js");
 const { default: logger } = await import("./utils/logger.js");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 
 connectDB();
 
