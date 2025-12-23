@@ -2,9 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-const { default: app } = await import("./app.js");
-const { connectDB } = await import("./config/db.js");
-const { default: logger } = await import("./utils/logger.js");
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,7 +17,10 @@ if (result.error) {
 }
 
 
-
+// Import modules AFTER dotenv has loaded
+const { default: app } = await import("./app.js");
+const { connectDB } = await import("./config/db.js");
+const { default: logger } = await import("./utils/logger.js");
 
 const PORT = 3000;
 
