@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import logger from "../../utils/logger.js";
 import { uploadVideoService, getSignedVideoUrlService } from "../../services/instructor/videoService.js";
 import { Course } from "../../models/Course.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Upload video
 export const uploadVideo = asyncHandler(async (req, res) => {

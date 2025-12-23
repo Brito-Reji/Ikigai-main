@@ -1,6 +1,5 @@
 
 import { Course } from "../../models/Course.js";
-import { Category } from "../../models/Category.js";
 
 // GET ALL COURSES BY INSTRUCTOR
 export const getAllCourseByInstructorService = async (instructorId) => {
@@ -123,7 +122,7 @@ export const updateCourseService = async (courseId, instructorId, data) => {
     const existing = await Course.findById(courseId);
     if (!existing) throw new Error("Course not found");
 
-    if (existing.instructor.toString() !== instructorId) {
+    if (existing.instructor.toString() !== instructorId.toString()) {
         throw new Error("You can only edit your own courses");
     }
 
@@ -164,7 +163,7 @@ export const getCourseByIdService = async (courseId, instructorId) => {
 
     if (!course) throw new Error("Course not found");
 
-    if (course.instructor._id.toString() !== instructorId) {
+    if (course.instructor._id.toString() !== instructorId.toString()) {
         throw new Error("You can only view your own courses");
     }
 

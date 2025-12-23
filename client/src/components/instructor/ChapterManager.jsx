@@ -720,31 +720,15 @@ function VideoPreviewModal({ lesson, onClose }) {
       }
 
       try {
-        const courseId = window.location.pathname.split('/')[3];
-        const token = localStorage.getItem('accessToken');
-
         console.log('[VideoPreview] Loading video:', {
           lessonTitle: lesson.title,
-          videoPath: lesson.videoUrl,
-          courseId,
-          hasToken: !!token
+          videoPath: lesson.videoUrl
         });
 
-        if (!token) {
-          setError('Authentication token not found. Please login again.');
-          setLoading(false);
-          return;
-        }
-
-        if (!courseId) {
-          setError('Course ID not found in URL');
-          setLoading(false);
-          return;
-        }
-
         const API_BASE_URL = 'http://localhost:3000/api';
-        // Include token in query string for video element (it can't send Authorization headers)
-        const streamUrl = `${API_BASE_URL}/instructor/stream-video?courseId=${courseId}&videoPath=${encodeURIComponent(lesson.videoUrl)}&token=${token}`;
+        // Use public endpoint - no authentication required since bucket is public
+        const streamUrl = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
+
 
         console.log('[VideoPreview] Stream URL constructed:', streamUrl);
 

@@ -11,11 +11,10 @@ import {
     deleteLesson,
 } from "../controllers/instructor/chapterController.js"
 import { uploadVideo, getVideoUrl } from "../controllers/instructor/videoController.js"
-import { streamVideo, streamVideoOptions } from "../controllers/instructor/streamController.js"
 import multer from "multer"
 
 const upload = multer({ dest: "uploads/" })
-import { getInstructorProfile } from "../controllers/instructor/profileController.js"
+
 
 const router = Router()
 
@@ -42,8 +41,7 @@ router.delete("/courses/:courseId/chapters/:chapterId/lessons/:lessonId", delete
 // Video upload
 router.post("/upload-video", upload.single("video"), uploadVideo)
 router.get("/video-url", getVideoUrl)
-router.get("/stream-video", streamVideo)
-router.options("/stream-video", streamVideoOptions)
+
 
 // Profile Routes
 import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP, changePassword } from "../controllers/instructor/instructorProfileController.js";
