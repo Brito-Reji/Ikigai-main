@@ -6,6 +6,7 @@ import {
     verifyEmailChangeOTPService,
     changePasswordService,
 } from "../../services/instructor/instructorProfileService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET INSTRUCTOR PROFILE
 export const getProfile = asyncHandler(async (req, res) => {
