@@ -27,16 +27,16 @@ export const startRazorpayPayment = async (
         await verifyPaymentMutation.mutateAsync(response);
 
         // navigate to success page AFTER verification
-        navigate('/payment/success');
+        navigate('/payment/success', { replace: true });
       } catch (err) {
         console.error('Payment verification failed:', err);
-        navigate('/payment/failed');
+        navigate('/payment/failed', { replace: true });
       }
     },
 
     modal: {
       ondismiss: function () {
-        navigate('/payment/cancelled');
+        navigate('/payment/cancelled', { replace: true });
       },
     },
   };

@@ -32,9 +32,13 @@ const CheckoutPage = () => {
         if (courseId) {
           // Scenario 1: Single Course Checkout via URL
           const response = await api.get(`/public/courses/${courseId}`);
+         if(response.data.data.isEnrolled){
+          navigate("/courses",{replace:true});
+         }else{
           if (response.data.success) {
             setCourses([response.data.data]);
           }
+         }
         } else if (cartItems.length > 0) {
           // Scenario 2: Cart Checkout
           setCourses(cartItems);
