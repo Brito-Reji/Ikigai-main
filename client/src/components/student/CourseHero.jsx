@@ -16,7 +16,7 @@ const CourseHero = ({ course }) => {
 
   if (!course) return null;
 
-  const isInCart = cartItems.some((item) => item._id === course._id);
+  const isInCart = cartItems.some((item) => item?._id === course._id);
 
   const handleAddToCart = () => {
     if (isInCart) {
@@ -33,23 +33,16 @@ const CourseHero = ({ course }) => {
       category: course.category
     };
 
-    if (user && user.id) {
-      // Authenticated user - add to backend
-      addToCartAPI(course._id, {
-        onSuccess: () => {
-          dispatch(addToCartRedux(courseData));
-          toast.success("Added to cart!");
-        },
-        onError: (error) => {
-          const message = error.response?.data?.message || "Failed to add to cart";
-          toast.error(message);
-        }
-      });
-    } else {
-      // Guest user - add to localStorage only
-      dispatch(addToCartRedux(courseData));
-      toast.success("Added to cart!");
-    }
+    addToCartAPI(course._id, {
+      onSuccess: () => {
+        dispatch(addToCartRedux(courseData));
+        toast.success("Added to cart!");
+      },
+      onError: (error) => {
+        const message = error.response?.data?.message || "Failed to add to cart";
+        toast.error(message);
+      }
+    });
   };
   const handleBuy = () => {
     navigate(`/checkout?courseId=${course._id}`);

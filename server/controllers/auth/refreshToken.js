@@ -54,7 +54,7 @@ export const refreshToken = async (req, res) => {
 
     // Generate new tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens({
-      userId: user._id,
+      userId: user.id,
       email: user.email,
       username: user.username,
       firstName: user.firstName,

@@ -14,15 +14,15 @@ export default function CourseCard({ course }) {
   const user = useSelector((state) => state.auth.user);
   const { mutate: addToCartAPI, isPending } = useAddToCart();
 
-  const isInCart = items.some((item) => item._id === course._id);
+  // const isInCart = items.some((item) => item._id === course._id);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
 
-    if (isInCart) {
-      toast.error("Already in cart");
-      return;
-    }
+    // if (isInCart) {
+    //   toast.error("Already in cart");
+    //   return;
+    // }
 
     const courseData = {
       _id: course._id,
@@ -80,12 +80,12 @@ export default function CourseCard({ course }) {
         <button
           onClick={handleAddToCart}
           disabled={isPending}
-          className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-300 z-10 ${isInCart
+          className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-300 z-10 ${false
             ? "bg-green-500 opacity-100 scale-110"
             : "bg-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-700"
             }`}
         >
-          {isInCart ? (
+          {false ? (
             <Check className="w-4 h-4 text-white" />
           ) : isPending ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

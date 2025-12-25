@@ -40,7 +40,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
   }
 
   req.user = {
-    id: user._id,
+    id: user.id,
     email: user.email,
     role: decoded.role,
   };

@@ -11,7 +11,7 @@ import { MESSAGES } from "../../utils/messages.js";
 
 // get cart
 export const getCart = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const courses = await getCartService(userId);
 
@@ -26,7 +26,7 @@ export const getCart = asyncHandler(async (req, res) => {
 // add to cart
 export const addToCart = asyncHandler(async (req, res) => {
 
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { courseId } = req.body;
 
     if (!courseId) {
@@ -46,7 +46,7 @@ export const addToCart = asyncHandler(async (req, res) => {
 
 // remove from cart
 export const removeFromCart = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { courseId } = req.params;
 
     await removeFromCartService(userId, courseId);
@@ -59,7 +59,7 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 
 // sync guest cart
 export const syncCart = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { courseIds } = req.body;
 
     if (!Array.isArray(courseIds)) {
@@ -79,7 +79,7 @@ export const syncCart = asyncHandler(async (req, res) => {
 
 // clear cart
 export const clearCart = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     await clearCartService(userId);
 

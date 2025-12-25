@@ -4,7 +4,7 @@ import * as applyCouponService   from "../../services/student/couponService.js";
 
 export const applyCoupon = asyncHandler(async (req, res) => {
   const { couponId } = req.body;
-  const userId = req.user._id;
+  const userId = req.user.id;
 
   const coupon = await applyCouponService.applyCouponService({ couponId, userId });
 

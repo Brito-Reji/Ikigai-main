@@ -39,7 +39,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     }
 
     const { accessToken, refreshToken } = generateTokens({
-      userId: user._id,
+      userId: user.id,
       email: user.email,
       firstName: user.firstName,
       role: user.role,
@@ -51,7 +51,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
       message: "Admin login successful",
       accessToken,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         role: user.role,
       },

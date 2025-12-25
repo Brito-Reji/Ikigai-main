@@ -1,7 +1,6 @@
 import { Cart } from "../../models/Cart.js";
 import { Course } from "../../models/Course.js";
 
-// get user cart
 export const getCartService = async (userId) => {
     const cart = await Cart.findOne({ userId })
         .populate({
@@ -13,7 +12,19 @@ export const getCartService = async (userId) => {
             ]
         });
 
-    return cart?.courses || [];
+    // filter nulls
+    const filteredCourses = (cart?.courses || []).filter(course => course !== null);
+    
+    // cleanup - remove null references from DB
+    if (cart && filteredCourses.length !== cart.courses.length) {
+        const validIds = filteredCourses.map(c => c._id);
+        await Cart.findOneAndUpdate(
+            { userId },
+            { $set: { courses: validIds } }
+        );
+    }
+    
+    return filteredCourses;
 };
 
 // add to cart
@@ -42,8 +53,19 @@ export const addToCartService = async (userId, courseId) => {
         ]
     });
 
-
-    return cart.courses;
+    // filter nulls
+    const filteredCourses = (cart.courses || []).filter(course => course !== null);
+    
+    // cleanup - remove null references from DB
+    if (filteredCourses.length !== cart.courses.length) {
+        const validIds = filteredCourses.map(c => c._id);
+        await Cart.findOneAndUpdate(
+            { userId },
+            { $set: { courses: validIds } }
+        );
+    }
+    
+    return filteredCourses;
 };
 
 // remove from cart
@@ -89,7 +111,19 @@ export const syncCartService = async (userId, courseIds) => {
         ]
     });
 
-    return cart.courses;
+    // filter nulls
+    const filteredCourses = (cart.courses || []).filter(course => course !== null);
+    
+    // cleanup - remove null references from DB
+    if (filteredCourses.length !== cart.courses.length) {
+        const validIds = filteredCourses.map(c => c._id);
+        await Cart.findOneAndUpdate(
+            { userId },
+            { $set: { courses: validIds } }
+        );
+    }
+    
+    return filteredCourses;
 };
 
 // clear cart

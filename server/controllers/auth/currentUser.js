@@ -47,7 +47,7 @@ export const currentUser = async (req, res) => {
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         username: user.username,
         firstName: user.firstName,

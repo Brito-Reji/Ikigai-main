@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import morganMiddleware from "./middlewares/morgan.js";
 
 // Routes
 import authRoute from "./routes/auth.js";
@@ -46,6 +47,9 @@ app.use(
 );
 
 app.use(cookieParser());
+
+// http request logging
+app.use(morganMiddleware);
 
 // PUBLIC ROUTES
 app.use("/api/auth", authRoute);

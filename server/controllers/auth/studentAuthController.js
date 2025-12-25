@@ -73,7 +73,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
         await sendOTPToEmail(email);
 
         let { refreshToken } = generateTokens({
-            userId: user._id,
+            userId: user.id,
             role: user.role,
         });
 
@@ -164,7 +164,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
     }
 
     let { accessToken, refreshToken } = generateTokens({
-        userId: user._id,
+        userId: user.id,
         role: user.role,
         email: user.email,
         username: user.username,
@@ -232,7 +232,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
         }
 
         let { accessToken, refreshToken } = generateTokens({
-            userId: user._id,
+            userId: user.id,
             role: user.role,
             email: user.email,
             username: user.username,
@@ -273,7 +273,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
             authType: "google",
         });
         let { accessToken, refreshToken } = generateTokens({
-            userId: user._id,
+            userId: user.id,
             role: user.role,
             email: user.email,
             username: user.username,

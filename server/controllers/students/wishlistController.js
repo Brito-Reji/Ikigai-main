@@ -10,7 +10,7 @@ import { MESSAGES } from "../../utils/messages.js";
 
 // get wishlist
 export const getWishlist = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const courses = await getWishlistService(userId);
 
@@ -24,7 +24,7 @@ export const getWishlist = asyncHandler(async (req, res) => {
 
 // toggle wishlist
 export const toggleWishlist = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { courseId } = req.body;
 
     if (!courseId) {
@@ -43,7 +43,7 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
 
 // remove from wishlist
 export const removeFromWishlist = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { courseId } = req.params;
 
     await removeFromWishlistService(userId, courseId);

@@ -115,7 +115,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
 
     // Generate JWT tokens
     let { accessToken, refreshToken } = generateTokens({
-        userId: user._id,
+        userId: user.id,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
@@ -159,7 +159,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     let user = await Instructor.findOne({ email });
     if (user) {
         let { accessToken, refreshToken } = generateTokens({
-            userId: user._id,
+            userId: user.id,
             email: user.email,
             username: user.username,
             firstName: user.firstName,
@@ -200,7 +200,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
         });
 
         let { accessToken, refreshToken } = generateTokens({
-            userId: user._id,
+            userId: user.id,
             email: user.email,
             username: user.username,
             firstName: user.firstName,
