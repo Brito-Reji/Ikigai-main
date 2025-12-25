@@ -1,127 +1,170 @@
-import asyncHandler from "express-async-handler";
-import bcrypt from "bcrypt";
-import { Instructor } from "../../models/Instructor.js";
+import asyncHandler from 'express-async-handler';
+import bcrypt from 'bcrypt';
+import { Instructor } from '../../models/Instructor.js';
 
-import api from "../../config/axiosConfig.js";
-import { OAuth2Client } from "google-auth-library";
-import { generateTokens } from "../../utils/generateTokens.js";
-import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import api from '../../config/axiosConfig.js';
+import { OAuth2Client } from 'google-auth-library';
+import { generateTokens } from '../../utils/generateTokens.js';
+import { HTTP_STATUS } from '../../utils/httpStatus.js';
 
 export const instructorRegister = asyncHandler(async (req, res) => {
+  let { email, username, firstName, lastName, password } = req.body;
 
-    let { email, username, firstName, lastName, password } = req.body;
-
-    if (!email || !username || !firstName || !lastName || !password) {
-        return res
-            .status(HTTP_STATUS.BAD_REQUEST)
-            .json({ success: false, message: "Please provide all required fields" });
-    }
-    const existingUser = await Instructor.findOne({
-        $or: [{ email }, { username }],
+  if (!email || !username || !firstName || !lastName || !password) {
+    return res
+      .status(HTTP_STATUS.BAD_REQUEST)
+      .json({ success: false, message: 'Please provide all required fields' });
+  }
+  const existingUser = await Instructor.findOne({
+    $or: [{ email }, { username }],
+  });
+  if (existingUser) {
+    return res
+      .status(HTTP_STATUS.BAD_REQUEST)
+      .json({ success: false, message: 'email or username  already exist' });
+  }
+  // Validate email format
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      message: 'Please provide a valid email address',
     });
-    if (existingUser) {
-        return res
-            .status(HTTP_STATUS.BAD_REQUEST)
-            .json({ success: false, message: "email or username  already exist" });
-    }
-    // Validate email format
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            message: "Please provide a valid email address",
-        });
-    }
+  }
 
-    // Validate password length
-    if (password.length < 6) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            message: "Password must be at least 6 characters long",
-        });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    let role = "instructor";
-    await Instructor.create({
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        username,
-        firstName,
-        lastName,
-        role,
+  // Validate password length
+  if (password.length < 6) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      message: 'Password must be at least 6 characters long',
     });
+  }
 
-    try {
-        let response = await api.post("/auth/send-otp", { email });
-        if (response.data.success) {
-            res.status(HTTP_STATUS.OK).json({ success: true, message: "otp " });
-        }
-    } catch (err) {
-        console.error("OTP API failed:", err.message);
-        return res
-            .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-            .json({ success: false, message: "Failed to send OTP. Try again." });
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  let role = 'instructor';
+  await Instructor.create({
+    email: email.toLowerCase(),
+    password: hashedPassword,
+    username,
+    firstName,
+    lastName,
+    role,
+  });
+
+  try {
+    let response = await api.post('/auth/send-otp', { email });
+    if (response.data.success) {
+      res.status(HTTP_STATUS.OK).json({ success: true, message: 'otp ' });
     }
+  } catch (err) {
+    console.error('OTP API failed:', err.message);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: 'Failed to send OTP. Try again.' });
+  }
 });
 
 export const instructorSignin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Validate required fields
-    if (!email || !password) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            message: "Please provide email and password",
-        });
-    }
+  // Validate required fields
+  if (!email || !password) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      message: 'Please provide email and password',
+    });
+  }
 
-    // Find user by email
-    const user = await Instructor.findOne({ email: email.toLowerCase() }).select(
-        "+password"
-    );
+  // Find user by email
+  const user = await Instructor.findOne({ email: email.toLowerCase() }).select(
+    '+password'
+  );
 
-    if (!user) {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-            success: false,
-            message: "Invalid email or password",
-        });
-    }
-    if (user.authType == "google") {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-            success: false,
-            message:
-                "This account was created with Google. Please use Google Sign-In to continue.",
-        });
-    }
-    // Check if user is an instructor
-    if (user.role !== "instructor") {
-        return res.status(HTTP_STATUS.FORBIDDEN).json({
-            success: false,
-            message: "Access denied. Instructor account required",
-        });
-    }
+  if (!user) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message: 'Invalid email or password',
+    });
+  }
+  if (user.authType == 'google') {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message:
+        'This account was created with Google. Please use Google Sign-In to continue.',
+    });
+  }
+  // Check if user is an instructor
+  if (user.role !== 'instructor') {
+    return res.status(HTTP_STATUS.FORBIDDEN).json({
+      success: false,
+      message: 'Access denied. Instructor account required',
+    });
+  }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-            success: false,
-            message: "Invalid email or password",
-        });
-    }
+  if (!isPasswordValid) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message: 'Invalid email or password',
+    });
+  }
 
-    // Generate JWT tokens
+  // Generate JWT tokens
+  let { accessToken, refreshToken } = generateTokens({
+    userId: user._id,
+    email: user.email,
+    username: user.username,
+    firstName: user.firstName,
+    role: user.role,
+    profileImageUrl: user.profileImageUrl,
+    isVerified: user.isVerified,
+  });
+
+  // Store refresh token in database
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+
+  // Set refresh token in HttpOnly cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    accessToken,
+    user: {
+      email: user.email,
+      role: user.role,
+    },
+  });
+});
+
+export const instructorGoogleAuth = asyncHandler(async (req, res) => {
+  const client = new OAuth2Client();
+  const { token } = req.body;
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.VITE_GOOGLE_ID,
+  });
+  let { email, name, picture } = ticket.payload;
+  let [firstName, ...lastName] = name.split(' ');
+  lastName = lastName.join(' ');
+  let user = await Instructor.findOne({ email });
+  if (user) {
     let { accessToken, refreshToken } = generateTokens({
-        userId: user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        role: user.role,
-        profileImageUrl: user.profileImageUrl,
-        isVerified: user.isVerified,
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      role: user.role,
+      profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerified,
     });
 
     // Store refresh token in database
@@ -129,105 +172,61 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return res.status(HTTP_STATUS.OK).json({
-        success: true,
-        accessToken,
-        user: {
-            email: user.email,
-            role: user.role,
-        },
+      success: true,
+      accessToken,
+      user: {
+        email: user.email,
+        role: user.role,
+      },
     });
-});
-
-export const instructorGoogleAuth = asyncHandler(async (req, res) => {
-    const client = new OAuth2Client();
-    const { token } = req.body;
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: process.env.VITE_GOOGLE_ID,
+  } else {
+    // Create new instructor account
+    user = await Instructor.create({
+      email,
+      firstName,
+      lastName,
+      username: null,
+      isVerified: true,
+      profileImageUrl: picture,
+      authType: 'google',
     });
-    let { email, name, picture } = ticket.payload;
-    let [firstName, ...lastName] = name.split(" ");
-    lastName = lastName.join(" ");
-    let user = await Instructor.findOne({ email });
-    if (user) {
-        let { accessToken, refreshToken } = generateTokens({
-            userId: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            role: user.role,
-            profileImageUrl: user.profileImageUrl,
-            isVerified: user.isVerified,
-        });
 
-        // Store refresh token in database
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false });
+    let { accessToken, refreshToken } = generateTokens({
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      role: user.role,
+      profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerified,
+    });
 
-        // Set refresh token in HttpOnly cookie
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
+    // Store refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
 
-        return res.status(HTTP_STATUS.OK).json({
-            success: true,
-            accessToken,
-            user: {
-                email: user.email,
-                role: user.role,
-            },
-        });
-    } else {
-        // Create new instructor account
-        user = await Instructor.create({
-            email,
-            firstName,
-            lastName,
-            username: null,
-            isVerified: true,
-            profileImageUrl: picture,
-            authType: "google",
-        });
+    // Set refresh token in HttpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
 
-        let { accessToken, refreshToken } = generateTokens({
-            userId: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            role: user.role,
-            profileImageUrl: user.profileImageUrl,
-            isVerified: user.isVerified,
-        });
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-        // Store refresh token in database
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false });
-
-        // Set refresh token in HttpOnly cookie
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
-
-        return res.status(HTTP_STATUS.OK).json({
-            success: true,
-            accessToken,
-            user: {
-                email: user.email,
-                role: user.role,
-            },
-        });
-    }
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      accessToken,
+      user: {
+        email: user.email,
+        role: user.role,
+      },
+    });
+  }
 });

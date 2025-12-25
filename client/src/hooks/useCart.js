@@ -10,8 +10,8 @@ export const useCart = () => {
     return useQuery({
         queryKey: ['cart'],
         queryFn: cartApi.getCart,
-        enabled: !!(user && user.id),
-        retry: false
+        enabled: true,
+        retry: 2
     });
 };
 

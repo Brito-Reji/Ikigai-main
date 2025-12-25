@@ -11,11 +11,10 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL PUBLISHED COURSES
 export const getPublishedCourses = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user._id;
 
   const result = await getPublishedCoursesService(req.query, userId);
 
-  
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "PUBLISHED COURSES FETCHED SUCCESSFULLY",
@@ -77,7 +76,6 @@ export const getPublicCourseChapters = asyncHandler(async (req, res) => {
     count: chapters.length,
   });
 });
-
 
 // get lessons
 export const getPublicCourseLessons = asyncHandler(async (req, res) => {

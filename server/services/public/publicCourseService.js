@@ -1,7 +1,6 @@
 
 import { Course } from "../../models/Course.js";
 import { Lesson } from "../../models/Lesson.js";
-import { Chapter } from "../../models/Chapter.js";
 import { Payment } from "../../models/Payment.js";
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
@@ -96,7 +95,10 @@ export const getPublishedCoursesService = async (queryParams,userId) => {
     const totalPages = Math.ceil(totalCourses / limit);
 
     return {
-        courses,
+        courses:courses.map((course) => ({
+            ...course.toObject(),
+            price: (course.price / 100).toFixed(2),
+        })),
         pagination: {
             currentPage: page,
             totalPages,
@@ -119,12 +121,22 @@ export const getFeaturedCoursesService = async (limit = 4) => {
         .sort({ createdAt: -1 })
         .limit(parseInt(limit));
 
-    return courses;
+    return courses.map((course) => ({
+        ...course.toObject(),
+        price: (course.price / 100).toFixed(2),
+    }));
 };
 
 // GET PUBLIC COURSE DETAILS
 export const getPublicCourseDetailsService = async (courseId,userId) => {
-    // First check if course exists at all
+    let isEnrolled = false;
+    if(userId){
+        const enrolledCourses = await Payment.find({
+            userId,
+            status: "PAID",
+        });
+        isEnrolled = enrolledCourses.some(payment => payment.courseId.toString() === courseId);
+    }
     const courseExists = await Course.findOne({
         _id: courseId,
         deleted: { $ne: true },
@@ -153,7 +165,11 @@ export const getPublicCourseDetailsService = async (courseId,userId) => {
         .populate("category", "name description")
         .populate("instructor", "firstName lastName email profileImageUrl headline description social");
 
-    return course;
+    return {
+        ...course.toObject(),
+        price: (course.price / 100).toFixed(2),
+        isEnrolled,
+    };
 };
 
 // GET PUBLIC COURSE STATISTICS

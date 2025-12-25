@@ -1,7 +1,7 @@
-import { Instructor } from "../../models/Instructor.js";
-import { User } from "../../models/User.js";
-import jwt from "jsonwebtoken";
-import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { Instructor } from '../../models/Instructor.js';
+import { User } from '../../models/User.js';
+import jwt from 'jsonwebtoken';
+import { HTTP_STATUS } from '../../utils/httpStatus.js';
 
 export const currentUser = async (req, res) => {
   try {
@@ -9,15 +9,15 @@ export const currentUser = async (req, res) => {
     let accessToken = null;
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer ")
+      req.headers.authorization.startsWith('Bearer ')
     ) {
-      accessToken = req.headers.authorization.split(" ")[1];
+      accessToken = req.headers.authorization.split(' ')[1];
     }
 
     if (!accessToken) {
       return res
         .status(HTTP_STATUS.UNAUTHORIZED)
-        .json({ success: false, message: "No token provided" });
+        .json({ success: false, message: 'No token provided' });
     }
 
     const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
@@ -31,7 +31,7 @@ export const currentUser = async (req, res) => {
     if (!user) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
@@ -39,7 +39,7 @@ export const currentUser = async (req, res) => {
     if (user.isBlocked) {
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
-        message: "Your account has been blocked. Please contact support.",
+        message: 'Your account has been blocked. Please contact support.',
         isBlocked: true,
       });
     }
@@ -47,7 +47,7 @@ export const currentUser = async (req, res) => {
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       user: {
-        id: user.id,
+        id: user._id,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
@@ -58,6 +58,8 @@ export const currentUser = async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "Invalid token" });
+    return res
+      .status(HTTP_STATUS.UNAUTHORIZED)
+      .json({ success: false, message: 'Invalid token' });
   }
 };

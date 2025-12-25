@@ -11,7 +11,10 @@ export const getAllCourseByInstructorService = async (instructorId) => {
         .populate("instructor", "firstName lastName email profileImageUrl headline")
         .sort({ createdAt: -1 });
 
-    return courses;
+    return courses.map((course) => ({
+        ...course.toObject(),
+        price: (course.price / 100).toFixed(2),
+    }));
 };
 
 // VALIDATE COURSE INPUT
@@ -107,7 +110,7 @@ export const createCourseService = async (instructorId, data) => {
         actualPrice: numericActualPrice,
         discountType: chosenType,
         discountValue: numericDiscountValue,
-        price: Math.round(finalPrice),
+        price: Math.round(finalPrice*100),
         thumbnail: thumbnail || "",
         published: published || false,
     });
@@ -143,7 +146,7 @@ export const updateCourseService = async (courseId, instructorId, data) => {
             actualPrice: numericActualPrice,
             discountType: chosenType,
             discountValue: numericDiscountValue,
-            price: finalPrice,
+            price: Math.round(finalPrice*100),
             thumbnail: data.thumbnail || existing.thumbnail,
             published: data.published !== undefined ? data.published : existing.published,
         },
@@ -167,5 +170,8 @@ export const getCourseByIdService = async (courseId, instructorId) => {
         throw new Error("You can only view your own courses");
     }
 
-    return course;
+    return {
+       ...course.toObject(),
+        price: (course.price / 100).toFixed(2),
+    };
 };
