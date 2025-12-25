@@ -1,11 +1,11 @@
-import asyncHandler from 'express-async-handler';
-import * as paymentService from '../../services/student/paymentService.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
-import { MESSAGES } from '../../utils/messages.js';
+import asyncHandler from "express-async-handler";
+import * as paymentService from "../../services/student/paymentService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { MESSAGES } from "../../utils/messages.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { courseIds } = req.body;
-
+console.log(req.user);
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
     res.status(HTTP_STATUS.BAD_REQUEST);
     throw new Error(
@@ -30,7 +30,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     req.body;
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error('Missing payment verification details');
+    throw new Error("Missing payment verification details");
   }
 
   const isValid = paymentService.verifyPaymentService({
@@ -53,6 +53,6 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error('Invalid payment signature');
+    throw new Error("Invalid payment signature");
   }
 });

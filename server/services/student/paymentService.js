@@ -30,6 +30,8 @@ export const createOrderService = async ({ courseIds, userId }) => {
 
   const razorpayOrder = await razorpayInstance.orders.create(options);
 
+  console.log(userId);
+
   await Order.create({
     userId,
     courseIds: courseIds,
@@ -63,6 +65,8 @@ export const verifyPaymentService = ({
   razorpay_order_id,
   razorpay_signature,
 }) => {
+
+  console.log("verifyPaymentService hit");
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)

@@ -57,7 +57,7 @@ export const courseApi = {
       return data;
     },
     verifyPayment: async (payload) => {
-     const res = await api.post(courseApi.student.verifyPayment(), payload);
+     const res = await api.post(courseEndpoints.student.verifyPayment(), payload);
      return res.data;
     },
   },
