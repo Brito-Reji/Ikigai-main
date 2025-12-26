@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { Course } from "../../models/Course.js";
 import { Payment } from "../../models/Payment.js";
 import { Order } from "../../models/Order.js";
+import { Cart } from "../../models/Cart.js";
+import { Wishlist } from "../../models/Wishlist.js";
 
 export const createOrderService = async ({ courseIds, userId }) => {
   const courses = await Course.find({
@@ -89,8 +91,11 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
     throw new Error("Order not found");
   }
 
+
   order.status = "PAID";
   await order.save();
+
+
 
  await Payment.updateMany(
     { razorpayOrderId: razorpay_order_id },
@@ -100,6 +105,10 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
       razorpaySignature: razorpay_signature
     }
   );
+    // clear cart and wishlist if there are any the course is already purchased
+    await Cart.deleteMany({ userId: order.userId,courses: { $in: order.courseIds } });
+    await Wishlist.deleteMany({ userId: order.userId,courses: { $in: order.courseIds } });
+
 
 
   return { paymentId: razorpay_payment_id };

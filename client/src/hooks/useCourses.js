@@ -99,6 +99,7 @@ export const useVerifyPayment = () => {
       queryClient.invalidateQueries({ queryKey: ['public-courses'] });
       queryClient.invalidateQueries({ queryKey: ['student-courses'] });
       queryClient.invalidateQueries({ queryKey: ['featured-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
 };
