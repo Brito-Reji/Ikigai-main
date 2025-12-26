@@ -1,13 +1,13 @@
-import asyncHandler from 'express-async-handler';
+import asyncHandler from "express-async-handler";
 import {
   getCartService,
   addToCartService,
   removeFromCartService,
   syncCartService,
   clearCartService,
-} from '../../services/student/cartService.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
-import { MESSAGES } from '../../utils/messages.js';
+} from "../../services/student/cartService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { MESSAGES } from "../../utils/messages.js";
 
 // get cart
 export const getCart = asyncHandler(async (req, res) => {
@@ -63,7 +63,7 @@ export const syncCart = asyncHandler(async (req, res) => {
 
   if (!Array.isArray(courseIds)) {
     res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error('courseIds must be an array');
+    throw new Error("courseIds must be an array");
   }
 
   const courses = await syncCartService(userId, courseIds);

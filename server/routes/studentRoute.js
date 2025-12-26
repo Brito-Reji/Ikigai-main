@@ -16,8 +16,8 @@ router.put("/profile/change-password", changePassword);
 // Cart
 router.get("/cart", getCart);
 router.post("/cart", addToCart);
-router.delete("/cart/:courseId", removeFromCart);
 router.post("/cart/sync", syncCart);
+router.delete("/cart/:courseId", removeFromCart);
 router.delete("/cart", clearCart);
 
 // Wishlist
