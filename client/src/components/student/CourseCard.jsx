@@ -26,6 +26,7 @@ export default function CourseCard({ course }) {
 
     const courseData = {
       _id: course._id,
+      id: course.id,
       title: course.title,
       price: course.price,
       thumbnail: course.thumbnail,
@@ -71,13 +72,13 @@ export default function CourseCard({ course }) {
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-
+  {console.log("course id",course._id)}
         <WishlistHeart
           courseId={course._id}
           className="absolute top-3 left-3 z-10"
         />
 
-        <button
+        {/* <button
           onClick={handleAddToCart}
           disabled={isPending}
           className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-300 z-10 ${false
@@ -92,7 +93,7 @@ export default function CourseCard({ course }) {
           ) : (
             <ShoppingCart className="w-4 h-4 text-white" />
           )}
-        </button>
+        </button> */}
       </div>
 
       <div className="p-4">

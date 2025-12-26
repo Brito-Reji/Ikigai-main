@@ -86,10 +86,19 @@ export const useVerifyPayment = () => {
   return useMutation({
     mutationFn:courseApi.student.verifyPayment,
     onSuccess: () => {
+      // refetch ALL course queries in cache (not just active)
+      queryClient.refetchQueries({ 
+        predicate: (query) => query.queryKey[0] === 'public-course'
+      });
       
+      queryClient.refetchQueries({ 
+        predicate: (query) => query.queryKey[0] === 'student-course'
+      });
+      
+      // invalidate lists
       queryClient.invalidateQueries({ queryKey: ['public-courses'] });
       queryClient.invalidateQueries({ queryKey: ['student-courses'] });
-      queryClient.invalidateQueries({ queryKey: ['public-course'] });
+      queryClient.invalidateQueries({ queryKey: ['featured-courses'] });
     },
   });
 };
@@ -114,6 +123,7 @@ export const usePublicCourse = (courseId) => {
         queryKey: ['public-course', courseId],
         queryFn: () => courseApi.public.getCourseDetails(courseId),
         enabled: !!courseId,
+        staleTime:0
     })
 }
 

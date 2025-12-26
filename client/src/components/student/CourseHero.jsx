@@ -23,6 +23,7 @@ const CourseHero = ({ course }) => {
       toast.error("Course already in cart");
       return;
     }
+console.log("course",course)
 
     const courseData = {
       _id: course._id,
@@ -30,7 +31,8 @@ const CourseHero = ({ course }) => {
       price: course.price,
       thumbnail: course.thumbnail,
       instructor: course.instructor,
-      category: course.category
+      category: course.category,
+      isEnrolled: course.isEnrolled,
     };
 
     addToCartAPI(course._id, {
@@ -133,10 +135,12 @@ const CourseHero = ({ course }) => {
                     e.target.src = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80";
                   }}
                 />
-                <WishlistHeart
+                {!course?.isEnrolled && (
+                  <WishlistHeart
                   courseId={course._id}
                   className="absolute top-3 right-3 z-10"
                 />
+                )}
                 <div className="absolute inset-0 bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all" >
                   <button className="bg-white bg-opacity-90 hover:bg-opacity-100 hover:scale-110 rounded-full p-5 transition-all shadow-lg">
                     <svg className="w-10 h-10 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 20 20">
@@ -155,20 +159,33 @@ const CourseHero = ({ course }) => {
                   <span className="text-gray-500 line-through ml-2">₹{Math.round(course.price * 1.5)}</span>
                 </div>
 
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isPending || isInCart}
-                  className={`w-full py-3 rounded-lg font-semibold transition-colors mb-3 ${isInCart
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
-                    }`}
-                >
-                  {isPending ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
-                </button>
+                {course?.isEnrolled ? (
+                  // enrolled
+                  <button
+                    onClick={() => navigate(`/my-courses/${course._id}`)}
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                  >
+                    Go to Course
+                  </button>
+                ) : (
+                  // not enrolled
+                  <>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={isPending || isInCart}
+                      className={`w-full py-3 rounded-lg font-semibold transition-colors mb-3 ${isInCart
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                        }`}
+                    >
+                      {isPending ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
+                    </button>
 
-                <button onClick={handleBuy} className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-                  Buy Now
-                </button>
+                    <button onClick={handleBuy} className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                      Buy Now
+                    </button>
+                  </>
+                )}
 
                 <div className="mt-4 text-center text-sm text-gray-600">
                   <p>30-Day Money-Back Guarantee</p>

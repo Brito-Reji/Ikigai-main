@@ -115,7 +115,8 @@ export default function CoursesPage() {
 
   // Transform courses for CourseCard component
   const transformedCourses = courses.map(course => ({
-    id: course._id,
+    id: course._id || course.id,
+    _id: course._id || course.id,
     title: course.title,
     instructor: course.instructor,
     rating: course.rating || 0,
@@ -438,6 +439,7 @@ export default function CoursesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                 {transformedCourses.map((course, idx) => (
                   <>
+                  {console.log("course",course)}
                     <Link to={`/course/${course.id}`} key={course.id || idx}>
                       <CourseCard course={course} />
                     </Link>
