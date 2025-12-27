@@ -5,6 +5,7 @@ import {
   updateCourseService,
   getCourseByIdService,
 } from "../../services/instructor/courseService.js";
+import { Course } from "../../models/Course.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET ALL COURSES OF INSTRUCTOR
@@ -70,7 +71,21 @@ export const applyForVerification = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
   const { courseId } = req.params;
 
-  const course = await getCourseByIdService(courseId, instructorId);
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: "Course not found",
+    });
+  }
+
+  if (course.instructor.toString() !== instructorId.toString()) {
+    return res.status(HTTP_STATUS.FORBIDDEN).json({
+      success: false,
+      message: "You can only apply for verification on your own courses",
+    });
+  }
 
   // Course should be in draft (not published yet)
   if (course.published) {
@@ -110,7 +125,21 @@ export const togglePublish = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
   const { courseId } = req.params;
 
-  const course = await getCourseByIdService(courseId, instructorId);
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: "Course not found",
+    });
+  }
+
+  if (course.instructor.toString() !== instructorId.toString()) {
+    return res.status(HTTP_STATUS.FORBIDDEN).json({
+      success: false,
+      message: "You can only publish your own courses",
+    });
+  }
 
   // Can only publish if course is verified
   if (!course.published && course.verificationStatus !== "verified") {
