@@ -106,8 +106,12 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
     }
   );
     // clear cart and wishlist if there are any the course is already purchased
-    await Cart.deleteMany({ userId: order.userId,courses: { $in: order.courseIds } });
-    await Wishlist.deleteMany({ userId: order.userId,courses: { $in: order.courseIds } });
+let deletingThings =  await Cart.find({ userId: order.userId,courses: { $in: order.courseIds } });
+
+console.log("deletingThings in the cart ->",deletingThings);
+
+    await Cart.updateMany({ userId: order.userId,courses: { $in: order.courseIds } }, { $pull: { courses: { $in: order.courseIds } } });
+    await Wishlist.updateMany({ userId: order.userId,courses: { $in: order.courseIds } }, { $pull: { courses: { $in: order.courseIds } } });
 
 
 

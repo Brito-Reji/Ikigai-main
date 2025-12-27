@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Save, Check } from "lucide-react";
 import api from "@/api/axiosConfig.js";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 
 export default function ChangeEmailSection({ currentEmail, authType }) {
   const [step, setStep] = useState(1);
@@ -10,10 +10,39 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
     password: "",
     otp: "",
   });
+  const [errors, setErrors] = useState({
+    newEmail: "",
+    password: "",
+    otp: "",
+  });
   const [loading, setLoading] = useState(false);
+
+  const validateStep1 = () => {
+    const newErrors = { newEmail: "", password: "", otp: "" };
+
+    if (!formData.newEmail) {
+      newErrors.newEmail = "New email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.newEmail)) {
+      newErrors.newEmail = "Please enter a valid email address";
+    } else if (formData.newEmail === currentEmail) {
+      newErrors.newEmail = "New email must be different from current email";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return !newErrors.newEmail && !newErrors.password;
+  };
 
   const handleRequestOTP = async (e) => {
     e.preventDefault();
+
+    if (!validateStep1()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -24,27 +53,36 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
         newEmail: formData.newEmail,
         password: formData.password,
       });
-      Swal.fire({
-        icon: "success",
-        title: "OTP Sent!",
-        text: response.data.message,
-        confirmButtonColor: "#14b8a6",
-      });
+      toast.success(response.data.message || "OTP sent to your new email");
       setStep(2);
+      setErrors({ newEmail: "", password: "", otp: "" });
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.response?.data?.message || "Failed to send OTP",
-        confirmButtonColor: "#ef4444",
-      });
+      toast.error(error.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
+  const validateStep2 = () => {
+    const newErrors = { newEmail: "", password: "", otp: "" };
+
+    if (!formData.otp) {
+      newErrors.otp = "OTP is required";
+    } else if (formData.otp.length !== 6) {
+      newErrors.otp = "OTP must be 6 digits";
+    }
+
+    setErrors(newErrors);
+    return !newErrors.otp;
+  };
+
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
+
+    if (!validateStep2()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -55,22 +93,13 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
         newEmail: formData.newEmail,
         otp: formData.otp,
       });
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: response.data.message,
-        confirmButtonColor: "#14b8a6",
-      });
+      toast.success(response.data.message || "Email changed successfully");
       setFormData({ newEmail: "", password: "", otp: "" });
+      setErrors({ newEmail: "", password: "", otp: "" });
       setStep(1);
       window.location.reload();
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.response?.data?.message || "Failed to verify OTP",
-        confirmButtonColor: "#ef4444",
-      });
+      toast.error(error.response?.data?.message || "Failed to verify OTP");
     } finally {
       setLoading(false);
     }
@@ -108,10 +137,17 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
               <input
                 type="email"
                 value={formData.newEmail}
-                onChange={(e) => setFormData({ ...formData, newEmail: e.target.value })}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onChange={(e) => {
+                  setFormData({ ...formData, newEmail: e.target.value });
+                  setErrors({ ...errors, newEmail: "" });
+                }}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  errors.newEmail ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.newEmail && (
+                <p className="mt-1 text-sm text-red-500">{errors.newEmail}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -120,11 +156,18 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  setErrors({ ...errors, password: "" });
+                }}
                 placeholder="Enter your current password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
             <button
               type="submit"
@@ -151,12 +194,19 @@ export default function ChangeEmailSection({ currentEmail, authType }) {
               <input
                 type="text"
                 value={formData.otp}
-                onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, otp: e.target.value });
+                  setErrors({ ...errors, otp: "" });
+                }}
                 maxLength={6}
                 placeholder="Enter 6-digit OTP"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  errors.otp ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.otp && (
+                <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
+              )}
             </div>
             <div className="flex gap-2">
               <button

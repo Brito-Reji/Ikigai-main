@@ -3,7 +3,7 @@ import { ArrowLeft, Save, Mail, Phone, MapPin, User, Camera } from "lucide-react
 import { useNavigate } from "react-router-dom";
 import ProfileImageUpload from "@/components/profile/ProfileImageUpload.jsx";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile.js";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import ChangeEmailSection from "@/components/profile/ChangeEmailSection.jsx";
 import ChangePasswordSection from "@/components/profile/ChangePasswordSection.jsx";
 
@@ -19,7 +19,11 @@ export default function EditStudentProfilePage() {
     email: "",
     phone: "",
     profileImageUrl: "",
-    address: "",
+  });
+
+  const [errors, setErrors] = useState({
+    firstName: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -30,7 +34,7 @@ export default function EditStudentProfilePage() {
         email: profileData.data.email || "",
         phone: profileData.data.phone || "",
         profileImageUrl: profileData.data.profileImageUrl || "",
-        address: profileData.data.address || "",
+    
       });
     }
   }, [profileData]);
@@ -38,32 +42,53 @@ export default function EditStudentProfilePage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   const handleImageChange = (url) => {
     setFormData({ ...formData, profileImageUrl: url });
   };
 
+  const validateForm = () => {
+    const newErrors = {
+      firstName: "",
+      phone: "",
+    };
+
+    // Validate first name
+    if (!formData.firstName || !formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    // Validate phone (optional but if provided should be valid)
+    if (formData.phone && formData.phone.trim()) {
+      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
+      if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = "Please enter a valid phone number";
+      }
+    }
+
+    setErrors(newErrors);
+    return !newErrors.firstName && !newErrors.phone;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       await updateMutation.mutateAsync(formData);
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Profile updated successfully",
-        confirmButtonColor: "#14b8a6",
-        timer: 2000,
-      });
+      toast.success("Profile updated successfully");
       navigate("/profile");
     } catch (error) {
       console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.response?.data?.message || "Failed to update profile",
-        confirmButtonColor: "#ef4444",
-      });
+      toast.error(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -154,10 +179,14 @@ export default function EditStudentProfilePage() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white ${
+                    errors.firstName ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholder="John"
                 />
+                {errors.firstName && (
+                  <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
+                )}
               </div>
 
               {/* Last Name */}
@@ -187,10 +216,15 @@ export default function EditStudentProfilePage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="+1 (555) 000-0000"
-                    className="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                    className={`w-full px-4 py-2.5 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white ${
+                      errors.phone ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
                   <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
                 </div>
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                )}
               </div>
             </div>
 
@@ -218,23 +252,7 @@ export default function EditStudentProfilePage() {
                 )}
               </div>
 
-              {/* Address (Spans 2 columns) */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="123 Main St, City, Country"
-                    className="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
-                  />
-                  <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
-                </div>
-              </div>
+            
             </div>
 
             {/* Footer Actions */}

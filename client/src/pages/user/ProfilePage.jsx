@@ -122,13 +122,6 @@ export default function StudentProfilePage() {
                   {profile?.phone || "Not provided"}
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Address</label>
-                <div className="flex items-center text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  <MapPin className="w-4 h-4 text-gray-400 mr-3" />
-                  {profile?.address || "Not provided"}
-                </div>
-              </div>
             </div>
           </div>
         </div>
