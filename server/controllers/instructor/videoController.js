@@ -1,11 +1,11 @@
-import asyncHandler from 'express-async-handler';
-import logger from '../../utils/logger.js';
+import asyncHandler from "express-async-handler";
+import logger from "../../utils/logger.js";
 import {
   uploadVideoService,
   getSignedVideoUrlService,
-} from '../../services/instructor/videoService.js';
-import { Course } from '../../models/Course.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
+} from "../../services/instructor/videoService.js";
+import { Course } from "../../models/Course.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Upload video
 export const uploadVideo = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     logger.warn(`Video upload failed: No file provided`);
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'No video file provided',
+      message: "No video file provided",
     });
   }
 
@@ -43,7 +43,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Video uploaded successfully',
+    message: "Video uploaded successfully",
     data: result,
   });
 });
@@ -55,7 +55,7 @@ export const getVideoUrl = asyncHandler(async (req, res) => {
   if (!videoPath) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Video path is required',
+      message: "Video path is required",
     });
   }
 
@@ -63,7 +63,7 @@ export const getVideoUrl = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Signed URL generated',
+    message: "Signed URL generated",
     data: { url: signedUrl },
   });
 });

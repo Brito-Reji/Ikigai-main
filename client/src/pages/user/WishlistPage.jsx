@@ -125,13 +125,23 @@ const WishlistPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <button
-                                        onClick={() => handleAddToCart(course)}
-                                        className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center justify-center space-x-2"
-                                    >
-                                        <ShoppingCart className="w-4 h-4" />
-                                        <span>Add to Cart</span>
-                                    </button>
+                                    {(() => {
+                                        const isInCart = cartItems.some((item) => item._id === course._id);
+                                        return (
+                                            <button
+                                                onClick={() => handleAddToCart(course)}
+                                                disabled={isInCart}
+                                                className={`w-full px-4 py-2 rounded-lg transition flex items-center justify-center space-x-2 ${
+                                                    isInCart
+                                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                                                }`}
+                                            >
+                                                <ShoppingCart className="w-4 h-4" />
+                                                <span>{isInCart ? 'Already in Cart' : 'Add to Cart'}</span>
+                                            </button>
+                                        );
+                                    })()}
 
                                     <button
                                         onClick={() => handleRemove(course._id)}
