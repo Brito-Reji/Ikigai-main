@@ -6,7 +6,8 @@ import {
 	Home,
 	ChevronRight,
 	Award,
-	MessageCircle
+	MessageCircle,
+	Star
 } from 'lucide-react';
 import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
@@ -158,6 +159,15 @@ const CourseViewerPage = () => {
 							) : (
 								<Menu className="w-5 h-5" />
 							)}
+						</button>
+
+						{/* Review button - always visible now */}
+						<button
+							onClick={() => setIsReviewModalOpen(true)}
+							className="hidden lg:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						>
+							<Star className="w-4 h-4" />
+							<span className="text-sm font-medium">Rate Course</span>
 						</button>
 					</div>
 
