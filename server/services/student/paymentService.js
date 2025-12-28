@@ -5,6 +5,7 @@ import { Payment } from "../../models/Payment.js";
 import { Order } from "../../models/Order.js";
 import { Cart } from "../../models/Cart.js";
 import { Wishlist } from "../../models/Wishlist.js";
+import { Enrollment } from "../../models/Enrollment.js";
 
 export const createOrderService = async ({ courseIds, userId }) => {
   const courses = await Course.find({
@@ -109,6 +110,14 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
 let deletingThings =  await Cart.find({ userId: order.userId,courses: { $in: order.courseIds } });
 
 console.log("deletingThings in the cart ->",deletingThings);
+for (const courseId of order.courseIds) {
+  await Enrollment.create({
+    user: order.userId,
+    course: courseId,
+    payment: order._id,
+    status: "active",
+  });
+}
 
     await Cart.updateMany({ userId: order.userId,courses: { $in: order.courseIds } }, { $pull: { courses: { $in: order.courseIds } } });
     await Wishlist.updateMany({ userId: order.userId,courses: { $in: order.courseIds } }, { $pull: { courses: { $in: order.courseIds } } });

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Heart, Bell, User, Menu, X } from "lucide-react";
+import { Search, Heart, Bell, User, Menu, X, BookOpen, MessageCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { logout } from "@/store/slices/authSlice.js";
@@ -125,6 +125,22 @@ export default function Header({ onMenuToggle, menuOpen }) {
                     <User className="w-5 h-5 text-white" />
                   </button>
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    {user?.role === "student" && (
+                      <>
+                        <Link
+                          to="/my-courses"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          My Courses
+                        </Link>
+                        <Link
+                          to="/chat"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Messages
+                        </Link>
+                      </>
+                    )}
                     <Link
                       to={user?.role === "instructor" ? "/instructor/profile" : "/profile"}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -192,6 +208,24 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
             {isAuthenticated ? (
               <>
+                {user?.role === "student" && (
+                  <>
+                    <Link
+                      to="/my-courses"
+                      className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      <span>My Courses</span>
+                    </Link>
+                    <Link
+                      to="/chat"
+                      className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      <span>Messages</span>
+                    </Link>
+                  </>
+                )}
                 <Link
                   to="/wishlist"
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"

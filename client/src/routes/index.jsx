@@ -20,6 +20,9 @@ import CheckoutPage from "@/pages/user/CheckoutPage.jsx";
 import StudentProfilePage from "@/pages/user/ProfilePage.jsx";
 import EditStudentProfilePage from "@/pages/user/EditProfilePage.jsx";
 import StudentSettingsPage from "@/pages/user/SettingsPage.jsx";
+import MyCoursesPage from "@/pages/user/MyCoursesPage.jsx";
+import CourseViewerPage from "@/pages/user/CourseViewerPage.jsx";
+import ChatPage from "@/pages/user/ChatPage.jsx";
 
 // Instructor routes
 import InstructorLoginPage from "@/pages/instructor/LoginPage.jsx";
@@ -107,6 +110,30 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
               <StudentSettingsPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="my-courses"
+          element={
+            <AuthGuard requireAuth={false} roles={["student"]}>
+              <MyCoursesPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="my-courses/:courseId"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <CourseViewerPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="chat"
+          element={
+            <AuthGuard requireAuth={false} roles={["student"]}>
+              <ChatPage />
             </AuthGuard>
           }
         />

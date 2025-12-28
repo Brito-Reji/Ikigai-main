@@ -60,6 +60,10 @@ export const courseApi = {
      const res = await api.post(courseEndpoints.student.verifyPayment(), payload);
      return res.data;
     },
+    getEnrolledCourses: async () => {
+      const { data } = await api.get(courseEndpoints.student.enrolledCourses());
+      return data;
+    },
   },
 
   public: {

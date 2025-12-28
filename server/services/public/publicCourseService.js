@@ -2,6 +2,7 @@
 import { Course } from "../../models/Course.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Payment } from "../../models/Payment.js";
+import { checkEnrollment } from "../student/enrollmentService.js";
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
 export const buildPublicCourseQuery = async (queryParams) => {
@@ -132,15 +133,7 @@ export const getFeaturedCoursesService = async (limit = 4) => {
 
 // GET PUBLIC COURSE DETAILS
 export const getPublicCourseDetailsService = async (courseId,userId) => {
-    let isEnrolled = false;
-    if(userId){
-        const enrolledCourses = await Payment.find({
-            userId,
-            status: "PAID",
-        });
-        console.log(enrolledCourses);
-        isEnrolled = enrolledCourses.some(payment => payment.courseId.toString() === courseId);
-    }
+ const isEnrolled = userId ? await checkEnrollment(userId, courseId) : false;
     const courseExists = await Course.findOne({
         _id: courseId,
         deleted: { $ne: true },
