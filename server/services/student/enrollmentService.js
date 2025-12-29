@@ -3,17 +3,41 @@ import { Enrollment } from "../../models/Enrollment.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Chapter } from "../../models/Chapter.js";
 export const getUserEnrollments = async (userId) => {
-  return await Enrollment.find({ user: userId, status: "active" })
+  const enrollments = await Enrollment.find({ user: userId, status: "active" })
     .populate({
       path: "course",
-      select: "title thumbnail instructor category price",
+      select: "title thumbnail instructor category price description",
       populate: {
         path: "instructor",
-        select: "firstName lastName"
+        select: "firstName lastName avatar"
       }
     })
     .sort({ enrolledAt: -1 });
+
+  // Manually fetch chapters for each course
+  for (const enrollment of enrollments) {
+    if (enrollment.course) {
+      const chapters = await Chapter.find({ course: enrollment.course._id })
+        .select("title description order")
+        .sort({ order: 1 })
+        .lean();
+
+      // Fetch lessons for each chapter
+      for (const chapter of chapters) {
+        const lessons = await Lesson.find({ chapter: chapter._id })
+          .select("title description duration videoUrl order resources")
+          .sort({ order: 1 })
+          .lean();
+        chapter.lessons = lessons;
+      }
+
+      enrollment.course.chapters = chapters;
+    }
+  }
+
+  return enrollments;
 };
+
 
 export const checkEnrollment = async (userId, courseId) => {
   const enrollment = await Enrollment.findOne({

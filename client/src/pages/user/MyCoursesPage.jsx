@@ -1,17 +1,75 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, TrendingUp, Clock, Search, GraduationCap } from 'lucide-react';
 import EnrolledCourseCard from '@/components/student/EnrolledCourseCard';
 import Footer from '@/components/layout/Footer';
 import { mockEnrolledCourses } from '@/data/mockEnrolledCourses';
+import api from '@/api/axiosConfig';
 
 const MyCoursesPage = () => {
 	const [filter, setFilter] = useState('all');
 	const [searchQuery, setSearchQuery] = useState('');
+	const [enrollments, setEnrollments] = useState(mockEnrolledCourses);
+	const [loading, setLoading] = useState(true);
 
-	const courses = mockEnrolledCourses;
+	useEffect(() => {
+		const fetchEnrollments = async () => {
+			try {
+				const response = await api.get('/student/enrollments');
+				if (Array.isArray(response.data)) {
+					setEnrollments(response.data);
+				} else {
+					console.warn('API returned non-array data, using mock data');
+					setEnrollments(mockEnrolledCourses);
+				}
+			} catch (error) {
+				console.error('Error fetching enrollments:', error);
+				setEnrollments(mockEnrolledCourses);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchEnrollments();
+	}, []);
 
-	const filteredCourses = courses.filter((course) => {
+	const transformedCourses = Array.isArray(enrollments) ? enrollments.map((enrollment) => {
+		const totalLessons = enrollment.course.chapters?.reduce(
+			(sum, chapter) => sum + (chapter.lessons?.length || 0), 
+			0
+		) || 0;
+		
+		const totalDuration = enrollment.course.chapters?.reduce(
+			(sum, chapter) => {
+				const chapterDuration = chapter.lessons?.reduce(
+					(lessonSum, lesson) => lessonSum + (lesson.duration || 0),
+					0
+				) || 0;
+				return sum + chapterDuration;
+			}, 
+			0
+		) || 0;
+		
+		return {
+			_id: enrollment.course._id,
+			title: enrollment.course.title,
+			thumbnail: enrollment.course.thumbnail,
+			instructor: {
+				name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`,
+				avatar: enrollment.course.instructor.avatar || `https://ui-avatars.com/api/?name=${enrollment.course.instructor.firstName}+${enrollment.course.instructor.lastName}`,
+			},
+			category: enrollment.course.category,
+			progress: Math.round(enrollment.progress.completionPercentage),
+			completedLessons: enrollment.progress.completedLessons.length,
+			totalLessons: totalLessons,
+			totalDuration: totalDuration > 0 ? `${Math.floor(totalDuration / 60)}h ${totalDuration % 60}m` : 'N/A',
+			lastAccessed: enrollment.progress.lastAccessedAt || enrollment.updatedAt,
+			currentLesson: enrollment.progress.lastAccessedLesson,
+			enrolledAt: enrollment.enrolledAt,
+			chapters: enrollment.course.chapters || [],
+		};
+	}) : [];
+
+	const filteredCourses = transformedCourses.filter((course) => {
 		const matchesSearch = course.title
 			.toLowerCase()
 			.includes(searchQuery.toLowerCase());
@@ -24,14 +82,14 @@ const MyCoursesPage = () => {
 		return matchesSearch;
 	});
 
-	const totalCourses = courses.length;
-	const completedCourses = courses.filter((c) => c.progress === 100).length;
-	const inProgressCourses = courses.filter(
+	const totalCourses = transformedCourses.length;
+	const completedCourses = transformedCourses.filter((c) => c.progress === 100).length;
+	const inProgressCourses = transformedCourses.filter(
 		(c) => c.progress > 0 && c.progress < 100
 	).length;
-	const avgProgress = Math.round(
-		courses.reduce((sum, c) => sum + c.progress, 0) / courses.length
-	);
+	const avgProgress = transformedCourses.length > 0 
+		? Math.round(transformedCourses.reduce((sum, c) => sum + c.progress, 0) / transformedCourses.length)
+		: 0;
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">

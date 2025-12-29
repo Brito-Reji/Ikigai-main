@@ -12,30 +12,30 @@ import {
 import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
 import ChatWindow from '@/components/student/ChatWindow';
-import { getEnrolledCourseById, getLessonById } from '@/data/mockEnrolledCourses';
+// import { getEnrolledCourseById, getLessonById } from '@/data/mockEnrolledCourses';
 import { getConversationByInstructorId } from '@/data/mockChatData';
+import { getEnrolledCourseById } from '@/data/mockEnrolledCourses';
+import api from '@/api/axiosConfig';
 
 const CourseViewerPage = () => {
 	const { courseId } = useParams();
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const course = getEnrolledCourseById(courseId);
+	const enrollment = getEnrolledCourseById(courseId);
+	const course = enrollment?.course;
 
-	const initialLessonId = location.state?.lessonId || course?.currentLesson || course?.chapters[0]?.lessons[0]?._id;
+	const initialLessonId = location.state?.lessonId || enrollment?.progress?.lastAccessedLesson || course?.chapters?.[0]?.lessons?.[0]?._id;
 
 	const [currentLessonId, setCurrentLessonId] = useState(initialLessonId);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [completedLessons, setCompletedLessons] = useState(
-		new Set(
-			course?.chapters.flatMap(ch =>
-				ch.lessons.filter(l => l.isCompleted).map(l => l._id)
-			) || []
-		)
+		new Set(enrollment?.progress?.completedLessons || [])
 	);
 
 	useEffect(() => {
+		api.get(`/student/enrollments`)
 		const handleResize = () => {
 			setIsSidebarOpen(window.innerWidth >= 1024);
 		};
@@ -71,13 +71,13 @@ const CourseViewerPage = () => {
 	const { lesson: currentLesson, chapter: currentChapter } = currentLessonData;
 
 	const getAllLessons = () => {
-		return course.chapters.flatMap((chapter) =>
-			chapter.lessons.map((lesson) => ({
+		return course?.chapters?.flatMap((chapter) =>
+			chapter.lessons?.map((lesson) => ({
 				...lesson,
 				chapterId: chapter._id,
 				chapterTitle: chapter.title
-			}))
-		);
+			})) || []
+		) || [];
 	};
 
 	const allLessons = getAllLessons();
@@ -108,9 +108,14 @@ const CourseViewerPage = () => {
 		setCompletedLessons((prev) => new Set([...prev, lessonId]));
 	};
 
-	const courseProgress = Math.round(
-		(completedLessons.size / course.totalLessons) * 100
-	);
+	const totalLessons = course?.chapters?.reduce(
+		(sum, chapter) => sum + (chapter.lessons?.length || 0), 
+		0
+	) || 0;
+
+	const courseProgress = totalLessons > 0 
+		? Math.round((completedLessons.size / totalLessons) * 100)
+		: 0;
 
 	return (
 		<div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -178,8 +183,8 @@ const CourseViewerPage = () => {
 									Course Progress
 								</span>
 								<span className="text-xs text-gray-600">
-									{completedLessons.size} / {course.totalLessons} lessons
-								</span>
+								{completedLessons.size} / {totalLessons} lessons
+							</span>
 							</div>
 							<div className="w-full bg-gray-200 rounded-full h-2">
 								<div
@@ -210,19 +215,19 @@ const CourseViewerPage = () => {
 							Course Content
 						</h2>
 						<p className="text-sm text-gray-600">
-							{course.chapters.length} chapters • {course.totalLessons} lessons
+							{course?.chapters?.length || 0} chapters • {totalLessons} lessons
 						</p>
 					</div>
 
 					<div className="flex-1 overflow-y-auto p-4">
 						<ChapterList
-							chapters={course.chapters.map((chapter) => ({
+							chapters={course?.chapters?.map((chapter) => ({
 								...chapter,
-								lessons: chapter.lessons.map((lesson) => ({
+								lessons: chapter.lessons?.map((lesson) => ({
 									...lesson,
 									isCompleted: completedLessons.has(lesson._id)
-								}))
-							}))}
+								})) || []
+							})) || []}
 							currentLessonId={currentLessonId}
 							onLessonSelect={handleLessonSelect}
 						/>

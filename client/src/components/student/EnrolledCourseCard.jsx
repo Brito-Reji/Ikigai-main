@@ -61,13 +61,15 @@ const EnrolledCourseCard = ({ course }) => {
 				</h3>
 
 				<div className="flex items-center gap-2 mb-4">
+				{course.instructor?.avatar && (
 					<img
 						src={course.instructor.avatar}
-						alt={course.instructor.name}
+						alt={course.instructor?.name || 'Instructor'}
 						className="w-6 h-6 rounded-full"
 					/>
-					<span className="text-sm text-gray-600">{course.instructor.name}</span>
-				</div>
+				)}
+				<span className="text-sm text-gray-600">{course.instructor?.name || 'Instructor'}</span>
+			</div>
 
 				<div className="mb-4">
 					<div className="flex justify-between items-center mb-2">
