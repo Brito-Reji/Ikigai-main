@@ -21,7 +21,7 @@ export const courseEndpoints = {
   student: {
   
     verifyPayment: () => '/payments/verify-payment',
-    enrolledCourses: () => '/student/enrolled-courses',
+    enrolledCourses: () => '/student/enrollments',
   },
 
   admin: {

@@ -5,7 +5,7 @@ import { getUserEnrollments, updateProgress } from "../../services/student/enrol
 
 export const getMyEnrollments = asyncHandler(async (req, res) => {
   const enrollments = await getUserEnrollments("6937b0d342ef919cbacb281c");
-  console.log(enrollments);
+  console.log(JSON.stringify(enrollments, null, 2));
   res.status(HTTP_STATUS.OK).json({
     success: true,
     data: enrollments,

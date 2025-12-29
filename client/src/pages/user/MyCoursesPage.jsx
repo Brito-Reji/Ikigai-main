@@ -3,34 +3,16 @@ import { Link } from 'react-router-dom';
 import { BookOpen, TrendingUp, Clock, Search, GraduationCap } from 'lucide-react';
 import EnrolledCourseCard from '@/components/student/EnrolledCourseCard';
 import Footer from '@/components/layout/Footer';
-import { mockEnrolledCourses } from '@/data/mockEnrolledCourses';
-import api from '@/api/axiosConfig';
+import { useGetEnrolledCourses } from '@/hooks/useEnrollment';
 
 const MyCoursesPage = () => {
 	const [filter, setFilter] = useState('all');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [enrollments, setEnrollments] = useState(mockEnrolledCourses);
-	const [loading, setLoading] = useState(true);
+	
+	let {data: enrollments} = useGetEnrolledCourses()
+	
+   enrollments = enrollments?.data
 
-	useEffect(() => {
-		const fetchEnrollments = async () => {
-			try {
-				const response = await api.get('/student/enrollments');
-				if (Array.isArray(response.data)) {
-					setEnrollments(response.data);
-				} else {
-					console.warn('API returned non-array data, using mock data');
-					setEnrollments(mockEnrolledCourses);
-				}
-			} catch (error) {
-				console.error('Error fetching enrollments:', error);
-				setEnrollments(mockEnrolledCourses);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchEnrollments();
-	}, []);
 
 	const transformedCourses = Array.isArray(enrollments) ? enrollments.map((enrollment) => {
 		const totalLessons = enrollment.course.chapters?.reduce(
@@ -57,7 +39,7 @@ const MyCoursesPage = () => {
 				name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`,
 				avatar: enrollment.course.instructor.avatar || `https://ui-avatars.com/api/?name=${enrollment.course.instructor.firstName}+${enrollment.course.instructor.lastName}`,
 			},
-			category: enrollment.course.category,
+			category: enrollment.course.category.name,
 			progress: Math.round(enrollment.progress.completionPercentage),
 			completedLessons: enrollment.progress.completedLessons.length,
 			totalLessons: totalLessons,
