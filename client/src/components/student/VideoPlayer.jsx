@@ -139,17 +139,17 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 		>
 			<video
 				ref={videoRef}
-				className="w-full aspect-video"
+				className="w-full max-h-[70vh] object-contain"
 				src={streamingUrl}
 				onClick={togglePlay}
 			/>
 
 			<div
-				className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300 ${
+				className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300 pointer-events-none ${
 					showControls ? 'opacity-100' : 'opacity-0'
 				}`}
 			>
-				<div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
+				<div className="absolute bottom-0 left-0 right-0 p-4 space-y-2 pointer-events-auto">
 					<div
 						className="w-full h-1 bg-gray-600 rounded-full cursor-pointer group/progress"
 						onClick={handleSeek}
@@ -246,7 +246,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 				</div>
 
 				{!isPlaying && (
-					<div className="absolute inset-0 flex items-center justify-center">
+					<div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
 						<button
 							onClick={togglePlay}
 							className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors shadow-xl"

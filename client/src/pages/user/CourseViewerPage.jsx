@@ -192,17 +192,6 @@ const CourseViewerPage = () => {
 							</nav>
 						</div>
 
-						<button
-							onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-							className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors"
-						>
-							{isSidebarOpen ? (
-								<X className="w-5 h-5" />
-							) : (
-								<Menu className="w-5 h-5" />
-							)}
-						</button>
-
 						{/* Review button - always visible now */}
 						<button
 							onClick={() => setIsReviewModalOpen(true)}
