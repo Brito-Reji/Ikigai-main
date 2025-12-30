@@ -1,5 +1,5 @@
-import api from './axiosConfig'
-import { courseEndpoints } from './endpoints/courseEndpoints'
+import api from './axiosConfig';
+import { courseEndpoints } from './endpoints/courseEndpoints';
 
 export const courseApi = {
   instructor: {
@@ -56,12 +56,25 @@ export const courseApi = {
       const { data } = await api.get(courseEndpoints.student.byId(courseId));
       return data;
     },
-    verifyPayment: async (payload) => {
-     const res = await api.post(courseEndpoints.student.verifyPayment(), payload);
-     return res.data;
+    verifyPayment: async payload => {
+      const res = await api.post(
+        courseEndpoints.student.verifyPayment(),
+        payload
+      );
+      return res.data;
     },
     getEnrolledCourses: async () => {
       const { data } = await api.get(courseEndpoints.student.enrolledCourses());
+      return data;
+    },
+    getEnrolledCourseById: async courseId => {
+      const { data } = await api.get(courseEndpoints.student.byId(courseId));
+      return data;
+    },
+    getLessonById: async (courseId, lessonId) => {
+      const { data } = await api.get(
+        courseEndpoints.student.lessonById(courseId, lessonId)
+      );
       return data;
     },
   },
@@ -166,4 +179,3 @@ export const courseApi = {
     },
   },
 };
-

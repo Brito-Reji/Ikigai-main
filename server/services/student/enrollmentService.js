@@ -5,6 +5,7 @@ import { Chapter } from "../../models/Chapter.js";
 import mongoose from "mongoose";
 
 export const getUserEnrollments = async userId => {
+  console.log("userId:", userId);
   const result = await Enrollment.aggregate([
     {
       $match: {
@@ -25,14 +26,14 @@ export const getUserEnrollments = async userId => {
     },
     {
       $lookup: {
-        from: "categories", 
+        from: "categories",
         localField: "course.category",
         foreignField: "_id",
         as: "course.category",
       },
     },
     {
-      $unwind: "$course.category", 
+      $unwind: "$course.category",
     },
     {
       $lookup: {
@@ -88,8 +89,52 @@ export const getUserEnrollments = async userId => {
       },
     },
   ]);
-
+  console.log("result:", result);
   return result;
+};
+
+export const getEnrolledCourseByIdService = async (userId, courseId) => {
+  // Check all enrollments for this user
+
+  const enrollment = await Enrollment.findOne({
+    user: userId,
+    course: courseId,
+    status: "active",
+  })
+    .populate({
+      path: "course",
+      populate: [
+        {
+          path: "category",
+          select: "_id name description isBlocked",
+        },
+        {
+          path: "instructor",
+          select: "_id firstName lastName profileImageUrl",
+        },
+      ],
+    })
+    .lean();
+
+  if (!enrollment) {
+    return null;
+  }
+
+  // chapters reference course, lessons reference chapter
+  const chapters = await Chapter.find({ course: courseId })
+    .sort({ order: 1 })
+    .lean();
+
+  // lessons for each chapter
+  for (const chapter of chapters) {
+    chapter.lessons = await Lesson.find({ chapter: chapter._id })
+      .sort({ order: 1 })
+      .lean();
+  }
+
+  enrollment.course.chapters = chapters;
+
+  return enrollment;
 };
 
 export const checkEnrollment = async (userId, courseId) => {
@@ -124,5 +169,6 @@ export const updateProgress = async (userId, courseId, lessonId) => {
     (enrollment.progress.completedLessons.length / totalLessons) * 100;
 
   await enrollment.save();
+
   return enrollment;
 };

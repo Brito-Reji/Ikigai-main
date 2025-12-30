@@ -3,7 +3,7 @@ import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP,
 import { getCart, addToCart, removeFromCart, syncCart, clearCart } from "../controllers/students/cartController.js";
 import { getWishlist, toggleWishlist, removeFromWishlist } from "../controllers/students/wishlistController.js";
 import { fullRefund, partialRefund, refundHistory } from "../controllers/students/refundController.js";
-import { getMyEnrollments, markLessonComplete } from "../controllers/students/enrollmentController.js";
+import { getMyEnrollments, markLessonComplete, getEnrolledCourseById } from "../controllers/students/enrollmentController.js";
 
 const router = Router();
 
@@ -33,6 +33,7 @@ router.get("/refund/history", refundHistory);
 
 // Enrollments
 router.get("/enrollments", getMyEnrollments);
+router.get("/enrollments/:courseId", getEnrolledCourseById);
 router.post("/enrollments/complete-lesson", markLessonComplete);
 
 export default router;

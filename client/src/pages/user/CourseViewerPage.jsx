@@ -16,26 +16,27 @@ import ChatWindow from '@/components/student/ChatWindow';
 import { getConversationByInstructorId } from '@/data/mockChatData';
 import { getEnrolledCourseById } from '@/data/mockEnrolledCourses';
 import api from '@/api/axiosConfig';
+import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
 
 const CourseViewerPage = () => {
 	const { courseId } = useParams();
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const enrollment = getEnrolledCourseById(courseId);
-	const course = enrollment?.course;
-
-	const initialLessonId = location.state?.lessonId || enrollment?.progress?.lastAccessedLesson || course?.chapters?.[0]?.lessons?.[0]?._id;
+	const { data: enrollment, isLoading } = useGetEnrolledCourseById(courseId);
+	console.log("enrollment", enrollment);
+	const course = enrollment?.data?.course
+	const initialLessonId = location.state?.lessonId || enrollment?.data?.progress?.lastAccessedLesson || course?.chapters?.[0]?.lessons?.[0]?._id;
 
 	const [currentLessonId, setCurrentLessonId] = useState(initialLessonId);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [completedLessons, setCompletedLessons] = useState(
-		new Set(enrollment?.progress?.completedLessons || [])
+		new Set(enrollment?.data?.progress?.completedLessons || [])
 	);
 
+
 	useEffect(() => {
-		api.get(`/student/enrollments`)
 		const handleResize = () => {
 			setIsSidebarOpen(window.innerWidth >= 1024);
 		};
@@ -45,6 +46,39 @@ const CourseViewerPage = () => {
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
+	useEffect(() => {
+		if (enrollment?.data) {
+			// Set lesson ID when data loads
+			const lessonId = location.state?.lessonId || 
+							 enrollment.data.progress?.lastAccessedLesson || 
+							 enrollment.data.course?.chapters?.[0]?.lessons?.[0]?._id;
+			
+			if (lessonId && !currentLessonId) {
+				setCurrentLessonId(lessonId);
+			}
+
+			// Update completed lessons
+			if (enrollment.data.progress?.completedLessons) {
+				setCompletedLessons(new Set(enrollment.data.progress.completedLessons));
+			}
+		}
+	}, [enrollment, location.state?.lessonId, currentLessonId]);
+
+
+	console.log("course", course);
+	
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-gray-50">
+				<div className="text-center">
+					<h2 className="text-2xl font-bold text-gray-900 mb-4">
+						Loading...
+					</h2>
+				</div>
+			</div>
+		);
+	}
+	
 	if (!course) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -63,12 +97,15 @@ const CourseViewerPage = () => {
 		);
 	}
 
-	const currentLessonData = getLessonById(courseId, currentLessonId);
-	if (!currentLessonData) {
+	const currentChapter = course?.chapters?.find((chapter) =>
+		chapter.lessons?.some((lesson) => lesson._id === currentLessonId)
+	);
+	
+	const currentLesson = currentChapter?.lessons?.find((lesson) => lesson._id === currentLessonId);
+
+	if (!currentLesson) {
 		return <div>Lesson not found</div>;
 	}
-
-	const { lesson: currentLesson, chapter: currentChapter } = currentLessonData;
 
 	const getAllLessons = () => {
 		return course?.chapters?.flatMap((chapter) =>

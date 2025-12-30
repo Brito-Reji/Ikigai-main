@@ -5,7 +5,6 @@ import { MESSAGES } from "../../utils/messages.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { courseIds } = req.body;
-console.log(req.user);
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
     res.status(HTTP_STATUS.BAD_REQUEST);
     throw new Error(

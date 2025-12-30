@@ -72,7 +72,6 @@ export const getPublishedCoursesService = async (queryParams,userId) => {
     const skip = (page - 1) * limit;
     
     let enrolledCourseIds = [];
-    console.log(userId);
     if (userId) {
         const enrolledCourses = await Payment.find({
             userId,
@@ -88,7 +87,6 @@ export const getPublishedCoursesService = async (queryParams,userId) => {
         .skip(skip)
         .limit(limit);
 
-        console.log(enrolledCourseIds);
 
     courses = courses.filter(course => {
         if (!course.category) return false;

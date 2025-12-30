@@ -33,7 +33,6 @@ export const createOrderService = async ({ courseIds, userId }) => {
 
   const razorpayOrder = await razorpayInstance.orders.create(options);
 
-  console.log(userId);
 
   await Order.create({
     userId,
@@ -69,7 +68,6 @@ export const verifyPaymentService = ({
   razorpay_signature,
 }) => {
 
-  console.log("verifyPaymentService hit");
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -107,9 +105,8 @@ export const updatePaymentStatusService = async ({ razorpay_order_id, razorpay_p
     }
   );
     // clear cart and wishlist if there are any the course is already purchased
-let deletingThings =  await Cart.find({ userId: order.userId,courses: { $in: order.courseIds } });
+  await Cart.find({ userId: order.userId,courses: { $in: order.courseIds } });
 
-console.log("deletingThings in the cart ->",deletingThings);
 for (const courseId of order.courseIds) {
   await Enrollment.create({
     user: order.userId,
