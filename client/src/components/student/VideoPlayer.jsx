@@ -23,6 +23,9 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 
 	const controlsTimeoutRef = useRef(null);
 
+	// streaming URL
+	const streamingUrl = videoUrl ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}` : null;
+
 	useEffect(() => {
 		const video = videoRef.current;
 		if (!video) return;
@@ -64,7 +67,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 		} else {
 			video.pause();
 			setIsPlaying(false);
-		}
+		};
 	};
 
 	const handleSeek = (e) => {
@@ -137,7 +140,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 			<video
 				ref={videoRef}
 				className="w-full aspect-video"
-				src={videoUrl}
+				src={streamingUrl}
 				onClick={togglePlay}
 			/>
 

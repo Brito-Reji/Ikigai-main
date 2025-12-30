@@ -101,6 +101,7 @@ export const useVerifyPayment = () => {
       queryClient.invalidateQueries({ queryKey: ['featured-courses'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       queryClient.invalidateQueries({ queryKey: ['enrolled-courses'] });
+      queryClient.invalidateQueries({queryKey:['wishlist']})
     },
   });
 };
