@@ -8,6 +8,7 @@ import {
 	Minimize,
 	Settings
 } from 'lucide-react';
+import axios from 'axios';
 
 const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 	const videoRef = useRef(null);
@@ -20,12 +21,22 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 	const [showControls, setShowControls] = useState(true);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-
+const [streamingUrl, setStreamingUrl] = useState(null);
 	const controlsTimeoutRef = useRef(null);
 
 	// streaming URL
-	const streamingUrl = videoUrl ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}` : null;
-
+	let vUrl = videoUrl ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}` : null;
+const refreshStreamingUrl = async () => {
+	try {
+		const {data} = await axios.get(vUrl);
+		setStreamingUrl(data.data.url);
+	} catch (error) {
+		console.error('Error fetching streaming URL:', error);
+	}
+};
+useEffect(() => {
+	refreshStreamingUrl();
+}, [videoUrl]);
 	useEffect(() => {
 		const video = videoRef.current;
 		if (!video) return;

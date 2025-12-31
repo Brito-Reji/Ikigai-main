@@ -9,7 +9,7 @@ import {
 } from "../controllers/public/courseController.js";
 
 import { getCategories } from "../controllers/admin/catergoryController.js";
-import { streamVideo, streamVideoOptions } from "../controllers/instructor/streamController.js";
+import { getSecureStreamUrl } from "../controllers/instructor/streamController.js";
 
 const router = Router();
 
@@ -27,8 +27,7 @@ router.get(
   getPublicCourseChapters
 );
 
-router.get("/stream-video", streamVideo);
-router.options("/stream-video", streamVideoOptions);
+router.get("/stream-video", getSecureStreamUrl);
 
 router.get("/", getCategories);
 
