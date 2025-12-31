@@ -1,15 +1,16 @@
 // src/components/Layout.jsx
 import { useEffect, useState } from "react";  
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Header from "./Header.jsx";
 import useUser from "@/hooks/useUser.js";
 
 function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);  
+  const navigate = useNavigate()
   let user = useUser()
    useEffect(() => {
         if(user && user?.role !== "student") {
-         alert("You are not authorized to access this page")
+         navigate('/')
     }
     },[])
   

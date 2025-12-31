@@ -272,21 +272,7 @@ export default function CreateCoursePage() {
               enableCrop={true}
             />
 
-            {/* Publish Option */}
-            <div className="flex items-center space-x-3 pt-4 border-t border-gray-200">
-              <input
-                type="checkbox"
-                id="published"
-                name="published"
-                checked={formData.published}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="published" className="text-sm font-medium text-gray-700">
-                Publish course immediately (make it visible to students)
-              </label>
-            </div>
-
+        
             {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-8">
               <button

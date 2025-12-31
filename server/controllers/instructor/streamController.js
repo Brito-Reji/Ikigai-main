@@ -7,15 +7,24 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
   const { videoPath } = req.query;
 
   if (!videoPath) {
-    return res.status(400).json({ 
-        success: false, 
-        message: "Video path is required", 
-        data: {} 
+    return res.status(400).json({
+      success: false,
+      message: "Video path is required",
+      data: {},
     });
   }
 
   // Clean the path to use as an S3 Key
   const s3Key = videoPath.startsWith("/") ? videoPath.substring(1) : videoPath;
+
+  // Log S3 config for debugging
+  console.log("S3 Configuration:", {
+    bucket: process.env.S3_BUCKET,
+    region: process.env.AWS_REGION,
+    key: s3Key,
+    hasAccessKey: !!process.env.AWS_ACCESS_KEY,
+    hasSecretKey: !!process.env.AWS_SECRET_KEY,
+  });
 
   try {
     const command = new GetObjectCommand({
@@ -23,19 +32,50 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
       Key: s3Key,
     });
 
-    // Create a URL that expires in 60 seconds
-    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 5 });
+    // Create a URL that expires in 1 hour (enough for long videos)
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+    console.log("✅ Signed URL generated successfully");
 
     res.status(200).json({
       success: true,
       message: "Secure video access granted",
-      data: { url: signedUrl }
+      data: { url: signedUrl },
     });
   } catch (error) {
-    res.status(500).json({ 
-        success: false, 
-        message: "Failed to generate access link", 
-        data: {error} 
+    console.error("❌ S3 Error Details:", {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      statusCode: error.$metadata?.httpStatusCode,
+      bucket: process.env.S3_BUCKET,
+      key: s3Key,
+    });
+
+    // Specific error messages
+    let userMessage = "Failed to generate access link";
+    if (error.name === "NoSuchKey" || error.code === "NoSuchKey") {
+      userMessage = "Video file not found in storage";
+    } else if (
+      error.code === "ENOTFOUND" ||
+      error.message?.includes("getaddrinfo")
+    ) {
+      userMessage =
+        "Cannot connect to cloud storage. Please check AWS configuration.";
+    } else if (
+      error.name === "CredentialsError" ||
+      error.message?.includes("credentials")
+    ) {
+      userMessage = "Invalid AWS credentials";
+    }
+
+    res.status(500).json({
+      success: false,
+      message: userMessage,
+      data: {
+        error: error.message,
+        code: error.code,
+      },
     });
   }
 });

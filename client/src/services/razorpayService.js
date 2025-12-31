@@ -16,7 +16,7 @@ export const startRazorpayPayment = async (
 
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-    amount: order.amount * 100,
+    amount: order.amount/100,
     currency: 'INR',
     order_id: order.razorpayOrderId,
 

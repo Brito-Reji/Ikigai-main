@@ -26,7 +26,7 @@ export const createOrderService = async ({ courseIds, userId }) => {
   const amount = courses.reduce((total, course) => total + course.price, 0);
 
   const options = {
-    amount: Math.round(amount * 100),
+    amount: Math.round(amount ),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };

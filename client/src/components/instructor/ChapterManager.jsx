@@ -438,7 +438,9 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">{lesson ? "Edit Lesson" : "Add Lesson"}</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {lesson ? 'Edit Lesson' : 'Add Lesson'}
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -446,38 +448,83 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
+              <label className="block text-sm font-medium mb-2">
+                Description
+              </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows="3"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Video {!lesson && "*"}</label>
+              <label className="block text-sm font-medium mb-2">
+                Video {!lesson && '*'}
+              </label>
               <input
                 type="file"
                 accept="video/*"
-                onChange={(e) => setVideoFile(e.target.files[0])}
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+
+                  setVideoFile(file);
+
+                  const video = document.createElement('video');
+                  video.preload = 'metadata';
+
+                  video.onloadedmetadata = () => {
+                    URL.revokeObjectURL(video.src);
+
+                    const durationInSeconds = video.duration;
+                    const minutes = Math.ceil(durationInSeconds / 60);
+
+                    console.log('Duration in seconds:', durationInSeconds);
+                    console.log('Duration in minutes (rounded up):', minutes);
+
+                    setFormData(prev => ({
+                      ...prev,
+                      duration: minutes,
+                    }));
+                  };
+
+                  video.onerror = () => {
+                    alert('Error loading video file');
+                    URL.revokeObjectURL(video.src);
+                  };
+
+                  video.src = URL.createObjectURL(file);
+                }}
                 className="w-full px-4 py-2 border rounded-lg"
               />
+
               {lesson?.videoUrl && !videoFile && (
-                <p className="text-xs text-gray-500 mt-1">Current video will be kept if no new file is selected</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Current video will be kept if no new file is selected
+                </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Duration (minutes)</label>
+              <label className="block text-sm font-medium mb-2">
+                Duration (minutes)
+              </label>
               <input
                 type="number"
                 value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg"
               />
             </div>
@@ -485,14 +532,20 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
               <input
                 type="checkbox"
                 checked={formData.isFree}
-                onChange={(e) => setFormData({ ...formData, isFree: e.target.checked })}
+                onChange={e =>
+                  setFormData({ ...formData, isFree: e.target.checked })
+                }
                 className="mr-2"
               />
               <label className="text-sm">Free preview</label>
             </div>
           </div>
           <div className="flex gap-3 mt-6">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-gray-200 rounded-lg"
+            >
               Cancel
             </button>
             <button
@@ -500,7 +553,7 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
               disabled={uploading}
               className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-50"
             >
-              {uploading ? "Uploading..." : lesson ? "Update" : "Create"}
+              {uploading ? 'Uploading...' : lesson ? 'Update' : 'Create'}
             </button>
           </div>
         </form>

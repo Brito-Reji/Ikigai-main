@@ -13,7 +13,8 @@ const AdminLayout = () => {
 
   const user = useUser()
 
-   useEffect(() => {
+  useEffect(() => {
+     console.log(user)
       if(!user && user.role !== "admin") {
     navigate("/")
   }

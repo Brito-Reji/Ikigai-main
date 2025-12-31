@@ -5,10 +5,11 @@ import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
+import { Admin } from "../models/Admin.js";
 
 const MODELS = {
   student: User,
-  admin: User,
+  admin: Admin,
   instructor: Instructor,
 };
 
