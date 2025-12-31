@@ -125,7 +125,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                     <User className="w-5 h-5 text-white" />
                   </button>
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    {user?.role === "student" && (
+                    {user?.role !== "instructor" && user?.role !== "admin" && (
                       <>
                         <Link
                           to="/my-courses"
@@ -208,7 +208,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
             {isAuthenticated ? (
               <>
-                {user?.role === "student" && (
+                {user?.role !== "instructor" && user?.role !== "admin" && (
                   <>
                     <Link
                       to="/my-courses"

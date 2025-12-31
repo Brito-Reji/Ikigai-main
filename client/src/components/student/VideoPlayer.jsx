@@ -133,7 +133,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
 
 	return (
 		<div
-			className="relative bg-black rounded-lg overflow-hidden group"
+			className="relative bg-black rounded-lg overflow-hidden group min-h-[400px]"
 			onMouseMove={handleMouseMove}
 			onMouseLeave={() => isPlaying && setShowControls(false)}
 		>

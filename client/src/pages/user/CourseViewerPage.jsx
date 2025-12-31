@@ -156,8 +156,8 @@ const CourseViewerPage = () => {
 
 	return (
 		<div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-			<div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm">
-				<div className="px-4 py-3">
+			<div className="flex-shrink-0 bg-white border-b relative border-gray-200 shadow-sm">
+				<div className="px-4 py-3 sticky top-10 z-10">
 					<div className="flex items-center justify-between mb-2">
 						<div className="flex items-center gap-3">
 							<button
@@ -267,8 +267,8 @@ const CourseViewerPage = () => {
 					/>
 				)}
 
-				<main className="flex-1 overflow-hidden">
-					<div className="h-full p-4 lg:p-6">
+				<main className="flex-1 overflow-y-auto">
+					<div className="p-4 lg:p-6">
 						<LessonViewer
 							lesson={{
 								...currentLesson,

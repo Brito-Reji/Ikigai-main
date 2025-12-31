@@ -32,7 +32,7 @@ const LessonViewer = ({ lesson, chapter, onPrevious, onNext, hasPrevious, hasNex
 				/>
 			</div>
 
-			<div className="flex-1 overflow-y-auto">
+			<div>
 				<div className="p-6">
 					<div className="flex items-start justify-between mb-4">
 						<div className="flex-1">
