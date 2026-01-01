@@ -1,12 +1,12 @@
-import asyncHandler from 'express-async-handler';
+import asyncHandler from "express-async-handler";
 import {
   getProfileService,
   updateProfileService,
   requestEmailChangeOTPService,
   verifyEmailChangeOTPService,
   changePasswordService,
-} from '../../services/instructor/instructorProfileService.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
+} from "../../services/instructor/instructorProfileService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET INSTRUCTOR PROFILE
 export const getProfile = asyncHandler(async (req, res) => {
@@ -14,7 +14,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Profile fetched successfully',
+    message: "Profile fetched successfully",
     data: user,
   });
 });
@@ -46,7 +46,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Profile updated successfully',
+    message: "Profile updated successfully",
     data: user,
   });
 });
@@ -58,7 +58,7 @@ export const requestEmailChangeOTP = asyncHandler(async (req, res) => {
   if (!newEmail || !password) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'New email and password are required',
+      message: "New email and password are required",
     });
   }
 
@@ -81,7 +81,7 @@ export const verifyEmailChangeOTP = asyncHandler(async (req, res) => {
   if (!newEmail || !otp) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Email and OTP are required',
+      message: "Email and OTP are required",
     });
   }
 
@@ -100,7 +100,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   if (!currentPassword || !newPassword) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Current password and new password are required',
+      message: "Current password and new password are required",
     });
   }
 

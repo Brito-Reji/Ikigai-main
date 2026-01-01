@@ -1,11 +1,11 @@
-import asyncHandler from 'express-async-handler';
-import bcrypt from 'bcrypt';
-import { Instructor } from '../../models/Instructor.js';
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+import { Instructor } from "../../models/Instructor.js";
 
-import api from '../../config/axiosConfig.js';
-import { OAuth2Client } from 'google-auth-library';
-import { generateTokens } from '../../utils/generateTokens.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
+import api from "../../config/axiosConfig.js";
+import { OAuth2Client } from "google-auth-library";
+import { generateTokens } from "../../utils/generateTokens.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
   let { email, username, firstName, lastName, password } = req.body;
@@ -13,7 +13,7 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   if (!email || !username || !firstName || !lastName || !password) {
     return res
       .status(HTTP_STATUS.BAD_REQUEST)
-      .json({ success: false, message: 'Please provide all required fields' });
+      .json({ success: false, message: "Please provide all required fields" });
   }
   const existingUser = await Instructor.findOne({
     $or: [{ email }, { username }],
@@ -21,14 +21,14 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   if (existingUser) {
     return res
       .status(HTTP_STATUS.BAD_REQUEST)
-      .json({ success: false, message: 'email or username  already exist' });
+      .json({ success: false, message: "email or username  already exist" });
   }
   // Validate email format
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Please provide a valid email address',
+      message: "Please provide a valid email address",
     });
   }
 
@@ -36,13 +36,13 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   if (password.length < 6) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Password must be at least 6 characters long',
+      message: "Password must be at least 6 characters long",
     });
   }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  let role = 'instructor';
+  let role = "instructor";
   await Instructor.create({
     email: email.toLowerCase(),
     password: hashedPassword,
@@ -53,15 +53,15 @@ export const instructorRegister = asyncHandler(async (req, res) => {
   });
 
   try {
-    let response = await api.post('/auth/send-otp', { email });
+    let response = await api.post("/auth/send-otp", { email });
     if (response.data.success) {
-      res.status(HTTP_STATUS.OK).json({ success: true, message: 'otp ' });
+      res.status(HTTP_STATUS.OK).json({ success: true, message: "otp " });
     }
   } catch (err) {
-    console.error('OTP API failed:', err.message);
+    console.error("OTP API failed:", err.message);
     return res
       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: 'Failed to send OTP. Try again.' });
+      .json({ success: false, message: "Failed to send OTP. Try again." });
   }
 });
 
@@ -72,33 +72,33 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   if (!email || !password) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Please provide email and password',
+      message: "Please provide email and password",
     });
   }
 
   // Find user by email
   const user = await Instructor.findOne({ email: email.toLowerCase() }).select(
-    '+password'
+    "+password"
   );
 
   if (!user) {
     return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      message: 'Invalid email or password',
+      message: "Invalid email or password",
     });
   }
-  if (user.authType == 'google') {
+  if (user.authType == "google") {
     return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
       message:
-        'This account was created with Google. Please use Google Sign-In to continue.',
+        "This account was created with Google. Please use Google Sign-In to continue.",
     });
   }
   // Check if user is an instructor
-  if (user.role !== 'instructor') {
+  if (user.role !== "instructor") {
     return res.status(HTTP_STATUS.FORBIDDEN).json({
       success: false,
-      message: 'Access denied. Instructor account required',
+      message: "Access denied. Instructor account required",
     });
   }
 
@@ -108,7 +108,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      message: 'Invalid email or password',
+      message: "Invalid email or password",
     });
   }
 
@@ -128,10 +128,10 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   // Set refresh token in HttpOnly cookie
-  res.cookie('refreshToken', refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -153,8 +153,8 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     audience: process.env.VITE_GOOGLE_ID,
   });
   let { email, name, picture } = ticket.payload;
-  let [firstName, ...lastName] = name.split(' ');
-  lastName = lastName.join(' ');
+  let [firstName, ...lastName] = name.split(" ");
+  lastName = lastName.join(" ");
   let user = await Instructor.findOne({ email });
   if (user) {
     let { accessToken, refreshToken } = generateTokens({
@@ -172,9 +172,9 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -195,7 +195,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
-      authType: 'google',
+      authType: "google",
     });
 
     let { accessToken, refreshToken } = generateTokens({
@@ -213,10 +213,10 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
 
-      sameSite: 'strict',
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

@@ -1,12 +1,12 @@
-import asyncHandler from 'express-async-handler';
+import asyncHandler from "express-async-handler";
 import {
   getWishlistService,
   addToWishlistService,
   removeFromWishlistService,
   toggleWishlistService,
-} from '../../services/student/wishlistService.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
-import { MESSAGES } from '../../utils/messages.js';
+} from "../../services/student/wishlistService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { MESSAGES } from "../../utils/messages.js";
 
 // get wishlist
 export const getWishlist = asyncHandler(async (req, res) => {
@@ -37,7 +37,7 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message:
-      result.action === 'added'
+      result.action === "added"
         ? MESSAGES.WISHLIST.ADDED
         : MESSAGES.WISHLIST.REMOVED,
     data: result,

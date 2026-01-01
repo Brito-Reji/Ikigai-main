@@ -1,12 +1,12 @@
-import asyncHandler from 'express-async-handler';
-import logger from '../../utils/logger.js';
+import asyncHandler from "express-async-handler";
+import logger from "../../utils/logger.js";
 import {
   verifyCourseOwnership,
   getChaptersService,
   createChapterService,
   updateChapterService,
   deleteChapterService,
-} from '../../services/instructor/chapterService.js';
+} from "../../services/instructor/chapterService.js";
 
 // Get chapters
 export const getCourseChapters = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ export const getCourseChapters = asyncHandler(async (req, res) => {
   logger.info(`Retrieved ${chapters.length} chapters for course: ${courseId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Chapters fetched successfully',
+    message: "Chapters fetched successfully",
     data: chapters,
   });
 });
@@ -40,7 +40,7 @@ export const createChapter = asyncHandler(async (req, res) => {
   logger.info(`Chapter created successfully: ${chapter._id}`);
   res.status(HTTP_STATUS.CREATED).json({
     success: true,
-    message: 'Chapter created successfully',
+    message: "Chapter created successfully",
     data: chapter,
   });
 });
@@ -61,7 +61,7 @@ export const updateChapter = asyncHandler(async (req, res) => {
   logger.info(`Chapter updated successfully: ${chapterId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Chapter updated successfully',
+    message: "Chapter updated successfully",
     data: chapter,
   });
 });
@@ -77,7 +77,7 @@ export const deleteChapter = asyncHandler(async (req, res) => {
   logger.info(`Chapter deleted successfully: ${chapterId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Chapter deleted successfully',
+    message: "Chapter deleted successfully",
   });
 });
 
@@ -87,8 +87,8 @@ import {
   createLessonService,
   updateLessonService,
   deleteLessonService,
-} from '../../services/instructor/lessonService.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
+} from "../../services/instructor/lessonService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get lessons
 export const getLessons = asyncHandler(async (req, res) => {
@@ -101,7 +101,7 @@ export const getLessons = asyncHandler(async (req, res) => {
   logger.info(`Retrieved ${lessons.length} lessons for chapter: ${chapterId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Lessons fetched successfully',
+    message: "Lessons fetched successfully",
     data: lessons,
   });
 });
@@ -127,7 +127,7 @@ export const addLesson = asyncHandler(async (req, res) => {
   logger.info(`Lesson created successfully: ${lesson._id}`);
   res.status(HTTP_STATUS.CREATED).json({
     success: true,
-    message: 'Lesson added successfully',
+    message: "Lesson added successfully",
     data: lesson,
   });
 });
@@ -153,7 +153,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
   logger.info(`Lesson updated successfully: ${lessonId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Lesson updated successfully',
+    message: "Lesson updated successfully",
     data: lesson,
   });
 });
@@ -169,6 +169,6 @@ export const deleteLesson = asyncHandler(async (req, res) => {
   logger.info(`Lesson deleted successfully: ${lessonId}`);
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Lesson deleted successfully',
+    message: "Lesson deleted successfully",
   });
 });

@@ -23,6 +23,9 @@ import StudentSettingsPage from "@/pages/user/SettingsPage.jsx";
 import MyCoursesPage from "@/pages/user/MyCoursesPage.jsx";
 import CourseViewerPage from "@/pages/user/CourseViewerPage.jsx";
 import ChatPage from "@/pages/user/ChatPage.jsx";
+import PaymentSuccessPage from "@/pages/user/PaymentSuccessPage.jsx";
+import PaymentFailedPage from "@/pages/user/PaymentFailedPage.jsx";
+import PaymentCancelledPage from "@/pages/user/PaymentCancelledPage.jsx";
 
 // Instructor routes
 import InstructorLoginPage from "@/pages/instructor/LoginPage.jsx";
@@ -134,6 +137,30 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={false} roles={["student"]}>
               <ChatPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="payment/success"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <PaymentSuccessPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="payment/failed"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <PaymentFailedPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="payment/cancelled"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <PaymentCancelledPage />
             </AuthGuard>
           }
         />

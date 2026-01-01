@@ -1,4 +1,4 @@
-import api from "@/api/axiosConfig";
+import api from '@/api/axiosConfig';
 
 export const startRazorpayPayment = async (
   courseIds,
@@ -16,21 +16,36 @@ export const startRazorpayPayment = async (
 
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-    amount: order.amount/100,
+    amount: order.amount / 100,
     currency: 'INR',
     order_id: order.razorpayOrderId,
 
     handler: async function (response) {
-      try {
-        // verify payment
-        alert('respomce');
-        await verifyPaymentMutation.mutateAsync(response);
+      let paymentId;
+      let enrolledDetails;
 
-        // navigate to success page AFTER verification
-        navigate('/payment/success', { replace: true });
+      try {
+        const verifyResult = await verifyPaymentMutation.mutateAsync(response);
+
+        console.log('Verify Payment Result:', verifyResult);
+
+        paymentId = verifyResult.data.paymentId;
+        enrolledDetails = verifyResult.data.enrolledDetails;
+
+        console.log('Extracted PaymentId:', paymentId);
+        console.log('Extracted EnrolledDetails:', enrolledDetails);
+
+        navigate('/payment/success', {
+          replace: true,
+          state: { paymentId, enrolledDetails },
+        });
       } catch (err) {
-        console.error('Payment verification failed:', err);
-        navigate('/payment/failed', { replace: true });
+        console.error('Payment verification error:', err);
+
+        navigate('/payment/failed', {
+          replace: true,
+          state: { paymentId, enrolledDetails },
+        });
       }
     },
 

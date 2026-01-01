@@ -1,6 +1,6 @@
-import asyncHandler from 'express-async-handler';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
-import * as applyCouponService from '../../services/student/couponService.js';
+import asyncHandler from "express-async-handler";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import * as applyCouponService from "../../services/student/couponService.js";
 
 export const applyCoupon = asyncHandler(async (req, res) => {
   const { couponId } = req.body;
@@ -13,7 +13,7 @@ export const applyCoupon = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Coupon applied successfully',
+    message: "Coupon applied successfully",
     data: {
       couponId: coupon._id,
       discount: coupon.discount,
@@ -28,7 +28,7 @@ export const getCoupon = asyncHandler(async (req, res) => {
   });
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    message: 'Coupon fetched successfully',
+    message: "Coupon fetched successfully",
     data: coupon,
   });
 });

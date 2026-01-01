@@ -1,11 +1,11 @@
-import { Instructor } from '../../models/Instructor.js';
-import { Otp } from '../../models/Otp.js';
-import bcrypt from 'bcrypt';
-import { sendOtpEmail } from '../../utils/emailService.js';
+import { Instructor } from "../../models/Instructor.js";
+import { Otp } from "../../models/Otp.js";
+import bcrypt from "bcrypt";
+import { sendOtpEmail } from "../../utils/emailService.js";
 
 export const getInstructorProfileSerice = async req => {
   let InstructorProfile = await Instructor.findById(req.user._id).select(
-    '-password'
+    "-password"
   );
   return InstructorProfile;
 };
@@ -28,7 +28,7 @@ export const updateInstructorProfileService = async req => {
     return updatedUser;
   } else {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 };
 
@@ -37,26 +37,26 @@ export const requestEmailChangeOTPService = async (
   newEmail,
   password
 ) => {
-  const instructor = await Instructor.findById(userId).select('+password');
+  const instructor = await Instructor.findById(userId).select("+password");
 
   if (!instructor) {
-    throw new Error('Instructor not found');
+    throw new Error("Instructor not found");
   }
 
-  if (instructor.authType !== 'email') {
-    throw new Error('Cannot change email for Google authenticated users');
+  if (instructor.authType !== "email") {
+    throw new Error("Cannot change email for Google authenticated users");
   }
 
   const isPasswordValid = await bcrypt.compare(password, instructor.password);
   if (!isPasswordValid) {
-    const error = new Error('Invalid password');
+    const error = new Error("Invalid password");
     error.statusCode = 401;
     throw error;
   }
 
   const emailExists = await Instructor.findOne({ email: newEmail });
   if (emailExists) {
-    const error = new Error('Email already in use');
+    const error = new Error("Email already in use");
     error.statusCode = 409;
     throw error;
   }
@@ -72,25 +72,25 @@ export const requestEmailChangeOTPService = async (
 
   await sendOtpEmail(newEmail, otp);
 
-  return { message: 'OTP sent to new email address' };
+  return { message: "OTP sent to new email address" };
 };
 
 export const verifyEmailChangeOTPService = async (userId, newEmail, otp) => {
   const otpRecord = await Otp.findOne({ email: newEmail, otp });
 
   if (!otpRecord) {
-    throw new Error('Invalid OTP');
+    throw new Error("Invalid OTP");
   }
 
   if (otpRecord.expiresAt < new Date()) {
     await Otp.findByIdAndDelete(otpRecord._id);
-    throw new Error('OTP has expired');
+    throw new Error("OTP has expired");
   }
 
   const instructor = await Instructor.findById(userId);
 
   if (!instructor) {
-    throw new Error('Instructor not found');
+    throw new Error("Instructor not found");
   }
 
   instructor.email = newEmail;
@@ -99,7 +99,7 @@ export const verifyEmailChangeOTPService = async (userId, newEmail, otp) => {
 
   await Otp.findByIdAndDelete(otpRecord._id);
 
-  return { message: 'Email updated successfully' };
+  return { message: "Email updated successfully" };
 };
 
 export const changePasswordService = async (
@@ -108,17 +108,17 @@ export const changePasswordService = async (
   newPassword
 ) => {
   if (newPassword.length < 6) {
-    throw new Error('New password must be at least 6 characters long');
+    throw new Error("New password must be at least 6 characters long");
   }
 
-  const instructor = await Instructor.findById(userId).select('+password');
+  const instructor = await Instructor.findById(userId).select("+password");
 
   if (!instructor) {
-    throw new Error('Instructor not found');
+    throw new Error("Instructor not found");
   }
 
-  if (instructor.authType !== 'email') {
-    throw new Error('Cannot change password for Google authenticated users');
+  if (instructor.authType !== "email") {
+    throw new Error("Cannot change password for Google authenticated users");
   }
 
   const isPasswordValid = await bcrypt.compare(
@@ -126,7 +126,7 @@ export const changePasswordService = async (
     instructor.password
   );
   if (!isPasswordValid) {
-    const error = new Error('Current password is incorrect');
+    const error = new Error("Current password is incorrect");
     error.statusCode = 401;
     throw error;
   }
@@ -135,5 +135,5 @@ export const changePasswordService = async (
   instructor.password = hashedPassword;
   await instructor.save();
 
-  return { message: 'Password changed successfully' };
+  return { message: "Password changed successfully" };
 };

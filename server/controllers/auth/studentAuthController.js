@@ -1,10 +1,10 @@
-import asyncHandler from 'express-async-handler';
-import bcrypt from 'bcrypt';
-import { User } from '../../models/User.js';
-import { OAuth2Client } from 'google-auth-library';
-import { generateTokens } from '../../utils/generateTokens.js';
-import { sendOTPToEmail } from '../../utils/OTPServices.js';
-import { HTTP_STATUS } from '../../utils/httpStatus.js';
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+import { User } from "../../models/User.js";
+import { OAuth2Client } from "google-auth-library";
+import { generateTokens } from "../../utils/generateTokens.js";
+import { sendOTPToEmail } from "../../utils/OTPServices.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // import { User } from './model/'
 
@@ -14,7 +14,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
   if (!email || !username || !firstName || !lastName || !password) {
     return res
       .status(HTTP_STATUS.BAD_REQUEST)
-      .json({ success: false, message: 'Please provide all required fields' });
+      .json({ success: false, message: "Please provide all required fields" });
   }
 
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -23,7 +23,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
   if (existingUser && existingUser.isVerified) {
     return res
       .status(HTTP_STATUS.BAD_REQUEST)
-      .json({ success: false, message: 'Email or username already exists' });
+      .json({ success: false, message: "Email or username already exists" });
   }
 
   // Validate email format
@@ -31,7 +31,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Please provide a valid email address',
+      message: "Please provide a valid email address",
     });
   }
 
@@ -39,13 +39,13 @@ export const studentRegister = asyncHandler(async (req, res) => {
   if (password.length < 6) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'Password must be at least 6 characters long',
+      message: "Password must be at least 6 characters long",
     });
   }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  let role = 'student';
+  let role = "student";
   let user;
 
   // if user exists but not verified, update their details
@@ -81,24 +81,24 @@ export const studentRegister = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       message: existingUser
-        ? 'Unverified account updated, OTP sent again'
-        : 'OTP sent successfully',
+        ? "Unverified account updated, OTP sent again"
+        : "OTP sent successfully",
     });
   } catch (err) {
-    console.error('OTP service failed:', err.message);
+    console.error("OTP service failed:", err.message);
     return res
       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: 'Failed to send OTP. Try again.' });
+      .json({ success: false, message: "Failed to send OTP. Try again." });
   }
 });
 
@@ -107,33 +107,33 @@ export const studentLogin = asyncHandler(async (req, res) => {
   if (!email || !password) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'fields cannot be empty',
+      message: "fields cannot be empty",
     });
   }
   let user = await User.findOne({
     $or: [{ email: email }, { username: email }],
   })
-    .select('+password')
+    .select("+password")
     .exec();
 
   // Check if user exists
   if (!user) {
     return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      message: 'Invalid credentials',
+      message: "Invalid credentials",
     });
   }
   if (user.isBlocked) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
-      message: 'user is blocked by the admin. please reach the customer care',
+      message: "user is blocked by the admin. please reach the customer care",
     });
   }
-  if (user.authType == 'google') {
+  if (user.authType == "google") {
     return res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
       message:
-        'This account was created with Google. Please use Google Sign-In to continue.',
+        "This account was created with Google. Please use Google Sign-In to continue.",
     });
   }
 
@@ -144,13 +144,13 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
       return res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: 'OTP sent for verification',
+        message: "OTP sent for verification",
       });
     } catch (err) {
-      console.error('OTP service failed:', err.message);
+      console.error("OTP service failed:", err.message);
       return res
         .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        .json({ success: false, message: 'Failed to send OTP. Try again.' });
+        .json({ success: false, message: "Failed to send OTP. Try again." });
     }
   }
 
@@ -159,7 +159,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     return res
       .status(HTTP_STATUS.UNAUTHORIZED)
-      .json({ success: false, message: 'Invalid credentials' });
+      .json({ success: false, message: "Invalid credentials" });
   }
 
   let { accessToken, refreshToken } = generateTokens({
@@ -177,10 +177,10 @@ export const studentLogin = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   // Set refresh token in HttpOnly cookie
-  res.cookie('refreshToken', refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -203,14 +203,14 @@ export const googleAuth = asyncHandler(async (req, res) => {
     audience: process.env.VITE_GOOGLE_ID,
   });
   let { email, name, picture } = ticket.payload;
-  let [firstName, ...lastName] = name.split(' ');
+  let [firstName, ...lastName] = name.split(" ");
   lastName = lastName.join();
   let user = await User.findOne({ email });
   if (user) {
     if (user.isBlocked) {
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
-        message: 'user is blocked by the admin ',
+        message: "user is blocked by the admin ",
       });
     }
     let needUpdate = false;
@@ -245,10 +245,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -269,7 +269,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
       username: null,
       isVerified: true,
       profileImageUrl: picture,
-      authType: 'google',
+      authType: "google",
     });
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,
@@ -286,10 +286,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set refresh token in HttpOnly cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
