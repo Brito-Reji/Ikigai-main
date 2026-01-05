@@ -6,6 +6,7 @@ import api from "../../config/axiosConfig.js";
 import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { User } from "../../models/User.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
   let { email, username, firstName, lastName, password } = req.body;
@@ -15,6 +16,14 @@ export const instructorRegister = asyncHandler(async (req, res) => {
       .status(HTTP_STATUS.BAD_REQUEST)
       .json({ success: false, message: "Please provide all required fields" });
   }
+
+  let isStudent = await User.findOne({ email })
+  if (isStudent) {
+     return res
+       .status(HTTP_STATUS.BAD_REQUEST)
+       .json({ success: false, message: "This user is registerd as student use another email" });
+  }
+
   const existingUser = await Instructor.findOne({
     $or: [{ email }, { username }],
   });
@@ -156,6 +165,13 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
   let [firstName, ...lastName] = name.split(" ");
   lastName = lastName.join(" ");
   let user = await Instructor.findOne({ email });
+    if (user.role !== "instructor") {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        success: false,
+        message:
+          "user is already registerd as instrucutore . Please use another account ",
+      });
+    }
   if (user) {
     let { accessToken, refreshToken } = generateTokens({
       userId: user._id,

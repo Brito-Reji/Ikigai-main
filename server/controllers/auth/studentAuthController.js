@@ -17,6 +17,14 @@ export const studentRegister = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Please provide all required fields" });
   }
 
+  let isInstructor = await User.findOne({ email })
+  console.log(isInstructor)
+    if (isInstructor) {
+       return res
+         .status(HTTP_STATUS.BAD_REQUEST)
+         .json({ success: false, message: "This user is registerd as instructor use another email" });
+    }
+
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
   // if verified user already exists -> block registration
@@ -212,7 +220,16 @@ export const googleAuth = asyncHandler(async (req, res) => {
         success: false,
         message: "user is blocked by the admin ",
       });
+
+   
     }
+
+       if (user.role !== "student") {
+         return res.status(HTTP_STATUS.FORBIDDEN).json({
+           success: false,
+           message: "user is already registerd as student . Please use another account ",
+         });
+       }
     let needUpdate = false;
     if (user.firstName !== firstName) {
       user.firstName = firstName;

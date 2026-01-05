@@ -48,12 +48,6 @@ export const startRazorpayPayment = async (
         });
       }
     },
-
-    modal: {
-      ondismiss: function () {
-        navigate('/payment/cancelled', { replace: true });
-      },
-    },
   };
 
   const rzp = new window.Razorpay(options);

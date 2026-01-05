@@ -71,7 +71,7 @@ export const applyForVerification = asyncHandler(async (req, res) => {
   const instructorId = req.user._id;
   const { courseId } = req.params;
 
-  const course = await Course.findById(courseId);
+  const course = await Course.findById(courseId)
 
   if (!course) {
     return res.status(HTTP_STATUS.NOT_FOUND).json({
@@ -79,6 +79,9 @@ export const applyForVerification = asyncHandler(async (req, res) => {
       message: "Course not found",
     });
   }
+
+  
+
 
   if (course.instructor.toString() !== instructorId.toString()) {
     return res.status(HTTP_STATUS.FORBIDDEN).json({
