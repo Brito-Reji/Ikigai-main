@@ -1,6 +1,3 @@
-
-
-
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { User } from "../models/User.js";
@@ -21,35 +18,54 @@ const authenticate = asyncHandler(async (req, res, next) => {
     return next();
   }
 
-  const token = authHeader.split(" ")[1];
-  const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  try {
+    const token = authHeader.split(" ")[1];
 
-  const Model = MODELS[decoded.role];
+    if (!token) {
+      req.user = { role: "guest" };
+      return next();
+    }
 
-  if (!Model) {
-    res.status(401);
-    throw new Error("Invalid role");
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+
+    const Model = MODELS[decoded.role];
+
+    if (!Model) {
+      res.status(401);
+      throw new Error("Invalid role");
+    }
+
+    const user = await Model.findById(decoded.id).select("-password");
+
+    if (!user) {
+      res.status(401);
+      throw new Error("User not found");
+    }
+
+    if (user.isBlocked) {
+      res.status(403);
+      throw new Error("Account is blocked");
+    }
+
+    req.user = {
+      _id: user._id,
+      email: user.email,
+      role: decoded.role,
+    };
+
+    next();
+  } catch (error) {
+    // Handle JWT errors (malformed, expired, etc.) by treating as guest
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      req.user = { role: "guest" };
+      return next();
+    }
+    // Re-throw other errors
+    throw error;
   }
-
-  const user = await Model.findById(decoded.id).select("-password");
-
-  if (!user) {
-    res.status(401);
-    throw new Error("User not found");
-  }
-
-  if (user.isBlocked) {
-    res.status(403);
-    throw new Error("Account is blocked");
-  }
-
-  req.user = {
-    _id: user._id,
-    email: user.email,
-    role: decoded.role,
-  };
-
-  next();
 });
 
 export default authenticate;

@@ -75,6 +75,10 @@ export const getAllCoursesService = async (filters) => {
 
     const totalCourses = await Course.countDocuments(query);
     const totalPages = Math.ceil(totalCourses / parseInt(limit));
+    // update coures price paise to inr
+    courses.forEach((course) => {
+        course.price = course.price / 100;
+    });
 
     return {
         courses,
@@ -92,13 +96,16 @@ export const getAllCoursesService = async (filters) => {
 export const getCourseDetailsService = async (courseId) => {
     const course = await Course.findById(courseId)
         .populate("category", "name description")
-        .populate("instructor", "firstName lastName email profileImageUrl headline description social");
+        .populate("instructor", "firstName lastName email profileImageUrl headline description social").lean()
 
     if (!course) {
         const error = new Error("Course not found");
         error.statusCode = HTTP_STATUS.NOT_FOUND;
         throw error;
     }
+
+   // update coures price paise to inr
+   course.price = course.price / 100;
 
     return course;
 };
