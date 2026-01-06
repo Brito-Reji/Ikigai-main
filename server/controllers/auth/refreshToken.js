@@ -24,7 +24,7 @@ export const refreshToken = async (req, res) => {
     } catch (e) {
       return res
         .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Invalid refresh token" });
+        .json({ success: false, message: "Invalid refresh token",error:e.message });
     }
 
     // Try to find user in both User and Instructor collections
@@ -49,7 +49,7 @@ export const refreshToken = async (req, res) => {
     if (user.refreshToken !== incomingToken) {
       return res
         .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Invalid refresh token" });
+        .json({ success: false, message: "Invalid refresh token", });
     }
 
     // Generate new tokens

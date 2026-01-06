@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   BookOpen,
@@ -8,12 +8,36 @@ import {
   Settings,
   ChevronLeft,
   User,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useRedux.js";
+import { logout } from "@/store/slices/authSlice.js";
+import { useDispatch } from "react-redux";
+import Swal from "sweetalert2";
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useAuth();
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Logout?',
+      text: "Are you sure you want to logout?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      dispatch(logout());
+      navigate('/instructor/login');
+    }
+  };
 
   const menuItems = [
     {
@@ -85,6 +109,15 @@ export default function Sidebar() {
             </Link>
           );
         })}
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-slate-400 hover:bg-slate-800 hover:text-white"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-medium">Logout</span>
+        </button>
       </nav>
 
       {/* User Profile */}

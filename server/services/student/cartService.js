@@ -5,15 +5,18 @@ export const getCartService = async (userId) => {
     const cart = await Cart.findOne({ userId })
         .populate({
             path: "courses",
-            select: "title description price thumbnail instructor category",
+            select: "title description price thumbnail instructor category blocked",
+            match: { blocked: false },
             populate: [
-                { path: "instructor", select: "firstName lastName" },
-                { path: "category", select: "name" }
-            ]
-        });
+                { path: "instructor", select: "firstName lastName", },
+                { path: "category", select: "name isBlocked" }
+            ] 
+        }).lean();
+
+
 
     // filter nulls
-    const filteredCourses = (cart?.courses || []).filter(course => course !== null);
+    const filteredCourses = (cart?.courses || []).filter(course => course !== null && course.category && !course.category.isBlocked);
     
     // cleanup - remove null references from DB
     if (cart && filteredCourses.length !== cart.courses.length) {
@@ -23,8 +26,11 @@ export const getCartService = async (userId) => {
             { $set: { courses: validIds } }
         );
     }
-    
-    return filteredCourses;
+
+    console.log("Filtered Courses in Cart:", filteredCourses);
+    const updated = filteredCourses.map(course => ({ ...course, price: course.price / 100,priceInPaise:course.price }))
+    console.log("Updated Courses with Adjusted Price:", updated);
+    return updated;
 };
 
 // add to cart
