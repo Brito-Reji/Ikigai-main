@@ -70,14 +70,6 @@ export default function InstructorProfilePage() {
               <span className="text-gray-600">Email:</span>
               <span className="font-medium">{profile?.email}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Phone:</span>
-              <span className="font-medium">{profile?.phone || "Not provided"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Headline:</span>
-              <span className="font-medium">{profile?.headline || "Not provided"}</span>
-            </div>
             {profile?.description && (
               <div>
                 <span className="text-gray-600">About:</span>

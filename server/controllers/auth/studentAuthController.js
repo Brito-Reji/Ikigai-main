@@ -5,6 +5,7 @@ import { OAuth2Client } from "google-auth-library";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { Instructor } from "../../models/Instructor.js";
 
 // import { User } from './model/'
 
@@ -17,7 +18,14 @@ export const studentRegister = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Please provide all required fields" });
   }
 
-  let isInstructor = await User.findOne({ email })
+ let isInstructor= await Instructor.findOne({ email })
+if(isInstructor){
+    return res
+    .status(HTTP_STATUS.BAD_REQUEST)
+    .json({ success: false, message: "This user is registerd as instructor use another email" });
+}
+
+ 
   console.log(isInstructor)
     if (isInstructor) {
        return res
