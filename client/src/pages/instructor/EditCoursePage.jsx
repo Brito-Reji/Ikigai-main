@@ -441,7 +441,6 @@ const SettingsTab = ({ formData, setFormData }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Settings</h2>
-
       <div className="space-y-4">
         {/* Published Status */}
         <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
