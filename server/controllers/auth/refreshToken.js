@@ -1,100 +1,25 @@
-import { Instructor } from "../../models/Instructor.js";
-import { User } from "../../models/User.js";
-import { Admin } from "../../models/Admin.js";
-import jwt from "jsonwebtoken";
-import { generateTokens } from "../../utils/generateTokens.js";
+import asyncHandler from "express-async-handler";
+import { refreshTokenService } from "../../services/auth/refreshTokenService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-export const refreshToken = async (req, res) => {
-  try {
-    const incomingToken =
-      req.cookies?.refreshToken ||
-      req.headers["x-refresh-token"] ||
-      req.query.refreshToken;
-    console.log("inconcomeing cokkite ", incomingToken);
+export const refreshToken = asyncHandler(async (req, res) => {
+  const incomingToken =
+    req.cookies?.refreshToken ||
+    req.headers["x-refresh-token"] ||
+    req.query.refreshToken;
 
-    if (!incomingToken) {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "No refresh token provided" });
-    }
+  const { accessToken, refreshToken: newRefreshToken } =
+    await refreshTokenService(incomingToken);
 
-    // Verify token
-    let decoded;
-    try {
-      decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
-      console.log("Decoded token:", decoded);
-    } catch (e) {
-      console.log("Token verification failed:", e.message);
-      return res.status(HTTP_STATUS.FORBIDDEN).json({
-        success: false,
-        message: "Invalid refresh token",
-        error: e.message,
-      });
-    }
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
-    // Try to find user in User, Instructor, and Admin collections
-    let user = await User.findById(decoded.id);
-    if (!user) {
-      user = await Instructor.findById(decoded.id);
-    }
-    if (!user) {
-      user = await Admin.findById(decoded.id);
-    }
-
-    console.log("User found:", user ? user.email : "null");
-    console.log("User role:", user?.role);
-    if (!user) {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "User not found" });
-    }
-
-    if (user.isBlocked) {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Account is blocked" });
-    }
-
-    // Check if the refresh token matches the one stored in the database
-    console.log("Stored token in DB:", user.refreshToken ? "exists" : "null");
-    console.log("Incoming token:", incomingToken ? "exists" : "null");
-    console.log("Tokens match:", user.refreshToken === incomingToken);
-
-    if (user.refreshToken !== incomingToken) {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Invalid refresh token" });
-    }
-
-    // Generate new tokens
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens({
-      userId: user._id,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      role: user.role,
-      profileImageUrl: user.profileImageUrl,
-      isVerified: user.isVerified,
-    });
-
-    // Update refresh token in database
-    user.refreshToken = newRefreshToken;
-    await user.save({ validateBeforeSave: false });
-
-    // Set refresh token in HttpOnly cookie
-    res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return res.status(HTTP_STATUS.OK).json({ success: true, accessToken });
-  } catch (err) {
-    console.error("Refresh token error:", err);
-    return res
-      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Internal server error" });
-  }
-};
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    accessToken,
+  });
+});

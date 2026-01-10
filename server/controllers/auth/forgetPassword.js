@@ -1,64 +1,25 @@
 import asyncHandler from "express-async-handler";
-import bcrypt from "bcrypt";
-import { User } from "../../models/User.js";
-import { Instructor } from "../../models/Instructor.js";
-import { Otp } from "../../models/Otp.js";
-import { sendOTPToEmail } from "../../utils/OTPServices.js";
+import { forgetPasswordService, resetPasswordService, verifyForgetPasswordOtpService } from "../../services/auth/forgetPasswordService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+
 
 export const forgetPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  if (!email) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Email is required",
-    });
-  }
+  await forgetPasswordService(email);
 
-  const user = await User.findOne({ email }) || await Instructor.findOne({ email });
-
-  if (!user) {
-    return res.status(HTTP_STATUS.NOT_FOUND).json({
-      success: false,
-      message: "No account found with this email",
-    });
-  }
-  if (user.isBlocked) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message:"The user is blocked pleses contact the admin for more info"
-    })
-  }
-
-  await sendOTPToEmail(email);
-
-  return res.status(HTTP_STATUS.OK).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "OTP sent to your email",
   });
 });
 
-export const verifyForgetPasswordOTP = asyncHandler(async (req, res) => {
+export const verifyForgetPasswordOtp = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
 
-  if (!email || !otp) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Email and OTP are required",
-    });
-  }
+  await verifyForgetPasswordOtpService(email, otp);
 
-  const otpRecord = await Otp.findOne({ email, otp });
-
-  if (!otpRecord) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Invalid or expired OTP",
-    });
-  }
-
-  return res.status(HTTP_STATUS.OK).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "OTP verified successfully",
   });
@@ -67,53 +28,11 @@ export const verifyForgetPasswordOTP = asyncHandler(async (req, res) => {
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
-  if (!email || !otp || !newPassword) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Email, OTP, and new password are required",
-    });
-  }
+  const role = await resetPasswordService(email, otp, newPassword);
 
-  if (newPassword.length < 6) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Password must be at least 6 characters long",
-    });
-  }
-
-  const otpRecord = await Otp.findOne({ email, otp });
-
-  if (!otpRecord) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Invalid or expired OTP",
-    });
-  }
-
-  let user = await User.findOne({ email });
-  let isInstructor = false;
-
-  if (!user) {
-    user = await Instructor.findOne({ email });
-    isInstructor = true;
-  }
-
-  if (!user) {
-    return res.status(HTTP_STATUS.NOT_FOUND).json({
-      success: false,
-      message: "User not found",
-    });
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-  user.password = hashedPassword;
-  await user.save({ validateBeforeSave: false });
-
-  await Otp.deleteMany({ email });
-
-  return res.status(HTTP_STATUS.OK).json({
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Password reset successfully",
-    role: isInstructor ? "instructor" : "student",
+    role,
   });
 });
