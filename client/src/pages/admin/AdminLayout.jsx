@@ -15,10 +15,10 @@ const AdminLayout = () => {
 
   useEffect(() => {
      console.log(user)
-      if(!user && user.role !== "admin") {
+      if(!user || user?.role !== "admin") {
     navigate("/")
   }
-  },[])
+  },[user, navigate])
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },

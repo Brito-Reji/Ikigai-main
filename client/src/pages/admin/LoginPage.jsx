@@ -117,6 +117,7 @@ function LoginPage() {
         if (response.data.success) {
           localStorage.setItem("accessToken", response.data.accessToken);
           toast.success("Login successful!");
+        
           navigate("/admin/dashboard");
         } else {
           toast.error(response.data.message || "Login failed");

@@ -16,20 +16,25 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   console.log("AuthGuard state:", { isAuthenticated, user, loading, hasToken, fetchAttempted, isValidating });
 
   useEffect(() => {
-    // Fetch current user if token exists but no user data and haven't tried yet
-    if (hasToken && !user && !loading && !fetchAttempted) {
-      console.log("Fetching current user...");
-      setFetchAttempted(true);
-      setIsValidating(true);
-      dispatch(fetchCurrentUser()).finally(() => {
+    const initAuth = async () => {
+      // If we have a token or might have a refresh token cookie, try fetching user
+      // The axios interceptor will handle token refresh automatically if needed
+      if (!user && !loading && !fetchAttempted) {
+        console.log("Attempting to fetch current user...");
+        setFetchAttempted(true);
+        setIsValidating(true);
+        
+        await dispatch(fetchCurrentUser());
+        
         setIsValidating(false);
-      });
-    }
+      }
+    };
+
+    initAuth();
 
     // Reset fetch attempted if token is removed
-    if (!hasToken && fetchAttempted) {
+    if (!hasToken && fetchAttempted && !isValidating) {
       setFetchAttempted(false);
-      setIsValidating(false);
     }
 
     // handle navigation in useEffect

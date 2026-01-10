@@ -43,7 +43,14 @@ export const adminLogin = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       role: user.role,
     });
-    res.cookie("refreshToken", refreshToken);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.status(HTTP_STATUS.OK).json({
       success: true,

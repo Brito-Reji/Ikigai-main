@@ -32,6 +32,22 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// Track ongoing refresh to prevent race conditions
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   response => response,
   async error => {
@@ -41,6 +57,8 @@ api.interceptors.response.use(
     // Don't try to refresh if it's the refresh endpoint itself that failed
     if (originalRequest.url?.includes('/auth/refresh')) {
       console.log('Refresh endpoint failed, not retrying');
+      isRefreshing = false;
+      processQueue(error, null);
       return Promise.reject(error);
     }
 
@@ -63,7 +81,22 @@ api.interceptors.response.use(
 
     // Check if error.response exists to avoid crashes
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
       console.log('Attempting to refresh token');
 
       try {
@@ -73,10 +106,14 @@ api.interceptors.response.use(
           localStorage.setItem('accessToken', accessToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           console.log('Token refreshed successfully');
+          isRefreshing = false;
+          processQueue(null, accessToken);
           return api(originalRequest);
         }
       } catch (err) {
         console.log('Refresh failed:', err.message);
+        isRefreshing = false;
+        processQueue(err, null);
         localStorage.removeItem('accessToken');
         return Promise.reject(err);
       }

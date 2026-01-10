@@ -6,11 +6,12 @@ import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const refreshToken = async (req, res) => {
-
   try {
     const incomingToken =
-      req.cookies?.refreshToken ||  req.headers["x-refresh-token"] || req.query.refreshToken;
-     console.log(incomingToken)
+      req.cookies?.refreshToken ||
+      req.headers["x-refresh-token"] ||
+      req.query.refreshToken;
+    console.log("inconcomeing cokkite ", incomingToken);
 
     if (!incomingToken) {
       return res
@@ -22,7 +23,9 @@ export const refreshToken = async (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
+      console.log("Decoded token:", decoded);
     } catch (e) {
+      console.log("Token verification failed:", e.message);
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         message: "Invalid refresh token",
@@ -39,6 +42,8 @@ export const refreshToken = async (req, res) => {
       user = await Admin.findById(decoded.id);
     }
 
+    console.log("User found:", user ? user.email : "null");
+    console.log("User role:", user?.role);
     if (!user) {
       return res
         .status(HTTP_STATUS.FORBIDDEN)
@@ -52,6 +57,10 @@ export const refreshToken = async (req, res) => {
     }
 
     // Check if the refresh token matches the one stored in the database
+    console.log("Stored token in DB:", user.refreshToken ? "exists" : "null");
+    console.log("Incoming token:", incomingToken ? "exists" : "null");
+    console.log("Tokens match:", user.refreshToken === incomingToken);
+
     if (user.refreshToken !== incomingToken) {
       return res
         .status(HTTP_STATUS.FORBIDDEN)

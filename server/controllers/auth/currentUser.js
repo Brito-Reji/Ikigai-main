@@ -1,5 +1,6 @@
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
+import { Admin } from "../../models/Admin.js";
 import jwt from "jsonwebtoken";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
@@ -26,6 +27,9 @@ export const currentUser = async (req, res) => {
     let user = await User.findById(decoded.id);
     if (!user) {
       user = await Instructor.findById(decoded.id);
+    }
+    if (!user) {
+      user = await Admin.findById(decoded.id);
     }
 
     if (!user) {
@@ -55,10 +59,10 @@ export const currentUser = async (req, res) => {
         profileImageUrl: user.profileImageUrl,
         isVerified: user.isVerified,
         isBlocked: user.isBlocked,
-      },
+      },  
     });
-  } catch (err) {
-    return res
+  } catch {
+    return res    
       .status(HTTP_STATUS.UNAUTHORIZED)
       .json({ success: false, message: "Invalid token" });
   }
