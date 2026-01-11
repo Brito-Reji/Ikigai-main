@@ -229,6 +229,7 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
             error.statusCode = HTTP_STATUS.BAD_REQUEST;
             throw error;
         }
+        course.verificationStatus = status
         course.rejectionReason = rejectionReason;
     } else {
         course.rejectionReason = null;

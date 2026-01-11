@@ -2,12 +2,13 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../../config/s3Client.js";
 import asyncHandler from "express-async-handler";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const getSecureStreamUrl = asyncHandler(async (req, res) => {
   const { videoPath } = req.query;
 
   if (!videoPath) {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Video path is required",
       data: {},
@@ -37,7 +38,7 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
 
     console.log("✅ Signed URL generated successfully");
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       message: "Secure video access granted",
       data: { url: signedUrl },
@@ -69,7 +70,7 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
       userMessage = "Invalid AWS credentials";
     }
 
-    res.status(500).json({
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: userMessage,
       data: {

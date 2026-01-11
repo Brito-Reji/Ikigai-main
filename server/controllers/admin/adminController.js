@@ -18,7 +18,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
 
 
     const user = Admin.find()
-    console.log(user)
+ 
     if (!user) {
       return res
         .status(HTTP_STATUS.NOT_FOUND)

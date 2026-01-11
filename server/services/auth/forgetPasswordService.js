@@ -3,12 +3,12 @@ import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
 import { Otp } from "../../models/Otp.js";
-
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const forgetPasswordService = async email => {
   if (!email) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Email is required",
     };
   }
@@ -18,14 +18,14 @@ export const forgetPasswordService = async email => {
 
   if (!user) {
     throw {
-      status: 404,
+      status: HTTP_STATUS.NOT_FOUND,
       message: "No account found with this email",
     };
   }
 
   if (user.isBlocked) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "The user is blocked please contact the admin for more info",
     };
   }
@@ -38,7 +38,7 @@ export const forgetPasswordService = async email => {
 export const verifyForgetPasswordOtpService = async (email, otp) => {
   if (!email || !otp) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Email and OTP are required",
     };
   }
@@ -47,7 +47,7 @@ export const verifyForgetPasswordOtpService = async (email, otp) => {
 
   if (!otpRecord) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Invalid or expired OTP",
     };
   }
@@ -58,14 +58,14 @@ export const verifyForgetPasswordOtpService = async (email, otp) => {
 export const resetPasswordService = async (email, otp, newPassword) => {
   if (!email || !otp || !newPassword) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Email, OTP, and new password are required",
     };
   }
 
   if (newPassword.length < 6) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Password must be at least 6 characters long",
     };
   }
@@ -74,7 +74,7 @@ export const resetPasswordService = async (email, otp, newPassword) => {
 
   if (!otpRecord) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Invalid or expired OTP",
     };
   }
@@ -89,7 +89,7 @@ export const resetPasswordService = async (email, otp, newPassword) => {
 
   if (!user) {
     throw {
-      status: 404,
+      status: HTTP_STATUS.NOT_FOUND,
       message: "User not found",
     };
   }

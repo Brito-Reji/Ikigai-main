@@ -3,12 +3,12 @@ import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { Admin } from "../../models/Admin.js";
 import { generateTokens } from "../../utils/generateTokens.js";
-
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const refreshTokenService = async incomingToken => {
   if (!incomingToken) {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "No refresh token provided",
     };
   }
@@ -18,7 +18,7 @@ export const refreshTokenService = async incomingToken => {
     decoded = jwt.verify(incomingToken, process.env.JWT_REFRESH_SECRET);
   } catch {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "Invalid refresh token",
     };
   }
@@ -30,21 +30,21 @@ export const refreshTokenService = async incomingToken => {
 
   if (!user) {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "User not found",
     };
   }
 
   if (user.isBlocked) {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "Account is blocked",
     };
   }
 
   if (user.refreshToken !== incomingToken) {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "Invalid refresh token",
     };
   }

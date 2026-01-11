@@ -2,12 +2,12 @@ import jwt from "jsonwebtoken";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { Admin } from "../../models/Admin.js";
-
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const getCurrentUserService = async accessToken => {
   if (!accessToken) {
     throw {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       message: "No token provided",
     };
   }
@@ -17,7 +17,7 @@ export const getCurrentUserService = async accessToken => {
     decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
   } catch {
     throw {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       message: "Invalid token",
     };
   }
@@ -29,14 +29,14 @@ export const getCurrentUserService = async accessToken => {
 
   if (!user) {
     throw {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       message: "User not found",
     };
   }
 
   if (user.isBlocked) {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "Your account has been blocked. Please contact support.",
       isBlocked: true,
     };

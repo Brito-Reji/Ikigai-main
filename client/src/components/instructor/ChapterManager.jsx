@@ -779,25 +779,17 @@ function VideoPreviewModal({ lesson, onClose }) {
         });
 
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-        // Use public endpoint - no authentication required since bucket is public
-        const streamUrl = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
+        const apiEndpoint = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
 
+        console.log('[VideoPreview] Fetching signed URL from:', apiEndpoint);
 
-        console.log('[VideoPreview] Stream URL constructed:', streamUrl);
-
-        // Test the endpoint with a HEAD request first
-        const response = await fetch(streamUrl, {
-          method: 'HEAD',
-          credentials: 'include', // Important for CORS with credentials
+        // Fetch the JSON response to get the signed URL
+        const response = await fetch(apiEndpoint, {
+          method: 'GET',
+          credentials: 'include',
         });
 
-        console.log('[VideoPreview] HEAD request response:', {
-          status: response.status,
-          statusText: response.statusText,
-          contentType: response.headers.get('content-type'),
-          contentLength: response.headers.get('content-length'),
-          acceptRanges: response.headers.get('accept-ranges')
-        });
+        console.log('[VideoPreview] Response status:', response.status);
 
         if (!response.ok) {
           let errorMessage = `Failed to access video: ${response.status} ${response.statusText}`;
@@ -810,7 +802,19 @@ function VideoPreviewModal({ lesson, onClose }) {
           throw new Error(errorMessage);
         }
 
-        setVideoUrl(streamUrl);
+        // Parse JSON and extract the signed URL
+        const data = await response.json();
+        
+        console.log('[VideoPreview] API Response:', data);
+
+        if (!data.success || !data.data?.url) {
+          throw new Error('Invalid response format: missing signed URL');
+        }
+
+        const signedUrl = data.data.url;
+        console.log('[VideoPreview] Signed URL extracted:', signedUrl);
+
+        setVideoUrl(signedUrl);
         setLoading(false);
       } catch (err) {
         console.error('[VideoPreview] Error loading video:', err);
@@ -912,7 +916,6 @@ function VideoPreviewModal({ lesson, onClose }) {
               <video
                 ref={videoRef}
                 controls
-                crossOrigin="use-credentials"
                 className="w-full rounded-lg bg-black"
                 style={{ maxHeight: '70vh' }}
                 onError={handleVideoError}

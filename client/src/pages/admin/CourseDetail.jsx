@@ -68,6 +68,7 @@ const CourseDetail = () => {
 
     if (result.isConfirmed) {
       try {
+      
         const response = await toggleBlockMutation.mutateAsync(courseId);
         Swal.fire({
           icon: 'success',

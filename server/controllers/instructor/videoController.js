@@ -59,7 +59,7 @@ export const getVideoUrl = asyncHandler(async (req, res) => {
     });
   }
 
-  const signedUrl = getSignedVideoUrlService(videoPath);
+  const signedUrl = await getSignedVideoUrlService(videoPath);
 
   res.status(HTTP_STATUS.OK).json({
     success: true,

@@ -4,19 +4,22 @@ import { OAuth2Client } from "google-auth-library";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { generateTokens } from "../../utils/generateTokens.js";
-
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const instructorRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
 
   if (!email || !username || !firstName || !lastName || !password) {
-    throw { status: 400, message: "Please provide all required fields" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Please provide all required fields",
+    };
   }
 
   const isStudent = await User.findOne({ email });
   if (isStudent) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "This user is registered as student use another email",
     };
   }
@@ -27,19 +30,22 @@ export const instructorRegisterService = async data => {
 
   if (existingInstructor) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Email or username already exist",
     };
   }
 
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
-    throw { status: 400, message: "Please provide a valid email address" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Please provide a valid email address",
+    };
   }
 
   if (password.length < 6) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Password must be at least 6 characters long",
     };
   }
@@ -58,7 +64,10 @@ export const instructorRegisterService = async data => {
   const response = await api.post("/auth/send-otp", { email });
 
   if (!response.data.success) {
-    throw { status: 500, message: "Failed to send OTP. Try again." };
+    throw {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      message: "Failed to send OTP. Try again.",
+    };
   }
 
   return true;
@@ -66,7 +75,10 @@ export const instructorRegisterService = async data => {
 
 export const instructorSigninService = async (email, password) => {
   if (!email || !password) {
-    throw { status: 400, message: "Please provide email and password" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Please provide email and password",
+    };
   }
 
   const instructor = await Instructor.findOne({
@@ -74,12 +86,15 @@ export const instructorSigninService = async (email, password) => {
   }).select("+password");
 
   if (!instructor) {
-    throw { status: 401, message: "Invalid email or password" };
+    throw {
+      status: HTTP_STATUS.UNAUTHORIZED,
+      message: "Invalid email or password",
+    };
   }
 
   if (instructor.authType === "google") {
     throw {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       message:
         "This account was created with Google. Please use Google Sign-In to continue.",
     };
@@ -87,15 +102,25 @@ export const instructorSigninService = async (email, password) => {
 
   if (instructor.role !== "instructor") {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message: "Access denied. Instructor account required",
     };
+  }
+
+  if (instructor.isBlocked) {
+    throw {
+      status: HTTP_STATUS.FORBIDDEN,
+      message:"You has been block by the admin . Please contact the admin via email"
+    }
   }
 
   const isPasswordValid = await bcrypt.compare(password, instructor.password);
 
   if (!isPasswordValid) {
-    throw { status: 401, message: "Invalid email or password" };
+    throw {
+      status: HTTP_STATUS.UNAUTHORIZED,
+      message: "Invalid email or password",
+    };
   }
 
   const tokens = generateTokens({
@@ -130,7 +155,7 @@ export const instructorGoogleAuthService = async token => {
 
   if (instructor && instructor.role !== "instructor") {
     throw {
-      status: 403,
+      status: HTTP_STATUS.FORBIDDEN,
       message:
         "User is already registered as instructor. Please use another account",
     };

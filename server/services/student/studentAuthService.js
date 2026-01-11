@@ -5,19 +5,22 @@ import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
 import { generateTokens } from "../../utils/generateTokens.js";
-
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const studentRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
 
   if (!email || !username || !firstName || !lastName || !password) {
-    throw { status: 400, message: "Please provide all required fields" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Please provide all required fields",
+    };
   }
 
   const isInstructor = await Instructor.findOne({ email });
   if (isInstructor) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "This user is registered as instructor use another email",
     };
   }
@@ -28,19 +31,22 @@ export const studentRegisterService = async data => {
 
   if (existingUser && existingUser.isVerified) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Email or username already exists",
     };
   }
 
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
-    throw { status: 400, message: "Please provide a valid email address" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Please provide a valid email address",
+    };
   }
 
   if (password.length < 6) {
     throw {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       message: "Password must be at least 6 characters long",
     };
   }
@@ -86,7 +92,10 @@ export const studentRegisterService = async data => {
 
 export const studentLoginService = async (email, password) => {
   if (!email || !password) {
-    throw { status: 400, message: "Fields cannot be empty" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "Fields cannot be empty",
+    };
   }
 
   const user = await User.findOne({
@@ -94,19 +103,16 @@ export const studentLoginService = async (email, password) => {
   }).select("+password");
 
   if (!user) {
-    throw { status: 401, message: "Invalid credentials" };
+    throw { status: HTTP_STATUS.UNAUTHORIZED, message: "Invalid credentials" };
   }
 
   if (user.isBlocked) {
-    throw {
-      status: 400,
-      message: "User is blocked by the admin. Please contact support",
-    };
+    throw { status: HTTP_STATUS.FORBIDDEN, message: "the user is blocked" };
   }
 
   if (user.authType === "google") {
     throw {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       message:
         "This account was created with Google. Please use Google Sign-In to continue.",
     };
@@ -119,7 +125,7 @@ export const studentLoginService = async (email, password) => {
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw { status: 401, message: "Invalid credentials" };
+    throw { status: HTTP_STATUS.UNAUTHORIZED, message: "Invalid credentials" };
   }
 
   const tokens = generateTokens({
@@ -155,14 +161,14 @@ export const studentGoogleAuthService = async token => {
   if (user) {
     if (user.isBlocked) {
       throw {
-        status: 403,
+        status: HTTP_STATUS.FORBIDDEN,
         message: "User is blocked by the admin",
       };
     }
 
     if (user.role !== "student") {
       throw {
-        status: 403,
+        status: HTTP_STATUS.FORBIDDEN,
         message:
           "User is already registered with another role. Please use another account",
       };

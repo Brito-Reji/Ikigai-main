@@ -32,4 +32,3 @@ export default function wai() {
     return wrapped;
 }
 
-export const con = wai();

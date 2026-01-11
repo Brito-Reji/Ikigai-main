@@ -1,24 +1,31 @@
 import bcrypt from "bcrypt";
 
-import {Admin} from "../../models/Admin.js"
-import {generateTokens} from "../../utils/generateTokens.js"
+import { Admin } from "../../models/Admin.js";
+import { generateTokens } from "../../utils/generateTokens.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 export const adminLoginService = async ({ email, password }) => {
   if (!email || !password) {
-    throw { status: 400, message: "All fields are required" };
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "All fields are required",
+    };
   }
 
   const admin = await Admin.findOne({ email }).select("+password");
   if (!admin) {
-    throw { status: 404, message: "User not found" };
+    throw { status: HTTP_STATUS.NOT_FOUND, message: "User not found" };
   }
 
   if (admin.role !== "admin") {
-    throw { status: 403, message: "Access denied. Not an admin." };
+    throw {
+      status: HTTP_STATUS.FORBIDDEN,
+      message: "Access denied. Not an admin.",
+    };
   }
 
   const isMatch = await bcrypt.compare(password, admin.password);
   if (!isMatch) {
-    throw { status: 401, message: "Invalid credentials" };
+    throw { status: HTTP_STATUS.UNAUTHORIZED, message: "Invalid credentials" };
   }
 
   const { accessToken, refreshToken } = generateTokens({

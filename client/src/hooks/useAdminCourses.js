@@ -54,12 +54,17 @@ export const useVerificationStatistics = () => {
 
 // Admin mutations
 export const useToggleCourseBlock = () => {
+    
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: courseApi.admin.toggleBlock,
-        onSuccess: () => {
+        onSuccess: (_,courseId) => {
+        
             queryClient.invalidateQueries({ queryKey: ['admin-courses'] })
+            queryClient.invalidateQueries({
+              queryKey: ["admin-course", courseId],
+            });
             queryClient.invalidateQueries({ queryKey: ['admin-course-statistics'] })
         },
     })
