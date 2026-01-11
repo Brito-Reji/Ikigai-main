@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import api from "../config/axiosConfig.js";
+import api from "../../config/axiosConfig.js";
 import { OAuth2Client } from "google-auth-library";
 import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";

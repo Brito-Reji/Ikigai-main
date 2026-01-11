@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  googleAuth,
+  studentGoogleAuth,
   studentLogin,
   studentRegister,
 } from "../controllers/auth/studentAuthController.js";
@@ -15,7 +15,11 @@ import {
 // import { Instructor } from "../models/Instructor.js";
 import { sentOTP, verifyOTP } from "../utils/OTPServices.js";
 // import { generateTokens } from "../utils/generateTokens.js";
-import { forgetPassword, verifyForgetPasswordOTP, resetPassword } from "../controllers/auth/forgetPassword.js";
+import {
+  forgetPassword,
+  verifyForgetPasswordOtp,
+  resetPassword,
+} from "../controllers/auth/forgetPassword.js";
 import { refreshToken } from "../controllers/auth/refreshToken.js";
 import { checkUsernameAvailabilty } from "../controllers/auth/checkUsername.js";
 import { currentUser } from "../controllers/auth/currentUser.js";
@@ -33,8 +37,8 @@ router.post("/student/register", studentRegister);
 router.post("/student/login", studentLogin);
 router
   .route("/student/google")
-  .post(googleAuth)
-  .get(() => { });
+  .post(studentGoogleAuth)
+  .get(() => {});
 
 router.post("/admin/login", adminLogin);
 
@@ -44,7 +48,7 @@ router.post("/verify-otp", verifyOTP);
 
 // Forget Password
 router.post("/forget-password", forgetPassword);
-router.post("/verify-forget-password-otp", verifyForgetPasswordOTP);
+router.post("/verify-forget-password-otp", verifyForgetPasswordOtp);
 router.post("/reset-password", resetPassword);
 
 // Check username availability using query params
