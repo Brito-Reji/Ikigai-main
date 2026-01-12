@@ -34,13 +34,20 @@ export default function CourseCard({ course }) {
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
       <div className="relative">
         <div className="absolute top-2 left-2 flex gap-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${course.status === "Published"
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
-            }`}>
-            {course.status}
+          <span
+            className={`px-2 py-1 rounded text-xs font-medium ${
+              course.blocked
+                ? "bg-red-100 text-red-800"
+                : course.status === "Published"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {course.blocked ? "Blocked" : course.status}
           </span>
-          <span className={`px-2 py-1 rounded text-xs font-medium ${verificationBadge.className}`}>
+          <span
+            className={`px-2 py-1 rounded text-xs font-medium ${verificationBadge.className}`}
+          >
             {verificationBadge.text}
           </span>
         </div>

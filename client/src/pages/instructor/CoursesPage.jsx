@@ -16,6 +16,7 @@ export default function CoursesPage() {
   // Transform backend data to match component expectations
   const courses = instructorCourses.map(course => ({
     id: course._id,
+    blocked:course.blocked,
     title: course.title,
     price: `₹${course.price}`,
     chapters: course.chapters || 0,

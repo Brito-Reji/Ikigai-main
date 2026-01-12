@@ -14,6 +14,7 @@ export const getProfileService = async (userId) => {
 };
 
 export const updateProfileService = async (userId, updateData) => {
+    console.log(updateData)
     const user = await User.findByIdAndUpdate(userId, updateData, {
         new: true,
         runValidators: true,
