@@ -53,6 +53,7 @@ import Students from "@/pages/admin/Students";
 import StudentDetail from "@/pages/admin/StudentDetail";
 import Instructors from "@/pages/admin/Instructors";
 import InstructorDetail from "@/pages/admin/InstructorDetail";
+import Coupons from "@/pages/admin/Coupons";
 
 export default function AppRoutes() {
   return (
@@ -255,6 +256,7 @@ export default function AppRoutes() {
         <Route path="students/:id" element={<StudentDetail />} />
         <Route path="instructors" element={<Instructors />} />
         <Route path="instructors/:id" element={<InstructorDetail />} />
+        <Route path="coupons" element={<Coupons />} />
       </Route>
 
       {/* 404 */}
