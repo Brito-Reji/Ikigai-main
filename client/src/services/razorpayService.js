@@ -1,23 +1,27 @@
-import api from '@/api/axiosConfig';
+import api from "@/api/axiosConfig";
 
 export const startRazorpayPayment = async (
   courseIds,
   navigate,
-  verifyPaymentMutation
+  verifyPaymentMutation,
+  couponCode = null
 ) => {
-  const response = await api.post('/payments/create-order', { courseIds });
+  const response = await api.post("/payments/create-order", {
+    courseIds,
+    couponCode,
+  });
 
   if (!response.data.success) {
-    throw new Error('Order creation failed');
+    throw new Error("Order creation failed");
   }
 
   const order = response.data.data;
-  console.log('order->', order.amount);
+  console.log("order->", order.amount);
 
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
     amount: order.amount / 100,
-    currency: 'INR',
+    currency: "INR",
     order_id: order.razorpayOrderId,
 
     handler: async function (response) {
@@ -27,22 +31,22 @@ export const startRazorpayPayment = async (
       try {
         const verifyResult = await verifyPaymentMutation.mutateAsync(response);
 
-        console.log('Verify Payment Result:', verifyResult);
+        console.log("Verify Payment Result:", verifyResult);
 
         paymentId = verifyResult.data.paymentId;
         enrolledDetails = verifyResult.data.enrolledDetails;
 
-        console.log('Extracted PaymentId:', paymentId);
-        console.log('Extracted EnrolledDetails:', enrolledDetails);
+        console.log("Extracted PaymentId:", paymentId);
+        console.log("Extracted EnrolledDetails:", enrolledDetails);
 
-        navigate('/payment/success', {
+        navigate("/payment/success", {
           replace: true,
           state: { paymentId, enrolledDetails },
         });
       } catch (err) {
-        console.error('Payment verification error:', err);
+        console.error("Payment verification error:", err);
 
-        navigate('/payment/failed', {
+        navigate("/payment/failed", {
           replace: true,
           state: { paymentId, enrolledDetails },
         });
@@ -53,9 +57,9 @@ export const startRazorpayPayment = async (
   const rzp = new window.Razorpay(options);
 
   // only handle failures via event
-  rzp.on('payment.failed', function (response) {
-    console.error('Payment failed:', response.error);
-    navigate('/payment/failed');
+  rzp.on("payment.failed", function (response) {
+    console.error("Payment failed:", response.error);
+    navigate("/payment/failed");
   });
 
   rzp.open();

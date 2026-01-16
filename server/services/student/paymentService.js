@@ -6,8 +6,12 @@ import { Order } from "../../models/Order.js";
 import { Cart } from "../../models/Cart.js";
 import { Wishlist } from "../../models/Wishlist.js";
 import { Enrollment } from "../../models/Enrollment.js";
+import {
+  validateCouponService,
+  incrementCouponUsageService,
+} from "./couponService.js";
 
-export const createOrderService = async ({ courseIds, userId }) => {
+export const createOrderService = async ({ courseIds, userId, couponCode }) => {
   const courses = await Course.find({
     _id: { $in: courseIds },
     published: true,
@@ -17,15 +21,31 @@ export const createOrderService = async ({ courseIds, userId }) => {
     throw new Error("One or more courses are not published");
   }
 
-  // TODO: implement discount logic
-  // TODO: implement coupon logic
+  const originalAmount = courses.reduce(
+    (total, course) => total + course.price,
+    0
+  );
 
-  // TODO: implement the already purchased courses check
+  let discountAmount = 0;
+  let couponId = null;
+  let appliedCouponCode = null;
 
-  const amount = courses.reduce((total, course) => total + course.price, 0);
+  // validate and apply coupon
+  if (couponCode) {
+    const couponData = await validateCouponService(
+      couponCode,
+      userId,
+      originalAmount
+    );
+    discountAmount = couponData.discountAmount;
+    couponId = couponData.couponId;
+    appliedCouponCode = couponData.code;
+  }
+
+  const finalAmount = originalAmount - discountAmount;
 
   const options = {
-    amount: Math.round(amount),
+    amount: Math.round(finalAmount),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
@@ -36,7 +56,11 @@ export const createOrderService = async ({ courseIds, userId }) => {
     userId,
     courseIds: courseIds,
     razorpayOrderId: razorpayOrder.id,
-    amount,
+    amount: finalAmount,
+    originalAmount,
+    discountAmount,
+    couponCode: appliedCouponCode,
+    couponId,
     status: "CREATED",
   });
 
@@ -52,7 +76,10 @@ export const createOrderService = async ({ courseIds, userId }) => {
 
   return {
     razorpayOrderId: razorpayOrder.id,
-    amount,
+    amount: finalAmount,
+    originalAmount,
+    discountAmount,
+    couponCode: appliedCouponCode,
     currency: "INR",
     message: "Order created successfully",
   };
@@ -89,6 +116,11 @@ export const updatePaymentStatusService = async ({
   order.status = "PAID";
   await order.save();
 
+  // increment coupon usage
+  if (order.couponId) {
+    await incrementCouponUsageService(order.couponId, order.userId);
+  }
+
   await Payment.updateMany(
     { razorpayOrderId: razorpay_order_id },
     {
@@ -97,7 +129,7 @@ export const updatePaymentStatusService = async ({
       razorpaySignature: razorpay_signature,
     }
   );
-  // clear cart and wishlist if there are any the course is already purchased
+  // clear cart and wishlist
   await Cart.find({ userId: order.userId, courses: { $in: order.courseIds } });
 
   for (const courseId of order.courseIds) {

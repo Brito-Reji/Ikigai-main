@@ -4,7 +4,7 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { courseIds } = req.body;
+  const { courseIds, couponCode } = req.body;
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
     res.status(HTTP_STATUS.BAD_REQUEST);
     throw new Error(
@@ -12,10 +12,10 @@ export const createOrder = asyncHandler(async (req, res) => {
     );
   }
 
-  // logic is delegated to the service layer
   const order = await paymentService.createOrderService({
     courseIds,
     userId: req.user._id,
+    couponCode,
   });
   res.status(HTTP_STATUS.OK).json({
     success: true,

@@ -12,7 +12,6 @@ export const couponApi = {
       api.patch(couponEndpoints.admin.togglePause(couponId)),
   },
   student: {
-    apply: couponId => api.post(couponEndpoints.student.apply(couponId)),
-    remove: couponId => api.delete(couponEndpoints.student.remove(couponId)),
+    validate: (code, amount) => api.get(couponEndpoints.student.validate(code, amount)),
   },
 };

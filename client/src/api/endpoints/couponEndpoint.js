@@ -7,7 +7,7 @@ export const couponEndpoints = {
     togglePause: couponId => `/admin/coupons/${couponId}/toggle-pause`,
   },
   student: {
-    apply: couponId => `/student/coupons/${couponId}`,
-    remove: couponId => `/student/coupons/${couponId}`,
+    validate: (code, amount) =>
+      `/student/coupons/validate/${code}?amount=${amount}`,
   },
 };

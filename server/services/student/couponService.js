@@ -1,26 +1,72 @@
 import { Coupon } from "../../models/Coupon.js";
 import { CouponUsage } from "../../models/CouponUsage.js";
 
-export const applyCouponService = async ({ couponId, userId }) => {
-  if (!couponId) {
-    throw new Error("Coupon ID is required");
-  }
-
-  const coupon = await Coupon.findById(couponId);
-  if (!coupon) {
-    throw new Error("Invalid coupon");
-  }
-
-  const couponUsage = await CouponUsage.findOne({
-    couponId,
-    userId
+export const validateCouponService = async (code, userId, amount) => {
+  const coupon = await Coupon.findOne({
+    code: code.toUpperCase(),
+    isDeleted: false,
   });
 
-  // If user already used coupon
-  if (couponUsage && couponUsage.usedCount >= coupon.perUserLimit) {
-    throw new Error("Coupon limit exceeded");
+  if (!coupon) {
+    throw new Error("Invalid coupon code");
   }
 
-  return coupon;
+  if (coupon.isPaused) {
+    throw new Error("Coupon is currently unavailable");
+  }
+
+  const now = new Date();
+  if (new Date(coupon.expiryDate) < now) {
+    throw new Error("Coupon has expired");
+  }
+
+  if (amount < coupon.minAmount) {
+    throw new Error(`Minimum purchase amount of ₹${coupon.minAmount} required`);
+  }
+
+  if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+    throw new Error("Coupon usage limit reached");
+  }
+
+  if (coupon.perUserLimit) {
+    const usage = await CouponUsage.findOne({
+      userId,
+      couponId: coupon._id,
+    });
+
+    if (usage && usage.usedCount >= coupon.perUserLimit) {
+      throw new Error("You have reached the usage limit for this coupon");
+    }
+  }
+
+  let discountAmount = 0;
+  if (coupon.discountType === "percentage") {
+    discountAmount = (amount * coupon.discountValue) / 100;
+    if (coupon.maxDiscount) {
+      discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+    }
+  } else {
+    discountAmount = coupon.discountValue;
+  }
+
+  discountAmount = Math.min(discountAmount, amount);
+
+  return {
+    couponId: coupon._id,
+    code: coupon.code,
+    discountType: coupon.discountType,
+    discountValue: coupon.discountValue,
+    discountAmount: Math.round(discountAmount),
+    description: coupon.description,
+  };
 };
 
+export const incrementCouponUsageService = async (couponId, userId) => {
+  await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
+
+  await CouponUsage.findOneAndUpdate(
+    { userId, couponId },
+    { $inc: { usedCount: 1 } },
+    { upsert: true, new: true }
+  );
+};

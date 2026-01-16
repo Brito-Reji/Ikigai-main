@@ -1,9 +1,34 @@
 import { Router } from "express";
-import { getProfile, updateProfile, requestEmailChangeOTP, verifyEmailChangeOTP, changePassword } from "../controllers/students/profileController.js";
-import { getCart, addToCart, removeFromCart, syncCart, clearCart } from "../controllers/students/cartController.js";
-import { getWishlist, toggleWishlist, removeFromWishlist } from "../controllers/students/wishlistController.js";
-import { fullRefund, partialRefund, refundHistory } from "../controllers/students/refundController.js";
-import { getMyEnrollments, markLessonComplete, getEnrolledCourseById } from "../controllers/students/enrollmentController.js";
+import {
+  getProfile,
+  updateProfile,
+  requestEmailChangeOTP,
+  verifyEmailChangeOTP,
+  changePassword,
+} from "../controllers/students/profileController.js";
+import {
+  getCart,
+  addToCart,
+  removeFromCart,
+  syncCart,
+  clearCart,
+} from "../controllers/students/cartController.js";
+import {
+  getWishlist,
+  toggleWishlist,
+  removeFromWishlist,
+} from "../controllers/students/wishlistController.js";
+import {
+  fullRefund,
+  partialRefund,
+  refundHistory,
+} from "../controllers/students/refundController.js";
+import {
+  getMyEnrollments,
+  markLessonComplete,
+  getEnrolledCourseById,
+} from "../controllers/students/enrollmentController.js";
+import { validateCoupon } from "../controllers/students/couponController.js";
 
 const router = Router();
 
@@ -35,5 +60,8 @@ router.get("/refund/history", refundHistory);
 router.get("/enrollments", getMyEnrollments);
 router.get("/enrollments/:courseId", getEnrolledCourseById);
 router.post("/enrollments/complete-lesson", markLessonComplete);
+
+// Coupons
+router.get("/coupons/validate/:code", validateCoupon);
 
 export default router;

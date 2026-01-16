@@ -67,8 +67,11 @@ const CheckoutPage = () => {
 
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
+    // use pre-calculated discount from API if available
+    if (appliedCoupon.discountAmount !== undefined) {
+      return appliedCoupon.discountAmount;
+    }
     const subtotal = calculateSubtotal();
-
     if (appliedCoupon.type === "percentage") {
       return (subtotal * appliedCoupon.value) / 100;
     } else {
@@ -86,28 +89,34 @@ const CheckoutPage = () => {
       return;
     }
 
+    const subtotal = calculateSubtotal();
+    if (subtotal <= 0) {
+      toast.error("Cannot apply coupon to empty cart");
+      return;
+    }
+
     setCouponLoading(true);
 
-    // Simulate API validation for coupon
-    setTimeout(() => {
-      const mockCoupons = {
-        "SAVE10": { code: "SAVE10", type: "percentage", value: 10, description: "10% Discount" },
-        "SAVE20": { code: "SAVE20", type: "percentage", value: 20, description: "20% Discount" },
-        "FLAT100": { code: "FLAT100", type: "fixed", value: 100, description: "₹100 Flat Off" },
-        "WELCOME50": { code: "WELCOME50", type: "percentage", value: 50, description: "Welcome Offer 50% Off" },
-      };
-
-      const coupon = mockCoupons[couponCode.toUpperCase()];
-
-      if (coupon) {
-        setAppliedCoupon(coupon);
-        toast.success(`Coupon "${coupon.code}" applied!`);
-      } else {
-        toast.error("Invalid coupon code");
+    try {
+      const response = await api.get(`/student/coupons/validate/${couponCode.toUpperCase()}?amount=${subtotal}`);
+      
+      if (response.data.success) {
+        const couponData = response.data.data;
+        setAppliedCoupon({
+          code: couponData.code,
+          type: couponData.discountType,
+          value: couponData.discountValue,
+          discountAmount: couponData.discountAmount,
+          description: couponData.description,
+        });
+        toast.success(`Coupon "${couponData.code}" applied!`);
       }
-
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || "Invalid coupon code";
+      toast.error(errorMessage);
+    } finally {
       setCouponLoading(false);
-    }, 600);
+    }
   };
 
   const handleRemoveCoupon = () => {
@@ -131,8 +140,9 @@ const CheckoutPage = () => {
 
       setProcessing(true);
 
-      // Initialize Razorpay payment
-      await startRazorpayPayment(courseIds, navigate, verifyPaymentMutation);
+      // Pass coupon code to payment
+      const couponToApply = appliedCoupon?.code || null;
+      await startRazorpayPayment(courseIds, navigate, verifyPaymentMutation, couponToApply);
 
      
 
