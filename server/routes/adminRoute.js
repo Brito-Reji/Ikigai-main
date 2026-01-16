@@ -1,17 +1,40 @@
-import { Router } from "express"
-import { getStudents, getInstructors, blockStudent, blockInstructor, getStudentDetails, getInstructorDetails } from "../controllers/admin/adminController.js"
-import { getAllCourses, getCourseDetails, toggleCourseBlock, deleteCourse, getCourseStatistics, updateVerificationStatus, getPendingVerifications, getVerificationStatistics, getAdminCourseChapters } from "../controllers/admin/courseController.js"
-import { createCoupon, getAllCoupons } from "../controllers/admin/couponContorller.js";
-const router = Router()
+import { Router } from "express";
+import {
+  getStudents,
+  getInstructors,
+  blockStudent,
+  blockInstructor,
+  getStudentDetails,
+  getInstructorDetails,
+} from "../controllers/admin/adminController.js";
+import {
+  getAllCourses,
+  getCourseDetails,
+  toggleCourseBlock,
+  deleteCourse,
+  getCourseStatistics,
+  updateVerificationStatus,
+  getPendingVerifications,
+  getVerificationStatistics,
+  getAdminCourseChapters,
+} from "../controllers/admin/courseController.js";
+import {
+  createCoupon,
+  getAllCoupons,
+  updateCoupon,
+  deleteCoupon,
+  togglePauseCoupon,
+} from "../controllers/admin/couponContorller.js";
+const router = Router();
 
 router.get("/students", getStudents);
-router.get("/students/:id", getStudentDetails)
-router.patch("/students/:studentId/toggle-block", blockStudent)
+router.get("/students/:id", getStudentDetails);
+router.patch("/students/:studentId/toggle-block", blockStudent);
 
 // INSTRUCTOR CONTROLLER
 router.get("/instructors", getInstructors);
-router.patch("/instructors/:instructorId/toggle-block", blockInstructor)
-router.get("/instructors/:id", getInstructorDetails)
+router.patch("/instructors/:instructorId/toggle-block", blockInstructor);
+router.get("/instructors/:id", getInstructorDetails);
 
 // COURSE MANAGEMENT
 router.get("/courses", getAllCourses);
@@ -29,9 +52,8 @@ router.get("/verifications/statistics", getVerificationStatistics);
 // COUPON MANAGEMENT
 router.post("/coupons", createCoupon);
 router.get("/coupons", getAllCoupons);
+router.put("/coupons/:couponId", updateCoupon);
+router.delete("/coupons/:couponId", deleteCoupon);
+router.patch("/coupons/:couponId/toggle-pause", togglePauseCoupon);
 
-
-
-
-
-export default router
+export default router;

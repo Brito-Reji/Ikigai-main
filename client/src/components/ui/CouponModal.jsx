@@ -122,7 +122,18 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <>
+      <style>{`
+        .coupon-input::placeholder {
+          color: #9ca3af;
+          opacity: 1;
+        }
+        .coupon-input:focus::placeholder {
+          color: #d1d5db;
+          opacity: 1;
+        }
+      `}</style>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
           <h3 className="text-xl font-semibold text-gray-800">
@@ -148,7 +159,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="code"
                   value={formData.code}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 uppercase ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 uppercase ${
                     errors.code ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="SAVE20"
@@ -185,7 +196,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="discountValue"
                   value={formData.discountValue}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                     errors.discountValue ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder={formData.discountType === "percentage" ? "20" : "200"}
@@ -206,7 +217,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="minAmount"
                   value={formData.minAmount}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                     errors.minAmount ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="500"
@@ -229,7 +240,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="maxDiscount"
                   value={formData.maxDiscount}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                     errors.maxDiscount ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="1000"
@@ -255,7 +266,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="expiryDate"
                   value={formData.expiryDate}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                     errors.expiryDate ? "border-red-500" : "border-gray-300"
                   }`}
                   min={new Date().toISOString().split("T")[0]}
@@ -274,7 +285,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                   name="usageLimit"
                   value={formData.usageLimit}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                  className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                     errors.usageLimit ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="Leave empty for unlimited"
@@ -298,7 +309,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                 name="perUserLimit"
                 value={formData.perUserLimit}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                   errors.perUserLimit ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="Leave empty for unlimited per user"
@@ -320,7 +331,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                className={`coupon-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
                   errors.description ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="Get 20% off on all courses"
@@ -349,7 +360,8 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
           </div>
         </form>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

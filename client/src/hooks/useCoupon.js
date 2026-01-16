@@ -1,15 +1,42 @@
 import { couponApi } from "@/api/couponApi";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetCoupons = () => {
-return useQuery({
-        queryKey: ['coupon'],
-        queryFn: () => couponApi.admin.getAll(),
-    });
-}
+  return useQuery({
+    queryKey: ["coupon"],
+    queryFn: () => couponApi.admin.getAll(),
+  });
+};
 
 export const useAddCoupon = () => {
-    return useMutation({
-        mutationFn: couponApi.admin.add,
-    });
-}
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: couponApi.admin.add,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coupon"] });
+    },
+  });
+};
+
+export const useDeleteCoupon = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: couponApi.admin.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coupon"] });
+    },
+  });
+};
+
+export const useTogglePauseCoupon = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: couponApi.admin.togglePause,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coupon"] });
+    },
+  });
+};

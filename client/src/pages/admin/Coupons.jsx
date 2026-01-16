@@ -2,134 +2,14 @@ import React, { useState } from "react";
 import { Search, Plus, Edit2, Trash2, Pause, Play, Tag, Calendar, TrendingUp } from "lucide-react";
 import CouponModal from "@/components/ui/CouponModal";
 import Swal from "sweetalert2";
-import { useAddCoupon, useGetCoupons } from "@/hooks/useCoupon";
+import { useAddCoupon, useGetCoupons, useDeleteCoupon, useTogglePauseCoupon } from "@/hooks/useCoupon";
 
 const Coupons = () => {
-  // const [coupons, setCoupons] = useState([])
   const {data:coupons, isLoading, error} = useGetCoupons()
   const {mutate:addCoupon,isPending:addCouponPending} = useAddCoupon()
-  //  useState([
-  //   {
-  //     id: 1,
-  //     code: "WELCOME50",
-  //     discountType: "percentage",
-  //     discountValue: 50,
-  //     minAmount: 0,
-  //     maxDiscount: 1000,
-  //     expiryDate: new Date("2026-03-31"),
-  //     usageLimit: 100,
-  //     usedCount: 23,
-  //     perUserLimit: 1,
-  //     isPaused: false,
-  //     description: "Welcome offer - 50% off on first purchase",
-  //     createdAt: new Date("2026-01-01"),
-  //   },
-  //   {
-  //     id: 2,
-  //     code: "SAVE20",
-  //     discountType: "percentage",
-  //     discountValue: 20,
-  //     minAmount: 500,
-  //     maxDiscount: 500,
-  //     expiryDate: new Date("2026-06-30"),
-  //     usageLimit: 200,
-  //     usedCount: 87,
-  //     perUserLimit: 3,
-  //     isPaused: false,
-  //     description: "Get 20% discount on orders above ₹500",
-  //     createdAt: new Date("2026-01-05"),
-  //   },
-  //   {
-  //     id: 3,
-  //     code: "FLAT200",
-  //     discountType: "fixed",
-  //     discountValue: 200,
-  //     minAmount: 1000,
-  //     maxDiscount: null,
-  //     expiryDate: new Date("2026-02-28"),
-  //     usageLimit: 50,
-  //     usedCount: 12,
-  //     perUserLimit: null,
-  //     isPaused: true,
-  //     description: "Flat ₹200 off on purchases above ₹1000",
-  //     createdAt: new Date("2026-01-10"),
-  //   },
-  //   {
-  //     id: 4,
-  //     code: "NEWYEAR2026",
-  //     discountType: "percentage",
-  //     discountValue: 30,
-  //     minAmount: 1500,
-  //     maxDiscount: 1500,
-  //     expiryDate: new Date("2026-01-31"),
-  //     usageLimit: 150,
-  //     usedCount: 142,
-  //     perUserLimit: 2,
-  //     isPaused: false,
-  //     description: "New Year special - 30% off",
-  //     createdAt: new Date("2025-12-25"),
-  //   },
-  //   {
-  //     id: 5,
-  //     code: "MEGA500",
-  //     discountType: "fixed",
-  //     discountValue: 500,
-  //     minAmount: 2000,
-  //     maxDiscount: null,
-  //     expiryDate: new Date("2026-12-31"),
-  //     usageLimit: 75,
-  //     usedCount: 8,
-  //     perUserLimit: null,
-  //     isPaused: false,
-  //     description: "Mega sale - Get ₹500 off on orders above ₹2000",
-  //     createdAt: new Date("2026-01-08"),
-  //   },
-  //   {
-  //     id: 6,
-  //     code: "EXPIRED10",
-  //     discountType: "percentage",
-  //     discountValue: 10,
-  //     minAmount: 300,
-  //     maxDiscount: 200,
-  //     expiryDate: new Date("2025-12-31"),
-  //     usageLimit: 100,
-  //     usedCount: 45,
-  //     perUserLimit: 5,
-  //     isPaused: false,
-  //     description: "Year end sale - expired coupon example",
-  //     createdAt: new Date("2025-12-01"),
-  //   },
-  //   {
-  //     id: 7,
-  //     code: "STUDENT15",
-  //     discountType: "percentage",
-  //     discountValue: 15,
-  //     minAmount: 0,
-  //     maxDiscount: 300,
-  //     expiryDate: new Date("2026-08-31"),
-  //     usageLimit: 500,
-  //     usedCount: 234,
-  //     perUserLimit: null,
-  //     isPaused: false,
-  //     description: "Student discount - 15% off on all courses",
-  //     createdAt: new Date("2026-01-03"),
-  //   },
-  //   {
-  //     id: 8,
-  //     code: "VIP100",
-  //     discountType: "percentage",
-  //     discountValue: 10,
-  //     minAmount: 0,
-  //     maxDiscount: null,
-  //     expiryDate: new Date("2027-12-31"),
-  //     usageLimit: null,
-  //     usedCount: 1523,
-  //     perUserLimit: null,
-  //     isPaused: false,
-  //     description: "VIP members - unlimited usage for both total and per user",
-  //     createdAt: new Date("2026-01-01"),
-  //   },
-  // ]);
+  const {mutate:deleteCoupon} = useDeleteCoupon()
+  const {mutate:togglePauseCoupon} = useTogglePauseCoupon()
+
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,12 +18,12 @@ const Coupons = () => {
   const [selectedCoupon, setSelectedCoupon] = useState(null);
 
   const itemsPerPage = 5;
-
-  const filteredCoupons = coupons.filter(
+console.log(coupons?.data?.data)
+  const filteredCoupons = coupons?.data?.data?.filter(
     (coupon) =>
       coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coupon.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
   const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -197,42 +77,42 @@ const Coupons = () => {
 
   const handleModalSubmit = (formData) => {
     if (modalMode === "add") {
-      const newCoupon = {
-        id: Date.now(),
-        ...formData,
-        usedCount: 0,
-        isPaused: false,
-        createdAt: new Date(),
-      };
-      addCoupon(formData)
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Coupon created successfully",
-        confirmButtonColor: "#14b8a6",
-        timer: 2000,
+      addCoupon(formData, {
+        onSuccess: () => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Coupon created successfully",
+            confirmButtonColor: "#14b8a6",
+            timer: 2000,
+          });
+          setIsModalOpen(false);
+        },
+        onError: (error) => {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: error?.response?.data?.message || "Failed to create coupon",
+            confirmButtonColor: "#ef4444",
+          });
+        }
       });
     } else {
-      setCoupons(
-        coupons.map((c) =>
-          c.id === selectedCoupon.id ? { ...c, ...formData } : c
-        )
-      );
+      // TODO: Implement update coupon
       Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Coupon updated successfully",
+        icon: "info",
+        title: "Not Implemented",
+        text: "Update functionality coming soon",
         confirmButtonColor: "#14b8a6",
-        timer: 2000,
       });
+      setIsModalOpen(false);
     }
-    setIsModalOpen(false);
   };
 
   const handleDeleteCoupon = async (couponId) => {
     const result = await Swal.fire({
       title: "Delete Coupon?",
-      text: "This action cannot be undone!",
+      text: "This coupon will be removed from the list!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
@@ -242,20 +122,31 @@ const Coupons = () => {
     });
 
     if (result.isConfirmed) {
-      setCoupons(coupons.filter((c) => c.id !== couponId));
-      Swal.fire({
-        icon: "success",
-        title: "Deleted!",
-        text: "Coupon has been deleted",
-        confirmButtonColor: "#14b8a6",
-        timer: 2000,
+      deleteCoupon(couponId, {
+        onSuccess: () => {
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Coupon has been deleted",
+            confirmButtonColor: "#14b8a6",
+            timer: 2000,
+          });
+        },
+        onError: (error) => {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: error?.response?.data?.message || "Failed to delete coupon",
+            confirmButtonColor: "#ef4444",
+          });
+        }
       });
     }
   };
 
   const handleTogglePause = async (couponId) => {
-    const coupon = coupons.find((c) => c.id === couponId);
-    const action = coupon.isPaused ? "activate" : "pause";
+    const coupon = coupons?.data?.data?.find((c) => c._id === couponId);
+    const action = coupon?.isPaused ? "activate" : "pause";
 
     const result = await Swal.fire({
       title: `${action === "pause" ? "Pause" : "Activate"} Coupon?`,
@@ -269,17 +160,24 @@ const Coupons = () => {
     });
 
     if (result.isConfirmed) {
-      setCoupons(
-        coupons.map((c) =>
-          c.id === couponId ? { ...c, isPaused: !c.isPaused } : c
-        )
-      );
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: `Coupon ${action}d successfully`,
-        confirmButtonColor: "#14b8a6",
-        timer: 2000,
+      togglePauseCoupon(couponId, {
+        onSuccess: () => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: `Coupon ${action}d successfully`,
+            confirmButtonColor: "#14b8a6",
+            timer: 2000,
+          });
+        },
+        onError: (error) => {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: error?.response?.data?.message || `Failed to ${action} coupon`,
+            confirmButtonColor: "#ef4444",
+          });
+        }
       });
     }
   };
@@ -367,10 +265,14 @@ const Coupons = () => {
         </div>
 
         <div className="space-y-4">
-          {currentCoupons.length > 0 ? (
-            currentCoupons.map((coupon) => (
+          {isLoading ? (
+            <div className="text-center py-12 text-gray-500">
+              Loading coupons...
+            </div>
+          ) : currentCoupons.length > 0 ? (
+            currentCoupons.map((coupon,id) => (
               <div
-                key={coupon.id}
+                key={id}
                 className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -455,7 +357,7 @@ const Coupons = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleTogglePause(coupon.id)}
+                      onClick={() => handleTogglePause(coupon._id)}
                       className={`flex-1 lg:flex-none px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                         coupon.isPaused
                           ? "bg-green-500 text-white hover:bg-green-600"
@@ -476,7 +378,7 @@ const Coupons = () => {
                       )}
                     </button>
                     <button
-                      onClick={() => handleDeleteCoupon(coupon.id)}
+                      onClick={() => handleDeleteCoupon(coupon._id)}
                       className="flex-1 lg:flex-none px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                     >
                       <Trash2 className="w-4 h-4" />
