@@ -127,6 +127,8 @@ export const updatePaymentStatusService = async ({
       status: "PAID",
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,
+      releaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      releaseStatus: "HELD",
     }
   );
   // clear cart and wishlist
