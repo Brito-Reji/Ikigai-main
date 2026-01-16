@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { getStudents, getInstructors, blockStudent, blockInstructor, getStudentDetails, getInstructorDetails } from "../controllers/admin/adminController.js"
 import { getAllCourses, getCourseDetails, toggleCourseBlock, deleteCourse, getCourseStatistics, updateVerificationStatus, getPendingVerifications, getVerificationStatistics, getAdminCourseChapters } from "../controllers/admin/courseController.js"
+import { createCoupon, getAllCoupons } from "../controllers/admin/couponContorller.js";
 const router = Router()
 
 router.get("/students", getStudents);
@@ -24,6 +25,11 @@ router.delete("/courses/:courseId", deleteCourse);
 router.patch("/courses/:courseId/verification", updateVerificationStatus);
 router.get("/verifications/pending", getPendingVerifications);
 router.get("/verifications/statistics", getVerificationStatistics);
+
+// COUPON MANAGEMENT
+router.post("/coupons", createCoupon);
+router.get("/coupons", getAllCoupons);
+
 
 
 
