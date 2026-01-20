@@ -41,6 +41,7 @@ import CourseDetailPage from "@/pages/instructor/CourseDetailPage.jsx";
 import InstructorProfilePage from "@/pages/instructor/ProfilePage.jsx";
 import EditInstructorProfilePage from "@/pages/instructor/EditProfilePage.jsx";
 import InstructorSettingsPage from "@/pages/instructor/SettingsPage.jsx";
+import RevenuePage from "@/pages/instructor/RevenuePage.jsx";
 
 // Admin routes
 import AdminLoginPage from "@/pages/admin/LoginPage.jsx";
@@ -237,6 +238,14 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={true} roles={["instructor"]}>
               <InstructorSettingsPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="revenue"
+          element={
+            <AuthGuard requireAuth={true} roles={["instructor"]}>
+              <RevenuePage />
             </AuthGuard>
           }
         />

@@ -23,7 +23,16 @@ import {
 } from "../controllers/instructor/videoController.js";
 import multer from "multer";
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  dest: "uploads/",
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("video/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only video files are allowed!"), false);
+    }
+  },
+});
 
 const router = Router();
 
@@ -80,5 +89,16 @@ import {
 
 router.get("/dashboard/stats", getDashboardStats);
 router.get("/dashboard/transactions", getTransactions);
+
+// Revenue Routes
+import {
+  getRevenueStats,
+  getMonthlyRevenue,
+  getCourseRevenue,
+} from "../controllers/instructor/revenueController.js";
+
+router.get("/revenue/stats", getRevenueStats);
+router.get("/revenue/monthly", getMonthlyRevenue);
+router.get("/revenue/by-course", getCourseRevenue);
 
 export default router;

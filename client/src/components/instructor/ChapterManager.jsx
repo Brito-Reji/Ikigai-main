@@ -500,8 +500,10 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
                   };
 
                   video.onerror = () => {
-                    alert('Error loading video file');
+                    alert('Error loading video file. Please select a valid video file.');
                     URL.revokeObjectURL(video.src);
+                    setVideoFile(null); // Clear the invalid file from state
+                    e.target.value = ""; // Reset file input
                   };
 
                   video.src = URL.createObjectURL(file);

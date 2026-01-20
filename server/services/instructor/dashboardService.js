@@ -2,6 +2,9 @@ import { Course } from "../../models/Course.js";
 import { Payment } from "../../models/Payment.js";
 import { Enrollment } from "../../models/Enrollment.js";
 
+// convert paise to rupees
+const toRupees = paise => Math.round(paise / 100);
+
 export const getDashboardStatsService = async instructorId => {
   // get instructor courses
   const courses = await Course.find({ instructor: instructorId });
@@ -49,9 +52,9 @@ export const getDashboardStatsService = async instructorId => {
   return {
     totalCourses: courses.length,
     totalStudents,
-    totalRevenue,
-    heldFunds,
-    releasedFunds,
+    totalRevenue: toRupees(totalRevenue),
+    heldFunds: toRupees(heldFunds),
+    releasedFunds: toRupees(releasedFunds),
   };
 };
 
@@ -94,7 +97,7 @@ export const getTransactionsService = async (
         title: t.courseId?.title || "Unknown Course",
         thumbnail: t.courseId?.thumbnail,
       },
-      amount: t.amount/100,
+      amount: t.amount / 100,
       status: t.status,
       releaseStatus: t.releaseStatus,
       releaseDate: t.releaseDate,
