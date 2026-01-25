@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Search, Plus, Edit2, Trash2, Pause, Play, Tag, Calendar, TrendingUp } from "lucide-react";
 import CouponModal from "@/components/ui/CouponModal";
 import Swal from "sweetalert2";
-import { useAddCoupon, useGetCoupons, useDeleteCoupon, useTogglePauseCoupon } from "@/hooks/useCoupon";
+import { useAddCoupon, useGetCoupons, useDeleteCoupon, useTogglePauseCoupon, useUpdateCoupon } from "@/hooks/useCoupon";
 
 const Coupons = () => {
   const {data:coupons, isLoading, error} = useGetCoupons()
   const {mutate:addCoupon,isPending:addCouponPending} = useAddCoupon()
-  const {mutate:deleteCoupon} = useDeleteCoupon()
+  const {mutate:updateCoupon} = useUpdateCoupon()
+  const {mutate:deleteCouponMutation} = useDeleteCoupon()
   const {mutate:togglePauseCoupon} = useTogglePauseCoupon()
 
 
@@ -98,14 +99,29 @@ console.log(coupons?.data?.data)
         }
       });
     } else {
-      // TODO: Implement update coupon
-      Swal.fire({
-        icon: "info",
-        title: "Not Implemented",
-        text: "Update functionality coming soon",
-        confirmButtonColor: "#14b8a6",
-      });
-      setIsModalOpen(false);
+      updateCoupon(
+        { couponId: selectedCoupon._id, couponData: formData },
+        {
+          onSuccess: () => {
+            Swal.fire({
+              icon: "success",
+              title: "Success!",
+              text: "Coupon updated successfully",
+              confirmButtonColor: "#14b8a6",
+              timer: 2000,
+            });
+            setIsModalOpen(false);
+          },
+          onError: (error) => {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: error?.response?.data?.message || "Failed to update coupon",
+              confirmButtonColor: "#ef4444",
+            });
+          },
+        }
+      );
     }
   };
 
@@ -122,7 +138,7 @@ console.log(coupons?.data?.data)
     });
 
     if (result.isConfirmed) {
-      deleteCoupon(couponId, {
+      deleteCouponMutation(couponId, {
         onSuccess: () => {
           Swal.fire({
             icon: "success",

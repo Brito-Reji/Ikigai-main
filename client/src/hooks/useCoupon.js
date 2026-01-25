@@ -40,3 +40,15 @@ export const useTogglePauseCoupon = () => {
     },
   });
 };
+
+export const useUpdateCoupon = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ couponId, couponData }) =>
+      couponApi.admin.update(couponId, couponData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coupon"] });
+    },
+  });
+};
