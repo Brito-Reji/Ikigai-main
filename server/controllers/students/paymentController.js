@@ -55,3 +55,11 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new Error("Invalid payment signature");
   }
 });
+
+export const getOrderHistory = asyncHandler(async (req, res) => {
+  const orders = await paymentService.getOrderHistoryService(req.user._id);
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: orders,
+  });
+});

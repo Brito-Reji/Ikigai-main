@@ -55,6 +55,9 @@ const paymentSchema = new mongoose.Schema(
     refundedAt: {
       type: Date,
     },
+    refundAmount: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

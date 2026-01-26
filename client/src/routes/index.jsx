@@ -26,6 +26,7 @@ import ChatPage from "@/pages/user/ChatPage.jsx";
 import PaymentSuccessPage from "@/pages/user/PaymentSuccessPage.jsx";
 import PaymentFailedPage from "@/pages/user/PaymentFailedPage.jsx";
 import PaymentCancelledPage from "@/pages/user/PaymentCancelledPage.jsx";
+import PurchaseHistoryPage from "@/pages/user/PurchaseHistoryPage.jsx";
 
 // Instructor routes
 import InstructorLoginPage from "@/pages/instructor/LoginPage.jsx";
@@ -163,6 +164,14 @@ export default function AppRoutes() {
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
               <PaymentCancelledPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="purchase-history"
+          element={
+            <AuthGuard requireAuth={true} roles={["student"]}>
+              <PurchaseHistoryPage />
             </AuthGuard>
           }
         />

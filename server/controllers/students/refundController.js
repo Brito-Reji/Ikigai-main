@@ -1,82 +1,55 @@
+import asyncHandler from "express-async-handler";
 import * as refundService from "../../services/student/refundService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-export const fullRefund = async (req, res) => {
-  try {
-    const { razorpayOrderId, reason } = req.body;
-    const userId = req.user._id;
+export const fullRefund = asyncHandler(async (req, res) => {
+  const { razorpayOrderId, reason } = req.body;
+  const userId = req.user._id;
 
-    if (!razorpayOrderId) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: "Razorpay Order ID is required",
-      });
-    }
-
-    const result = await refundService.processFullRefund({
-      razorpayOrderId,
-      userId,
-      reason,
-    });
-
-    return res.status(HTTP_STATUS.OK).json(result);
-  } catch (error) {
-    console.error("Full refund error:", error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message,
-    });
+  if (!razorpayOrderId) {
+    res.status(HTTP_STATUS.BAD_REQUEST);
+    throw new Error("Razorpay Order ID is required");
   }
-};
 
-export const partialRefund = async (req, res) => {
-  try {
-    const { courseId, razorpayOrderId, reason } = req.body;
-    const userId = req.user._id;
+  const result = await refundService.processFullRefund({
+    razorpayOrderId,
+    userId,
+    reason,
+  });
 
-    if (!courseId || !razorpayOrderId) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: "Course ID and Razorpay Order ID are required",
-      });
-    }
+  res.status(HTTP_STATUS.OK).json(result);
+});
 
-    const result = await refundService.processPartialRefund({
-      courseId,
-      userId,
-      razorpayOrderId,
-      reason,
-    });
+export const partialRefund = asyncHandler(async (req, res) => {
+  const { courseId, razorpayOrderId, reason } = req.body;
+  const userId = req.user._id;
 
-    return res.status(HTTP_STATUS.OK).json(result);
-  } catch (error) {
-    console.error("Partial refund error:", error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message,
-    });
+  if (!courseId || !razorpayOrderId) {
+    res.status(HTTP_STATUS.BAD_REQUEST);
+    throw new Error("Course ID and Razorpay Order ID are required");
   }
-};
 
-export const refundHistory = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { razorpayOrderId } = req.query;
+  const result = await refundService.processPartialRefund({
+    courseId,
+    userId,
+    razorpayOrderId,
+    reason,
+  });
 
-    const history = await refundService.getRefundHistory({
-      userId,
-      razorpayOrderId,
-    });
+  res.status(HTTP_STATUS.OK).json(result);
+});
 
-    return res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: history,
-    });
-  } catch (error) {
-    console.error("Refund history error:", error);
-    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+export const refundHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { razorpayOrderId } = req.query;
+
+  const history = await refundService.getRefundHistory({
+    userId,
+    razorpayOrderId,
+  });
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: history,
+  });
+});

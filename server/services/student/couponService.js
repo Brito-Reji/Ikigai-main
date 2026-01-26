@@ -70,3 +70,20 @@ export const incrementCouponUsageService = async (couponId, userId) => {
     { upsert: true, new: true }
   );
 };
+
+export const decrementCouponUsageService = async (couponId, userId) => {
+  // decrement total usage count (min 0)
+  await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: -1 } });
+
+  // decrement per-user usage
+  const usage = await CouponUsage.findOneAndUpdate(
+    { userId, couponId, usedCount: { $gt: 0 } },
+    { $inc: { usedCount: -1 } },
+    { new: true }
+  );
+
+  // cleanup if usage is 0
+  if (usage && usage.usedCount <= 0) {
+    await CouponUsage.deleteOne({ _id: usage._id });
+  }
+};

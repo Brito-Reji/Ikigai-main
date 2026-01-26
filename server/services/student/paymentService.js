@@ -164,3 +164,36 @@ export const updatePaymentStatusService = async ({
 
   return { paymentId: razorpay_payment_id, enrolledDetails };
 };
+
+export const getOrderHistoryService = async userId => {
+  const orders = await Order.find({
+    userId,
+    status: { $in: ["PAID", "REFUNDED"] },
+  })
+    .populate({
+      path: "courseIds",
+      select: "title price thumbnail",
+    })
+    .populate({
+      path: "couponId",
+      select: "code discountType discountValue",
+    })
+    .sort({ createdAt: -1 });
+
+  // get payment details for each order
+  const ordersWithPayments = await Promise.all(
+    orders.map(async order => {
+      const payments = await Payment.find({
+        razorpayOrderId: order.razorpayOrderId,
+        userId,
+      }).select("courseId status refundAmount refundedAt");
+
+      return {
+        ...order.toObject(),
+        payments,
+      };
+    })
+  );
+
+  return ordersWithPayments;
+};
