@@ -1,80 +1,93 @@
-import React, { useState, useEffect } from "react";
-import { ArrowLeft, Tag, Calendar, CreditCard, RefreshCcw, CheckCircle, XCircle, Clock } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, Tag, Calendar, CreditCard, RefreshCcw, CheckCircle, XCircle, Clock, Wallet, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "@/api/axiosConfig.js";
-import { refundApi } from "@/api/refundApi.js";
+import { useOrderHistory, usePartialRefund } from "@/hooks/useOrder.js";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 const PurchaseHistoryPage = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [refundLoading, setRefundLoading] = useState(null);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/payments/orders");
-      if (response.data.success) {
-        setOrders(response.data.data);
-      }
-    } catch (error) {
-      toast.error("Failed to load purchase history");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: orders = [], isLoading } = useOrderHistory();
+  const { mutate: partialRefund } = usePartialRefund();
 
   const handleRefundCourse = async (order, courseId, courseTitle, originalPrice) => {
-    // calc proportional refund
-    let refundAmount = originalPrice;
-    if (order.discountAmount && order.originalAmount) {
-      const discount = Math.round((originalPrice / order.originalAmount) * order.discountAmount);
-      refundAmount = originalPrice - discount;
+    // calculate base refund
+    let baseRefundAmount;
+    if (order.originalAmount && order.originalAmount !== order.amount) {
+      baseRefundAmount = Math.round((originalPrice / order.originalAmount) * order.amount);
+    } else {
+      baseRefundAmount = originalPrice;
     }
+    const bankRefundAmount = Math.round(baseRefundAmount * 0.8);
 
     const result = await Swal.fire({
-      title: "Request Refund?",
+      title: "Choose Refund Method",
       html: `
         <div class="text-left">
-          <p class="mb-2"><strong>Course:</strong> ${courseTitle}</p>
-          <p class="mb-2"><strong>Original Price:</strong> ₹${originalPrice}</p>
-          ${order.discountAmount ? `<p class="mb-2 text-orange-600"><strong>Coupon Discount Applied:</strong> -₹${Math.round((originalPrice / order.originalAmount) * order.discountAmount)}</p>` : ""}
-          <p class="text-lg font-bold text-green-600"><strong>Refund Amount:</strong> ₹${refundAmount}</p>
-          <p class="mt-4 text-sm text-gray-500">Refund will be processed within 5-7 business days.</p>
+          <p class="mb-4"><strong>Course:</strong> ${courseTitle}</p>
+          
+          <div class="space-y-3">
+            <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition" id="wallet-option">
+              <input type="radio" name="refundMethod" value="wallet" class="mr-3" checked />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">💳</span>
+                  <span class="font-semibold">Wallet</span>
+                  <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Recommended</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Get <strong class="text-green-600">100%</strong> refund instantly to your wallet</p>
+                <p class="text-lg font-bold text-green-600 mt-1">₹${baseRefundAmount}</p>
+              </div>
+            </label>
+            
+            <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition" id="bank-option">
+              <input type="radio" name="refundMethod" value="bank" class="mr-3" />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">🏦</span>
+                  <span class="font-semibold">Bank Account</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">Get <strong class="text-orange-600">80%</strong> refund to bank (5-7 days)</p>
+                <p class="text-lg font-bold text-orange-600 mt-1">₹${bankRefundAmount}</p>
+              </div>
+            </label>
+          </div>
+          
+          <p class="mt-4 text-xs text-gray-400">20% processing fee applies for bank refunds</p>
         </div>
       `,
-      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#ef4444",
+      confirmButtonColor: "#4f46e5",
       cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, Request Refund",
+      confirmButtonText: "Confirm Refund",
       cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const selected = document.querySelector('input[name="refundMethod"]:checked');
+        return selected ? selected.value : "wallet";
+      },
     });
 
     if (result.isConfirmed) {
-      try {
-        setRefundLoading(courseId);
-        const response = await refundApi.requestPartial({
-          courseId,
-          razorpayOrderId: order.razorpayOrderId,
-          reason: "Customer request",
-        });
-
-        if (response.data.success) {
-          toast.success(`Refund of ₹${response.data.refundAmount} processed!`);
-          fetchOrders();
+      const refundMethod = result.value;
+      setRefundLoading(courseId);
+      partialRefund(
+        { courseId, razorpayOrderId: order.razorpayOrderId, reason: "Customer request", refundMethod },
+        {
+          onSuccess: (response) => {
+            const msg = refundMethod === "wallet" 
+              ? `₹${response.data.refundAmount / 100} credited to wallet!`
+              : `₹${response.data.refundAmount / 100} refund to bank (5-7 days)`;
+            toast.success(msg);
+            setRefundLoading(null);
+          },
+          onError: (error) => {
+            toast.error(error?.response?.data?.message || "Refund failed");
+            setRefundLoading(null);
+          },
         }
-      } catch (error) {
-        toast.error(error?.response?.data?.message || "Refund failed");
-      } finally {
-        setRefundLoading(null);
-      }
+      );
     }
   };
 
@@ -103,7 +116,7 @@ const PurchaseHistoryPage = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>

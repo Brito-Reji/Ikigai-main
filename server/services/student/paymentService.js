@@ -49,8 +49,10 @@ export const createOrderService = async ({ courseIds, userId, couponCode }) => {
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
+  
 
   const razorpayOrder = await razorpayInstance.orders.create(options);
+
 
   await Order.create({
     userId,
@@ -187,6 +189,9 @@ export const getOrderHistoryService = async userId => {
         razorpayOrderId: order.razorpayOrderId,
         userId,
       }).select("courseId status refundAmount refundedAt");
+
+      console.log("payments", payments)
+      console.log("order", order.toObject())
 
       return {
         ...order.toObject(),

@@ -58,6 +58,10 @@ const paymentSchema = new mongoose.Schema(
     refundAmount: {
       type: Number,
     },
+    refundMethod: {
+      type: String,
+      enum: ["wallet", "bank"],
+    },
   },
   { timestamps: true }
 );

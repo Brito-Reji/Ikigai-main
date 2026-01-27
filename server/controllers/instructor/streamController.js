@@ -36,7 +36,7 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
     // Create a URL that expires in 1 hour (enough for long videos)
     const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
-    console.log("✅ Signed URL generated successfully");
+    console.log("Signed URL generated successfully");
 
     res.status(HTTP_STATUS.OK).json({
       success: true,

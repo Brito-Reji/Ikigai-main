@@ -5,7 +5,8 @@ import { Chapter } from "../../models/Chapter.js";
 import mongoose from "mongoose";
 
 export const getUserEnrollments = async userId => {
-  console.log("userId:", userId);
+  const enroll = await Enrollment.find({ user: userId, status: "active" });
+  console.log("enroll:", enroll);
   const result = await Enrollment.aggregate([
     {
       $match: {
@@ -89,6 +90,7 @@ export const getUserEnrollments = async userId => {
       },
     },
   ]);
+  console.log("course number:", result.length);
   console.log("result:", result);
   return result;
 };

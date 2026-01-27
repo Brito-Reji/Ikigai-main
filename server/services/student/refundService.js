@@ -1,12 +1,15 @@
-import razorpayInstance from "../../config/razorpayConfig.js";
 import { Payment } from "../../models/Payment.js";
 import { Order } from "../../models/Order.js";
+import { Enrollment } from "../../models/Enrollment.js";
 import { decrementCouponUsageService } from "./couponService.js";
+import { creditWallet } from "./walletService.js";
+import razorpayInstance from "../../config/razorpayConfig.js";
 
 export const processFullRefund = async ({
   razorpayOrderId,
   userId,
   reason = "Customer request",
+  refundMethod = "wallet", // wallet or bank
 }) => {
   const order = await Order.findOne({ razorpayOrderId, userId });
 
@@ -24,48 +27,83 @@ export const processFullRefund = async ({
     throw new Error("No payments found for this order");
   }
 
-  // check if already refunded
   const alreadyRefunded = payments.every(p => p.status === "REFUNDED");
   if (alreadyRefunded) {
     throw new Error("All payments already refunded");
   }
 
-  // razorpay full refund
   try {
-    const refund = await razorpayInstance.payments.refund(
-      payments[0].razorpayPaymentId,
-      {
-        amount: Math.round(order.amount * 100),
-        notes: { reason },
-      }
-    );
+    const baseAmount = Math.round(order.amount);
+    // wallet = 100%, bank = 80%
+    const refundAmount = refundMethod === "bank" 
+      ? Math.round(baseAmount * 0.8) 
+      : baseAmount;
+
+    if (refundMethod === "bank") {
+      // razorpay refund
+      const refund = await razorpayInstance.payments.refund(
+        payments[0].razorpayPaymentId,
+        {
+          amount: refundAmount,
+          notes: { reason },
+        }
+      );
+
+      await Payment.updateMany(
+        { razorpayOrderId, userId },
+        {
+          status: "REFUNDED",
+          razorpayRefundId: refund.id,
+          refundedAt: new Date(),
+          refundAmount,
+          refundMethod: "bank",
+        }
+      );
+    } else {
+      // wallet refund
+      await creditWallet({
+        userId,
+        amount: refundAmount,
+        reason: `Full refund for order`,
+        relatedOrderId: order._id,
+      });
+
+      await Payment.updateMany(
+        { razorpayOrderId, userId },
+        {
+          status: "REFUNDED",
+          refundedAt: new Date(),
+          refundAmount,
+          refundMethod: "wallet",
+        }
+      );
+    }
 
     order.status = "REFUNDED";
     await order.save();
 
-    await Payment.updateMany(
-      { razorpayOrderId, userId },
-      {
-        status: "REFUNDED",
-        razorpayRefundId: refund.id,
-        refundedAt: new Date(),
-      }
+    await Enrollment.updateMany(
+      { user: userId, course: { $in: order.courseIds } },
+      { status: "refunded" }
     );
 
-    // decrement coupon usage so user can reuse coupon
     if (order.couponId) {
       await decrementCouponUsageService(order.couponId, order.userId);
     }
 
     return {
       success: true,
-      refundId: refund.id,
-      amount: order.amount,
-      message: "Full refund processed successfully",
+      originalAmount: baseAmount,
+      refundAmount,
+      refundMethod,
+      message: refundMethod === "bank" 
+        ? "Refund of 80% processed to bank (5-7 days)" 
+        : "Full refund credited to wallet",
     };
   } catch (error) {
-    console.error("Razorpay refund error:", error);
-    throw new Error(`Refund failed: ${error.message}`);
+    console.error("Refund error:", error);
+    const errorMessage = error?.error?.description || error?.message || "Unknown error";
+    throw new Error(`Refund failed: ${errorMessage}`);
   }
 };
 
@@ -74,6 +112,7 @@ export const processPartialRefund = async ({
   userId,
   razorpayOrderId,
   reason = "Customer request",
+  refundMethod = "wallet", // wallet or bank
 }) => {
   const payment = await Payment.findOne({ courseId, userId, razorpayOrderId });
 
@@ -85,44 +124,64 @@ export const processPartialRefund = async ({
     throw new Error("This course payment is already refunded");
   }
 
-  // get order to check coupon details
   const order = await Order.findOne({ razorpayOrderId, userId });
   if (!order) {
     throw new Error("Order not found");
   }
 
-  // calculate refund amount (proportional if coupon was used)
-  let refundAmount = payment.amount;
+  // calculate base refund amount
+  let baseRefundAmount;
+  const coursePrice = payment.amount;
 
-  if (
-    order.discountAmount &&
-    order.discountAmount > 0 &&
-    order.originalAmount
-  ) {
-    // proportional discount = (coursePrice / originalTotal) * totalDiscount
-    const courseProportionalDiscount = Math.round(
-      (payment.amount / order.originalAmount) * order.discountAmount
+  if (order.originalAmount && order.originalAmount !== order.amount) {
+    baseRefundAmount = Math.round(
+      (coursePrice / order.originalAmount) * order.amount
     );
-    refundAmount = payment.amount - courseProportionalDiscount;
+  } else {
+    baseRefundAmount = coursePrice;
   }
 
-  // ensure refund is not negative
-  refundAmount = Math.max(0, refundAmount);
+  baseRefundAmount = Math.max(1, baseRefundAmount);
+
+  // wallet = 100%, bank = 80%
+  const refundAmount = refundMethod === "bank" 
+    ? Math.round(baseRefundAmount * 0.8) 
+    : baseRefundAmount;
 
   try {
-    const refund = await razorpayInstance.payments.refund(
-      payment.razorpayPaymentId,
-      {
-        amount: Math.round(refundAmount * 100), // razorpay expects paise
-        notes: { reason, courseId: payment.courseId.toString() },
-      }
-    );
+    if (refundMethod === "bank") {
+      // razorpay refund
+      const refund = await razorpayInstance.payments.refund(
+        payment.razorpayPaymentId,
+        {
+          amount: refundAmount,
+          notes: { reason, courseId: payment.courseId.toString() },
+        }
+      );
+
+      payment.razorpayRefundId = refund.id;
+      payment.refundMethod = "bank";
+    } else {
+      // wallet refund
+      await creditWallet({
+        userId,
+        amount: refundAmount,
+        reason: `Refund for course`,
+        relatedPaymentId: payment._id,
+        relatedOrderId: order._id,
+      });
+      payment.refundMethod = "wallet";
+    }
 
     payment.status = "REFUNDED";
-    payment.razorpayRefundId = refund.id;
     payment.refundedAt = new Date();
-    payment.refundAmount = refundAmount; // store actual refunded amount
+    payment.refundAmount = refundAmount;
     await payment.save();
+
+    await Enrollment.findOneAndUpdate(
+      { user: userId, course: courseId },
+      { status: "refunded" }
+    );
 
     const remainingPayments = await Payment.find({
       razorpayOrderId,
@@ -130,14 +189,12 @@ export const processPartialRefund = async ({
       status: { $ne: "REFUNDED" },
     });
 
-    // if all courses refunded, mark order as refunded and restore coupon usage
     if (remainingPayments.length === 0) {
       await Order.findOneAndUpdate(
         { razorpayOrderId, userId },
         { status: "REFUNDED" }
       );
 
-      // restore coupon usage only when full order is refunded
       if (order.couponId) {
         await decrementCouponUsageService(order.couponId, order.userId);
       }
@@ -145,16 +202,19 @@ export const processPartialRefund = async ({
 
     return {
       success: true,
-      refundId: refund.id,
       originalPrice: payment.amount,
-      discountApplied: payment.amount - refundAmount,
-      refundAmount: refundAmount,
+      baseRefundAmount,
+      refundAmount,
+      refundMethod,
       courseId: payment.courseId,
-      message: "Partial refund processed successfully",
+      message: refundMethod === "bank" 
+        ? "Refund of 80% processed to bank (5-7 days)" 
+        : "Full refund credited to wallet",
     };
   } catch (error) {
-    console.error("Razorpay refund error:", error);
-    throw new Error(`Refund failed: ${error.message}`);
+    console.error("Refund error:", error);
+    const errorMessage = error?.error?.description || error?.message || "Unknown error";
+    throw new Error(`Refund failed: ${errorMessage}`);
   }
 };
 

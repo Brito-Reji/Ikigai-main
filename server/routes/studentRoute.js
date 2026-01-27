@@ -29,6 +29,10 @@ import {
   getEnrolledCourseById,
 } from "../controllers/students/enrollmentController.js";
 import { validateCoupon } from "../controllers/students/couponController.js";
+import {
+  getWallet,
+  getTransactions,
+} from "../controllers/students/walletController.js";
 
 const router = Router();
 
@@ -63,5 +67,9 @@ router.post("/enrollments/complete-lesson", markLessonComplete);
 
 // Coupons
 router.get("/coupons/validate/:code", validateCoupon);
+
+// Wallet
+router.get("/wallet", getWallet);
+router.get("/wallet/transactions", getTransactions);
 
 export default router;
