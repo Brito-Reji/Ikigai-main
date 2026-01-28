@@ -1,5 +1,9 @@
 import { Router } from "express";
 import {
+  getDashboard,
+  getOrders,
+} from "../controllers/admin/dashboardController.js";
+import {
   getStudents,
   getInstructors,
   blockStudent,
@@ -26,6 +30,10 @@ import {
   togglePauseCoupon,
 } from "../controllers/admin/couponContorller.js";
 const router = Router();
+
+// DASHBOARD
+router.get("/dashboard", getDashboard);
+router.get("/orders", getOrders);
 
 router.get("/students", getStudents);
 router.get("/students/:id", getStudentDetails);

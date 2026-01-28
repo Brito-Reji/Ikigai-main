@@ -57,6 +57,7 @@ import StudentDetail from "@/pages/admin/StudentDetail";
 import Instructors from "@/pages/admin/Instructors";
 import InstructorDetail from "@/pages/admin/InstructorDetail";
 import Coupons from "@/pages/admin/Coupons";
+import OrdersPage from "@/pages/admin/OrdersPage.jsx";
 
 export default function AppRoutes() {
   return (
@@ -284,6 +285,7 @@ export default function AppRoutes() {
         <Route path="instructors" element={<Instructors />} />
         <Route path="instructors/:id" element={<InstructorDetail />} />
         <Route path="coupons" element={<Coupons />} />
+        <Route path="orders" element={<OrdersPage />} />
       </Route>
 
       {/* 404 */}
