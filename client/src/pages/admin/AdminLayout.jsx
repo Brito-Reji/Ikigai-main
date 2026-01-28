@@ -57,9 +57,9 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg">
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar - Fixed */}
+      <aside className="w-64 bg-white shadow-lg flex-shrink-0 h-screen sticky top-0 flex flex-col">
         <div className="flex items-center gap-3 p-6 border-b">
           <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-purple-500 rounded-full flex items-center justify-center">
             <svg
@@ -73,7 +73,7 @@ const AdminLayout = () => {
           <span className="text-xl font-semibold text-gray-800">Ikigai</span>
         </div>
 
-        <nav className="py-4">
+        <nav className="py-4 flex-1 overflow-y-auto">
           {menuItems.map((item) => (
             <Link
               key={item.name}
@@ -87,20 +87,22 @@ const AdminLayout = () => {
               {item.name}
             </Link>
           ))}
-          
-          {/* Logout Button */}
+        </nav>
+        
+        {/* Logout Button - at bottom */}
+        <div className="border-t">
           <button
             onClick={handleLogout}
-            className="w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 mt-4 border-t pt-4"
+            className="w-full text-left px-6 py-4 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
           >
             <LogOut className="w-5 h-5" />
             Logout
           </button>
-        </nav>
+        </div>
       </aside>
 
-      {/* Main Content Area - Child routes render here */}
-      <main className="flex-1 p-8">
+      {/* Main Content Area - Scrollable */}
+      <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>
