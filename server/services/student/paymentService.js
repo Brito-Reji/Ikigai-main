@@ -10,8 +10,14 @@ import {
   validateCouponService,
   incrementCouponUsageService,
 } from "./couponService.js";
+import { getWalletBalance, debitWallet } from "./walletService.js";
 
-export const createOrderService = async ({ courseIds, userId, couponCode }) => {
+export const createOrderService = async ({
+  courseIds,
+  userId,
+  couponCode,
+  useWallet = false,
+}) => {
   const courses = await Course.find({
     _id: { $in: courseIds },
     published: true,
@@ -42,17 +48,37 @@ export const createOrderService = async ({ courseIds, userId, couponCode }) => {
     appliedCouponCode = couponData.code;
   }
 
-  const finalAmount = originalAmount - discountAmount;
+  let finalAmount = originalAmount - discountAmount;
+  let walletAmountUsed = 0;
+
+  // apply wallet if requested
+  if (useWallet && finalAmount > 0) {
+    const walletBalance = await getWalletBalance(userId);
+    walletAmountUsed = Math.min(walletBalance, finalAmount);
+    finalAmount = finalAmount - walletAmountUsed;
+  }
+  console.log("final amount", finalAmount);
+  // if entire amount covered by wallet
+  if (finalAmount <= 0) {
+    return await processWalletOnlyPayment({
+      userId,
+      courseIds,
+      courses,
+      originalAmount,
+      discountAmount,
+      walletAmountUsed: originalAmount - discountAmount,
+      couponId,
+      appliedCouponCode,
+    });
+  }
 
   const options = {
     amount: Math.round(finalAmount),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
-  
 
   const razorpayOrder = await razorpayInstance.orders.create(options);
-
 
   await Order.create({
     userId,
@@ -61,6 +87,7 @@ export const createOrderService = async ({ courseIds, userId, couponCode }) => {
     amount: finalAmount,
     originalAmount,
     discountAmount,
+    walletAmountUsed,
     couponCode: appliedCouponCode,
     couponId,
     status: "CREATED",
@@ -75,15 +102,116 @@ export const createOrderService = async ({ courseIds, userId, couponCode }) => {
   }));
 
   await Payment.insertMany(paymentsData);
+  // console.log("finalAmount", finalAmount);
 
   return {
     razorpayOrderId: razorpayOrder.id,
     amount: finalAmount,
     originalAmount,
     discountAmount,
+    walletAmountUsed,
     couponCode: appliedCouponCode,
     currency: "INR",
+    paymentMethod: "razorpay",
     message: "Order created successfully",
+  };
+};
+
+// full wallet payment - no razorpay needed
+const processWalletOnlyPayment = async ({
+  userId,
+  courseIds,
+  courses,
+  originalAmount,
+  discountAmount,
+  walletAmountUsed,
+  couponId,
+  appliedCouponCode,
+}) => {
+  const walletOrderId = `wallet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  const order = await Order.create({
+    userId,
+    courseIds,
+    razorpayOrderId: walletOrderId,
+    amount: 0,
+    originalAmount,
+    discountAmount,
+    walletAmountUsed,
+    couponCode: appliedCouponCode,
+    couponId,
+    status: "PAID",
+    paymentMethod: "wallet",
+  });
+
+  // debit wallet
+  await debitWallet({
+    userId,
+    amount: walletAmountUsed,
+    reason: `Payment for ${courses.length} course(s)`,
+    relatedOrderId: order._id,
+  });
+
+  // increment coupon usage
+  if (couponId) {
+    await incrementCouponUsageService(couponId, userId);
+  }
+
+  // create payments
+  const paymentsData = courses.map(course => ({
+    courseId: course._id,
+    userId,
+    razorpayOrderId: walletOrderId,
+    amount: course.price,
+    status: "PAID",
+    releaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    releaseStatus: "HELD",
+  }));
+
+  await Payment.insertMany(paymentsData);
+
+  // create enrollments
+  for (const courseId of courseIds) {
+    await Enrollment.create({
+      user: userId,
+      course: courseId,
+      payment: order._id,
+      status: "active",
+    });
+  }
+
+  // clear cart and wishlist
+  await Cart.updateMany(
+    { userId, courses: { $in: courseIds } },
+    { $pull: { courses: { $in: courseIds } } }
+  );
+  await Wishlist.updateMany(
+    { userId, courses: { $in: courseIds } },
+    { $pull: { courses: { $in: courseIds } } }
+  );
+
+  // populate course details for response
+  const populatedOrder = await Order.findById(order._id).populate({
+    path: "courseIds",
+    select: "title price thumbnail instructor",
+    populate: {
+      path: "instructor",
+      select: "firstName lastName",
+    },
+  });
+
+  return {
+    razorpayOrderId: walletOrderId,
+    amount: 0,
+    originalAmount,
+    discountAmount,
+    walletAmountUsed,
+    couponCode: appliedCouponCode,
+    currency: "INR",
+    paymentMethod: "wallet",
+    paidInFull: true,
+    enrolledDetails: populatedOrder,
+    message: "Payment completed using wallet",
   };
 };
 
@@ -190,8 +318,8 @@ export const getOrderHistoryService = async userId => {
         userId,
       }).select("courseId status refundAmount refundedAt");
 
-      console.log("payments", payments)
-      console.log("order", order.toObject())
+      console.log("payments", payments);
+      console.log("order", order.toObject());
 
       return {
         ...order.toObject(),

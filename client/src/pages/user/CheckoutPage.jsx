@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Tag, X, ShoppingBag, Lock, CreditCard } from "lucide-react";
+import { ArrowLeft, Tag, X, ShoppingBag, Lock, CreditCard, Wallet } from "lucide-react";
 import { useCart } from "@/hooks/useRedux";
 import { startRazorpayPayment } from "@/services/razorpayService";
 import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import { useVerifyPayment } from "@/hooks/useCourses.js";
+import { useWallet } from "@/hooks/useWallet";
 
 const CheckoutPage = () => {
   const verifyPaymentMutation = useVerifyPayment();
@@ -13,10 +14,12 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { items: cartItems, dispatch } = useCart();
+  const { data: walletData, isLoading: walletLoading } = useWallet();
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [useWalletBalance, setUseWalletBalance] = useState(false);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -24,13 +27,13 @@ const CheckoutPage = () => {
   const [couponLoading, setCouponLoading] = useState(false);
 
   const courseId = searchParams.get("courseId");
+  const walletBalance = walletData?.balance || 0;
 
   useEffect(() => {
     const loadCourses = async () => {
       try {
         setLoading(true);
         if (courseId) {
-          // Scenario 1: Single Course Checkout via URL
           const response = await api.get(`/public/courses/${courseId}`);
          if(response.data.data.isEnrolled){
           navigate("/courses",{replace:true});
@@ -40,10 +43,8 @@ const CheckoutPage = () => {
           }
          }
         } else if (cartItems.length > 0) {
-          // Scenario 2: Cart Checkout
           setCourses(cartItems);
         } else {
-          // Empty state - redirect to cart
           navigate("/cart");
         }
       } catch (error) {
@@ -67,7 +68,6 @@ const CheckoutPage = () => {
 
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
-    // use pre-calculated discount from API if available
     if (appliedCoupon.discountAmount !== undefined) {
       return appliedCoupon.discountAmount;
     }
@@ -79,8 +79,16 @@ const CheckoutPage = () => {
     }
   };
 
+  const calculateWalletDeduction = () => {
+    if (!useWalletBalance || walletBalance <= 0) return 0;
+    const afterDiscount = calculateSubtotal() - calculateDiscount();
+    return Math.min(walletBalance / 100, afterDiscount); // convert paise to rupees
+  };
+
   const calculateTotal = () => {
-    return Math.max(0, calculateSubtotal() - calculateDiscount());
+    const afterDiscount = calculateSubtotal() - calculateDiscount();
+    const walletDeduction = calculateWalletDeduction();
+    return Math.max(0, afterDiscount - walletDeduction);
   };
 
   const handleApplyCoupon = async () => {
@@ -127,11 +135,7 @@ const CheckoutPage = () => {
 
   const handlePayment = async () => {
     try {
-      console.log("handlePayment triggered");
-      console.log("Courses in state:", courses);
-
       const courseIds = courses.map(c => c._id).filter(id => id);
-      console.log("Derived courseIds:", courseIds);
 
       if (courseIds.length === 0) {
         toast.error("No valid courses found to checkout");
@@ -140,12 +144,8 @@ const CheckoutPage = () => {
 
       setProcessing(true);
 
-      // Pass coupon code to payment
       const couponToApply = appliedCoupon?.code || null;
-      await startRazorpayPayment(courseIds, navigate, verifyPaymentMutation, couponToApply);
-
-     
-
+      await startRazorpayPayment(courseIds, navigate, verifyPaymentMutation, couponToApply, useWalletBalance);
 
     } catch (error) {
       console.error("Checkout Payment error:", error);
@@ -279,6 +279,37 @@ const CheckoutPage = () => {
               )}
             </div>
 
+            {/* Wallet Section */}
+            {walletBalance > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <Wallet className="w-5 h-5 mr-2 text-indigo-500" />
+                  Wallet Balance
+                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-2xl font-bold text-indigo-600">₹{(walletBalance / 100).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">Available balance</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useWalletBalance}
+                      onChange={(e) => setUseWalletBalance(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    <span className="ms-3 text-sm font-medium text-gray-700">Use Wallet</span>
+                  </label>
+                </div>
+                {useWalletBalance && (
+                  <div className="bg-indigo-50 rounded-lg p-3 text-sm text-indigo-700">
+                    ₹{calculateWalletDeduction().toFixed(2)} will be deducted from wallet
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Summary Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
@@ -301,8 +332,18 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {useWalletBalance && calculateWalletDeduction() > 0 && (
+                  <div className="flex justify-between text-indigo-600">
+                    <span className="flex items-center gap-1">
+                      <Wallet className="w-3 h-3" />
+                      Wallet
+                    </span>
+                    <span>-₹{calculateWalletDeduction().toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="border-t border-gray-100 pt-4 flex justify-between items-end">
-                  <span className="text-gray-900 font-bold">Total Amount</span>
+                  <span className="text-gray-900 font-bold">To Pay</span>
                   <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
                     ₹{calculateTotal().toFixed(2)}
                   </span>
@@ -318,6 +359,11 @@ const CheckoutPage = () => {
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     Processing...
+                  </>
+                ) : calculateTotal() <= 0 ? (
+                  <>
+                    <span>Pay with Wallet</span>
+                    <Wallet className="w-5 h-5" />
                   </>
                 ) : (
                   <>

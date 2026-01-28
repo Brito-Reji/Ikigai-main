@@ -37,7 +37,12 @@ export const creditWallet = async ({
 };
 
 // debit wallet
-export const debitWallet = async ({ userId, amount, reason }) => {
+export const debitWallet = async ({
+  userId,
+  amount,
+  reason,
+  relatedOrderId = null,
+}) => {
   const wallet = await getOrCreateWallet(userId);
 
   if (wallet.balance < amount) {
@@ -53,6 +58,7 @@ export const debitWallet = async ({ userId, amount, reason }) => {
     type: "debit",
     amount,
     reason,
+    relatedOrderId,
   });
 
   return { wallet, transaction };

@@ -4,11 +4,13 @@ export const startRazorpayPayment = async (
   courseIds,
   navigate,
   verifyPaymentMutation,
-  couponCode = null
+  couponCode = null,
+  useWallet = false
 ) => {
   const response = await api.post("/payments/create-order", {
     courseIds,
     couponCode,
+    useWallet,
   });
 
   if (!response.data.success) {
@@ -16,7 +18,20 @@ export const startRazorpayPayment = async (
   }
 
   const order = response.data.data;
-  console.log("order->", order.amount);
+
+  // if paid in full with wallet - no razorpay needed
+  console.log("order", order);
+  if (order.paidInFull) {
+    navigate("/payment/success", {
+      replace: true,
+      state: {
+        paymentId: order.razorpayOrderId,
+        enrolledDetails: order.enrolledDetails,
+        walletPayment: true,
+      },
+    });
+    return response;
+  }
 
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -31,13 +46,8 @@ export const startRazorpayPayment = async (
       try {
         const verifyResult = await verifyPaymentMutation.mutateAsync(response);
 
-        console.log("Verify Payment Result:", verifyResult);
-
         paymentId = verifyResult.data.paymentId;
         enrolledDetails = verifyResult.data.enrolledDetails;
-
-        console.log("Extracted PaymentId:", paymentId);
-        console.log("Extracted EnrolledDetails:", enrolledDetails);
 
         navigate("/payment/success", {
           replace: true,
@@ -56,7 +66,6 @@ export const startRazorpayPayment = async (
 
   const rzp = new window.Razorpay(options);
 
-  // only handle failures via event
   rzp.on("payment.failed", function (response) {
     console.error("Payment failed:", response.error);
     navigate("/payment/failed");

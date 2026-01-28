@@ -4,7 +4,7 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const { courseIds, couponCode } = req.body;
+  const { courseIds, couponCode, useWallet } = req.body;
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
     res.status(HTTP_STATUS.BAD_REQUEST);
     throw new Error(
@@ -16,7 +16,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     courseIds,
     userId: req.user._id,
     couponCode,
+    useWallet,
   });
+  console.log("order", order);
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: MESSAGES.PAYMENT.ORDER_CREATED,

@@ -37,6 +37,15 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Coupon",
     },
+    walletAmountUsed: {
+      type: Number,
+      default: 0,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["razorpay", "wallet", "mixed"],
+      default: "razorpay",
+    },
     currency: {
       type: String,
       default: "INR",
