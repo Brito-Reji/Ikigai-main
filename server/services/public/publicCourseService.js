@@ -1,6 +1,6 @@
 import { Course } from "../../models/Course.js";
 import { Lesson } from "../../models/Lesson.js";
-import { Payment } from "../../models/Payment.js";
+import { Enrollment } from "../../models/Enrollment.js";
 import { checkEnrollment } from "../student/enrollmentService.js";
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
@@ -76,13 +76,11 @@ export const getPublishedCoursesService = async (queryParams, userId) => {
 
   let enrolledCourseIds = [];
   if (userId) {
-    const enrolledCourses = await Payment.find({
-      userId,
-      status: "PAID",
+    const enrollments = await Enrollment.find({
+      user: userId,
+      status: "active",
     });
-    enrolledCourseIds = enrolledCourses.map(payment =>
-      payment.courseId.toString()
-    );
+    enrolledCourseIds = enrollments.map(e => e.course.toString());
   }
 
   let courses = await Course.find(query)

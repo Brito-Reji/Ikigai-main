@@ -57,7 +57,6 @@ export const createOrderService = async ({
     walletAmountUsed = Math.min(walletBalance, finalAmount);
     finalAmount = finalAmount - walletAmountUsed;
   }
-  console.log("final amount", finalAmount);
   // if entire amount covered by wallet
   if (finalAmount <= 0) {
     return await processWalletOnlyPayment({
@@ -102,7 +101,6 @@ export const createOrderService = async ({
   }));
 
   await Payment.insertMany(paymentsData);
-  // console.log("finalAmount", finalAmount);
 
   return {
     razorpayOrderId: razorpayOrder.id,
@@ -170,14 +168,13 @@ const processWalletOnlyPayment = async ({
 
   await Payment.insertMany(paymentsData);
 
-  // create enrollments
+  // create or reactivate enrollments
   for (const courseId of courseIds) {
-    await Enrollment.create({
-      user: userId,
-      course: courseId,
-      payment: order._id,
-      status: "active",
-    });
+    await Enrollment.findOneAndUpdate(
+      { user: userId, course: courseId },
+      { $set: { payment: order._id, status: "active" } },
+      { upsert: true, new: true }
+    );
   }
 
   // clear cart and wishlist
@@ -261,16 +258,13 @@ export const updatePaymentStatusService = async ({
       releaseStatus: "HELD",
     }
   );
-  // clear cart and wishlist
-  await Cart.find({ userId: order.userId, courses: { $in: order.courseIds } });
-
+  // create or reactivate enrollments
   for (const courseId of order.courseIds) {
-    await Enrollment.create({
-      user: order.userId,
-      course: courseId,
-      payment: order._id,
-      status: "active",
-    });
+    await Enrollment.findOneAndUpdate(
+      { user: order.userId, course: courseId },
+      { $set: { payment: order._id, status: "active" } },
+      { upsert: true, new: true }
+    );
   }
 
   await Cart.updateMany(
@@ -317,9 +311,6 @@ export const getOrderHistoryService = async userId => {
         razorpayOrderId: order.razorpayOrderId,
         userId,
       }).select("courseId status refundAmount refundedAt");
-
-      console.log("payments", payments);
-      console.log("order", order.toObject());
 
       return {
         ...order.toObject(),
