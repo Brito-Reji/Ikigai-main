@@ -1,19 +1,47 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import ChatTabs from '@/components/student/ChatTabs';
 import ConversationList from '@/components/student/ConversationList';
+import CourseRoomList from '@/components/student/CourseRoomList';
 import ChatWindow from '@/components/student/ChatWindow';
-import { mockConversations, getConversationById } from '@/data/mockChatData';
+import ChatRoomWindow from '@/components/student/ChatRoomWindow';
+import { 
+	useGetConversations, 
+	useGetCourseRooms,
+	useGetConversationById,
+	useGetCourseRoomById
+} from '@/hooks/useChat';
 
 const ChatPage = () => {
+	const [activeTab, setActiveTab] = useState('direct');
 	const [selectedConversationId, setSelectedConversationId] = useState(null);
+	const [selectedRoomId, setSelectedRoomId] = useState(null);
 	const [showChatOnMobile, setShowChatOnMobile] = useState(false);
 
-	const selectedConversation = selectedConversationId
-		? getConversationById(selectedConversationId)
-		: null;
+	// tanstack queries
+	const { data: conversationsData, isLoading: loadingConversations } = useGetConversations();
+	const { data: roomsData, isLoading: loadingRooms } = useGetCourseRooms();
+	const { data: selectedConversationData } = useGetConversationById(selectedConversationId);
+	const { data: selectedRoomData } = useGetCourseRoomById(selectedRoomId);
+
+	const conversations = conversationsData?.data || [];
+	const rooms = roomsData?.data || [];
+	const selectedConversation = selectedConversationData?.data || null;
+	const selectedRoom = selectedRoomData?.data || null;
+
+	// calc unread counts
+	const directUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
+	const roomsUnread = rooms.reduce((sum, r) => sum + r.unreadCount, 0);
 
 	const handleSelectConversation = (conversationId) => {
 		setSelectedConversationId(conversationId);
+		setSelectedRoomId(null);
+		setShowChatOnMobile(true);
+	};
+
+	const handleSelectRoom = (roomId) => {
+		setSelectedRoomId(roomId);
+		setSelectedConversationId(null);
 		setShowChatOnMobile(true);
 	};
 
@@ -21,23 +49,57 @@ const ChatPage = () => {
 		setShowChatOnMobile(false);
 	};
 
+	const handleTabChange = (tab) => {
+		setActiveTab(tab);
+		setSelectedConversationId(null);
+		setSelectedRoomId(null);
+		setShowChatOnMobile(false);
+	};
+
+	const isLoading = activeTab === 'direct' ? loadingConversations : loadingRooms;
+
 	return (
 		<div className="h-[calc(100vh-64px)] flex flex-col bg-white overflow-hidden">
+			{/* tabs */}
+			<ChatTabs 
+				activeTab={activeTab} 
+				onTabChange={handleTabChange}
+				directUnread={directUnread}
+				roomsUnread={roomsUnread}
+			/>
+
 			<div className="flex-1 flex overflow-hidden">
+				{/* list panel */}
 				<div className={`${
 					showChatOnMobile ? 'hidden' : 'block'
 				} lg:block w-full lg:w-auto h-full`}>
-					<ConversationList
-						conversations={mockConversations}
-						selectedConversationId={selectedConversationId}
-						onSelectConversation={handleSelectConversation}
-					/>
+					{isLoading ? (
+						<div className="w-full lg:w-96 h-full flex items-center justify-center bg-white border-r border-gray-200">
+							<div className="text-center">
+								<div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+								<p className="text-gray-500 text-sm">Loading...</p>
+							</div>
+						</div>
+					) : activeTab === 'direct' ? (
+						<ConversationList
+							conversations={conversations}
+							selectedConversationId={selectedConversationId}
+							onSelectConversation={handleSelectConversation}
+						/>
+					) : (
+						<CourseRoomList
+							rooms={rooms}
+							selectedRoomId={selectedRoomId}
+							onSelectRoom={handleSelectRoom}
+						/>
+					)}
 				</div>
 
+				{/* chat panel */}
 				<div className={`${
 					showChatOnMobile ? 'block' : 'hidden'
 				} lg:block flex-1 h-full`}>
-					{showChatOnMobile && selectedConversation && (
+					{showChatOnMobile && (selectedConversation || selectedRoom) && (
 						<div className="lg:hidden bg-white border-b border-gray-200 p-4">
 							<button
 								onClick={handleBackToList}
@@ -48,7 +110,12 @@ const ChatPage = () => {
 							</button>
 						</div>
 					)}
-					<ChatWindow conversation={selectedConversation} />
+					
+					{activeTab === 'direct' ? (
+						<ChatWindow conversation={selectedConversation} />
+					) : (
+						<ChatRoomWindow room={selectedRoom} />
+					)}
 				</div>
 			</div>
 		</div>

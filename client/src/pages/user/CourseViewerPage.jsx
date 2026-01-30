@@ -7,13 +7,14 @@ import {
 	ChevronRight,
 	Award,
 	MessageCircle,
-	Star
+	Star,
+	Users
 } from 'lucide-react';
 import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
 import ChatWindow from '@/components/student/ChatWindow';
-// import { getEnrolledCourseById, getLessonById } from '@/data/mockEnrolledCourses';
-import { getConversationByInstructorId } from '@/data/mockChatData';
+import ChatRoomWindow from '@/components/student/ChatRoomWindow';
+import { getConversationByInstructorId, getCourseRoomByCourseId } from '@/data/mockChatData';
 import { getEnrolledCourseById } from '@/data/mockEnrolledCourses';
 import api from '@/api/axiosConfig';
 import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
@@ -31,6 +32,8 @@ const CourseViewerPage = () => {
 	const [currentLessonId, setCurrentLessonId] = useState(initialLessonId);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const [isChatOpen, setIsChatOpen] = useState(false);
+	const [showChatMenu, setShowChatMenu] = useState(false);
+	const [chatMode, setChatMode] = useState('instructor'); // 'instructor' or 'room'
 	const [completedLessons, setCompletedLessons] = useState(
 		new Set(enrollment?.data?.progress?.completedLessons || [])
 	);
@@ -285,17 +288,78 @@ const CourseViewerPage = () => {
 				</main>
 			</div>
 
-			{/* Floating Chat Button */}
-			<button
-				onClick={() => setIsChatOpen(!isChatOpen)}
-				className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 flex items-center justify-center"
-			>
-				{isChatOpen ? (
-					<X className="w-6 h-6" />
-				) : (
-					<MessageCircle className="w-6 h-6" />
+			{/* Floating Chat Button with Dropdown */}
+			<div className="fixed bottom-6 right-6 z-40">
+				{/* dropdown menu */}
+				{showChatMenu && !isChatOpen && (
+					<div className="absolute bottom-16 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-64 animate-fade-in">
+						<button
+							onClick={() => {
+								setChatMode('instructor');
+								setIsChatOpen(true);
+								setShowChatMenu(false);
+							}}
+							className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left"
+						>
+							<div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+								<MessageCircle className="w-5 h-5 text-blue-600" />
+							</div>
+							<div>
+								<p className="font-medium text-gray-900">Chat with Instructor</p>
+								<p className="text-xs text-gray-500">Direct message {course?.instructor?.firstName || 'instructor'}</p>
+							</div>
+						</button>
+						<div className="border-t border-gray-100"></div>
+						<button
+							onClick={() => {
+								setChatMode('room');
+								setIsChatOpen(true);
+								setShowChatMenu(false);
+							}}
+							className="w-full px-4 py-3 flex items-center gap-3 hover:bg-purple-50 transition-colors text-left"
+						>
+							<div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+								<Users className="w-5 h-5 text-purple-600" />
+							</div>
+							<div>
+								<p className="font-medium text-gray-900">Course Discussion</p>
+								<p className="text-xs text-gray-500">Chat with all students</p>
+							</div>
+						</button>
+					</div>
 				)}
-			</button>
+
+				{/* main button */}
+				<button
+					onClick={() => {
+						if (isChatOpen) {
+							setIsChatOpen(false);
+							setShowChatMenu(false);
+						} else {
+							setShowChatMenu(!showChatMenu);
+						}
+					}}
+					className={`w-14 h-14 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center ${
+						isChatOpen 
+							? 'bg-gray-700 text-white hover:bg-gray-800' 
+							: 'bg-blue-600 text-white hover:bg-blue-700'
+					}`}
+				>
+					{isChatOpen ? (
+						<X className="w-6 h-6" />
+					) : (
+						<MessageCircle className="w-6 h-6" />
+					)}
+				</button>
+			</div>
+
+			{/* backdrop for chat menu */}
+			{showChatMenu && !isChatOpen && (
+				<div 
+					className="fixed inset-0 z-30" 
+					onClick={() => setShowChatMenu(false)}
+				/>
+			)}
 
 			{/* Chat Modal */}
 			{isChatOpen && (
@@ -305,9 +369,15 @@ const CourseViewerPage = () => {
 						onClick={() => setIsChatOpen(false)}
 					/>
 					<div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden animate-fade-in">
-						<ChatWindow
-							conversation={getConversationByInstructorId(course.instructor._id)}
-						/>
+						{chatMode === 'instructor' ? (
+							<ChatWindow
+								conversation={getConversationByInstructorId(course?.instructor?._id)}
+							/>
+						) : (
+							<ChatRoomWindow
+								room={getCourseRoomByCourseId(courseId)}
+							/>
+						)}
 					</div>
 				</>
 			)}
