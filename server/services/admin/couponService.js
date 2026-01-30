@@ -16,10 +16,10 @@ export const deleteCouponService = couponId => {
   return Coupon.findByIdAndUpdate(couponId, { isDeleted: true }, { new: true });
 };
 
-export const togglePauseCouponService = couponId => {
-  return Coupon.findById(couponId).then(coupon => {
-    if (!coupon) throw new Error("Coupon not found");
-    coupon.isPaused = !coupon.isPaused;
-    return coupon.save();
-  });
+export const togglePauseCouponService = async (couponId) => {
+  let coupon = await Coupon.findById(couponId)
+  if(!coupon) throw new Error("Coupon not found")
+  coupon.isPaused = !coupon.isPaused
+  return coupon.save()
+ 
 };

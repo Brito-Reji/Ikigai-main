@@ -77,7 +77,19 @@ export const createOrderService = async ({
     receipt: `receipt_${Date.now()}`,
   };
 
-  const razorpayOrder = await razorpayInstance.orders.create(options);
+  let razorpayOrder;
+  try {
+    razorpayOrder = await razorpayInstance.orders.create(options);
+  } catch (err) {
+    console.error("Razorpay order creation failed:", err);
+    throw new Error(
+      err?.error?.description || "Failed to create Razorpay order"
+    );
+  }
+
+  if (!razorpayOrder || !razorpayOrder.id) {
+    throw new Error("Invalid response from Razorpay");
+  }
 
   await Order.create({
     userId,
