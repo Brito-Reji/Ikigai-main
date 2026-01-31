@@ -1,58 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
+import { chatApi } from "@/api/chatApi";
 import {
-  mockConversations,
-  mockCourseRooms,
-  getConversationById,
-  getCourseRoomById,
-  getCourseRoomByCourseId,
-  getConversationByInstructorId,
-} from "@/data/mockChatData";
-
-// simulate async delay
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-// mock fetchers
-const fetchConversations = async () => {
-  await delay(300);
-  return { data: mockConversations };
-};
-
-const fetchCourseRooms = async () => {
-  await delay(300);
-  return { data: mockCourseRooms };
-};
-
-const fetchConversationById = async conversationId => {
-  await delay(200);
-  const conversation = getConversationById(conversationId);
-  if (!conversation) throw new Error("Conversation not found");
-  return { data: conversation };
-};
-
-const fetchCourseRoomById = async roomId => {
-  await delay(200);
-  const room = getCourseRoomById(roomId);
-  if (!room) throw new Error("Room not found");
-  return { data: room };
-};
-
-const fetchRoomByCourseId = async courseId => {
-  await delay(200);
-  const room = getCourseRoomByCourseId(courseId);
-  return { data: room || null };
-};
-
-const fetchConversationByInstructorId = async instructorId => {
-  await delay(200);
-  const conversation = getConversationByInstructorId(instructorId);
-  return { data: conversation || null };
-};
+  getSocket,
+  joinConversation,
+  leaveConversation,
+  joinRoom,
+  leaveRoom,
+  sendMessage as socketSendMessage,
+  sendRoomMessage as socketSendRoomMessage,
+} from "@/lib/socket";
 
 // get all conversations
 export const useGetConversations = () => {
   return useQuery({
     queryKey: ["conversations"],
-    queryFn: fetchConversations,
+    queryFn: async () => {
+      const res = await chatApi.getConversations();
+      return res.data;
+    },
   });
 };
 
@@ -60,126 +26,190 @@ export const useGetConversations = () => {
 export const useGetCourseRooms = () => {
   return useQuery({
     queryKey: ["course-rooms"],
-    queryFn: fetchCourseRooms,
+    queryFn: async () => {
+      const res = await chatApi.getCourseRooms();
+      return res.data;
+    },
   });
 };
 
-// get single conversation
-export const useGetConversationById = conversationId => {
-  return useQuery({
-    queryKey: ["conversations", conversationId],
-    queryFn: () => fetchConversationById(conversationId),
+// get conversation messages with socket updates
+export const useConversationMessages = conversationId => {
+  const [messages, setMessages] = useState([]);
+  const queryClient = useQueryClient();
+
+  // fetch initial messages
+  const { data, isLoading } = useQuery({
+    queryKey: ["messages", conversationId],
+    queryFn: async () => {
+      const res = await chatApi.getConversationMessages(conversationId);
+      return res.data;
+    },
     enabled: !!conversationId,
   });
+
+  // set initial messages
+  useEffect(() => {
+    if (data?.data) {
+      setMessages(data.data);
+    }
+  }, [data]);
+
+  // socket listener
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    // join room
+    joinConversation(conversationId);
+
+    // listen for new messages
+    const handleNewMessage = ({ message }) => {
+      if (message.conversationId === conversationId) {
+        setMessages(prev => [...prev, message]);
+      }
+    };
+
+    socket.on("message:new", handleNewMessage);
+
+    return () => {
+      leaveConversation(conversationId);
+      socket.off("message:new", handleNewMessage);
+    };
+  }, [conversationId]);
+
+  // send message
+  const sendMessage = useCallback(
+    (content, mentions = []) => {
+      socketSendMessage(conversationId, content, mentions);
+    },
+    [conversationId]
+  );
+
+  return { messages, isLoading, sendMessage };
 };
 
-// get single room
-export const useGetCourseRoomById = roomId => {
+// get room messages with socket updates
+export const useRoomMessages = roomId => {
+  const [messages, setMessages] = useState([]);
+
+  // fetch initial messages
+  const { data, isLoading } = useQuery({
+    queryKey: ["room-messages", roomId],
+    queryFn: async () => {
+      const res = await chatApi.getRoomMessages(roomId);
+      return res.data;
+    },
+    enabled: !!roomId,
+  });
+
+  // set initial messages
+  useEffect(() => {
+    if (data?.data) {
+      setMessages(data.data);
+    }
+  }, [data]);
+
+  // socket listener
+  useEffect(() => {
+    if (!roomId) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    // join room
+    joinRoom(roomId);
+
+    // listen for new messages
+    const handleNewMessage = ({ message }) => {
+      if (message.roomId === roomId) {
+        setMessages(prev => [...prev, message]);
+      }
+    };
+
+    socket.on("room:message:new", handleNewMessage);
+
+    return () => {
+      leaveRoom(roomId);
+      socket.off("room:message:new", handleNewMessage);
+    };
+  }, [roomId]);
+
+  // send message
+  const sendMessage = useCallback(
+    (content, mentions = []) => {
+      socketSendRoomMessage(roomId, content, mentions);
+    },
+    [roomId]
+  );
+
+  return { messages, isLoading, sendMessage };
+};
+
+// get room participants
+export const useGetRoomParticipants = roomId => {
   return useQuery({
-    queryKey: ["course-rooms", roomId],
-    queryFn: () => fetchCourseRoomById(roomId),
+    queryKey: ["room-participants", roomId],
+    queryFn: async () => {
+      const res = await chatApi.getRoomParticipants(roomId);
+      return res.data;
+    },
     enabled: !!roomId,
   });
 };
 
 // get room by course id
-export const useGetRoomByCourseId = courseId => {
+export const useGetRoomByCourse = courseId => {
   return useQuery({
-    queryKey: ["course-rooms", "by-course", courseId],
-    queryFn: () => fetchRoomByCourseId(courseId),
+    queryKey: ["course-room", courseId],
+    queryFn: async () => {
+      const res = await chatApi.getRoomByCourse(courseId);
+      return res.data;
+    },
     enabled: !!courseId,
   });
 };
 
-// get conversation by instructor id
-export const useGetConversationByInstructor = instructorId => {
-  return useQuery({
-    queryKey: ["conversations", "by-instructor", instructorId],
-    queryFn: () => fetchConversationByInstructorId(instructorId),
-    enabled: !!instructorId,
-  });
-};
-
-// send message to conversation
-export const useSendMessage = () => {
+// create/get conversation
+export const useCreateConversation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ conversationId, message }) => {
-      await delay(100);
-      const conversation = getConversationById(conversationId);
-      if (conversation) {
-        conversation.messages.push(message);
-        conversation.lastMessage = message.content;
-        conversation.lastMessageTime = message.timestamp;
-      }
-      return { data: message };
-    },
-    onSuccess: (_, { conversationId }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["conversations", conversationId],
-      });
+    mutationFn: ({ instructorId, courseId }) =>
+      chatApi.createConversation(instructorId, courseId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
   });
 };
 
-// send message to room
-export const useSendRoomMessage = () => {
-  const queryClient = useQueryClient();
+// typing indicator hook
+export const useTypingIndicator = () => {
+  const [typingUsers, setTypingUsers] = useState([]);
 
-  return useMutation({
-    mutationFn: async ({ roomId, message }) => {
-      await delay(100);
-      const room = getCourseRoomById(roomId);
-      if (room) {
-        room.messages.push(message);
-        room.lastMessage = message.content;
-        room.lastMessageTime = message.timestamp;
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleTyping = ({ userId, userName, isTyping }) => {
+      if (isTyping) {
+        setTypingUsers(prev => {
+          if (prev.find(u => u.userId === userId)) return prev;
+          return [...prev, { userId, userName }];
+        });
+      } else {
+        setTypingUsers(prev => prev.filter(u => u.userId !== userId));
       }
-      return { data: message };
-    },
-    onSuccess: (_, { roomId }) => {
-      queryClient.invalidateQueries({ queryKey: ["course-rooms", roomId] });
-      queryClient.invalidateQueries({ queryKey: ["course-rooms"] });
-    },
-  });
-};
+    };
 
-// get room participants for mentions
-export const useGetRoomParticipants = roomId => {
-  return useQuery({
-    queryKey: ["course-rooms", roomId, "participants"],
-    queryFn: async () => {
-      await delay(150);
-      const room = getCourseRoomById(roomId);
-      if (!room) return { data: [] };
+    socket.on("typing:update", handleTyping);
 
-      // extract unique participants from messages + instructor
-      const participants = new Map();
+    return () => {
+      socket.off("typing:update", handleTyping);
+    };
+  }, []);
 
-      // add instructor
-      participants.set(room.instructor.id, {
-        id: room.instructor.id,
-        name: room.instructor.name,
-        avatar: room.instructor.avatar,
-        type: "instructor",
-      });
-
-      // add students from messages
-      room.messages.forEach(msg => {
-        if (!participants.has(msg.senderId)) {
-          participants.set(msg.senderId, {
-            id: msg.senderId,
-            name: msg.senderName,
-            avatar: msg.senderAvatar,
-            type: msg.senderType,
-          });
-        }
-      });
-
-      return { data: Array.from(participants.values()) };
-    },
-    enabled: !!roomId,
-  });
+  return typingUsers;
 };

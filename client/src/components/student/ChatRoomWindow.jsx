@@ -1,16 +1,17 @@
 import React, { useRef, useEffect } from 'react';
 import { Users, GraduationCap, MoreVertical } from 'lucide-react';
 import ChatInputWithMentions from './ChatInputWithMentions';
-import { useGetRoomParticipants, useSendRoomMessage } from '@/hooks/useChat';
+import { useRoomMessages, useGetRoomParticipants, useTypingIndicator } from '@/hooks/useChat';
 
 const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 	const messagesEndRef = useRef(null);
 	
-	const { data: participantsData } = useGetRoomParticipants(room?.id);
-	const sendMessageMutation = useSendRoomMessage();
+	// use real-time hooks
+	const { messages, sendMessage } = useRoomMessages(room?._id);
+	const { data: participantsData } = useGetRoomParticipants(room?._id);
+	const typingUsers = useTypingIndicator();
 	
 	const participants = participantsData?.data || [];
-	const messages = room?.messages || [];
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,19 +23,7 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 
 	const handleSendMessage = (content, mentions = []) => {
 		if (!room) return;
-		
-		const newMessage = {
-			id: `msg${Date.now()}`,
-			senderId: currentUserId,
-			senderName: 'You',
-			senderAvatar: 'https://i.pravatar.cc/150?img=1',
-			senderType: 'student',
-			content,
-			timestamp: new Date().toISOString(),
-			mentions
-		};
-		
-		sendMessageMutation.mutate({ roomId: room.id, message: newMessage });
+		sendMessage(content, mentions);
 	};
 
 	const formatTime = (timestamp) => {
@@ -60,7 +49,8 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 	const groupMessagesByDate = (msgs) => {
 		const groups = {};
 		msgs.forEach(msg => {
-			const dateKey = new Date(msg.timestamp).toDateString();
+			const ts = msg.createdAt || msg.timestamp;
+			const dateKey = new Date(ts).toDateString();
 			if (!groups[dateKey]) groups[dateKey] = [];
 			groups[dateKey].push(msg);
 		});
@@ -122,7 +112,7 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 								<span>{room.participantCount} members</span>
 								<span>•</span>
 								<GraduationCap className="w-3 h-3" />
-								<span>{room.instructor.name}</span>
+								<span>{room.instructor?.name}</span>
 							</div>
 						</div>
 					</div>
@@ -144,22 +134,23 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 					<div key={dateKey}>
 						<div className="flex justify-center mb-4">
 							<span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm">
-								{formatDate(msgs[0].timestamp)}
+								{formatDate(msgs[0].createdAt || msgs[0].timestamp)}
 							</span>
 						</div>
 
 						{msgs.map((message) => {
-							const isOwn = message.senderId === currentUserId;
-							const isInstructor = message.senderType === 'instructor';
+							const senderId = message.sender || message.senderId;
+							const isOwn = senderId === currentUserId || senderId?.toString() === currentUserId;
+							const isInstructor = message.senderType === 'instructor' || message.senderModel === 'Instructor';
 
 							return (
 								<div
-									key={message.id}
+									key={message._id || message.id}
 									className={`flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`}
 								>
 									{!isOwn && (
 										<img
-											src={message.senderAvatar}
+											src={message.senderAvatar || 'https://i.pravatar.cc/150'}
 											alt={message.senderName}
 											className="w-8 h-8 rounded-full object-cover flex-shrink-0"
 										/>
@@ -191,7 +182,7 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 											</p>
 										</div>
 										<span className={`text-xs text-gray-400 mt-1 block ${isOwn ? 'text-right' : ''}`}>
-											{formatTime(message.timestamp)}
+											{formatTime(message.createdAt || message.timestamp)}
 										</span>
 									</div>
 								</div>
@@ -202,6 +193,22 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 				<div ref={messagesEndRef} />
 			</div>
 
+			{/* typing indicator */}
+			{typingUsers.length > 0 && (
+				<div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+					<div className="flex items-center gap-2 text-sm text-gray-500">
+						<div className="flex gap-1">
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+						</div>
+						<span>
+							{typingUsers.map(u => u.userName).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+						</span>
+					</div>
+				</div>
+			)}
+
 			{/* input with mentions */}
 			<div className="flex-shrink-0">
 				<ChatInputWithMentions 
@@ -209,6 +216,7 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 					placeholder="Message the group... (type @ to mention)" 
 					participants={participants}
 					showMentions={true}
+					roomId={room?._id}
 				/>
 			</div>
 		</div>

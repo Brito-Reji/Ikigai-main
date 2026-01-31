@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import AppRoutes from "./routes";
 import LoadingScreen from "@/components/common/LoadingScreen.jsx";
 import { useAuthCheck } from "./hooks/useAuthCheck.js";
+import SocketProvider from "@/context/SocketProvider";
 
 function App() {
   const location = useLocation();
@@ -20,11 +21,14 @@ function App() {
   }
 
   return (
-    <div>
-      <Toaster position="top-center" />
-      <AppRoutes />
-    </div>
+    <SocketProvider>
+      <div>
+        <Toaster position="top-center" />
+        <AppRoutes />
+      </div>
+    </SocketProvider>
   );
 }
 
 export default App;
+

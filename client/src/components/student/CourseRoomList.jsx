@@ -35,10 +35,10 @@ const CourseRoomList = ({ rooms, selectedRoomId, onSelectRoom }) => {
 			<div className="flex-1 overflow-y-auto">
 				{rooms.map((room) => (
 					<button
-						key={room.id}
-						onClick={() => onSelectRoom(room.id)}
+						key={room._id || room.id}
+						onClick={() => onSelectRoom(room)}
 						className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-							selectedRoomId === room.id ? 'bg-blue-50' : ''
+							selectedRoomId === (room._id || room.id) ? 'bg-blue-50' : ''
 						}`}
 					>
 						<div className="relative flex-shrink-0">

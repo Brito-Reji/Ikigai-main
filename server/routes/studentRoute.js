@@ -33,6 +33,15 @@ import {
   getWallet,
   getTransactions,
 } from "../controllers/students/walletController.js";
+import {
+  getConversations,
+  getOrCreateConversation,
+  getMessages,
+  getCourseRooms,
+  getRoomMessages,
+  getRoomParticipants,
+  getRoomByCourse,
+} from "../controllers/students/chatController.js";
 
 const router = Router();
 
@@ -71,5 +80,14 @@ router.get("/coupons/validate/:code", validateCoupon);
 // Wallet
 router.get("/wallet", getWallet);
 router.get("/wallet/transactions", getTransactions);
+
+// Chat
+router.get("/chat/conversations", getConversations);
+router.post("/chat/conversations", getOrCreateConversation);
+router.get("/chat/conversations/:conversationId/messages", getMessages);
+router.get("/chat/rooms", getCourseRooms);
+router.get("/chat/rooms/:roomId/messages", getRoomMessages);
+router.get("/chat/rooms/:roomId/participants", getRoomParticipants);
+router.get("/chat/rooms/course/:courseId", getRoomByCourse);
 
 export default router;

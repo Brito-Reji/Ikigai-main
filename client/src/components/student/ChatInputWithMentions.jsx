@@ -1,29 +1,70 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Smile, Paperclip, AtSign, X } from 'lucide-react';
+import { startTyping, stopTyping } from '@/lib/socket';
 
 const ChatInputWithMentions = ({ 
 	onSendMessage, 
 	placeholder = "Type a message...",
 	participants = [],
-	showMentions = false
+	showMentions = false,
+	conversationId = null,
+	roomId = null
 }) => {
 	const [message, setMessage] = useState('');
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const [mentionSearch, setMentionSearch] = useState('');
 	const [cursorPosition, setCursorPosition] = useState(0);
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const [isTyping, setIsTyping] = useState(false);
 	const inputRef = useRef(null);
+	const typingTimeoutRef = useRef(null);
 
 	// filter participants based on search
 	const filteredParticipants = participants.filter(p => 
 		p.name.toLowerCase().includes(mentionSearch.toLowerCase())
 	);
 
+	// handle typing indicator
+	const handleTypingStart = useCallback(() => {
+		if (!isTyping) {
+			setIsTyping(true);
+			startTyping({ conversationId, roomId });
+		}
+		
+		// clear existing timeout
+		if (typingTimeoutRef.current) {
+			clearTimeout(typingTimeoutRef.current);
+		}
+		
+		// stop typing after 2 seconds of no input
+		typingTimeoutRef.current = setTimeout(() => {
+			setIsTyping(false);
+			stopTyping({ conversationId, roomId });
+		}, 2000);
+	}, [isTyping, conversationId, roomId]);
+
+	// cleanup on unmount
+	useEffect(() => {
+		return () => {
+			if (typingTimeoutRef.current) {
+				clearTimeout(typingTimeoutRef.current);
+			}
+			if (isTyping) {
+				stopTyping({ conversationId, roomId });
+			}
+		};
+	}, [isTyping, conversationId, roomId]);
+
 	const handleInputChange = (e) => {
 		const value = e.target.value;
 		const cursor = e.target.selectionStart;
 		setMessage(value);
 		setCursorPosition(cursor);
+
+		// emit typing
+		if (value.trim()) {
+			handleTypingStart();
+		}
 
 		// check for @ trigger
 		if (showMentions) {

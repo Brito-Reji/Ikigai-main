@@ -5,42 +5,38 @@ import ConversationList from '@/components/student/ConversationList';
 import CourseRoomList from '@/components/student/CourseRoomList';
 import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
-import { 
-	useGetConversations, 
-	useGetCourseRooms,
-	useGetConversationById,
-	useGetCourseRoomById
-} from '@/hooks/useChat';
+import { useGetConversations, useGetCourseRooms } from '@/hooks/useChat';
 
 const ChatPage = () => {
 	const [activeTab, setActiveTab] = useState('direct');
 	const [selectedConversationId, setSelectedConversationId] = useState(null);
-	const [selectedRoomId, setSelectedRoomId] = useState(null);
+	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [showChatOnMobile, setShowChatOnMobile] = useState(false);
 
 	// tanstack queries
 	const { data: conversationsData, isLoading: loadingConversations } = useGetConversations();
 	const { data: roomsData, isLoading: loadingRooms } = useGetCourseRooms();
-	const { data: selectedConversationData } = useGetConversationById(selectedConversationId);
-	const { data: selectedRoomData } = useGetCourseRoomById(selectedRoomId);
 
 	const conversations = conversationsData?.data || [];
 	const rooms = roomsData?.data || [];
-	const selectedConversation = selectedConversationData?.data || null;
-	const selectedRoom = selectedRoomData?.data || null;
+
+	// find selected conversation
+	const selectedConversation = selectedConversationId 
+		? conversations.find(c => c._id === selectedConversationId)
+		: null;
 
 	// calc unread counts
-	const directUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
-	const roomsUnread = rooms.reduce((sum, r) => sum + r.unreadCount, 0);
+	const directUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+	const roomsUnread = rooms.reduce((sum, r) => sum + (r.unreadCount || 0), 0);
 
 	const handleSelectConversation = (conversationId) => {
 		setSelectedConversationId(conversationId);
-		setSelectedRoomId(null);
+		setSelectedRoom(null);
 		setShowChatOnMobile(true);
 	};
 
-	const handleSelectRoom = (roomId) => {
-		setSelectedRoomId(roomId);
+	const handleSelectRoom = (room) => {
+		setSelectedRoom(room);
 		setSelectedConversationId(null);
 		setShowChatOnMobile(true);
 	};
@@ -52,7 +48,7 @@ const ChatPage = () => {
 	const handleTabChange = (tab) => {
 		setActiveTab(tab);
 		setSelectedConversationId(null);
-		setSelectedRoomId(null);
+		setSelectedRoom(null);
 		setShowChatOnMobile(false);
 	};
 
@@ -89,7 +85,7 @@ const ChatPage = () => {
 					) : (
 						<CourseRoomList
 							rooms={rooms}
-							selectedRoomId={selectedRoomId}
+							selectedRoomId={selectedRoom?._id}
 							onSelectRoom={handleSelectRoom}
 						/>
 					)}
