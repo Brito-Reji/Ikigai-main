@@ -1,14 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Send, Smile, Paperclip } from 'lucide-react';
+import { startTyping, stopTyping } from '@/lib/socket';
 
-const ChatInput = ({ onSendMessage, placeholder = "Type a message..." }) => {
+const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversationId = null }) => {
 	const [message, setMessage] = useState('');
+	const [isTyping, setIsTyping] = useState(false);
+	const typingTimeoutRef = useRef(null);
+
+	const handleTypingStart = useCallback(() => {
+		if (!conversationId) return;
+		if (!isTyping) {
+			setIsTyping(true);
+			startTyping({ conversationId });
+		}
+		if (typingTimeoutRef.current) {
+			clearTimeout(typingTimeoutRef.current);
+		}
+		typingTimeoutRef.current = setTimeout(() => {
+			setIsTyping(false);
+			stopTyping({ conversationId });
+		}, 2000);
+	}, [isTyping, conversationId]);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (message.trim()) {
 			onSendMessage(message.trim());
 			setMessage('');
+			if (conversationId) {
+				setIsTyping(false);
+				stopTyping({ conversationId });
+				if (typingTimeoutRef.current) {
+					clearTimeout(typingTimeoutRef.current);
+				}
+			}
 		}
 	};
 
@@ -16,6 +41,13 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message..." }) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			handleSubmit(e);
+		}
+	};
+
+	const handleChange = (e) => {
+		setMessage(e.target.value);
+		if (e.target.value.trim()) {
+			handleTypingStart();
 		}
 	};
 
@@ -39,7 +71,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message..." }) => {
 				<div className="flex-1 relative">
 					<textarea
 						value={message}
-						onChange={(e) => setMessage(e.target.value)}
+						onChange={handleChange}
 						onKeyPress={handleKeyPress}
 						placeholder={placeholder}
 						rows={1}

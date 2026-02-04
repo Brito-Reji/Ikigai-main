@@ -11,8 +11,9 @@ export const SocketProvider = ({ children }) => {
   const { accessToken, isAuthenticated, user } = useSelector(state => state.auth);
 
   useEffect(() => {
-    // connect only for students
-    if (isAuthenticated && accessToken && user?.role === 'student') {
+    // connect for students and instructors
+    const allowedRoles = ['student', 'instructor'];
+    if (isAuthenticated && accessToken && allowedRoles.includes(user?.role)) {
       const socket = connectSocket(accessToken);
 
       socket.on('connect', () => setIsConnected(true));

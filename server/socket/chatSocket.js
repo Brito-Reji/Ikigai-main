@@ -24,25 +24,26 @@ export const initChatSocket = io => {
       // get user data
       if (decoded.role === "student") {
         const user = await User.findById(decoded.id).select(
-          "firstName lastName avatar"
+          "firstName lastName profileImageUrl"
         );
         socket.userName = `${user.firstName} ${user.lastName}`;
-        socket.userAvatar = user.avatar;
+        socket.userAvatar = user.profileImageUrl;
       } else if (decoded.role === "instructor") {
         const instructor = await Instructor.findById(decoded.id).select(
-          "firstName lastName avatar"
+          "firstName lastName profileImageUrl"
         );
         socket.userName = `${instructor.firstName} ${instructor.lastName}`;
-        socket.userAvatar = instructor.avatar;
+        socket.userAvatar = instructor.profileImageUrl;
       }
 
       next();
     } catch (err) {
-      next(new Error("Invalid token"));
+      next(new Error("Invalid token",err));
     }
   });
 
   io.on("connection", socket => {
+    console.log(socket);
     console.log(`User connected: ${socket.userId} (${socket.userRole})`);
 
     // track active user

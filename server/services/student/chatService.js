@@ -121,14 +121,18 @@ export const getCourseRooms = async userId => {
 export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
   const skip = (page - 1) * limit;
 
-  const messages = await Message.find({ roomId })
+  const messages = await Message.find({ roomId }).populate({
+    path: "sender",
+    select: "avatar",
+  })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
+  console.log(messages)
 
   return messages.reverse().map(msg => ({
     _id: msg._id,
-    senderId: msg.sender,
+    senderId: msg.sender.toString(), // convert to string for frontend comparison
     senderName: msg.senderName,
     senderAvatar: msg.senderAvatar,
     senderType: msg.senderModel === "Instructor" ? "instructor" : "student",

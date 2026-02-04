@@ -25,4 +25,22 @@ export const chatApi = {
     api.get(`/student/chat/rooms/course/${courseId}`),
 };
 
+// instructor chat API
+export const instructorChatApi = {
+  getConversations: () => api.get("/instructor/chat/conversations"),
+
+  getConversationMessages: (conversationId, page = 1) =>
+    api.get(
+      `/instructor/chat/conversations/${conversationId}/messages?page=${page}`
+    ),
+
+  getCourseRooms: () => api.get("/instructor/chat/rooms"),
+
+  getRoomMessages: (roomId, page = 1) =>
+    api.get(`/instructor/chat/rooms/${roomId}/messages?page=${page}`),
+
+  getRoomParticipants: roomId =>
+    api.get(`/instructor/chat/rooms/${roomId}/participants`),
+};
+
 export default chatApi;

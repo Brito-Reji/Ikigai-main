@@ -1,11 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import ChatHeader from './ChatHeader';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
+import { useConversationMessages, useTypingIndicator } from '@/hooks/useChat';
 
-const ChatWindow = ({ conversation, currentUserId = 'student1' }) => {
-	const [messages, setMessages] = useState(conversation?.messages || []);
+const ChatWindow = ({ conversation }) => {
 	const messagesEndRef = useRef(null);
+	const { user } = useSelector(state => state.auth);
+	const currentUserId = user?._id;
+
+	// use real-time hooks
+	const { messages, sendMessage } = useConversationMessages(conversation?._id);
+	const typingUsers = useTypingIndicator();
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -15,23 +22,9 @@ const ChatWindow = ({ conversation, currentUserId = 'student1' }) => {
 		scrollToBottom();
 	}, [messages]);
 
-	useEffect(() => {
-		if (conversation) {
-			setMessages(conversation.messages);
-		}
-	}, [conversation]);
-
 	const handleSendMessage = (content) => {
-		const newMessage = {
-			id: `msg${Date.now()}`,
-			senderId: currentUserId,
-			senderType: 'student',
-			content,
-			timestamp: new Date().toISOString(),
-			status: 'sent'
-		};
-
-		setMessages([...messages, newMessage]);
+		if (!conversation) return;
+		sendMessage(content);
 	};
 
 	if (!conversation) {
@@ -86,18 +79,36 @@ const ChatWindow = ({ conversation, currentUserId = 'student1' }) => {
 					</div>
 				</div>
 
-				{messages.map((message) => (
-					<MessageBubble
-						key={message.id}
-						message={message}
-						isOwn={message.senderId === currentUserId}
-					/>
-				))}
+				{messages.map((message) => {
+					const senderId = message.sender || message.senderId;
+					const isOwn = senderId === currentUserId || senderId?.toString() === currentUserId;
+					return (
+						<MessageBubble
+							key={message._id || message.id}
+							message={message}
+							isOwn={isOwn}
+						/>
+					);
+				})}
 				<div ref={messagesEndRef} />
 			</div>
 
+			{/* typing indicator */}
+			{typingUsers.length > 0 && (
+				<div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+					<div className="flex items-center gap-2 text-sm text-gray-500">
+						<div className="flex gap-1">
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+							<span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+						</div>
+						<span>{typingUsers[0]?.userName} is typing...</span>
+					</div>
+				</div>
+			)}
+
 			<div className="flex-shrink-0">
-				<ChatInput onSendMessage={handleSendMessage} />
+				<ChatInput onSendMessage={handleSendMessage} conversationId={conversation?._id} />
 			</div>
 		</div>
 	);

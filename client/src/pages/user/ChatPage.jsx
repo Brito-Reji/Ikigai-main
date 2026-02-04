@@ -20,7 +20,7 @@ const ChatPage = () => {
 	const conversations = conversationsData?.data || [];
 	const rooms = roomsData?.data || [];
 
-	// find selected conversation
+	// find selected conversation by _id
 	const selectedConversation = selectedConversationId 
 		? conversations.find(c => c._id === selectedConversationId)
 		: null;

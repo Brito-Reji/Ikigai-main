@@ -1,10 +1,13 @@
 import React, { useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Users, GraduationCap, MoreVertical } from 'lucide-react';
 import ChatInputWithMentions from './ChatInputWithMentions';
 import { useRoomMessages, useGetRoomParticipants, useTypingIndicator } from '@/hooks/useChat';
 
-const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
+const ChatRoomWindow = ({ room }) => {
 	const messagesEndRef = useRef(null);
+	const { user } = useSelector(state => state.auth);
+	const currentUserId = user?.id;
 	
 	// use real-time hooks
 	const { messages, sendMessage } = useRoomMessages(room?._id);
@@ -140,52 +143,53 @@ const ChatRoomWindow = ({ room, currentUserId = 'student1' }) => {
 
 						{msgs.map((message) => {
 							const senderId = message.sender || message.senderId;
-							const isOwn = senderId === currentUserId || senderId?.toString() === currentUserId;
+							// compare as strings to handle ObjectId vs string
+							const isOwn = currentUserId && senderId && String(senderId) === String(currentUserId);
 							const isInstructor = message.senderType === 'instructor' || message.senderModel === 'Instructor';
 
 							return (
-								<div
-									key={message._id || message.id}
-									className={`flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`}
-								>
-									{!isOwn && (
-										<img
-											src={message.senderAvatar || 'https://i.pravatar.cc/150'}
-											alt={message.senderName}
-											className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-										/>
-									)}
-									<div className={`max-w-[70%] ${isOwn ? 'items-end' : ''}`}>
-										{!isOwn && (
-											<div className="flex items-center gap-2 mb-1">
-												<span className={`text-xs font-medium ${isInstructor ? 'text-blue-600' : 'text-gray-700'}`}>
-													{message.senderName}
-												</span>
-												{isInstructor && (
-													<span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-														Instructor
-													</span>
-												)}
-											</div>
-										)}
-										<div
-											className={`px-4 py-2 rounded-2xl ${
-												isOwn
-													? 'bg-blue-600 text-white rounded-br-md'
-													: isInstructor
-														? 'bg-blue-50 text-gray-900 border border-blue-200 rounded-bl-md'
-														: 'bg-white text-gray-900 shadow-sm rounded-bl-md'
-											}`}
-										>
-											<p className="text-sm">
-												{isOwn ? message.content : renderMessageContent(message.content)}
-											</p>
-										</div>
-										<span className={`text-xs text-gray-400 mt-1 block ${isOwn ? 'text-right' : ''}`}>
-											{formatTime(message.createdAt || message.timestamp)}
-										</span>
-									</div>
-								</div>
+						<div
+  key={message._id || message.id}
+  className={`flex gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : ''}`}
+>
+  {!isOwn && (
+    <img
+      src={message.senderAvatar || 'https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png'}
+      alt={message.senderName}
+      className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+    />
+  )}
+  <div className={`max-w-[70%] ${isOwn ? 'flex flex-col items-end' : 'flex flex-col'}`}>
+    {!isOwn && (
+      <div className="flex items-center gap-2 mb-1">
+        <span className={`text-xs font-medium ${isInstructor ? 'text-blue-600' : 'text-gray-700'}`}>
+          {message.senderName}
+        </span>
+        {isInstructor && (
+          <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+            Instructor
+          </span>
+        )}
+      </div>
+    )}
+    <div
+      className={`px-4 py-2 rounded-2xl ${
+        isOwn
+          ? 'bg-blue-600 text-white rounded-br-md'
+          : isInstructor
+            ? 'bg-blue-50 text-gray-900 border border-blue-200 rounded-bl-md'
+            : 'bg-white text-gray-900 shadow-sm rounded-bl-md'
+      }`}
+    >
+      <p className="text-sm">
+        {isOwn ? message.content : renderMessageContent(message.content)}
+      </p>
+    </div>
+    <span className={`text-xs text-gray-400 mt-1 ${isOwn ? 'text-right' : ''}`}>
+      {formatTime(message.createdAt || message.timestamp)}
+    </span>
+  </div>
+</div>
 							);
 						})}
 					</div>

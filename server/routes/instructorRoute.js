@@ -101,4 +101,19 @@ router.get("/revenue/stats", getRevenueStats);
 router.get("/revenue/monthly", getMonthlyRevenue);
 router.get("/revenue/by-course", getCourseRevenue);
 
+// Chat Routes
+import {
+  getConversations,
+  getMessages,
+  getCourseRooms,
+  getRoomMessages,
+  getRoomParticipants,
+} from "../controllers/instructor/instructorChatController.js";
+
+router.get("/chat/conversations", getConversations);
+router.get("/chat/conversations/:conversationId/messages", getMessages);
+router.get("/chat/rooms", getCourseRooms);
+router.get("/chat/rooms/:roomId/messages", getRoomMessages);
+router.get("/chat/rooms/:roomId/participants", getRoomParticipants);
+
 export default router;
