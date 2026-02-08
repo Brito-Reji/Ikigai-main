@@ -7,7 +7,7 @@ import { Course } from "../../models/Course.js";
 // get student conversations
 export const getConversations = async userId => {
   const conversations = await Conversation.find({ student: userId })
-    .populate("instructor", "firstName lastName avatar")
+    .populate("instructor", "firstName lastName profileImageUrl")
     .populate("course", "title thumbnail")
     .sort({ updatedAt: -1 });
 
@@ -15,7 +15,7 @@ export const getConversations = async userId => {
     _id: conv._id,
     instructorId: conv.instructor._id,
     instructorName: `${conv.instructor.firstName} ${conv.instructor.lastName}`,
-    instructorAvatar: conv.instructor.avatar,
+    instructorAvatar: conv.instructor.profileImageUrl,
     courseId: conv.course._id,
     courseTitle: conv.course.title,
     lastMessage: conv.lastMessage?.content || "",
@@ -75,7 +75,7 @@ export const getCourseRooms = async userId => {
     select: "title thumbnail instructor",
     populate: {
       path: "instructor",
-      select: "firstName lastName avatar",
+      select: "firstName lastName profileImageUrl",
     },
   });
 
@@ -106,7 +106,7 @@ export const getCourseRooms = async userId => {
       instructor: {
         id: enrollment.course.instructor._id,
         name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`,
-        avatar: enrollment.course.instructor.avatar,
+        avatar: enrollment.course.instructor.profileImageUrl,
       },
       lastMessage: room.lastMessage?.content || "No messages yet",
       lastMessageTime: room.lastMessage?.timestamp || room.createdAt,
@@ -121,18 +121,19 @@ export const getCourseRooms = async userId => {
 export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
   const skip = (page - 1) * limit;
 
-  const messages = await Message.find({ roomId }).populate({
-    path: "sender",
-    select: "avatar",
-  })
+  const messages = await Message.find({ roomId })
+    .populate({
+      path: "sender",
+      select: "avatar",
+    })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-  console.log(messages)
+  console.log(messages);
 
   return messages.reverse().map(msg => ({
     _id: msg._id,
-    senderId: msg.sender.toString(), // convert to string for frontend comparison
+    senderId: msg.sender?._id?.toString() || msg.sender?.toString(),
     senderName: msg.senderName,
     senderAvatar: msg.senderAvatar,
     senderType: msg.senderModel === "Instructor" ? "instructor" : "student",
@@ -149,7 +150,7 @@ export const getRoomParticipants = async roomId => {
     select: "instructor",
     populate: {
       path: "instructor",
-      select: "firstName lastName avatar",
+      select: "firstName lastName profileImageUrl",
     },
   });
 
@@ -162,23 +163,24 @@ export const getRoomParticipants = async roomId => {
     participants.push({
       id: room.course.instructor._id,
       name: `${room.course.instructor.firstName} ${room.course.instructor.lastName}`,
-      avatar: room.course.instructor.avatar,
+      avatar: room.course.instructor.profileImageUrl,
       type: "instructor",
     });
   }
+  console.log(participants);
 
   // get enrolled students
   const enrollments = await Enrollment.find({
     course: room.course._id,
     status: "active",
-  }).populate("user", "firstName lastName avatar");
+  }).populate("user", "firstName lastName profileImageUrl");
 
   for (const enrollment of enrollments) {
     if (enrollment.user) {
       participants.push({
         id: enrollment.user._id,
         name: `${enrollment.user.firstName} ${enrollment.user.lastName}`,
-        avatar: enrollment.user.avatar,
+        avatar: enrollment.user.profileImageUrl,
         type: "student",
       });
     }
@@ -197,7 +199,7 @@ export const getRoomByCourseId = async (courseId, userId) => {
 
   const course = await Course.findById(courseId)
     .select("title thumbnail instructor")
-    .populate("instructor", "firstName lastName avatar");
+    .populate("instructor", "firstName lastName profileImageUrl");
 
   const participantCount = await Enrollment.countDocuments({
     course: courseId,
@@ -213,7 +215,7 @@ export const getRoomByCourseId = async (courseId, userId) => {
     instructor: {
       id: course.instructor._id,
       name: `${course.instructor.firstName} ${course.instructor.lastName}`,
-      avatar: course.instructor.avatar,
+      avatar: course.instructor.profileImageUrl,
     },
     lastMessage: room.lastMessage?.content || "No messages yet",
     lastMessageTime: room.lastMessage?.timestamp || room.createdAt,

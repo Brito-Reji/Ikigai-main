@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { getCurrentUserService } from "../../services/auth/currentUserService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-export const currentUser = asyncHandler(async (req, res) => {
+export const currentUser = asyncHandler(async (req, res,next) => {
   let accessToken = null;
 
   if (
@@ -11,10 +11,11 @@ export const currentUser = asyncHandler(async (req, res) => {
   ) {
     accessToken = req.headers.authorization.split(" ")[1];
   }
+  
 
   const user = await getCurrentUserService(accessToken);
 
-  res.status(HTTP_STATUS.OK).json({
+    res.status(HTTP_STATUS.OK).json({
     success: true,
     user,
   });

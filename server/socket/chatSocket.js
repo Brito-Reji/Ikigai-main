@@ -13,6 +13,7 @@ export const initChatSocket = io => {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
+      console.log(token);
       if (!token) {
         return next(new Error("Authentication required"));
       }
@@ -27,18 +28,22 @@ export const initChatSocket = io => {
           "firstName lastName profileImageUrl"
         );
         socket.userName = `${user.firstName} ${user.lastName}`;
-        socket.userAvatar = user.profileImageUrl;
+        socket.userAvatar =
+          user.profileImageUrl ||
+          "https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png";
       } else if (decoded.role === "instructor") {
         const instructor = await Instructor.findById(decoded.id).select(
           "firstName lastName profileImageUrl"
         );
         socket.userName = `${instructor.firstName} ${instructor.lastName}`;
-        socket.userAvatar = instructor.profileImageUrl;
+        socket.userAvatar =
+          instructor.profileImageUrl ||
+          "https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png";
       }
 
       next();
     } catch (err) {
-      next(new Error("Invalid token",err));
+      next(new Error("Invalid token", err));
     }
   });
 

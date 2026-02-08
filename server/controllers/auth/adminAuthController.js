@@ -2,8 +2,6 @@ import asyncHandler from "express-async-handler";
 import { adminLoginService } from "../../services/admin/adminLoginService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-
-
 export const adminLogin = asyncHandler(async (req, res) => {
   const { admin, accessToken, refreshToken } = await adminLoginService(
     req.body
@@ -12,7 +10,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -27,7 +25,3 @@ export const adminLogin = asyncHandler(async (req, res) => {
     },
   });
 });
-
-
-
-

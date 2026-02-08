@@ -23,7 +23,7 @@ const ChatInputWithMentions = ({
 	const filteredParticipants = participants.filter(p => 
 		p.name.toLowerCase().includes(mentionSearch.toLowerCase())
 	);
-
+console.log(participants);
 	// handle typing indicator
 	const handleTypingStart = useCallback(() => {
 		if (!isTyping) {

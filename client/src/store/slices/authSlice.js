@@ -1,35 +1,36 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../api/axiosConfig.js';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../../api/axiosConfig.js";
 
 // Async thunks for API calls
 export const loginUser = createAsyncThunk(
-  'auth/loginUser',
+  "auth/loginUser",
   async ({ email, password, role }, { rejectWithValue }) => {
     try {
       let endpoint;
-      if (role === 'instructor') {
-        endpoint = '/auth/instructor/signin';
-      } else if (role === 'admin') {
-        endpoint = '/auth/admin/login';
+      if (role === "instructor") {
+        endpoint = "/auth/instructor/signin";
+      } else if (role === "admin") {
+        endpoint = "/auth/admin/login";
       } else {
-        endpoint = '/auth/student/login';
+        endpoint = "/auth/student/login";
       }
       const response = await api.post(endpoint, { email, password });
-      console.log('response', response);
+      console.log("response", response);
 
       if (response.data.success) {
         const accessToken = response.data.accessToken;
         // Ensure we're storing a string, not an object
-        if (typeof accessToken === 'object') {
-          console.error('AccessToken is an object, extracting token string');
+        if (typeof accessToken === "object") {
+          console.error("AccessToken is an object, extracting token string");
           localStorage.setItem(
-            'accessToken',
+            "accessToken",
             accessToken.accessToken || JSON.stringify(accessToken)
           );
         } else {
-          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem("accessToken", accessToken);
         }
-        console.log('Login successful, token stored:', accessToken);
+        sessionStorage.removeItem("refreshFailed");
+        console.log("Login successful, token stored:", accessToken);
         return {
           user: response.data.user || { email, role },
           accessToken: accessToken,
@@ -38,7 +39,7 @@ export const loginUser = createAsyncThunk(
       } else {
         // If response is not successful but no error was thrown
         return rejectWithValue({
-          message: response.data?.message || 'Login failed',
+          message: response.data?.message || "Login failed",
         });
       }
     } catch (error) {
@@ -56,32 +57,32 @@ export const loginUser = createAsyncThunk(
       // Check if user is blocked
       if (
         error.response?.data?.isBlocked ||
-        error.response?.data?.message?.toLowerCase().includes('blocked')
+        error.response?.data?.message?.toLowerCase().includes("blocked")
       ) {
         return rejectWithValue({
           message:
-            error.response?.data?.message || 'Your account has been blocked',
+            error.response?.data?.message || "Your account has been blocked",
           isBlocked: true,
         });
       }
 
       return rejectWithValue({
-        message: error.response?.data?.message || 'Login failed',
+        message: error.response?.data?.message || "Login failed",
       });
     }
   }
 );
 
 export const registerUser = createAsyncThunk(
-  'auth/registerUser',
+  "auth/registerUser",
   async ({ userData, role }, { rejectWithValue }) => {
     try {
       const endpoint =
-        role === 'instructor'
-          ? '/auth/instructor/register'
-          : '/auth/student/register';
+        role === "instructor"
+          ? "/auth/instructor/register"
+          : "/auth/student/register";
       const response = await api.post(endpoint, userData);
-      console.log('response-> register redux', response);
+      console.log("response-> register redux", response);
       if (response.data.success) {
         return {
           message: response.data.message,
@@ -91,21 +92,22 @@ export const registerUser = createAsyncThunk(
       }
     } catch (error) {
       return rejectWithValue({
-        message: error.response?.data?.message || 'Registration failed',
+        message: error.response?.data?.message || "Registration failed",
       });
     }
   }
 );
 
 export const verifyOTP = createAsyncThunk(
-  'auth/verifyOTP',
+  "auth/verifyOTP",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/verify-otp', { email, otp });
+      const response = await api.post("/auth/verify-otp", { email, otp });
 
-      console.log('response-> verify OTP redux', response);
-      localStorage.setItem('userAuth', 'hello world');
-      localStorage.setItem('accessToken', response.data.accessToken);
+      console.log("response-> verify OTP redux", response);
+      localStorage.setItem("userAuth", "hello world");
+      localStorage.setItem("accessToken", response.data.accessToken);
+      sessionStorage.removeItem("refreshFailed");
       if (response.data.success) {
         return {
           message: response.data.message,
@@ -114,73 +116,73 @@ export const verifyOTP = createAsyncThunk(
       }
     } catch (error) {
       return rejectWithValue({
-        message: error.response?.data?.message || 'OTP verification failed',
+        message: error.response?.data?.message || "OTP verification failed",
       });
     }
   }
 );
 
 export const refreshAccessToken = createAsyncThunk(
-  'auth/refreshAccessToken',
+  "auth/refreshAccessToken",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/refresh');
+      const response = await api.post("/auth/refresh");
       if (response.data.success && response.data.accessToken) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        console.log('Token refreshed successfully');
+        localStorage.setItem("accessToken", response.data.accessToken);
+        console.log("Token refreshed successfully");
         return response.data.accessToken;
       } else {
         return rejectWithValue({
-          message: 'Failed to refresh token',
+          message: "Failed to refresh token",
         });
       }
     } catch (error) {
-      console.log('Error refreshing token:', error);
-      localStorage.removeItem('accessToken');
+      console.log("Error refreshing token:", error);
+      localStorage.removeItem("accessToken");
       return rejectWithValue({
-        message: 'Failed to refresh token',
+        message: "Failed to refresh token",
       });
     }
   }
 );
 
 export const fetchCurrentUser = createAsyncThunk(
-  'auth/fetchCurrentUser',
+  "auth/fetchCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/auth/me');
-      console.log('Current user fetched:', response.data);
+      const response = await api.get("/auth/me");
+      console.log("Current user fetched:", response.data);
       if (response.data.success && response.data.user) {
         // Check if user is blocked
         if (response.data.user.isBlocked) {
-          localStorage.removeItem('accessToken');
+          localStorage.removeItem("accessToken");
           return rejectWithValue({
-            message: 'Your account has been blocked. Please contact support.',
+            message: "Your account has been blocked. Please contact support.",
             isBlocked: true,
           });
         }
         return response.data.user;
       } else {
         return rejectWithValue({
-          message: 'Failed to fetch user data',
+          message: "Failed to fetch user data",
         });
       }
     } catch (error) {
-      console.log('Error fetching current user:', error);
+      console.log("Error fetching current user:", error);
 
       // Check if error is due to blocked account
       if (error.response?.data?.isBlocked) {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem("accessToken");
         return rejectWithValue({
           message:
-            error.response.data.message || 'Your account has been blocked.',
+            error.response.data.message || "Your account has been blocked.",
           isBlocked: true,
         });
       }
 
       // Don't remove token here - let the caller handle refresh logic
       return rejectWithValue({
-        message: 'Failed to fetch user data',
+        message: "Failed to fetch user data",
         shouldRetry: error.response?.status === 401,
       });
     }
@@ -188,20 +190,21 @@ export const fetchCurrentUser = createAsyncThunk(
 );
 
 export const googleAuth = createAsyncThunk(
-  'auth/googleAuth',
+  "auth/googleAuth",
   async ({ token, role }, { rejectWithValue }) => {
     try {
       const endpoint =
-        role === 'instructor'
-          ? '/auth/instructor/google'
-          : '/auth/student/google';
+        role === "instructor"
+          ? "/auth/instructor/google"
+          : "/auth/student/google";
       const response = await api.post(endpoint, { token });
 
       console.log(response.data);
       if (response.data.success) {
         const accessToken = response.data.accessToken;
-        localStorage.setItem('accessToken', accessToken);
-        console.log('Google auth successful, token stored:', accessToken);
+        localStorage.setItem("accessToken", accessToken);
+        sessionStorage.removeItem("refreshFailed");
+        console.log("Google auth successful, token stored:", accessToken);
         return {
           user: response.data.user || { role },
           token: accessToken,
@@ -211,7 +214,7 @@ export const googleAuth = createAsyncThunk(
     } catch (error) {
       return rejectWithValue({
         message:
-          error.response?.data?.message || 'Google authentication failed',
+          error.response?.data?.message || "Google authentication failed",
       });
     }
   }
@@ -219,8 +222,8 @@ export const googleAuth = createAsyncThunk(
 
 const initialState = {
   user: null,
-  accessToken: localStorage.getItem('accessToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  accessToken: localStorage.getItem("accessToken"),
+  isAuthenticated: !!localStorage.getItem("accessToken"),
   loading: false,
   error: null,
   requiresVerification: false,
@@ -228,7 +231,7 @@ const initialState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     logout: state => {
@@ -239,15 +242,15 @@ const authSlice = createSlice({
       state.error = null;
       state.requiresVerification = false;
       state.verificationEmail = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('userAuth');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userAuth");
 
       // Call backend to clear refresh token cookie
-      api.post('/auth/logout').catch(err => {
-        console.error('Logout API call failed:', err);
+      api.post("/auth/logout").catch(err => {
+        console.error("Logout API call failed:", err);
       });
 
-      console.log('User logged out');
+      console.log("User logged out");
     },
     clearError: state => {
       state.error = null;
@@ -275,7 +278,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
         state.requiresVerification = false;
-        console.log('Login fulfilled, state updated:', state);
+        console.log("Login fulfilled, state updated:", state);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -331,15 +334,15 @@ const authSlice = createSlice({
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         state.loading = false;
         state.accessToken = action.payload;
-        console.log('Token refreshed, state updated');
+        console.log("Token refreshed, state updated");
       })
       .addCase(refreshAccessToken.rejected, state => {
         state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
         state.accessToken = null;
-        localStorage.removeItem('accessToken');
-        console.log('Token refresh failed, clearing auth state');
+        localStorage.removeItem("accessToken");
+        console.log("Token refresh failed, clearing auth state");
       })
 
       // Fetch current user cases
@@ -350,7 +353,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
-        console.log('Current user fulfilled, state updated:', state);
+        console.log("Current user fulfilled, state updated:", state);
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
@@ -359,8 +362,8 @@ const authSlice = createSlice({
           state.user = null;
           state.isAuthenticated = false;
           state.accessToken = null;
-          localStorage.removeItem('accessToken');
-          console.log('Current user rejected, token cleared');
+          localStorage.removeItem("accessToken");
+          console.log("Current user rejected, token cleared");
         }
       })
 
@@ -375,7 +378,7 @@ const authSlice = createSlice({
         state.accessToken = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
-        console.log('Google auth fulfilled, state updated:', state);
+        console.log("Google auth fulfilled, state updated:", state);
       })
       .addCase(googleAuth.rejected, (state, action) => {
         state.loading = false;

@@ -6,7 +6,6 @@ import { Instructor } from "../models/Instructor.js";
 // import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
 
-
 const testAccount = await nodemailer.createTestAccount();
 
 function generateOTP() {
@@ -84,7 +83,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -116,7 +115,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 

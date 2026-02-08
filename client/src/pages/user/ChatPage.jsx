@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ChatTabs from '@/components/student/ChatTabs';
 import ConversationList from '@/components/student/ConversationList';
@@ -8,10 +9,13 @@ import ChatRoomWindow from '@/components/student/ChatRoomWindow';
 import { useGetConversations, useGetCourseRooms } from '@/hooks/useChat';
 
 const ChatPage = () => {
-	const [activeTab, setActiveTab] = useState('direct');
+	const { roomId } = useParams();
+	const navigate = useNavigate();
+	
+	const [activeTab, setActiveTab] = useState(roomId ? 'rooms' : 'direct');
 	const [selectedConversationId, setSelectedConversationId] = useState(null);
 	const [selectedRoom, setSelectedRoom] = useState(null);
-	const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+	const [showChatOnMobile, setShowChatOnMobile] = useState(!!roomId);
 
 	// tanstack queries
 	const { data: conversationsData, isLoading: loadingConversations } = useGetConversations();
@@ -19,6 +23,18 @@ const ChatPage = () => {
 
 	const conversations = conversationsData?.data || [];
 	const rooms = roomsData?.data || [];
+
+	// set room from URL param
+	useEffect(() => {
+		if (roomId && rooms.length > 0) {
+			const room = rooms.find(r => r._id === roomId);
+			if (room) {
+				setSelectedRoom(room);
+				setActiveTab('rooms');
+				setShowChatOnMobile(true);
+			}
+		}
+	}, [roomId, rooms]);
 
 	// find selected conversation by _id
 	const selectedConversation = selectedConversationId 
@@ -33,16 +49,19 @@ const ChatPage = () => {
 		setSelectedConversationId(conversationId);
 		setSelectedRoom(null);
 		setShowChatOnMobile(true);
+		navigate('/chat');
 	};
 
 	const handleSelectRoom = (room) => {
 		setSelectedRoom(room);
 		setSelectedConversationId(null);
 		setShowChatOnMobile(true);
+		navigate(`/chat/room/${room._id}`);
 	};
 
 	const handleBackToList = () => {
 		setShowChatOnMobile(false);
+		navigate('/chat');
 	};
 
 	const handleTabChange = (tab) => {
@@ -50,6 +69,7 @@ const ChatPage = () => {
 		setSelectedConversationId(null);
 		setSelectedRoom(null);
 		setShowChatOnMobile(false);
+		navigate('/chat');
 	};
 
 	const isLoading = activeTab === 'direct' ? loadingConversations : loadingRooms;

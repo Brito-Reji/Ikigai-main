@@ -75,6 +75,7 @@ export const getRoomParticipants = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
   const participants = await chatService.getRoomParticipants(roomId);
+  // console.log(participants)
 
   res.status(HTTP_STATUS.OK).json({
     success: true,

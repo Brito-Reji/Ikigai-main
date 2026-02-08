@@ -1,7 +1,10 @@
 import asyncHandler from "express-async-handler";
-import { studentGoogleAuthService, studentLoginService, studentRegisterService } from "../../services/student/studentAuthService.js";
+import {
+  studentGoogleAuthService,
+  studentLoginService,
+  studentRegisterService,
+} from "../../services/student/studentAuthService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
-
 
 export const studentRegister = asyncHandler(async (req, res) => {
   const { refreshToken, message } = await studentRegisterService(req.body);
@@ -9,7 +12,7 @@ export const studentRegister = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -36,7 +39,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -59,7 +62,7 @@ export const studentGoogleAuth = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 

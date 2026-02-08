@@ -1,7 +1,10 @@
 import asyncHandler from "express-async-handler";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
-import { instructorGoogleAuthService, instructorRegisterService, instructorSigninService } from "../../services/instructor/instructorAuthService.js";
-
+import {
+  instructorGoogleAuthService,
+  instructorRegisterService,
+  instructorSigninService,
+} from "../../services/instructor/instructorAuthService.js";
 
 export const instructorRegister = asyncHandler(async (req, res) => {
   await instructorRegisterService(req.body);
@@ -21,7 +24,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -44,7 +47,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 

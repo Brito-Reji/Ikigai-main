@@ -14,8 +14,7 @@ import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
 import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
-import { getConversationByInstructorId, getCourseRoomByCourseId } from '@/data/mockChatData';
-import { getEnrolledCourseById } from '@/data/mockEnrolledCourses';
+import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
 import api from '@/api/axiosConfig';
 import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
 
@@ -33,10 +32,16 @@ const CourseViewerPage = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [showChatMenu, setShowChatMenu] = useState(false);
-	const [chatMode, setChatMode] = useState('instructor'); // 'instructor' or 'room'
+	const [chatMode, setChatMode] = useState('room'); // 'instructor' or 'room'
 	const [completedLessons, setCompletedLessons] = useState(
 		new Set(enrollment?.data?.progress?.completedLessons || [])
 	);
+	const [conversation, setConversation] = useState(null);
+
+	// chat hooks
+	const { data: roomData, isLoading: roomLoading } = useGetRoomByCourse(courseId);
+	const room = roomData?.data;
+	const createConversation = useCreateConversation();
 
 
 	useEffect(() => {
@@ -146,6 +151,30 @@ const CourseViewerPage = () => {
 
 	const handleMarkComplete = (lessonId) => {
 		setCompletedLessons((prev) => new Set([...prev, lessonId]));
+	};
+
+	// open instructor chat
+	const handleOpenInstructorChat = async () => {
+		if (!course?.instructor?._id) return;
+		try {
+			const result = await createConversation.mutateAsync({
+				instructorId: course.instructor._id,
+				courseId: courseId
+			});
+			if (result?.data) {
+				setConversation({
+					_id: result.data._id,
+					instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
+					instructorAvatar: course.instructor.avatar,
+					courseTitle: course.title
+				});
+				setChatMode('instructor');
+				setIsChatOpen(true);
+				setShowChatMenu(false);
+			}
+		} catch (err) {
+			console.error('Failed to create conversation:', err);
+		}
 	};
 
 	const totalLessons = course?.chapters?.reduce(
@@ -294,12 +323,9 @@ const CourseViewerPage = () => {
 				{showChatMenu && !isChatOpen && (
 					<div className="absolute bottom-16 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-64 animate-fade-in">
 						<button
-							onClick={() => {
-								setChatMode('instructor');
-								setIsChatOpen(true);
-								setShowChatMenu(false);
-							}}
-							className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left"
+							onClick={handleOpenInstructorChat}
+							disabled={createConversation.isPending}
+							className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left disabled:opacity-50"
 						>
 							<div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
 								<MessageCircle className="w-5 h-5 text-blue-600" />
@@ -368,16 +394,31 @@ const CourseViewerPage = () => {
 						className="fixed inset-0 bg-black/50 z-40"
 						onClick={() => setIsChatOpen(false)}
 					/>
-					<div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden animate-fade-in">
-						{chatMode === 'instructor' ? (
-							<ChatWindow
-								conversation={getConversationByInstructorId(course?.instructor?._id)}
-							/>
-						) : (
-							<ChatRoomWindow
-								room={getCourseRoomByCourseId(courseId)}
-							/>
-						)}
+					<div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden animate-fade-in flex flex-col">
+						{/* mini chat header */}
+						<div className="flex-shrink-0 flex items-center justify-between px-3 py-2 bg-gray-50 border-b">
+							<span className="text-sm font-medium text-gray-700">
+								{chatMode === 'instructor' ? 'Instructor Chat' : 'Course Discussion'}
+							</span>
+							<Link
+								to="/chat"
+								className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+							>
+								<span>Open Full Chat</span>
+								<ChevronRight className="w-3 h-3" />
+							</Link>
+						</div>
+						<div className="flex-1 overflow-hidden">
+							{chatMode === 'instructor' ? (
+								<ChatWindow conversation={conversation} />
+							) : roomLoading ? (
+								<div className="flex items-center justify-center h-full">
+									<div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+								</div>
+							) : (
+								<ChatRoomWindow room={room} />
+							)}
+						</div>
 					</div>
 				</>
 			)}

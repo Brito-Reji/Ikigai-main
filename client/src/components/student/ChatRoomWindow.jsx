@@ -7,7 +7,7 @@ import { useRoomMessages, useGetRoomParticipants, useTypingIndicator } from '@/h
 const ChatRoomWindow = ({ room }) => {
 	const messagesEndRef = useRef(null);
 	const { user } = useSelector(state => state.auth);
-	const currentUserId = user?.id;
+	const currentUserId = user?.id || user?._id;
 	
 	// use real-time hooks
 	const { messages, sendMessage } = useRoomMessages(room?._id);

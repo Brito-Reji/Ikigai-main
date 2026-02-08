@@ -147,6 +147,14 @@ export default function AppRoutes() {
           }
         />
         <Route
+          path="chat/room/:roomId"
+          element={
+            <AuthGuard requireAuth={false} roles={["student"]}>
+              <ChatPage />
+            </AuthGuard>
+          }
+        />
+        <Route
           path="payment/success"
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
