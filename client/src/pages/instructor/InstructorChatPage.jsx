@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Users, Search, GraduationCap, MoreVertical } from 'lucide-react';
 import { useGetInstructorConversations, useGetInstructorRooms } from '@/hooks/useInstructorChat';
 import InstructorChatWindow from '@/components/instructor/InstructorChatWindow';
 import InstructorRoomWindow from '@/components/instructor/InstructorRoomWindow';
 
 const InstructorChatPage = () => {
-	const [activeTab, setActiveTab] = useState('direct');
+	const { conversationId, roomId } = useParams();
+	const navigate = useNavigate();
+	
+	const [activeTab, setActiveTab] = useState(roomId ? 'rooms' : 'direct');
 	const [selectedConversation, setSelectedConversation] = useState(null);
 	const [selectedRoom, setSelectedRoom] = useState(null);
-	const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+	const [showChatOnMobile, setShowChatOnMobile] = useState(!!conversationId || !!roomId);
 
 	const { data: conversationsData, isLoading: loadingConversations } = useGetInstructorConversations();
 	const { data: roomsData, isLoading: loadingRooms } = useGetInstructorRooms();
@@ -19,20 +23,46 @@ const InstructorChatPage = () => {
 	const directUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 	const roomsUnread = rooms.reduce((sum, r) => sum + (r.unreadCount || 0), 0);
 
+	// set conversation/room from URL param
+	useEffect(() => {
+		if (conversationId && conversations.length > 0) {
+			const conv = conversations.find(c => c._id === conversationId);
+			if (conv) {
+				setSelectedConversation(conv);
+				setActiveTab('direct');
+				setShowChatOnMobile(true);
+			}
+		}
+	}, [conversationId, conversations]);
+
+	useEffect(() => {
+		if (roomId && rooms.length > 0) {
+			const room = rooms.find(r => r._id === roomId);
+			if (room) {
+				setSelectedRoom(room);
+				setActiveTab('rooms');
+				setShowChatOnMobile(true);
+			}
+		}
+	}, [roomId, rooms]);
+
 	const handleSelectConversation = (conv) => {
 		setSelectedConversation(conv);
 		setSelectedRoom(null);
 		setShowChatOnMobile(true);
+		navigate(`/instructor/communication/conversation/${conv._id}`);
 	};
 
 	const handleSelectRoom = (room) => {
 		setSelectedRoom(room);
 		setSelectedConversation(null);
 		setShowChatOnMobile(true);
+		navigate(`/instructor/communication/room/${room._id}`);
 	};
 
 	const handleBackToList = () => {
 		setShowChatOnMobile(false);
+		navigate('/instructor/communication');
 	};
 
 	const formatTime = (timestamp) => {
@@ -58,7 +88,7 @@ const InstructorChatPage = () => {
 			<div className="flex-shrink-0 bg-white border-b border-gray-200 px-4">
 				<div className="flex gap-4">
 					<button
-						onClick={() => { setActiveTab('direct'); setSelectedConversation(null); setSelectedRoom(null); }}
+						onClick={() => { setActiveTab('direct'); setSelectedConversation(null); setSelectedRoom(null); navigate('/instructor/communication'); }}
 						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
 							activeTab === 'direct' 
 								? 'border-blue-600 text-blue-600' 
@@ -74,7 +104,7 @@ const InstructorChatPage = () => {
 						)}
 					</button>
 					<button
-						onClick={() => { setActiveTab('rooms'); setSelectedConversation(null); setSelectedRoom(null); }}
+						onClick={() => { setActiveTab('rooms'); setSelectedConversation(null); setSelectedRoom(null); navigate('/instructor/communication'); }}
 						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
 							activeTab === 'rooms' 
 								? 'border-blue-600 text-blue-600' 

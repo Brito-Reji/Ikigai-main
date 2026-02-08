@@ -155,6 +155,14 @@ export default function AppRoutes() {
           }
         />
         <Route
+          path="chat/conversation/:conversationId"
+          element={
+            <AuthGuard requireAuth={false} roles={["student"]}>
+              <ChatPage />
+            </AuthGuard>
+          }
+        />
+        <Route
           path="payment/success"
           element={
             <AuthGuard requireAuth={true} roles={["student"]}>
@@ -279,6 +287,22 @@ export default function AppRoutes() {
         />
         <Route
           path="communication"
+          element={
+            <AuthGuard requireAuth={true} roles={["instructor"]}>
+              <InstructorChatPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="communication/conversation/:conversationId"
+          element={
+            <AuthGuard requireAuth={true} roles={["instructor"]}>
+              <InstructorChatPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="communication/room/:roomId"
           element={
             <AuthGuard requireAuth={true} roles={["instructor"]}>
               <InstructorChatPage />

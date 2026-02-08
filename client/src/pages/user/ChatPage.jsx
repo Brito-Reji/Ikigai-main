@@ -9,13 +9,13 @@ import ChatRoomWindow from '@/components/student/ChatRoomWindow';
 import { useGetConversations, useGetCourseRooms } from '@/hooks/useChat';
 
 const ChatPage = () => {
-	const { roomId } = useParams();
+	const { roomId, conversationId } = useParams();
 	const navigate = useNavigate();
 	
 	const [activeTab, setActiveTab] = useState(roomId ? 'rooms' : 'direct');
-	const [selectedConversationId, setSelectedConversationId] = useState(null);
+	const [selectedConversationId, setSelectedConversationId] = useState(conversationId || null);
 	const [selectedRoom, setSelectedRoom] = useState(null);
-	const [showChatOnMobile, setShowChatOnMobile] = useState(!!roomId);
+	const [showChatOnMobile, setShowChatOnMobile] = useState(!!roomId || !!conversationId);
 
 	// tanstack queries
 	const { data: conversationsData, isLoading: loadingConversations } = useGetConversations();
@@ -49,7 +49,7 @@ const ChatPage = () => {
 		setSelectedConversationId(conversationId);
 		setSelectedRoom(null);
 		setShowChatOnMobile(true);
-		navigate('/chat');
+		navigate(`/chat/conversation/${conversationId}`);
 	};
 
 	const handleSelectRoom = (room) => {
