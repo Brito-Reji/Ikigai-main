@@ -27,17 +27,17 @@ export const initChatSocket = io => {
       // get user data
       if (decoded.role === "student") {
         const user = await User.findById(decoded.id).select(
-          "firstName lastName profileImageUrl"
+          "username profileImageUrl"
         );
-        socket.userName = `${user.firstName} ${user.lastName}`;
+        socket.userName = user.username || "User";
         socket.userAvatar =
           user.profileImageUrl ||
           "https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png";
       } else if (decoded.role === "instructor") {
         const instructor = await Instructor.findById(decoded.id).select(
-          "firstName lastName profileImageUrl"
+          "username profileImageUrl"
         );
-        socket.userName = `${instructor.firstName} ${instructor.lastName}`;
+        socket.userName = instructor.username || "Instructor";
         socket.userAvatar =
           instructor.profileImageUrl ||
           "https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png";

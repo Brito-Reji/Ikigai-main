@@ -7,14 +7,14 @@ import { Course } from "../../models/Course.js";
 // get student conversations
 export const getConversations = async userId => {
   const conversations = await Conversation.find({ student: userId })
-    .populate("instructor", "firstName lastName profileImageUrl")
+    .populate("instructor", "username profileImageUrl")
     .populate("course", "title thumbnail")
     .sort({ updatedAt: -1 });
 
   return conversations.map(conv => ({
     _id: conv._id,
     instructorId: conv.instructor._id,
-    instructorName: `${conv.instructor.firstName} ${conv.instructor.lastName}`,
+    instructorName: conv.instructor.username || "Instructor",
     instructorAvatar: conv.instructor.profileImageUrl,
     courseId: conv.course._id,
     courseTitle: conv.course.title,
@@ -75,7 +75,7 @@ export const getCourseRooms = async userId => {
     select: "title thumbnail instructor",
     populate: {
       path: "instructor",
-      select: "firstName lastName profileImageUrl",
+      select: "username profileImageUrl",
     },
   });
 
@@ -105,7 +105,7 @@ export const getCourseRooms = async userId => {
       participantCount: participantCount + 1, // +1 for instructor
       instructor: {
         id: enrollment.course.instructor._id,
-        name: `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`,
+        name: enrollment.course.instructor.username || "Instructor",
         avatar: enrollment.course.instructor.profileImageUrl,
       },
       lastMessage: room.lastMessage?.content || "No messages yet",
@@ -150,19 +150,26 @@ export const getRoomParticipants = async roomId => {
     select: "instructor",
     populate: {
       path: "instructor",
-      select: "firstName lastName profileImageUrl",
+      select: "username profileImageUrl",
     },
   });
 
   if (!room) return [];
 
-  // get instructor
-  const participants = [];
+  // add AI as default mention
+  const participants = [
+    {
+      id: "ai-assistant",
+      name: "AI",
+      avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+      type: "ai",
+    },
+  ];
 
   if (room.course?.instructor) {
     participants.push({
       id: room.course.instructor._id,
-      name: `${room.course.instructor.firstName} ${room.course.instructor.lastName}`,
+      name: room.course.instructor.username || "Instructor",
       avatar: room.course.instructor.profileImageUrl,
       type: "instructor",
     });
@@ -173,13 +180,13 @@ export const getRoomParticipants = async roomId => {
   const enrollments = await Enrollment.find({
     course: room.course._id,
     status: "active",
-  }).populate("user", "firstName lastName profileImageUrl");
+  }).populate("user", "username profileImageUrl");
 
   for (const enrollment of enrollments) {
     if (enrollment.user) {
       participants.push({
         id: enrollment.user._id,
-        name: `${enrollment.user.firstName} ${enrollment.user.lastName}`,
+        name: enrollment.user.username || "User",
         avatar: enrollment.user.profileImageUrl,
         type: "student",
       });
@@ -199,7 +206,7 @@ export const getRoomByCourseId = async (courseId, userId) => {
 
   const course = await Course.findById(courseId)
     .select("title thumbnail instructor")
-    .populate("instructor", "firstName lastName profileImageUrl");
+    .populate("instructor", "username profileImageUrl");
 
   const participantCount = await Enrollment.countDocuments({
     course: courseId,
@@ -214,7 +221,7 @@ export const getRoomByCourseId = async (courseId, userId) => {
     participantCount: participantCount + 1,
     instructor: {
       id: course.instructor._id,
-      name: `${course.instructor.firstName} ${course.instructor.lastName}`,
+      name: course.instructor.username || "Instructor",
       avatar: course.instructor.profileImageUrl,
     },
     lastMessage: room.lastMessage?.content || "No messages yet",
