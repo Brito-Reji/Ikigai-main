@@ -6,6 +6,7 @@ import { User } from "../../models/User.js";
 import { sendOTPToEmail } from "../../utils/OTPServices.js";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { generateUniqueUsername } from "../../utils/generateUniqueUsername.js";
 
 export const studentRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
@@ -191,11 +192,12 @@ export const studentGoogleAuthService = async token => {
       await user.save();
     }
   } else {
+    let username = await generateUniqueUsername(email,"student");
     user = await User.create({
       email,
       firstName,
       lastName,
-      username: null,
+      username,
       isVerified: true,
       profileImageUrl: picture,
       authType: "google",

@@ -5,6 +5,7 @@ import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { generateUniqueUsername } from "../../utils/generateUniqueUsername.js";
 
 export const instructorRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
@@ -162,11 +163,12 @@ export const instructorGoogleAuthService = async token => {
   }
 
   if (!instructor) {
+    let username = await generateUniqueUsername(email,"instructor");
     instructor = await Instructor.create({
       email,
       firstName,
       lastName,
-      username: null,
+      username,
       isVerified: true,
       profileImageUrl: picture,
       authType: "google",

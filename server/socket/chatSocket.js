@@ -2,8 +2,10 @@ import jwt from "jsonwebtoken";
 import { Message } from "../models/Message.js";
 import { Conversation } from "../models/Conversation.js";
 import { CourseRoom } from "../models/CourseRoom.js";
+import { Course } from "../models/Course.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
+import { getAIResponse } from "./Gemini.js";
 
 // store active users
 const activeUsers = new Map();
@@ -48,7 +50,7 @@ export const initChatSocket = io => {
   });
 
   io.on("connection", socket => {
-    console.log(socket);
+    // console.log(socket);
     console.log(`User connected: ${socket.userId} (${socket.userRole})`);
 
     // track active user
@@ -200,6 +202,64 @@ export const initChatSocket = io => {
             createdAt: message.createdAt,
           },
         });
+        // check if @AI mentioned in message
+        if (content.toLowerCase().includes("@ai")) {
+          // get course context
+          const room = await CourseRoom.findById(roomId);
+          const course = await Course.findById(room.course).select(
+            "title description overview"
+          );
+
+          // get last 10 messages for context
+          const recentMessages = await Message.find({ roomId })
+            .sort({ createdAt: -1 })
+            .limit(10);
+          const chatHistory = recentMessages.reverse();
+
+          // extract question from message
+          const question = content.replace(/@ai/gi, "").trim();
+
+          // get AI response
+          const aiResponse = await getAIResponse(
+            question,
+            {
+              title: course?.title || "Unknown Course",
+              description: course?.description || "",
+              overview: course?.overview || "",
+            },
+            chatHistory
+          );
+
+          // save AI message to DB
+          const aiMessage = await Message.create({
+            roomId,
+            sender: socket.userId,
+            senderModel: "User",
+            senderName: "AI Assistant",
+            senderAvatar:
+              "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+            content: aiResponse,
+            mentions: [],
+            mentionModels: [],
+          });
+
+          // broadcast AI response
+          io.to(`room:${roomId}`).emit("room:message:new", {
+            message: {
+              _id: aiMessage._id,
+              roomId,
+              sender: "ai-assistant",
+              senderModel: "AI",
+              senderName: "AI Assistant",
+              senderAvatar:
+                "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+              senderType: "ai",
+              content: aiResponse,
+              mentions: [],
+              createdAt: aiMessage.createdAt,
+            },
+          });
+        }
       } catch (err) {
         console.error("Room message error:", err);
         socket.emit("error", { message: "Failed to send message" });

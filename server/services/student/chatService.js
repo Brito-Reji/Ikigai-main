@@ -129,7 +129,7 @@ export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-  console.log(messages);
+  // console.log(messages);
 
   return messages.reverse().map(msg => ({
     _id: msg._id,
@@ -167,7 +167,7 @@ export const getRoomParticipants = async roomId => {
       type: "instructor",
     });
   }
-  console.log(participants);
+  // console.log(participants);
 
   // get enrolled students
   const enrollments = await Enrollment.find({

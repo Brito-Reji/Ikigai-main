@@ -28,6 +28,4 @@ const courseRoomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-courseRoomSchema.index({ course: 1 });
-
 export const CourseRoom = mongoose.model("CourseRoom", courseRoomSchema);
