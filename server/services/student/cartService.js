@@ -6,13 +6,13 @@ export const getCartService = async (userId) => {
         .populate({
             path: "courses",
             select: "title description price thumbnail instructor category blocked",
-            match: { blocked: false },
             populate: [
                 { path: "instructor", select: "firstName lastName", },
                 { path: "category", select: "name isBlocked" }
             ] 
         }).lean();
 
+    console.log(cart)
 
 
     // filter nulls

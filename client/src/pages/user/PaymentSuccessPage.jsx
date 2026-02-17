@@ -13,8 +13,14 @@ export default function PaymentSuccessPage() {
   const paymentId = stateData.paymentId;
   const enrolledDetails = stateData.enrolledDetails;
   
-  const courses = enrolledDetails?.courseIds || [];
-
+  let courses = enrolledDetails?.courseIds || [];
+  console.log("courses", courses);
+courses = courses.map((course) => (
+  {
+    ...course,
+    price: course.price / 100
+  }
+));
   useEffect(() => {
     console.log("Payment Success Page - State:", stateData);
     console.log("PaymentId:", paymentId);

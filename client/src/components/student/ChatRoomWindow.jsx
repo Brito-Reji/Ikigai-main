@@ -144,7 +144,12 @@ const ChatRoomWindow = ({ room }) => {
 						{msgs.map((message) => {
 							const senderId = message.sender || message.senderId;
 							// compare as strings to handle ObjectId vs string
-							const isOwn = currentUserId && senderId && String(senderId) === String(currentUserId);
+							console.log("sender ",message)
+							const isOwn =
+                currentUserId &&
+                senderId &&
+                String(senderId) === String(currentUserId) &&
+                message.senderName !== "AI Assistant";
 							const isInstructor = message.senderType === 'instructor' || message.senderModel === 'Instructor';
 
 							return (

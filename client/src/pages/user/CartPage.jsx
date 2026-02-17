@@ -63,7 +63,17 @@ const CartPage = () => {
       }
     }
   };
-
+function checkoutHandler() {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+  if(cartItems.some(item => item.blocked)) {
+    toast.error("One or more courses in your cart are currently unavailable. Please remove them to proceed.");
+    return;
+  }
+    navigate("/checkout");
+  }
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
       const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
@@ -114,14 +124,21 @@ const CartPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((course) => (
+            {cartItems.map(course => (
               <div
                 key={course._id}
-                className="bg-white rounded-lg shadow p-4 flex items-center space-x-4"
+                className={
+                  course.blocked
+                    ? "bg-white rounded-lg shadow p-4 flex items-center gap-4 opacity-50"
+                    : "bg-white rounded-lg shadow p-4 flex items-center gap-4"
+                }
               >
                 {/* Course Image */}
                 <img
-                  src={course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
+                  src={
+                    course.thumbnail ||
+                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"
+                  }
                   alt={course.title}
                   className="w-32 h-20 object-cover rounded"
                 />
@@ -132,15 +149,21 @@ const CartPage = () => {
                     {course.title}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    By {course.instructor?.firstName} {course.instructor?.lastName}
+                    By {course.instructor?.firstName}{" "}
+                    {course.instructor?.lastName}
                   </p>
-                  <p className="text-sm text-gray-500">{course.category?.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {course.category?.name}
+                  </p>
                 </div>
 
                 {/* Price & Remove */}
                 <div className="text-right">
                   <p className="text-xl font-bold text-gray-900 mb-2">
-                    ₹{typeof course.price === 'number' ? course.price : course.price}
+                    ₹
+                    {typeof course.price === "number"
+                      ? course.price
+                      : course.price}
                   </p>
                   <button
                     onClick={() => handleRemoveItem(course._id)}
@@ -157,7 +180,9 @@ const CartPage = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Order Summary
+              </h2>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
@@ -171,10 +196,10 @@ const CartPage = () => {
               </div>
 
               <button
-                onClick={() => navigate("/checkout")}
-                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2"
+                onClick={checkoutHandler}
+                className={cartItems.some(item => item.blocked) ? "w-full px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed" : "w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2"}
               >
-                <span>Proceed to Checkout</span>
+                <span >Proceed to Checkout</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 
