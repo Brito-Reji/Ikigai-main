@@ -11,9 +11,9 @@ const PurchaseHistoryPage = () => {
 
   const { data: orders = [], isLoading } = useOrderHistory();
   const { mutate: partialRefund } = usePartialRefund();
-
   const handleRefundCourse = async (order, courseId, courseTitle, originalPrice) => {
     // calculate base refund
+    console.log("order", order);
     let baseRefundAmount;
     if (order.originalAmount && order.originalAmount !== order.amount) {
       baseRefundAmount = Math.round((originalPrice / order.originalAmount) * order.amount);
@@ -41,7 +41,8 @@ const PurchaseHistoryPage = () => {
                 <p class="text-lg font-bold text-green-600 mt-1">₹${baseRefundAmount}</p>
               </div>
             </label>
-            
+        
+            ${order.paymentMethod !== 'wallet' ? `
             <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition" id="bank-option">
               <input type="radio" name="refundMethod" value="bank" class="mr-3" />
               <div class="flex-1">
@@ -53,9 +54,10 @@ const PurchaseHistoryPage = () => {
                 <p class="text-lg font-bold text-orange-600 mt-1">₹${bankRefundAmount}</p>
               </div>
             </label>
+            ` : ''}
           </div>
           
-          <p class="mt-4 text-xs text-gray-400">20% processing fee applies for bank refunds</p>
+          ${order.paymentMethod !== 'wallet' ? `<p class="mt-4 text-xs text-gray-400">20% processing fee applies for bank refunds</p>` : ''}
         </div>
       `,
       showCancelButton: true,
