@@ -16,6 +16,7 @@ const WishlistPage = () => {
     const cartItems = useSelector((state) => state.cart.items);
 
     const wishlistItems = wishlistData?.data || [];
+    console.log("wishlistItems", wishlistItems);
 
     const handleRemove = (courseId) => {
         removeFromWishlist(courseId, {
@@ -29,6 +30,10 @@ const WishlistPage = () => {
     };
 
     const handleAddToCart = (course) => {
+        if (course.blocked) {
+            toast.error("Course is blocked");
+            return;
+        }
         const isInCart = cartItems.some((item) => item._id === course._id);
 
         if (isInCart) {
@@ -98,6 +103,7 @@ const WishlistPage = () => {
                         <div
                             key={course._id}
                             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+                            style={{ opacity: course.blocked ? 0.5 : 1 }}
                         >
                             <div className="relative">
                                 <img

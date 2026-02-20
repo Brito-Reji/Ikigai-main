@@ -7,7 +7,7 @@ export const getWishlistService = async userId => {
     .populate({
       path: "courses",
       select:
-        "title description price thumbnail instructor category rating students",
+        "title description price thumbnail instructor category rating students blocked",
       populate: [
         { path: "instructor", select: "firstName lastName" },
         { path: "category", select: "name isBlocked" },
@@ -30,7 +30,7 @@ export const getWishlistService = async userId => {
     price: course.price / 100,
     priceInPaise: course.price,
   }));
-
+console.log("updated", updated);
   return updated;
 };
 
