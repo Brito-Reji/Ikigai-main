@@ -14,6 +14,7 @@ import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
 import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
+import CourseReviewModal from '@/components/student/CourseReviewModal';
 import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
 import api from '@/api/axiosConfig';
 import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
@@ -37,6 +38,7 @@ const CourseViewerPage = () => {
 		new Set(enrollment?.data?.progress?.completedLessons || [])
 	);
 	const [conversation, setConversation] = useState(null);
+	const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
 	// chat hooks
 	const { data: roomData, isLoading: roomLoading } = useGetRoomByCourse(courseId);
@@ -224,13 +226,13 @@ const CourseViewerPage = () => {
 							</nav>
 						</div>
 
-						{/* Review button - always visible now */}
+						{/* Review button - visible on all screens */}
 						<button
 							onClick={() => setIsReviewModalOpen(true)}
-							className="hidden lg:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							className="flex items-center gap-1.5 lg:gap-2 px-3 py-1.5 lg:px-4 lg:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
 						>
-							<Star className="w-4 h-4" />
-							<span className="text-sm font-medium">Rate Course</span>
+							<Star className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+							<span className="text-xs lg:text-sm font-medium">Rate</span>
 						</button>
 					</div>
 
@@ -422,6 +424,12 @@ const CourseViewerPage = () => {
 					</div>
 				</>
 			)}
+
+			<CourseReviewModal
+				isOpen={isReviewModalOpen}
+				onClose={() => setIsReviewModalOpen(false)}
+				courseTitle={course?.title}
+			/>
 		</div>
 	);
 };
