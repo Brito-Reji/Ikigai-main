@@ -1,5 +1,5 @@
-import api from './axiosConfig';
-import { courseEndpoints } from './endpoints/courseEndpoints';
+import api from "./axiosConfig";
+import { courseEndpoints } from "./endpoints/courseEndpoints";
 
 export const courseApi = {
   instructor: {
@@ -109,16 +109,21 @@ export const courseApi = {
       );
       return data;
     },
+
+    getReviews: async courseId => {
+      const { data } = await api.get(courseEndpoints.public.reviews(courseId));
+      return data;
+    },
   },
 
   admin: {
     getCourses: async (filters = {}) => {
       const params = new URLSearchParams();
-      if (filters.page) params.append('page', filters.page);
-      if (filters.limit) params.append('limit', filters.limit);
-      if (filters.search) params.append('search', filters.search);
-      if (filters.category) params.append('category', filters.category);
-      if (filters.status) params.append('status', filters.status);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.limit) params.append("limit", filters.limit);
+      if (filters.search) params.append("search", filters.search);
+      if (filters.category) params.append("category", filters.category);
+      if (filters.status) params.append("status", filters.status);
 
       const { data } = await api.get(
         `${courseEndpoints.admin.list()}?${params.toString()}`

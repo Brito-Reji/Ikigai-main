@@ -1,24 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { logout } from "@/store/slices/authSlice.js";
 import { LogOut } from "lucide-react";
 import Swal from "sweetalert2";
-import useUser from "@/hooks/useUser";
+import { jwtDecode } from "jwt-decode";
+import api from "@/api/adminAxiosConfig.js";
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const user = useUser()
+  // decode admin token
+  const user = useMemo(() => {
+    const token = localStorage.getItem("adminAccessToken");
+    if (!token) return null;
+    try {
+      return jwtDecode(token);
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-     console.log(user)
-      if(!user || user?.role !== "admin") {
-    navigate("/")
-  }
-  },[user, navigate])
+    if (!user || user?.role !== "admin") {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
@@ -44,7 +50,8 @@ const AdminLayout = () => {
     });
 
     if (result.isConfirmed) {
-      dispatch(logout());
+      localStorage.removeItem("adminAccessToken");
+      api.post("/auth/logout").catch(() => {});
       navigate('/admin/login');
       Swal.fire({
         icon: 'success',

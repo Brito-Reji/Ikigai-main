@@ -1,4 +1,4 @@
-import api from "@/api/axiosConfig";
+import api from "@/api/adminAxiosConfig";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";

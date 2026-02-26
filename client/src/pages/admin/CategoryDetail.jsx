@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Eye } from 'lucide-react';
-import api from '@/api/axiosConfig.js';
+import api from '@/api/adminAxiosConfig.js';
 
 const CategoryDetail = () => {
   const { categoryId } = useParams();

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import api from "@/api/axiosConfig.js";
+import api from "@/api/adminAxiosConfig.js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
@@ -115,7 +115,7 @@ function LoginPage() {
         console.log("response", response);
         
         if (response.data.success) {
-          localStorage.setItem("accessToken", response.data.accessToken);
+          localStorage.setItem("adminAccessToken", response.data.accessToken);
           toast.success("Login successful!");
         
           navigate("/admin/dashboard");

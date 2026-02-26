@@ -16,6 +16,7 @@ import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
 import CourseReviewModal from '@/components/student/CourseReviewModal';
 import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
+import { useCourseReviews } from '@/hooks/useReview';
 import api from '@/api/axiosConfig';
 import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
 
@@ -44,6 +45,8 @@ const CourseViewerPage = () => {
 	const { data: roomData, isLoading: roomLoading } = useGetRoomByCourse(courseId);
 	const room = roomData?.data;
 	const createConversation = useCreateConversation();
+	const { data: reviewsData } = useCourseReviews(courseId);
+	const reviews = reviewsData?.data || [];
 
 
 	useEffect(() => {
@@ -315,6 +318,37 @@ const CourseViewerPage = () => {
 							hasNext={currentLessonIndex < allLessons.length - 1}
 							onMarkComplete={handleMarkComplete}
 						/>
+
+						{/* Reviews Section */}
+						{reviews.length > 0 && (
+							<div className="mt-8">
+								<h3 className="text-lg font-semibold text-gray-900 mb-4">Student Reviews ({reviews.length})</h3>
+								<div className="space-y-4">
+									{reviews.map((review) => (
+										<div key={review._id} className="bg-white border border-gray-200 rounded-xl p-4">
+											<div className="flex items-center gap-3 mb-2">
+												<div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-600">
+													{review.user?.firstName?.[0] || '?'}
+												</div>
+												<div>
+													<p className="text-sm font-medium text-gray-900">
+														{review.user?.firstName} {review.user?.lastName}
+													</p>
+													<div className="flex items-center gap-0.5">
+														{[1, 2, 3, 4, 5].map((s) => (
+															<Star key={s} className={`w-3.5 h-3.5 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+														))}
+													</div>
+												</div>
+											</div>
+											{review.reviewText && (
+												<p className="text-sm text-gray-600 mt-2">{review.reviewText}</p>
+											)}
+										</div>
+									))}
+								</div>
+							</div>
+						)}
 					</div>
 				</main>
 			</div>
@@ -428,6 +462,7 @@ const CourseViewerPage = () => {
 			<CourseReviewModal
 				isOpen={isReviewModalOpen}
 				onClose={() => setIsReviewModalOpen(false)}
+				courseId={courseId}
 				courseTitle={course?.title}
 			/>
 		</div>

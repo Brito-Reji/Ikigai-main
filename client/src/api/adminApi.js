@@ -1,6 +1,6 @@
-import api from "./axiosConfig.js";
+import adminApi from "./adminAxiosConfig.js";
 
-export const adminApi = {
-  getDashboard: () => api.get("/admin/dashboard"),
-  getOrders: params => api.get("/admin/orders", { params }),
+export const adminApiService = {
+  getDashboard: () => adminApi.get("/admin/dashboard"),
+  getOrders: params => adminApi.get("/admin/orders", { params }),
 };

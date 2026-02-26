@@ -1,8 +1,8 @@
 export const courseEndpoints = {
   instructor: {
-    list: () => '/instructor/courses',
+    list: () => "/instructor/courses",
     byId: courseId => `/instructor/courses/${courseId}`,
-    create: () => '/instructor/courses',
+    create: () => "/instructor/courses",
     update: courseId => `/instructor/courses/${courseId}`,
     applyVerification: courseId =>
       `/instructor/courses/${courseId}/apply-verification`,
@@ -10,32 +10,32 @@ export const courseEndpoints = {
   },
 
   public: {
-    list: () => '/public/courses',
-    featured: () => '/public/courses/featured',
+    list: () => "/public/courses",
+    featured: () => "/public/courses/featured",
     details: courseId => `/public/courses/${courseId}`,
     chapters: courseId => `/public/courses/${courseId}/chapters`,
     lessons: (courseId, chapterId) =>
       `/public/courses/${courseId}/chapters/${chapterId}`,
+    reviews: courseId => `/public/courses/${courseId}/reviews`,
   },
 
   student: {
-    enrolledCourses: () => '/student/enrollments',
+    enrolledCourses: () => "/student/enrollments",
     byId: courseId => `/student/enrollments/${courseId}`,
-    verifyPayment: () => '/payments/verify-payment',
-    lessonById: (courseId, lessonId) => `/student/enrollments/${courseId}/lessons/${lessonId}`,
-    
+    verifyPayment: () => "/payments/verify-payment",
+    lessonById: (courseId, lessonId) =>
+      `/student/enrollments/${courseId}/lessons/${lessonId}`,
   },
 
   admin: {
-    list: () => '/admin/courses',
+    list: () => "/admin/courses",
     byId: courseId => `/admin/courses/${courseId}`,
-    statistics: () => '/admin/courses/statistics',
+    statistics: () => "/admin/courses/statistics",
     chapters: courseId => `/admin/courses/${courseId}/chapters`,
     toggleBlock: courseId => `/admin/courses/${courseId}/toggle-block`,
     delete: courseId => `/admin/courses/${courseId}`,
     updateVerification: courseId => `/admin/courses/${courseId}/verification`,
-    pendingVerifications: () => '/admin/verifications/pending',
-    verificationStatistics: () => '/admin/verifications/statistics',
+    pendingVerifications: () => "/admin/verifications/pending",
+    verificationStatistics: () => "/admin/verifications/statistics",
   },
 };
-

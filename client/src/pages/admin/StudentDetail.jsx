@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import api from "@/api/axiosConfig";
+import api from "@/api/adminAxiosConfig";
 import {
   ArrowLeft,
   Mail,

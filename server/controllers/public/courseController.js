@@ -91,3 +91,48 @@ export const getPublicCourseLessons = asyncHandler(async (req, res) => {
     count: lessons.length,
   });
 });
+
+// get public reviews for a course
+export const getPublicCourseReviews = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  const { Review } = await import("../../models/Review.js");
+
+  const reviews = await Review.find({ course: courseId })
+    .populate({ path: "user", select: "firstName lastName avatar username" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // compute stats
+  const totalReviews = reviews.length;
+  let averageRating = 0;
+  const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+  if (totalReviews > 0) {
+    let sum = 0;
+    reviews.forEach(r => {
+      sum += r.rating;
+      distribution[r.rating]++;
+    });
+    averageRating = parseFloat((sum / totalReviews).toFixed(1));
+  }
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map(stars => ({
+    stars,
+    count: distribution[stars],
+    percentage:
+      totalReviews > 0
+        ? Math.round((distribution[stars] / totalReviews) * 100)
+        : 0,
+  }));
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: {
+      reviews,
+      averageRating,
+      totalReviews,
+      ratingDistribution,
+    },
+  });
+});

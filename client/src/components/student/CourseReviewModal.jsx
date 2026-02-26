@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, X } from 'lucide-react';
+import { useAddReview, useMyReview } from '@/hooks/useReview';
 
-const CourseReviewModal = ({ isOpen, onClose, courseTitle }) => {
+const CourseReviewModal = ({ isOpen, onClose, courseId, courseTitle }) => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
 
+  const addReview = useAddReview();
+  const { data: myReview } = useMyReview(isOpen ? courseId : null);
+
+  // pre-fill if user already has a review
+  useEffect(() => {
+    if (myReview?.data) {
+      setRating(myReview.data.rating);
+      setReviewText(myReview.data.reviewText || '');
+    } else {
+      setRating(0);
+      setReviewText('');
+    }
+  }, [myReview]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // No backend integration for now, just log and close
-    console.log({ rating, reviewText });
-    setRating(0);
-    setReviewText('');
-    onClose();
+    try {
+      await addReview.mutateAsync({ courseId, rating, reviewText });
+      onClose();
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+    }
   };
 
   return (
@@ -24,10 +40,10 @@ const CourseReviewModal = ({ isOpen, onClose, courseTitle }) => {
         onClick={onClose}
       />
       
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-xl z-50 overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-xl font-semibold text-gray-900">
-            Rate this Course
+            {myReview?.data ? 'Update Your Review' : 'Rate this Course'}
           </h2>
           <button 
             onClick={onClose}
@@ -87,10 +103,10 @@ const CourseReviewModal = ({ isOpen, onClose, courseTitle }) => {
             </button>
             <button
               type="submit"
-              disabled={rating === 0}
+              disabled={rating === 0 || addReview.isPending}
               className="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl shadow-sm hover:bg-blue-700 hover:shadow disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              Submit Review
+              {addReview.isPending ? 'Submitting...' : myReview?.data ? 'Update Review' : 'Submit Review'}
             </button>
           </div>
         </form>

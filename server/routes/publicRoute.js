@@ -6,13 +6,13 @@ import {
   getCourseStats,
   getPublicCourseDetails,
   getPublicCourseChapters,
+  getPublicCourseReviews,
 } from "../controllers/public/courseController.js";
 
 import { getCategories } from "../controllers/admin/catergoryController.js";
 import { getSecureStreamUrl } from "../controllers/instructor/streamController.js";
 
 const router = Router();
-
 
 router.get("/courses", authenticate, getPublishedCourses);
 
@@ -26,6 +26,9 @@ router.get(
   authenticate,
   getPublicCourseChapters
 );
+
+// public reviews (no auth needed)
+router.get("/courses/:courseId/reviews", getPublicCourseReviews);
 
 router.get("/stream-video", getSecureStreamUrl);
 

@@ -19,15 +19,15 @@ export const loginUser = createAsyncThunk(
 
       if (response.data.success) {
         const accessToken = response.data.accessToken;
-        // Ensure we're storing a string, not an object
+        // admin uses separate key
+        const tokenKey = role === "admin" ? "adminAccessToken" : "accessToken";
         if (typeof accessToken === "object") {
-          console.error("AccessToken is an object, extracting token string");
           localStorage.setItem(
-            "accessToken",
+            tokenKey,
             accessToken.accessToken || JSON.stringify(accessToken)
           );
         } else {
-          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem(tokenKey, accessToken);
         }
         sessionStorage.removeItem("refreshFailed");
         console.log("Login successful, token stored:", accessToken);
@@ -243,6 +243,7 @@ const authSlice = createSlice({
       state.requiresVerification = false;
       state.verificationEmail = null;
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("adminAccessToken");
       localStorage.removeItem("userAuth");
 
       // Call backend to clear refresh token cookie

@@ -42,6 +42,11 @@ import {
   getRoomParticipants,
   getRoomByCourse,
 } from "../controllers/students/chatController.js";
+import {
+  addOrUpdateReview,
+  getCourseReviews,
+  getUserReview,
+} from "../controllers/students/reviewController.js";
 
 const router = Router();
 
@@ -89,5 +94,10 @@ router.get("/chat/rooms", getCourseRooms);
 router.get("/chat/rooms/:roomId/messages", getRoomMessages);
 router.get("/chat/rooms/:roomId/participants", getRoomParticipants);
 router.get("/chat/rooms/course/:courseId", getRoomByCourse);
+
+// Reviews
+router.post("/reviews", addOrUpdateReview);
+router.get("/reviews/course/:courseId", getCourseReviews);
+router.get("/reviews/my/:courseId", getUserReview);
 
 export default router;

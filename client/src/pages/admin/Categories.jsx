@@ -2,7 +2,7 @@ import { useCategory } from "@/hooks/useRedux";
 import { createCategory, updateCategory, toggleCategoryBlock } from "@/store/slices/categorySlice";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "@/api/axiosConfig.js";
+import api from "@/api/adminAxiosConfig.js";
 import Swal from "sweetalert2";
 
 const Categories = () => {
