@@ -5,7 +5,7 @@ import {
   requestEmailChangeOTPService,
   verifyEmailChangeOTPService,
   changePasswordService,
-} from "../../services/students/profileService.js";
+} from "../../services/student/profileService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET STUDENT PROFILE

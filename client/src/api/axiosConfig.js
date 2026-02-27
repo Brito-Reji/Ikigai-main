@@ -62,7 +62,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't try to refresh on login/signup/auth pages - let the actual error show
+    // Don't trprocessQueuey to refresh on login/signup/auth pages - let the actual error show
     const authPages = [
       "/login",
       "/signup",
