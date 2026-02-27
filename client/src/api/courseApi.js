@@ -77,6 +77,13 @@ export const courseApi = {
       );
       return data;
     },
+    markLessonComplete: async ({ courseId, lessonId }) => {
+      const { data } = await api.post(
+        courseEndpoints.student.completeLesson(),
+        { courseId, lessonId }
+      );
+      return data;
+    },
   },
 
   public: {

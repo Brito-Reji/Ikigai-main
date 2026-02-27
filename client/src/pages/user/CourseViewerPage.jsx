@@ -18,7 +18,7 @@ import CourseReviewModal from '@/components/student/CourseReviewModal';
 import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
 import { useCourseReviews } from '@/hooks/useReview';
 import api from '@/api/axiosConfig';
-import { useGetEnrolledCourseById } from '@/hooks/useEnrollment';
+import { useGetEnrolledCourseById, useMarkLessonComplete } from '@/hooks/useEnrollment';
 
 const CourseViewerPage = () => {
 	const { courseId } = useParams();
@@ -45,6 +45,7 @@ const CourseViewerPage = () => {
 	const { data: roomData, isLoading: roomLoading } = useGetRoomByCourse(courseId);
 	const room = roomData?.data;
 	const createConversation = useCreateConversation();
+	const markComplete = useMarkLessonComplete();
 	const { data: reviewsData } = useCourseReviews(courseId);
 	const reviews = reviewsData?.data || [];
 
@@ -155,7 +156,14 @@ const CourseViewerPage = () => {
 	};
 
 	const handleMarkComplete = (lessonId) => {
-		setCompletedLessons((prev) => new Set([...prev, lessonId]));
+		markComplete.mutate(
+			{ courseId, lessonId },
+			{
+				onSuccess: () => {
+					setCompletedLessons((prev) => new Set([...prev, lessonId]));
+				},
+			}
+		);
 	};
 
 	// open instructor chat

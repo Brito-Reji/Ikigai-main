@@ -25,6 +25,7 @@ export const courseEndpoints = {
     verifyPayment: () => "/payments/verify-payment",
     lessonById: (courseId, lessonId) =>
       `/student/enrollments/${courseId}/lessons/${lessonId}`,
+    completeLesson: () => "/student/enrollments/complete-lesson",
   },
 
   admin: {
