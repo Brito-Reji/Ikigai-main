@@ -10,7 +10,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useAdmin";
-import { Users, BookOpen, DollarSign, ShoppingCart, RefreshCcw, GraduationCap } from "lucide-react";
+import { Users, BookOpen, DollarSign, ShoppingCart, RefreshCcw, GraduationCap, Download } from "lucide-react";
+import toast from "react-hot-toast";
+import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 
 const AdminDashboard = () => {
   const { data, isLoading, error } = useAdminDashboard();
@@ -47,7 +49,28 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-8">Dashboard</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
+        <button
+          onClick={() => {
+            try {
+              generateSalesReportPdf({
+                mode: "admin",
+                stats: stats || {},
+                orders: recentOrders || [],
+                monthlyData: chartData || [],
+              });
+              toast.success("Sales report downloaded!");
+            } catch (err) {
+              toast.error("Failed to download report");
+            }
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+        >
+          <Download className="w-4 h-4" />
+          Download Report
+        </button>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">

@@ -94,7 +94,8 @@ courses = courses.map((course) => (
               />
               <DownloadInvoiceButton 
                 paymentDetails={{ paymentId }} 
-                courses={courses} 
+                courses={courses}
+                orderData={enrolledDetails}
               />
             </div>
           </div>

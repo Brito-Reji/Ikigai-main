@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Download } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "@/api/axiosConfig";
+import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 import RevenueStats from "@/components/instructor/RevenueStats.jsx";
 import RevenueChart from "@/components/instructor/RevenueChart.jsx";
 import CourseRevenue from "@/components/instructor/CourseRevenue.jsx";
@@ -58,16 +60,38 @@ export default function RevenuePage() {
             <h1 className="text-3xl font-bold text-gray-900">Revenue</h1>
           </div>
           
-          {/* Year Selector */}
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          >
-            {years.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+          {/* Year Selector + Download */}
+          <div className="flex items-center gap-3">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              {years.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => {
+                try {
+                  generateSalesReportPdf({
+                    mode: "instructor",
+                    stats,
+                    courses,
+                    monthlyData,
+                  });
+                  toast.success("Sales report downloaded!");
+                } catch (err) {
+                  toast.error("Failed to download report");
+                }
+              }}
+              disabled={statsLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              Download Report
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}

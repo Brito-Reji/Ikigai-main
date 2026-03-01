@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { ArrowLeft, Tag, Calendar, CreditCard, RefreshCcw, CheckCircle, XCircle, Clock, Wallet, Building2 } from "lucide-react";
+import { ArrowLeft, Tag, Calendar, CreditCard, RefreshCcw, CheckCircle, XCircle, Clock, Wallet, Building2, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useOrderHistory, usePartialRefund } from "@/hooks/useOrder.js";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import generateInvoicePdf from "@/utils/generateInvoicePdf";
 
 const PurchaseHistoryPage = () => {
   const navigate = useNavigate();
@@ -93,6 +94,24 @@ const PurchaseHistoryPage = () => {
     }
   };
 
+  // download invoice for an order
+  const handleDownloadInvoice = (order) => {
+    try {
+      generateInvoicePdf({
+        paymentId: order.razorpayOrderId,
+        courses: order.courseIds,
+        date: order.createdAt,
+        orderAmount: order.amount,
+        discountAmount: order.discountAmount,
+        couponCode: order.couponCode,
+        paymentMethod: order.paymentMethod,
+      });
+      toast.success("Invoice downloaded!");
+    } catch (err) {
+      toast.error("Failed to download invoice");
+    }
+  };
+
   const getPaymentStatus = (payment) => {
     if (payment.status === "REFUNDED") {
       return (
@@ -177,6 +196,15 @@ const PurchaseHistoryPage = () => {
                       }`}>
                         {order.status}
                       </span>
+                      {order.status === "PAID" && (
+                        <button
+                          onClick={() => handleDownloadInvoice(order)}
+                          className="flex items-center gap-1 px-2 py-1 bg-white/15 rounded-lg hover:bg-white/25 transition-colors text-xs font-medium"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Invoice
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

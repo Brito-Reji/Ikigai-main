@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { useAdminOrders } from "@/hooks/useAdmin";
-import { ShoppingCart, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useAdminOrders, useAdminDashboard } from "@/hooks/useAdmin";
+import { ShoppingCart, Search, ChevronLeft, ChevronRight, Eye, Download } from "lucide-react";
+import toast from "react-hot-toast";
+import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 
 const AdminOrdersPage = () => {
   const [page, setPage] = useState(1);
@@ -8,6 +10,7 @@ const AdminOrdersPage = () => {
   const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useAdminOrders({ page, limit: 20, status: status || undefined });
+  const { data: dashboardData } = useAdminDashboard();
 
   const formatAmount = (amount) => {
     return (amount / 100).toFixed(2);
@@ -56,8 +59,28 @@ const AdminOrdersPage = () => {
           <ShoppingCart className="w-7 h-7 text-indigo-600" />
           Orders
         </h1>
-        <div className="text-sm text-gray-500">
-          Total: {data?.pagination?.total || 0} orders
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-gray-500">
+            Total: {data?.pagination?.total || 0} orders
+          </div>
+          <button
+            onClick={() => {
+              try {
+                generateSalesReportPdf({
+                  mode: "admin",
+                  stats: dashboardData?.stats || {},
+                  orders: data?.orders || [],
+                });
+                toast.success("Sales report downloaded!");
+              } catch (err) {
+                toast.error("Failed to download report");
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+          >
+            <Download className="w-4 h-4" />
+            Download Report
+          </button>
         </div>
       </div>
 
