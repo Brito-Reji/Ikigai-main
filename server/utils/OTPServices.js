@@ -69,12 +69,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       );
       let { accessToken, refreshToken } = generateTokens({
         userId: student._id,
-        email: student.email,
-        username: student.username,
-        firstName: student.firstName,
         role: student.role,
-        profileImageUrl: student.profileImageUrl,
-        isVerified: true,
       });
 
       student.refreshToken = refreshToken;
@@ -101,12 +96,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       );
       let { accessToken, refreshToken } = generateTokens({
         userId: instructor._id,
-        email: instructor.email,
-        username: instructor.username,
-        firstName: instructor.firstName,
         role: instructor.role,
-        profileImageUrl: instructor.profileImageUrl,
-        isVerified: true,
       });
 
       instructor.refreshToken = refreshToken;

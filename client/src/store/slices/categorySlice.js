@@ -5,8 +5,8 @@ export const fetchCategories = createAsyncThunk(
   "categories/fetchCategories",
   async (_, thunkAPI) => {
     try {
-      const res = await api.get("/public");
-      console.log("category thunk ->", res);
+      const res = await api.get("/public/categories");
+
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.message);

@@ -33,10 +33,11 @@ releaseEscrowJob();
 const httpServer = createServer(app);
 
 // setup socket.io
+const isDev = process.env.NODE_ENV === "development";
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: isDev ? "*" : process.env.FRONTEND_URL,
+    credentials: !isDev,
   },
 });
 
@@ -46,7 +47,7 @@ initChatSocket(io);
 // make io available to routes
 app.set("io", io);
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   logger.info(`Server is running on port ${PORT}`);
   logger.info(`Socket.IO enabled`);
 });

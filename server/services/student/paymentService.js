@@ -11,7 +11,6 @@ import {
   incrementCouponUsageService,
 } from "./couponService.js";
 import { getWalletBalance, debitWallet } from "./walletService.js";
-import { Console } from "console";
 
 export const createOrderService = async ({
   courseIds,
@@ -73,7 +72,7 @@ export const createOrderService = async ({
   }
 
   const options = {
-    amount: Math.round(finalAmount),
+    amount: Math.round(finalAmount * 100),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
@@ -318,7 +317,7 @@ export const getOrderHistoryService = async userId => {
     .sort({ createdAt: -1 });
 
   // get payment details for each order
-  console.log("orders", orders);
+
   const ordersWithPayments = await Promise.all(
     orders.map(async order => {
       const payments = await Payment.find({

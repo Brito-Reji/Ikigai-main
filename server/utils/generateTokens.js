@@ -1,23 +1,13 @@
-// utils/generateTokens.js
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
-const generateTokens = ({userId,email,username,firstName,role,profileImageUrl,isVerified}) => {
-  // Short-lived access token (15min - 1hr)
+// generate access and refresh tokens
+const generateTokens = ({ userId, role }) => {
   const accessToken = jwt.sign(
-    {
-      id: userId,
-      email,
-      username,
-      firstName,
-      role,
-      profileImageUrl,
-      isVerified,
-    },
+    { id: userId, role },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "15m" }
   );
 
-  // Long-lived refresh token (7-30 days)
   const refreshToken = jwt.sign(
     { id: userId },
     process.env.JWT_REFRESH_SECRET,
@@ -27,4 +17,4 @@ const generateTokens = ({userId,email,username,firstName,role,profileImageUrl,is
   return { accessToken, refreshToken };
 };
 
-export  {generateTokens}
+export { generateTokens };

@@ -35,7 +35,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
         }
 
         try {
-            const vUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}`;
+            const vUrl = `${(import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}`;
             const { data } = await axios.get(vUrl);
             
             if (data.success && data.data?.url) {

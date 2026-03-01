@@ -125,7 +125,7 @@ export default function AppRoutes() {
         <Route
           path="my-courses"
           element={
-            <AuthGuard requireAuth={false} roles={["student"]}>
+            <AuthGuard requireAuth={true} roles={["student"]}>
               <MyCoursesPage />
             </AuthGuard>
           }
@@ -141,7 +141,7 @@ export default function AppRoutes() {
         <Route
           path="chat"
           element={
-            <AuthGuard requireAuth={false} roles={["student"]}>
+            <AuthGuard requireAuth={true} roles={["student"]}>
               <ChatPage />
             </AuthGuard>
           }
@@ -149,7 +149,7 @@ export default function AppRoutes() {
         <Route
           path="chat/room/:roomId"
           element={
-            <AuthGuard requireAuth={false} roles={["student"]}>
+            <AuthGuard requireAuth={true} roles={["student"]}>
               <ChatPage />
             </AuthGuard>
           }
@@ -157,7 +157,7 @@ export default function AppRoutes() {
         <Route
           path="chat/conversation/:conversationId"
           element={
-            <AuthGuard requireAuth={false} roles={["student"]}>
+            <AuthGuard requireAuth={true} roles={["student"]}>
               <ChatPage />
             </AuthGuard>
           }
@@ -316,17 +316,61 @@ export default function AppRoutes() {
       <Route path="/admin" element={<AdminLayout />}>
 
         <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="categories" element={<Categories />} />
-        <Route path="categories/:categoryId" element={<CategoryDetail />} />
-        <Route path="courses" element={<Courses />} />
-        <Route path="courses/:courseId" element={<CourseDetail />} />
-        <Route path="students" element={<Students />} />
-        <Route path="students/:id" element={<StudentDetail />} />
-        <Route path="instructors" element={<Instructors />} />
-        <Route path="instructors/:id" element={<InstructorDetail />} />
-        <Route path="coupons" element={<Coupons />} />
-        <Route path="orders" element={<OrdersPage />} />
+        <Route path="dashboard" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <AdminDashboard />
+          </AuthGuard>
+        } />
+        <Route path="categories" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <Categories />
+          </AuthGuard>
+        } />
+        <Route path="categories/:categoryId" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <CategoryDetail />
+          </AuthGuard>
+        } />
+        <Route path="courses" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <Courses />
+          </AuthGuard>
+        } />
+        <Route path="courses/:courseId" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <CourseDetail />
+          </AuthGuard>
+        } />
+        <Route path="students" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <Students />
+          </AuthGuard>
+        } />
+        <Route path="students/:id" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <StudentDetail />
+          </AuthGuard>
+        } />
+        <Route path="instructors" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <Instructors />
+          </AuthGuard>
+        } />
+        <Route path="instructors/:id" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <InstructorDetail />
+          </AuthGuard>
+        } />
+        <Route path="coupons" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <Coupons />
+          </AuthGuard>
+        } />
+        <Route path="orders" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <OrdersPage />
+          </AuthGuard>
+        } />
       </Route>
 
       {/* 404 */}

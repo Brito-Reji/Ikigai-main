@@ -28,7 +28,7 @@ import {
   updateCoupon,
   deleteCoupon,
   togglePauseCoupon,
-} from "../controllers/admin/couponContorller.js";
+} from "../controllers/admin/couponController.js";
 const router = Router();
 
 // DASHBOARD

@@ -1,4 +1,5 @@
 import api from "./axiosConfig";
+import adminApi from "./adminAxiosConfig";
 import { courseEndpoints } from "./endpoints/courseEndpoints";
 
 export const courseApi = {
@@ -132,41 +133,45 @@ export const courseApi = {
       if (filters.category) params.append("category", filters.category);
       if (filters.status) params.append("status", filters.status);
 
-      const { data } = await api.get(
+      const { data } = await adminApi.get(
         `${courseEndpoints.admin.list()}?${params.toString()}`
       );
       return data;
     },
 
     getCourseById: async courseId => {
-      const { data } = await api.get(courseEndpoints.admin.byId(courseId));
+      const { data } = await adminApi.get(courseEndpoints.admin.byId(courseId));
       return data;
     },
 
     getStatistics: async () => {
-      const { data } = await api.get(courseEndpoints.admin.statistics());
+      const { data } = await adminApi.get(courseEndpoints.admin.statistics());
       return data;
     },
 
     getChapters: async courseId => {
-      const { data } = await api.get(courseEndpoints.admin.chapters(courseId));
+      const { data } = await adminApi.get(
+        courseEndpoints.admin.chapters(courseId)
+      );
       return data;
     },
 
     toggleBlock: async courseId => {
-      const { data } = await api.patch(
+      const { data } = await adminApi.patch(
         courseEndpoints.admin.toggleBlock(courseId)
       );
       return data;
     },
 
     deleteCourse: async courseId => {
-      const { data } = await api.delete(courseEndpoints.admin.delete(courseId));
+      const { data } = await adminApi.delete(
+        courseEndpoints.admin.delete(courseId)
+      );
       return data;
     },
 
     updateVerification: async ({ courseId, status, rejectionReason }) => {
-      const { data } = await api.patch(
+      const { data } = await adminApi.patch(
         courseEndpoints.admin.updateVerification(courseId),
         {
           status,
@@ -177,14 +182,14 @@ export const courseApi = {
     },
 
     getPendingVerifications: async (page = 1, limit = 20) => {
-      const { data } = await api.get(
+      const { data } = await adminApi.get(
         `${courseEndpoints.admin.pendingVerifications()}?page=${page}&limit=${limit}`
       );
       return data;
     },
 
     getVerificationStatistics: async () => {
-      const { data } = await api.get(
+      const { data } = await adminApi.get(
         courseEndpoints.admin.verificationStatistics()
       );
       return data;

@@ -51,12 +51,7 @@ export const refreshTokenService = async incomingToken => {
 
   const { accessToken, refreshToken: newRefreshToken } = generateTokens({
     userId: user._id,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
     role: user.role,
-    profileImageUrl: user.profileImageUrl,
-    isVerified: user.isVerified,
   });
 
   user.refreshToken = newRefreshToken;

@@ -111,7 +111,6 @@ export const getAllOrders = async ({ page = 1, limit = 20, status }) => {
     .skip((page - 1) * limit)
     .limit(limit);
 
-    console.log("orders", orders);
   const total = await Order.countDocuments(query);
 
   return {

@@ -16,9 +16,8 @@ export const adminLogin = asyncHandler(async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
+    const user = Admin.find();
 
-    const user = Admin.find()
- 
     if (!user) {
       return res
         .status(HTTP_STATUS.NOT_FOUND)
@@ -41,8 +40,6 @@ export const adminLogin = asyncHandler(async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens({
       userId: user._id,
-      email: user.email,
-      firstName: user.firstName,
       role: user.role,
     });
     res.cookie("refreshToken", refreshToken);

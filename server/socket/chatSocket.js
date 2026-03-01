@@ -15,7 +15,7 @@ export const initChatSocket = io => {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
-      console.log(token);
+
       if (!token) {
         return next(new Error("Authentication required"));
       }

@@ -21,6 +21,29 @@ import {
   uploadVideo,
   getVideoUrl,
 } from "../controllers/instructor/videoController.js";
+import {
+  getProfile,
+  updateProfile,
+  requestEmailChangeOTP,
+  verifyEmailChangeOTP,
+  changePassword,
+} from "../controllers/instructor/instructorProfileController.js";
+import {
+  getDashboardStats,
+  getTransactions,
+} from "../controllers/instructor/dashboardController.js";
+import {
+  getRevenueStats,
+  getMonthlyRevenue,
+  getCourseRevenue,
+} from "../controllers/instructor/revenueController.js";
+import {
+  getConversations,
+  getMessages,
+  getCourseRooms,
+  getRoomMessages,
+  getRoomParticipants,
+} from "../controllers/instructor/instructorChatController.js";
 import multer from "multer";
 
 const upload = multer({
@@ -66,50 +89,23 @@ router.delete(
 router.post("/upload-video", upload.single("video"), uploadVideo);
 router.get("/video-url", getVideoUrl);
 
-// Profile Routes
-import {
-  getProfile,
-  updateProfile,
-  requestEmailChangeOTP,
-  verifyEmailChangeOTP,
-  changePassword,
-} from "../controllers/instructor/instructorProfileController.js";
-
+// Profile
 router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
 router.post("/profile/request-email-change", requestEmailChangeOTP);
 router.post("/profile/verify-email-change", verifyEmailChangeOTP);
 router.put("/profile/change-password", changePassword);
 
-// Dashboard Routes
-import {
-  getDashboardStats,
-  getTransactions,
-} from "../controllers/instructor/dashboardController.js";
-
+// Dashboard
 router.get("/dashboard/stats", getDashboardStats);
 router.get("/dashboard/transactions", getTransactions);
 
-// Revenue Routes
-import {
-  getRevenueStats,
-  getMonthlyRevenue,
-  getCourseRevenue,
-} from "../controllers/instructor/revenueController.js";
-
+// Revenue
 router.get("/revenue/stats", getRevenueStats);
 router.get("/revenue/monthly", getMonthlyRevenue);
 router.get("/revenue/by-course", getCourseRevenue);
 
-// Chat Routes
-import {
-  getConversations,
-  getMessages,
-  getCourseRooms,
-  getRoomMessages,
-  getRoomParticipants,
-} from "../controllers/instructor/instructorChatController.js";
-
+// Chat
 router.get("/chat/conversations", getConversations);
 router.get("/chat/conversations/:conversationId/messages", getMessages);
 router.get("/chat/rooms", getCourseRooms);

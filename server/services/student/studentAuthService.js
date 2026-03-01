@@ -132,11 +132,6 @@ export const studentLoginService = async (email, password) => {
   const tokens = generateTokens({
     userId: user._id,
     role: user.role,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
-    profileImageUrl: user.profileImageUrl,
-    isVerified: user.isVerified,
   });
 
   user.refreshToken = tokens.refreshToken;
@@ -192,7 +187,7 @@ export const studentGoogleAuthService = async token => {
       await user.save();
     }
   } else {
-    let username = await generateUniqueUsername(email,"student");
+    let username = await generateUniqueUsername(email, "student");
     user = await User.create({
       email,
       firstName,
@@ -208,11 +203,6 @@ export const studentGoogleAuthService = async token => {
   const tokens = generateTokens({
     userId: user._id,
     role: user.role,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
-    profileImageUrl: user.profileImageUrl,
-    isVerified: user.isVerified,
   });
 
   user.refreshToken = tokens.refreshToken;

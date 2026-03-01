@@ -9,12 +9,11 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     courses: courseReducer,
-    course: courseReducer, // For instructor course management
     cart: cartReducer,
     category: categoryReducer,
-    chapters: chapterReducer
+    chapters: chapterReducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types

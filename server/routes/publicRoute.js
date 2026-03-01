@@ -9,7 +9,7 @@ import {
   getPublicCourseReviews,
 } from "../controllers/public/courseController.js";
 
-import { getCategories } from "../controllers/admin/catergoryController.js";
+import { getCategories } from "../controllers/admin/categoryController.js";
 import { getSecureStreamUrl } from "../controllers/instructor/streamController.js";
 
 const router = Router();

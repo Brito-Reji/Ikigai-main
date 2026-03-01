@@ -5,8 +5,6 @@ import { Chapter } from "../../models/Chapter.js";
 import mongoose from "mongoose";
 
 export const getUserEnrollments = async userId => {
-  const enroll = await Enrollment.find({ user: userId, status: "active" });
-  console.log("enroll:", enroll);
   const result = await Enrollment.aggregate([
     {
       $match: {
@@ -90,8 +88,7 @@ export const getUserEnrollments = async userId => {
       },
     },
   ]);
-  console.log("course number:", result.length);
-  console.log("result:", result);
+
   return result;
 };
 
@@ -152,6 +149,7 @@ export const updateProgress = async (userId, courseId, lessonId) => {
   const enrollment = await Enrollment.findOne({
     user: userId,
     course: courseId,
+    status: "active",
   });
 
   if (!enrollment) throw new Error("Not enrolled");
@@ -168,7 +166,9 @@ export const updateProgress = async (userId, courseId, lessonId) => {
     chapter: { $in: await Chapter.find({ course: courseId }).distinct("_id") },
   });
   enrollment.progress.completionPercentage =
-    (enrollment.progress.completedLessons.length / totalLessons) * 100;
+    totalLessons > 0
+      ? (enrollment.progress.completedLessons.length / totalLessons) * 100
+      : 0;
 
   await enrollment.save();
 

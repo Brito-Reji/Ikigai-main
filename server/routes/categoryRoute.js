@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getCategories, createCategory, editCategory, toggleCategoryBlock } from "../controllers/admin/catergoryController.js";
+import {
+  getCategories,
+  createCategory,
+  editCategory,
+  toggleCategoryBlock,
+} from "../controllers/admin/categoryController.js";
 import authenticate from "../middlewares/authenticate.js";
 import authorize from "../middlewares/authorize.js";
 
@@ -11,6 +16,11 @@ router.get("/", authenticate, getCategories);
 // Admin-only routes for category management
 router.post("/", authenticate, authorize("admin"), createCategory);
 router.put("/:categoryId", authenticate, authorize("admin"), editCategory);
-router.patch("/:categoryId/toggle-block", authenticate, authorize("admin"), toggleCategoryBlock);
+router.patch(
+  "/:categoryId/toggle-block",
+  authenticate,
+  authorize("admin"),
+  toggleCategoryBlock
+);
 
 export default router;

@@ -1,10 +1,12 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
-  withCredentials: true,
-});
+const isDev = import.meta.env.DEV;
 
+const api = axios.create({
+  baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") +"/api",
+  withCredentials: !isDev,
+});
+console.log("api",import.meta.env.VITE_API)
 api.interceptors.request.use(config => {
   let accessToken = localStorage.getItem("accessToken");
 
@@ -62,7 +64,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't trprocessQueuey to refresh on login/signup/auth pages - let the actual error show
+    // Don't try to refresh on auth pages
     const authPages = [
       "/login",
       "/signup",

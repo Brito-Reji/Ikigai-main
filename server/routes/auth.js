@@ -35,10 +35,7 @@ router.route("/instructor/google").post(instructorGoogleAuth);
 // Student
 router.post("/student/register", studentRegister);
 router.post("/student/login", studentLogin);
-router
-  .route("/student/google")
-  .post(studentGoogleAuth)
-  .get(() => {});
+router.post("/student/google", studentGoogleAuth);
 
 router.post("/admin/login", adminLogin);
 

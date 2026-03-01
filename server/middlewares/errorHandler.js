@@ -2,9 +2,9 @@ import logger from "../utils/logger.js";
 
 // Global error handler
 export const errorHandler = (err, req, res, next) => {
-  // support both err.statusCode and err.status
-  const statusCode = err.statusCode || err.status || 500;
-  console.log("err", err);
+  // pick status from error, or from res if set before throw
+  const resCode = res.statusCode !== 200 ? res.statusCode : null;
+  const statusCode = err.statusCode || err.status || resCode || 500;
 
   const message = err.message || "Internal Server Error";
 

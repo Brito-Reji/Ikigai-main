@@ -30,7 +30,7 @@ export const getWishlistService = async userId => {
     price: course.price / 100,
     priceInPaise: course.price,
   }));
-console.log("updated", updated);
+
   return updated;
 };
 

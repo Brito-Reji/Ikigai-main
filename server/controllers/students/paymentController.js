@@ -18,7 +18,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     couponCode,
     useWallet,
   });
-  console.log("order", order);
+
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: MESSAGES.PAYMENT.ORDER_CREATED,

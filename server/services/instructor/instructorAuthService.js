@@ -111,8 +111,9 @@ export const instructorSigninService = async (email, password) => {
   if (instructor.isBlocked) {
     throw {
       status: HTTP_STATUS.FORBIDDEN,
-      message:"You has been block by the admin . Please contact the admin via email"
-    }
+      message:
+        "You has been block by the admin . Please contact the admin via email",
+    };
   }
 
   const isPasswordValid = await bcrypt.compare(password, instructor.password);
@@ -126,12 +127,7 @@ export const instructorSigninService = async (email, password) => {
 
   const tokens = generateTokens({
     userId: instructor._id,
-    email: instructor.email,
-    username: instructor.username,
-    firstName: instructor.firstName,
     role: instructor.role,
-    profileImageUrl: instructor.profileImageUrl,
-    isVerified: instructor.isVerified,
   });
 
   instructor.refreshToken = tokens.refreshToken;
@@ -163,7 +159,7 @@ export const instructorGoogleAuthService = async token => {
   }
 
   if (!instructor) {
-    let username = await generateUniqueUsername(email,"instructor");
+    let username = await generateUniqueUsername(email, "instructor");
     instructor = await Instructor.create({
       email,
       firstName,
@@ -178,12 +174,7 @@ export const instructorGoogleAuthService = async token => {
 
   const tokens = generateTokens({
     userId: instructor._id,
-    email: instructor.email,
-    username: instructor.username,
-    firstName: instructor.firstName,
     role: instructor.role,
-    profileImageUrl: instructor.profileImageUrl,
-    isVerified: instructor.isVerified,
   });
 
   instructor.refreshToken = tokens.refreshToken;

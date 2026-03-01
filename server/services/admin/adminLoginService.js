@@ -30,14 +30,12 @@ export const adminLoginService = async ({ email, password }) => {
 
   const { accessToken, refreshToken } = generateTokens({
     userId: admin._id,
-    email: admin.email,
-    firstName: admin.firstName,
     role: admin.role,
   });
 
   admin.refreshToken = refreshToken;
   await admin.save();
-
+console.log(admin)
   return {
     admin,
     accessToken,
