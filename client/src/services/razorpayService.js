@@ -20,7 +20,7 @@ export const startRazorpayPayment = async (
   const order = response.data.data;
 
   // if paid in full with wallet - no razorpay needed
-  console.log("order", order);
+ 
   if (order.paidInFull) {
     navigate("/payment/success", {
       replace: true,

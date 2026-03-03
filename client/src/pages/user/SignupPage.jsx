@@ -44,6 +44,8 @@ export default function SignUpPage() {
   // Handle verification requirement
   useEffect(() => {
     if (requiresVerification && verificationEmail) {
+      console.log("verificationEmail", verificationEmail);
+      console.log("requiresVerification", requiresVerification);
       navigate("/verify-otp", {
         state: {
           email: verificationEmail,

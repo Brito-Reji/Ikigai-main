@@ -109,6 +109,7 @@ export const verifyOTP = createAsyncThunk(
         return {
           message: response.data.message,
           verified: true,
+          accessToken: response.data.accessToken,
         };
       }
       return rejectWithValue({
@@ -302,11 +303,14 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyOTP.fulfilled, state => {
+      .addCase(verifyOTP.fulfilled, (state, action) => {
         state.loading = false;
         state.requiresVerification = false;
         state.verificationEmail = null;
         state.error = null;
+        state.isAuthenticated = true;
+        state.accessToken =
+          action.payload.accessToken || localStorage.getItem("accessToken");
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;

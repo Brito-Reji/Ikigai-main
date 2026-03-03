@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
-import { verifyOTP, clearError } from "@/store/slices/authSlice.js";
+import { verifyOTP, clearError, clearVerificationState } from "@/store/slices/authSlice.js";
 
 export default function OTPVerificationPage() {
   const location = useLocation();
@@ -183,6 +183,8 @@ export default function OTPVerificationPage() {
 
   // Handle change email
   const handleChangeEmail = () => {
+    dispatch(clearVerificationState());
+    localStorage.removeItem("otpExpiry");
     navigate("/signup");
   };
 

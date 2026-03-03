@@ -72,7 +72,7 @@ export const createOrderService = async ({
   }
 
   const options = {
-    amount: Math.round(finalAmount * 100),
+    amount: Math.round(finalAmount),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
