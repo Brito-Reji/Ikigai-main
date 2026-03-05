@@ -108,13 +108,13 @@ export default function CourseCard({ course }) {
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(course.rating || 0)
+              className={`w-3 h-3 sm:w-4 sm:h-4 ${i < Math.floor(course.averageRating || 0)
                 ? "fill-yellow-400 text-yellow-400"
                 : "text-gray-300"
                 }`}
             />
           ))}
-          <span className="text-xs text-gray-600 ml-1">({course.rating || 0})</span>
+          <span className="text-xs text-gray-600 ml-1">({course.averageRating || 0})</span>
         </div>
 
         {course.category && (

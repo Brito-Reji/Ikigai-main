@@ -1,7 +1,54 @@
 import { Course } from "../../models/Course.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Enrollment } from "../../models/Enrollment.js";
+import { Review } from "../../models/Review.js";
 import { checkEnrollment } from "../student/enrollmentService.js";
+
+// compute rating and enrollment stats for courses
+const attachCourseStats = async courses => {
+  const courseIds = courses.map(c => c._id || c.id);
+
+  const [ratingStats, enrollmentStats] = await Promise.all([
+    Review.aggregate([
+      { $match: { course: { $in: courseIds } } },
+      {
+        $group: {
+          _id: "$course",
+          avg: { $avg: "$rating" },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Enrollment.aggregate([
+      { $match: { course: { $in: courseIds }, status: "active" } },
+      { $group: { _id: "$course", count: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const ratingMap = {};
+  ratingStats.forEach(r => {
+    ratingMap[r._id.toString()] = {
+      averageRating: parseFloat(r.avg.toFixed(1)),
+      totalReviews: r.count,
+    };
+  });
+
+  const enrollmentMap = {};
+  enrollmentStats.forEach(e => {
+    enrollmentMap[e._id.toString()] = e.count;
+  });
+
+  return courses.map(course => {
+    const id = (course._id || course.id).toString();
+    const stats = ratingMap[id] || { averageRating: 0, totalReviews: 0 };
+    return {
+      ...course,
+      averageRating: stats.averageRating,
+      totalReviews: stats.totalReviews,
+      enrollmentCount: enrollmentMap[id] || 0,
+    };
+  });
+};
 
 // BUILD FILTER QUERY FOR PUBLIC COURSES
 export const buildPublicCourseQuery = async queryParams => {
@@ -104,11 +151,15 @@ export const getPublishedCoursesService = async (queryParams, userId) => {
   const totalCourses = await Course.countDocuments(query);
   const totalPages = Math.ceil(totalCourses / limit);
 
+  const coursesPlain = courses.map(course => ({
+    ...course.toObject(),
+    price: (course.price / 100).toFixed(2),
+  }));
+
+  const coursesWithStats = await attachCourseStats(coursesPlain);
+
   return {
-    courses: courses.map(course => ({
-      ...course.toObject(),
-      price: (course.price / 100).toFixed(2),
-    })),
+    courses: coursesWithStats,
     pagination: {
       currentPage: page,
       totalPages,
@@ -134,10 +185,12 @@ export const getFeaturedCoursesService = async (limit = 4) => {
     .sort({ createdAt: -1 })
     .limit(parseInt(limit));
 
-  return courses.map(course => ({
+  const coursesPlain = courses.map(course => ({
     ...course.toObject(),
     price: (course.price / 100).toFixed(2),
   }));
+
+  return attachCourseStats(coursesPlain);
 };
 
 // GET PUBLIC COURSE DETAILS
@@ -176,11 +229,14 @@ export const getPublicCourseDetailsService = async (courseId, userId) => {
       "firstName lastName email profileImageUrl headline description social"
     );
 
-  return {
+  const coursePlain = {
     ...course.toObject(),
     price: (course.price / 100).toFixed(2),
     isEnrolled,
   };
+
+  const [withStats] = await attachCourseStats([coursePlain]);
+  return withStats;
 };
 
 // GET PUBLIC COURSE STATISTICS

@@ -76,7 +76,7 @@ console.log("course",course)
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${i < Math.floor(course.rating || 4.5)
+                      className={`w-5 h-5 ${i < Math.floor(course.averageRating || 0)
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-400"
                         }`}
@@ -84,16 +84,16 @@ console.log("course",course)
                   ))}
                 </div>
                 <span className="text-yellow-400 font-semibold mr-2">
-                  {course.rating || 4.5}
+                  {course.averageRating || 0}
                 </span>
                 <span className="text-blue-200">
-                  ({course.reviews || 234} reviews)
+                  ({course.totalReviews || 0} reviews)
                 </span>
               </div>
 
               <div className="flex items-center text-blue-200">
                 <Users className="w-5 h-5 mr-2" />
-                <span>{course.students || 1254} students</span>
+                <span>{course.enrollmentCount || 0} students</span>
               </div>
 
               <div className="flex items-center text-blue-200">
