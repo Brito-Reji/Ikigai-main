@@ -20,7 +20,7 @@ export const startRazorpayPayment = async (
   const order = response.data.data;
 
   // if paid in full with wallet - no razorpay needed
- 
+
   if (order.paidInFull) {
     navigate("/payment/success", {
       replace: true,
@@ -35,7 +35,7 @@ export const startRazorpayPayment = async (
 
   const options = {
     key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-    amount: order.amount / 100,
+    amount: order.amount,
     currency: "INR",
     order_id: order.razorpayOrderId,
 

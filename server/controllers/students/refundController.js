@@ -3,7 +3,7 @@ import * as refundService from "../../services/student/refundService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const fullRefund = asyncHandler(async (req, res) => {
-  const { razorpayOrderId, reason } = req.body;
+  const { razorpayOrderId, reason, refundMethod } = req.body;
   const userId = req.user._id;
 
   if (!razorpayOrderId) {
@@ -15,13 +15,14 @@ export const fullRefund = asyncHandler(async (req, res) => {
     razorpayOrderId,
     userId,
     reason,
+    refundMethod,
   });
 
   res.status(HTTP_STATUS.OK).json(result);
 });
 
 export const partialRefund = asyncHandler(async (req, res) => {
-  const { courseId, razorpayOrderId, reason } = req.body;
+  const { courseId, razorpayOrderId, reason, refundMethod } = req.body;
   const userId = req.user._id;
 
   if (!courseId || !razorpayOrderId) {
@@ -34,6 +35,7 @@ export const partialRefund = asyncHandler(async (req, res) => {
     userId,
     razorpayOrderId,
     reason,
+    refundMethod,
   });
 
   res.status(HTTP_STATUS.OK).json(result);

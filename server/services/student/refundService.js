@@ -9,7 +9,7 @@ export const processFullRefund = async ({
   razorpayOrderId,
   userId,
   reason = "Customer request",
-  refundMethod = "wallet", // wallet or bank
+  refundMethod = "wallet",
 }) => {
   const order = await Order.findOne({ razorpayOrderId, userId });
 
@@ -32,19 +32,27 @@ export const processFullRefund = async ({
     throw new Error("All payments already refunded");
   }
 
-  try {
-    const baseAmount = Math.round(order.amount);
-    // wallet = 100%, bank = 80%
-    const refundAmount = refundMethod === "bank" 
-      ? Math.round(baseAmount * 0.8) 
-      : baseAmount;
+  // wallet-only orders can only be refunded to wallet
+  if (order.paymentMethod === "wallet") {
+    refundMethod = "wallet";
+  }
 
-    if (refundMethod === "bank") {
-      // razorpay refund
+  try {
+    // user paid = razorpay portion + wallet portion (coupon is not refunded)
+    const razorpayPortion = Math.round(order.amount);
+    const walletPortion = Math.round(order.walletAmountUsed || 0);
+    const totalUserPaid = razorpayPortion + walletPortion;
+
+    let refundAmount;
+
+    if (refundMethod === "bank" && razorpayPortion > 0) {
+      // bank: 80% of razorpay portion to bank
+      const bankRefund = Math.round(razorpayPortion * 0.8);
+
       const refund = await razorpayInstance.payments.refund(
         payments[0].razorpayPaymentId,
         {
-          amount: refundAmount,
+          amount: bankRefund,
           notes: { reason },
         }
       );
@@ -55,16 +63,30 @@ export const processFullRefund = async ({
           status: "REFUNDED",
           razorpayRefundId: refund.id,
           refundedAt: new Date(),
-          refundAmount,
+          refundAmount: bankRefund,
           refundMethod: "bank",
         }
       );
+
+      // credit wallet portion back
+      if (walletPortion > 0) {
+        await creditWallet({
+          userId,
+          amount: walletPortion,
+          reason: "Wallet portion refund for order",
+          relatedOrderId: order._id,
+        });
+      }
+
+      refundAmount = bankRefund + walletPortion;
     } else {
-      // wallet refund
+      // wallet: 100% of total user paid to wallet
+      refundAmount = totalUserPaid;
+
       await creditWallet({
         userId,
         amount: refundAmount,
-        reason: `Full refund for order`,
+        reason: "Full refund for order",
         relatedOrderId: order._id,
       });
 
@@ -93,16 +115,18 @@ export const processFullRefund = async ({
 
     return {
       success: true,
-      originalAmount: baseAmount,
+      originalAmount: totalUserPaid,
       refundAmount,
       refundMethod,
-      message: refundMethod === "bank" 
-        ? "Refund of 80% processed to bank (5-7 days)" 
-        : "Full refund credited to wallet",
+      message:
+        refundMethod === "bank"
+          ? "Refund of 80% processed to bank (5-7 days). Wallet portion credited back."
+          : "Full refund credited to wallet",
     };
   } catch (error) {
     console.error("Refund error:", error);
-    const errorMessage = error?.error?.description || error?.message || "Unknown error";
+    const errorMessage =
+      error?.error?.description || error?.message || "Unknown error";
     throw new Error(`Refund failed: ${errorMessage}`);
   }
 };
@@ -112,7 +136,7 @@ export const processPartialRefund = async ({
   userId,
   razorpayOrderId,
   reason = "Customer request",
-  refundMethod = "wallet", // wallet or bank
+  refundMethod = "wallet",
 }) => {
   const payment = await Payment.findOne({ courseId, userId, razorpayOrderId });
 
@@ -129,13 +153,21 @@ export const processPartialRefund = async ({
     throw new Error("Order not found");
   }
 
-  // calculate base refund amount
-  let baseRefundAmount;
+  // wallet-only orders can only be refunded to wallet
+  if (order.paymentMethod === "wallet") {
+    refundMethod = "wallet";
+  }
+
+  // total amount user actually paid (razorpay + wallet, excludes coupon)
+  const totalUserPaid =
+    Math.round(order.amount) + Math.round(order.walletAmountUsed || 0);
   const coursePrice = payment.amount;
 
-  if (order.originalAmount && order.originalAmount !== order.amount) {
+  // proportional refund based on total user paid amount
+  let baseRefundAmount;
+  if (order.originalAmount && order.originalAmount > 0) {
     baseRefundAmount = Math.round(
-      (coursePrice / order.originalAmount) * order.amount
+      (coursePrice / order.originalAmount) * totalUserPaid
     );
   } else {
     baseRefundAmount = coursePrice;
@@ -144,12 +176,13 @@ export const processPartialRefund = async ({
   baseRefundAmount = Math.max(1, baseRefundAmount);
 
   // wallet = 100%, bank = 80%
-  const refundAmount = refundMethod === "bank" 
-    ? Math.round(baseRefundAmount * 0.8) 
-    : baseRefundAmount;
+  const refundAmount =
+    refundMethod === "bank"
+      ? Math.round(baseRefundAmount * 0.8)
+      : baseRefundAmount;
 
   try {
-    if (refundMethod === "bank") {
+    if (refundMethod === "bank" && order.paymentMethod !== "wallet") {
       // razorpay refund
       const refund = await razorpayInstance.payments.refund(
         payment.razorpayPaymentId,
@@ -166,7 +199,7 @@ export const processPartialRefund = async ({
       await creditWallet({
         userId,
         amount: refundAmount,
-        reason: `Refund for course`,
+        reason: "Refund for course",
         relatedPaymentId: payment._id,
         relatedOrderId: order._id,
       });
@@ -207,13 +240,15 @@ export const processPartialRefund = async ({
       refundAmount,
       refundMethod,
       courseId: payment.courseId,
-      message: refundMethod === "bank" 
-        ? "Refund of 80% processed to bank (5-7 days)" 
-        : "Full refund credited to wallet",
+      message:
+        refundMethod === "bank"
+          ? "Refund of 80% processed to bank (5-7 days)"
+          : "Full refund credited to wallet",
     };
   } catch (error) {
     console.error("Refund error:", error);
-    const errorMessage = error?.error?.description || error?.message || "Unknown error";
+    const errorMessage =
+      error?.error?.description || error?.message || "Unknown error";
     throw new Error(`Refund failed: ${errorMessage}`);
   }
 };

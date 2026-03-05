@@ -102,6 +102,7 @@ export const createOrderService = async ({
     couponCode: appliedCouponCode,
     couponId,
     status: "CREATED",
+    paymentMethod: walletAmountUsed > 0 ? "mixed" : "razorpay",
   });
 
   const paymentsData = courses.map(course => ({
@@ -254,6 +255,16 @@ export const updatePaymentStatusService = async ({
 
   order.status = "PAID";
   await order.save();
+
+  // debit wallet for mixed payments
+  if (order.walletAmountUsed > 0) {
+    await debitWallet({
+      userId: order.userId,
+      amount: order.walletAmountUsed,
+      reason: `Payment for ${order.courseIds.length} course(s)`,
+      relatedOrderId: order._id,
+    });
+  }
 
   // increment coupon usage
   if (order.couponId) {
