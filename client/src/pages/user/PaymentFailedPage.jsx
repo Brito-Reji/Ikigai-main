@@ -1,17 +1,29 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { XCircle, Home, RefreshCcw, AlertCircle, ArrowRight } from "lucide-react";
+import { XCircle, Home, RefreshCcw, AlertCircle, ArrowRight, Tag, Wallet } from "lucide-react";
 import PaymentFailureCard from "@/components/common/PaymentFailureCard";
+import { retryPayment } from "@/services/razorpayService";
+import { useVerifyPayment } from "@/hooks/useCourses";
 
 export default function PaymentFailedPage() {
+  const verifyPaymentMutation = useVerifyPayment();
   const location = useLocation();
   const navigate = useNavigate();
   const stateData = location.state || {};
+  let  enrolledDetails = stateData.enrolledDetails;
+  enrolledDetails = {
+    ...enrolledDetails,
+    amount: enrolledDetails.amount/100,
+    courseIds: enrolledDetails.courseIds.map((course) => {return {...course, price: course.price/100}}),
+    originalAmount: enrolledDetails.originalAmount/100,
+    discountAmount: enrolledDetails.discountAmount/100,
+    walletAmountUsed: enrolledDetails.walletAmountUsed/100,
+  }
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     console.log("Payment Failed Page - State:", stateData);
-    const enrolledDetails = stateData.enrolledDetails;
+    console.log("Enrolled Details:", enrolledDetails);
     
     if (enrolledDetails?.courseIds) {
       setCourses(enrolledDetails.courseIds);
@@ -19,12 +31,8 @@ export default function PaymentFailedPage() {
   }, [stateData]);
 
   const handleRetry = () => {
-    if (courses.length > 0) {
-      const courseIds = courses.map(c => c._id).join(',');
-      navigate(`/checkout?courseId=${courseIds}`);
-    } else {
-      navigate("/courses");
-    }
+    const response = retryPayment(stateData.orderId, navigate, verifyPaymentMutation);
+ 
   };
 
   return (
@@ -57,6 +65,46 @@ export default function PaymentFailedPage() {
                   {courses.map((course, index) => (
                     <PaymentFailureCard key={index} course={course} />
                   ))}
+                </div>
+              </div>
+            )}
+
+            {enrolledDetails && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8 transform transition-all hover:shadow-2xl">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h3>
+                
+                <div className="space-y-4 text-lg">
+                  <div className="flex justify-between text-gray-600 font-medium">
+                    <span>Original Price</span>
+                    <span>₹{enrolledDetails.originalAmount?.toFixed(2)}</span>
+                  </div>
+
+                  {enrolledDetails.discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-green-600 font-medium">
+                      <span className="flex items-center gap-2">
+                        <Tag className="w-5 h-5" />
+                        Coupon Applied ({enrolledDetails.couponCode})
+                      </span>
+                      <span>-₹{enrolledDetails.discountAmount?.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {enrolledDetails.walletAmountUsed > 0 && (
+                    <div className="flex justify-between text-indigo-600 font-medium pb-4 border-b border-gray-100">
+                      <span className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5" />
+                        Wallet Deducted
+                      </span>
+                      <span>-₹{enrolledDetails.walletAmountUsed?.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  <div className="pt-4 flex justify-between items-end">
+                    <span className="text-xl text-gray-900 font-bold">Total Amount to Pay</span>
+                    <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">
+                      ₹{enrolledDetails.amount?.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

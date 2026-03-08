@@ -3,6 +3,7 @@ import {
   createOrder,
   verifyPayment,
   getOrderHistory,
+  retryOrder,
 } from "../controllers/students/paymentController.js";
 import authenticate from "../middlewares/authenticate.js";
 import authorize from "../middlewares/authorize.js";
@@ -16,6 +17,7 @@ router.post(
   authorize("student"),
   verifyPayment
 );
+router.post("/retry-order", authenticate, authorize("student"), retryOrder);
 router.get("/orders", authenticate, authorize("student"), getOrderHistory);
 
 export default router;

@@ -11,6 +11,7 @@ import {
 
 import { getCategories } from "../controllers/admin/categoryController.js";
 import { getSecureStreamUrl } from "../controllers/instructor/streamController.js";
+import getPublicCouponsController from "../controllers/public/publicCoponConroller.js";
 
 const router = Router();
 
@@ -33,5 +34,8 @@ router.get("/courses/:courseId/reviews", getPublicCourseReviews);
 router.get("/stream-video", getSecureStreamUrl);
 
 router.get("/", getCategories);
+
+// public coupons 
+router.get("/coupons", getPublicCouponsController);
 
 export default router;

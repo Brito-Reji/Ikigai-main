@@ -16,4 +16,7 @@ export const couponApi = {
     validate: (code, amount) =>
       api.get(couponEndpoints.student.validate(code, amount)),
   },
+  public: {
+    getAll: () => api.get(couponEndpoints.public.getAll()),
+  },
 };

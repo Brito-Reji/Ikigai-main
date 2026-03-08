@@ -58,9 +58,21 @@ export const startRazorpayPayment = async (
 
         navigate("/payment/failed", {
           replace: true,
-          state: { paymentId, enrolledDetails },
+          state: { paymentId, enrolledDetails, orderId: order.orderId },
         });
       }
+    },
+    modal: {
+      ondismiss: function () {
+        console.log("Payment window closed by user");
+        navigate("/payment/failed", {
+          replace: true,
+          state: {
+            enrolledDetails: order.enrolledDetails,
+            orderId: order.orderId,
+          },
+        });
+      },
     },
   };
 
@@ -68,7 +80,93 @@ export const startRazorpayPayment = async (
 
   rzp.on("payment.failed", function (response) {
     console.error("Payment failed:", response.error);
-    navigate("/payment/failed");
+    navigate("/payment/failed", {
+      replace: true,
+      state: {
+        error: response.error,
+        enrolledDetails: order.enrolledDetails,
+        orderId: order.orderId,
+      },
+    });
+  });
+
+  rzp.open();
+  return response;
+};
+
+export const retryPayment = async (
+  orderId,
+  navigate,
+  verifyPaymentMutation
+) => {
+  const response = await api.post("/payments/retry-order", {
+    orderId,
+  });
+
+  if (!response.data.success) {
+    throw new Error("Order retry failed");
+  }
+
+  const order = response.data.data;
+
+  const options = {
+    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+    amount: order.amount,
+    currency: "INR",
+    order_id: order.razorpayOrderId,
+    retry: {
+      enabled: true,
+    },
+
+    handler: async function (response) {
+      let paymentId;
+      let enrolledDetails;
+
+      try {
+        const verifyResult = await verifyPaymentMutation.mutateAsync(response);
+
+        paymentId = verifyResult.data.paymentId;
+        enrolledDetails = verifyResult.data.enrolledDetails;
+
+        navigate("/payment/success", {
+          replace: true,
+          state: { paymentId, enrolledDetails },
+        });
+      } catch (err) {
+        console.error("Payment verification error:", err);
+
+        navigate("/payment/failed", {
+          replace: true,
+          state: { paymentId, enrolledDetails, orderId: order.orderId },
+        });
+      }
+    },
+    modal: {
+      ondismiss: function () {
+        console.log("Payment window closed by user");
+        navigate("/payment/failed", {
+          replace: true,
+          state: {
+            enrolledDetails: order.enrolledDetails,
+            orderId: order.orderId,
+          },
+        });
+      },
+    },
+  };
+
+  const rzp = new window.Razorpay(options);
+
+  rzp.on("payment.failed", function (response) {
+    console.error("Payment failed:", response.error);
+    navigate("/payment/failed", {
+      replace: true,
+      state: {
+        error: response.error,
+        enrolledDetails: order.enrolledDetails,
+        orderId: order.orderId,
+      },
+    });
   });
 
   rzp.open();

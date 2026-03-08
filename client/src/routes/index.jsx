@@ -15,6 +15,7 @@ import StudentResetPassword from "@/pages/user/Password.jsx";
 import UserCourseListingPage from "@/pages/user/CourseListingPage.jsx";
 import UserCourseDetailPage from "@/pages/user/CourseDetailPage.jsx";
 import CartPage from "@/pages/user/CartPage.jsx";
+import CouponsPage from "@/pages/user/CouponsPage.jsx";
 import WishlistPage from "@/pages/user/WishlistPage.jsx";
 import CheckoutPage from "@/pages/user/CheckoutPage.jsx";
 import StudentProfilePage from "@/pages/user/ProfilePage.jsx";
@@ -75,6 +76,7 @@ export default function AppRoutes() {
         <Route path="courses" element={<UserCourseListingPage />} />
         <Route path="course/:courseId" element={<UserCourseDetailPage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route path="coupons" element={<CouponsPage />} />
         <Route
           path="wishlist"
           element={

@@ -52,3 +52,10 @@ export const useUpdateCoupon = () => {
     },
   });
 };
+
+export const useGetPublicCoupons = () => {
+  return useQuery({
+    queryKey: ["public-coupon"],
+    queryFn: () => couponApi.public.getAll(),
+  });
+};

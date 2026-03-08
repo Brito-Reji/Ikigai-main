@@ -10,4 +10,7 @@ export const couponEndpoints = {
     validate: (code, amount) =>
       `/student/coupons/validate/${code}?amount=${amount}`,
   },
+  public: {
+    getAll: () => "/public/coupons",
+  },
 };

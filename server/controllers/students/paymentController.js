@@ -58,6 +58,26 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   }
 });
 
+export const retryOrder = asyncHandler(async (req, res) => {
+  const { orderId } = req.body;
+  if (!orderId) {
+    res.status(HTTP_STATUS.BAD_REQUEST);
+    throw new Error("Order ID is required");
+  }
+
+  const order = await paymentService.retryOrderService({
+    orderId,
+    userId: req.user._id,
+  });
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: MESSAGES.PAYMENT.ORDER_RETRY,
+    data: order,
+  });
+});
+
+
 export const getOrderHistory = asyncHandler(async (req, res) => {
   const orders = await paymentService.getOrderHistoryService(req.user._id);
   res.status(HTTP_STATUS.OK).json({

@@ -91,7 +91,7 @@ export const createOrderService = async ({
     throw new Error("Invalid response from Razorpay");
   }
 
-  await Order.create({
+  const newOrder = await Order.create({
     userId,
     courseIds: courseIds,
     razorpayOrderId: razorpayOrder.id,
@@ -105,6 +105,15 @@ export const createOrderService = async ({
     paymentMethod: walletAmountUsed > 0 ? "mixed" : "razorpay",
   });
 
+  const populatedOrder = await Order.findById(newOrder._id).populate({
+    path: "courseIds",
+    select: "title price thumbnail instructor",
+    populate: {
+      path: "instructor",
+      select: "firstName lastName",
+    },
+  });
+
   const paymentsData = courses.map(course => ({
     courseId: course._id,
     userId,
@@ -116,6 +125,7 @@ export const createOrderService = async ({
   await Payment.insertMany(paymentsData);
 
   return {
+    orderId: newOrder._id,
     razorpayOrderId: razorpayOrder.id,
     amount: finalAmount,
     originalAmount,
@@ -124,6 +134,7 @@ export const createOrderService = async ({
     couponCode: appliedCouponCode,
     currency: "INR",
     paymentMethod: "razorpay",
+    enrolledDetails: populatedOrder,
     message: "Order created successfully",
   };
 };
@@ -344,4 +355,37 @@ export const getOrderHistoryService = async userId => {
   );
 
   return ordersWithPayments;
+};
+export const retryOrderService = async ({ orderId, userId }) => {
+  const order = await Order.findOne({ _id: orderId, userId });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.status === "PAID") {
+    throw new Error("Order is already paid");
+  }
+
+  if (order.status === "REFUNDED") {
+    throw new Error("Order is already refunded");
+  }
+
+  const populatedOrder = await Order.findById(order._id).populate({
+    path: "courseIds",
+    select: "title price thumbnail instructor",
+    populate: {
+      path: "instructor",
+      select: "firstName lastName",
+    },
+  });
+
+  return {
+    orderId: order._id,
+    razorpayOrderId: order.razorpayOrderId,
+    amount: order.amount,
+    currency: "INR",
+    enrolledDetails: populatedOrder,
+    message: "Order retry successful",
+  };
 };

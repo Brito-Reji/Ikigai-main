@@ -7,6 +7,7 @@ import api from "@/api/axiosConfig";
 import toast from "react-hot-toast";
 import { useVerifyPayment } from "@/hooks/useCourses.js";
 import { useWallet } from "@/hooks/useWallet";
+import { useGetPublicCoupons } from "@/hooks/useCoupon";
 
 const CheckoutPage = () => {
   const verifyPaymentMutation = useVerifyPayment();
@@ -15,6 +16,10 @@ const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
   const { items: cartItems, dispatch } = useCart();
   const { data: walletData, isLoading: walletLoading } = useWallet();
+  const { data: publicCoupons, isLoading: publicCouponsLoading } = useGetPublicCoupons();
+  console.log("publicCoupons", publicCoupons);
+  let availableCoupons = publicCoupons?.data?.data
+  console.log("availableCoupons", availableCoupons);
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -271,9 +276,24 @@ const CheckoutPage = () => {
                     </button>
                   </div>
                   {/* Coupon hints */}
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => setCouponCode("SAVE10")} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-200 transition-colors">SAVE10</button>
-                    <button onClick={() => setCouponCode("WELCOME50")} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-200 transition-colors">WELCOME50</button>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {availableCoupons?.slice(0, 3).map((coupon) => (
+                      <button
+                        key={coupon._id}
+                        onClick={() => setCouponCode(coupon.code)}
+                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-200 transition-colors"
+                      >
+                        {coupon.code}
+                      </button>
+                    ))}
+                    {availableCoupons?.length > 3 && (
+                      <button
+                        onClick={() => navigate("/coupons")}
+                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                      >
+                        +{availableCoupons.length - 3} More
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
