@@ -43,7 +43,7 @@ export const createOrderService = async ({
       userId,
       originalAmount
     );
-    discountAmount = couponData.discountAmount;
+    discountAmount = couponData.discountAmount * 100;
     couponId = couponData.couponId;
     appliedCouponCode = couponData.code;
   }
@@ -105,22 +105,59 @@ export const createOrderService = async ({
     paymentMethod: walletAmountUsed > 0 ? "mixed" : "razorpay",
   });
 
-  const populatedOrder = await Order.findById(newOrder._id).populate({
-    path: "courseIds",
-    select: "title price thumbnail instructor",
-    populate: {
-      path: "instructor",
-      select: "firstName lastName",
-    },
-  });
+  const populatedOrder = await Order.findById(newOrder._id)
+    .populate({
+      path: "courseIds",
+      select: "title price thumbnail instructor",
+      populate: {
+        path: "instructor",
+        select: "firstName lastName",
+      },
+    })
+    .populate({
+      path: "couponId",
+      select: "code discountValue discountType maxDiscount",
+    });
+  let paymentsData;
+  let productRatio = [];
+  let productDiscount = [];
+  if (
+    populatedOrder.couponId &&
+    (populatedOrder.couponId.discountType === "fixed" ||
+      (populatedOrder.amount > populatedOrder.couponId.maxDiscount &&
+        populatedOrder.couponId.discountType === "percentage"))
+  ) {
+    productRatio = populatedOrder.courseIds.map(course => ({
+      courseId: course._id,
+      ratio: course.price / populatedOrder.originalAmount,
+    }));
 
-  const paymentsData = courses.map(course => ({
-    courseId: course._id,
-    userId,
-    razorpayOrderId: razorpayOrder.id,
-    amount: course.price,
-    status: "CREATED",
-  }));
+    productDiscount = productRatio.map(ratio => ({
+      courseId: ratio.courseId,
+      discountAmount: ratio.ratio * populatedOrder.discountAmount,
+    }));
+
+    paymentsData = courses.map(course => {
+      const discount = productDiscount.find(
+        item => item.courseId.toString() === course._id.toString()
+      );
+      return {
+        courseId: course._id,
+        userId,
+        razorpayOrderId: razorpayOrder.id,
+        amount: course.price - (discount?.discountAmount || 0),
+        status: "CREATED",
+      };
+    });
+  } else {
+    paymentsData = courses.map(course => ({
+      courseId: course._id,
+      userId,
+      razorpayOrderId: razorpayOrder.id,
+      amount: course.price,
+      status: "CREATED",
+    }));
+  }
 
   await Payment.insertMany(paymentsData);
 
