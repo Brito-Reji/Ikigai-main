@@ -86,16 +86,7 @@ const EnrolledCourseCard = ({ course }) => {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100">
-					<div className="flex items-center gap-2 text-gray-600">
-						<Calendar className="w-4 h-4" />
-						<span className="text-xs">{formatDate(course.lastAccessed)}</span>
-					</div>
-					<div className="flex items-center gap-2 text-gray-600">
-						<Clock className="w-4 h-4" />
-						<span className="text-xs">{course.totalDuration}</span>
-					</div>
-				</div>
+			
 			</div>
 		</div>
 	);
