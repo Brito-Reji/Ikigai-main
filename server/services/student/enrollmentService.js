@@ -46,6 +46,24 @@ export const getUserEnrollments = async userId => {
       $unwind: "$course.instructor",
     },
     {
+      $lookup: {
+        from: "chapters",
+        localField: "course._id",
+        foreignField: "course",
+        pipeline: [
+          {
+            $lookup: {
+              from: "lessons",
+              localField: "_id",
+              foreignField: "chapter",
+              as: "lessons",
+            },
+          },
+        ],
+        as: "course.chapters",
+      },
+    },
+    {
       $project: {
         _id: 1,
         user: 1,
@@ -73,6 +91,7 @@ export const getUserEnrollments = async userId => {
           title: "$course.title",
           thumbnail: "$course.thumbnail",
           price: "$course.price",
+          chapters: "$course.chapters",
           instructor: {
             _id: "$course.instructor._id",
             firstName: "$course.instructor.firstName",
