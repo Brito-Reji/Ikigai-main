@@ -6,7 +6,7 @@ const api = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api",
   withCredentials: !isDev,
 });
-console.log("api", import.meta.env.VITE_API);
+console.log("api", import.meta.env.VITE_API_URL);
 api.interceptors.request.use(config => {
   let accessToken = localStorage.getItem("accessToken");
 

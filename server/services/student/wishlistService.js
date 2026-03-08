@@ -92,3 +92,5 @@ export const toggleWishlistService = async (userId, courseId) => {
     return { action: "added", inWishlist: true };
   }
 };
+
+

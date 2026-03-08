@@ -19,6 +19,7 @@ export const createCoupon = asyncHandler(async (req, res) => {
     usageLimit,
     perUserLimit,
     isPaused,
+    isPublic,
     description,
   } = req.body;
   let data = await createCouponService({
@@ -31,6 +32,7 @@ export const createCoupon = asyncHandler(async (req, res) => {
     usageLimit,
     perUserLimit,
     isPaused,
+    isPublic,
     description,
   });
   res.status(HTTP_STATUS.CREATED).json({
@@ -61,6 +63,7 @@ export const updateCoupon = asyncHandler(async (req, res) => {
     usageLimit,
     perUserLimit,
     isPaused,
+    isPublic,
     description,
   } = req.body;
   let data = await updateCouponService(couponId, {
@@ -73,6 +76,7 @@ export const updateCoupon = asyncHandler(async (req, res) => {
     usageLimit,
     perUserLimit,
     isPaused,
+    isPublic,
     description,
   });
   res.status(HTTP_STATUS.OK).json({

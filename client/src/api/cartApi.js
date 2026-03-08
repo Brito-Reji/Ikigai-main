@@ -5,6 +5,7 @@ export const cartApi = {
     // Get cart
     getCart: async () => {
         const { data } = await api.get(cartEndpoints.get());
+        // console.log("data", data);
         return data;
     },
 

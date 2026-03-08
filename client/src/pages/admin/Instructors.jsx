@@ -1,4 +1,5 @@
 import api from "@/api/adminAxiosConfig";
+import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -223,7 +224,7 @@ const Instructors = () => {
       {/* Search Bar and Items Per Page */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex items-center gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
             <input
               type="text"
               placeholder="Search by name, email, username, or ID..."
@@ -232,8 +233,16 @@ const Instructors = () => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
+            {searchQuery && (
+              <button
+                onClick={() => { setSearchQuery(""); setCurrentPage(1); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <select
             value={itemsPerPage}

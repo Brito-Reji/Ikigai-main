@@ -54,7 +54,7 @@ export default function CoursesPage() {
     const urlPage = searchParams.get("page");
     const urlPriceRange = searchParams.get("priceRange");
 
-    if (urlSearch) setSearchQuery(urlSearch);
+    setSearchQuery(urlSearch || "");
     if (urlCategory) setSelectedCategories([urlCategory]);
     if (urlSort) setSortBy(urlSort);
     if (urlPage) setCurrentPage(Number(urlPage));

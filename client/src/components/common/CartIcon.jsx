@@ -1,11 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "@/hooks/useRedux";
+import { useSelector, useDispatch } from "react-redux";
+import { useCart as useCartAPI } from "@/hooks/useCart";
+import { setCart } from "@/store/slices/cartSlice";
 
 const CartIcon = () => {
   const navigate = useNavigate();
-  const { items = [] } = useCart();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const reduxItems = useSelector((state) => state.cart.items);
+  const { data: apiCartData } = useCartAPI();
+  const isLoggedIn = !!(user && (user.id || user._id));
+
+  // sync server cart to redux
+  useEffect(() => {
+    if (isLoggedIn && apiCartData?.data) {
+      dispatch(setCart(apiCartData.data));
+    }
+  }, [apiCartData, isLoggedIn, dispatch]);
+
+  const items = isLoggedIn && apiCartData?.data ? apiCartData.data : reduxItems;
   const itemCount = items?.length || 0;
 
   return (
@@ -25,3 +40,4 @@ const CartIcon = () => {
 };
 
 export default CartIcon;
+

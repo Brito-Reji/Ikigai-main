@@ -74,14 +74,7 @@ export default function AppRoutes() {
 
         <Route path="courses" element={<UserCourseListingPage />} />
         <Route path="course/:courseId" element={<UserCourseDetailPage />} />
-        <Route
-          path="cart"
-          element={
-            <AuthGuard requireAuth={true} roles={["student"]}>
-              <CartPage />
-            </AuthGuard>
-          }
-        />
+        <Route path="cart" element={<CartPage />} />
         <Route
           path="wishlist"
           element={

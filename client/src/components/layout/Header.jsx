@@ -4,6 +4,7 @@ import { Search, Heart, Bell, User, Menu, X, BookOpen, MessageCircle } from "luc
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { logout } from "@/store/slices/authSlice.js";
+import { clearCart } from "@/store/slices/cartSlice.js";
 import { useDispatch } from "react-redux";
 import logo from "@/assets/images/logo.png";
 import CartIcon from "../common/CartIcon.jsx";
@@ -20,6 +21,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
   console.log("Header auth state:", { isAuthenticated, user });
 
   const handleLogout = () => {
+    dispatch(clearCart());
     dispatch(logout());
     navigate("/");
   };
@@ -29,6 +31,15 @@ export default function Header({ onMenuToggle, menuOpen }) {
     if (searchQuery.trim()) {
       navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  // clear search and update URL
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    const params = new URLSearchParams(searchParams);
+    params.delete("search");
+    const remaining = params.toString();
+    navigate(remaining ? `/courses?${remaining}` : window.location.pathname);
   };
 
   const handleSearchInput = (value) => {
@@ -83,11 +94,20 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 placeholder="Search courses"
                 value={searchQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               />
               <button type="submit" className="absolute left-3 top-2.5">
                 <Search className="w-5 h-5 text-gray-400" />
               </button>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </form>
           </div>
 
@@ -159,7 +179,10 @@ export default function Header({ onMenuToggle, menuOpen }) {
               </>
             ) : (
               <>
-                {/* Unauthenticated User Actions - Always visible on desktop */}
+                {/* Unauthenticated User Actions */}
+                <div className="hidden md:block">
+                  <CartIcon />
+                </div>
                 <Link to={"/login"}>
                   <button className="hidden md:inline-block px-4 py-2 text-gray-700 hover:text-gray-900 transition font-medium text-sm border border-gray-300 rounded-lg">
                     Log In
@@ -184,12 +207,21 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 placeholder="Search courses"
                 value={searchQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 autoFocus
               />
               <button type="submit" className="absolute left-3 top-2.5">
                 <Search className="w-5 h-5 text-gray-400" />
               </button>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </form>
           </div>
         )}
@@ -263,6 +295,13 @@ export default function Header({ onMenuToggle, menuOpen }) {
               </>
             ) : (
               <>
+                <Link
+                  to="/cart"
+                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
+                >
+                  <CartIcon />
+                  <span>Cart</span>
+                </Link>
                 <Link to="/login">
                   <a className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium">
                     Log In

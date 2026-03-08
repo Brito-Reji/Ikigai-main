@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Edit2, Trash2, Pause, Play, Tag, Calendar, TrendingUp } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Pause, Play, Tag, Calendar, TrendingUp, X } from "lucide-react";
 import CouponModal from "@/components/ui/CouponModal";
 import Swal from "sweetalert2";
 import { useAddCoupon, useGetCoupons, useDeleteCoupon, useTogglePauseCoupon, useUpdateCoupon } from "@/hooks/useCoupon";
@@ -258,8 +258,16 @@ console.log(coupons?.data?.data)
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
+            {searchTerm && (
+              <button
+                onClick={() => { setSearchTerm(""); setCurrentPage(1); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <button
             onClick={handleAddCoupon}

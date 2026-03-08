@@ -23,7 +23,6 @@ const CourseHero = ({ course }) => {
       toast.error("Course already in cart");
       return;
     }
-console.log("course",course)
 
     const courseData = {
       _id: course._id,
@@ -35,16 +34,23 @@ console.log("course",course)
       isEnrolled: course.isEnrolled,
     };
 
-    addToCartAPI(course._id, {
-      onSuccess: () => {
-        dispatch(addToCartRedux(courseData));
-        toast.success("Added to cart!");
-      },
-      onError: (error) => {
-        const message = error.response?.data?.message || "Failed to add to cart";
-        toast.error(message);
-      }
-    });
+    if (user && user.id) {
+      // authenticated
+      addToCartAPI(course._id, {
+        onSuccess: () => {
+          dispatch(addToCartRedux(courseData));
+          toast.success("Added to cart!");
+        },
+        onError: (error) => {
+          const message = error.response?.data?.message || "Failed to add to cart";
+          toast.error(message);
+        }
+      });
+    } else {
+      // guest
+      dispatch(addToCartRedux(courseData));
+      toast.success("Added to cart!");
+    }
   };
   const handleBuy = () => {
     navigate(`/checkout?courseId=${course._id}`);

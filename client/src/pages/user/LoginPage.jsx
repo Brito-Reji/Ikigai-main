@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
-import { loginUser, clearError } from "@/store/slices/authSlice.js";
+import { loginUser, clearError, fetchCurrentUser } from "@/store/slices/authSlice.js";
 import { setCart, clearCart } from "@/store/slices/cartSlice.js";
 import { useSyncCart } from "@/hooks/useCart.js";
 import logo from "../../assets/images/logo.png";
@@ -13,6 +14,7 @@ import Swal from "sweetalert2";
 function LoginPage() {
   let navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { dispatch, loading, isAuthenticated } = useAuth();
   const cartItems = useSelector((state) => state.cart.items);
   const { mutate: syncCartMutation } = useSyncCart();
@@ -170,23 +172,30 @@ function LoginPage() {
               },
             });
           } else {
+            // fetch full user data
+            dispatch(fetchCurrentUser());
+
             // Sync guest cart if exists
             if (cartItems.length > 0) {
               const courseIds = cartItems.map(item => item._id);
               syncCartMutation(courseIds, {
                 onSuccess: () => {
                   dispatch(clearCart());
+                  queryClient.invalidateQueries({ queryKey: ["cart"] });
                 },
                 onError: (error) => {
                   console.error("Cart sync failed:", error);
+                  dispatch(clearCart());
+                  queryClient.invalidateQueries({ queryKey: ["cart"] });
                 }
               });
+            } else {
+              // no guest cart, just refetch server cart
+              dispatch(clearCart());
+              queryClient.invalidateQueries({ queryKey: ["cart"] });
             }
 
-            // Clear success message
             setSuccessMessage("");
-            // Small delay to ensure Redux state is fully updated
-            // Use replace: true to prevent going back to login page
             setTimeout(() => {
               navigate("/courses", { replace: true });
             }, 100);

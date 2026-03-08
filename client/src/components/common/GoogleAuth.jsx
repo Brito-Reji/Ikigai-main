@@ -2,18 +2,20 @@ import { GoogleLogin } from "@react-oauth/google";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 import { googleAuth, fetchCurrentUser } from "@/store/slices/authSlice";
+import { clearCart } from "@/store/slices/cartSlice";
 import Swal from "sweetalert2";
 
 function GoogleAuth({ role }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       console.log("Google credential received:", credentialResponse.credential);
 
-      // Dispatch Redux googleAuth action
       const result = await dispatch(
         googleAuth({
           token: credentialResponse.credential,
@@ -23,12 +25,14 @@ function GoogleAuth({ role }) {
 
       console.log("Google auth successful:", result);
 
-      // Fetch current user data to populate Redux state
       await dispatch(fetchCurrentUser()).unwrap();
 
       console.log("User data fetched successfully");
 
-      // Navigate based on role
+      // reset cart for new session
+      dispatch(clearCart());
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+
       if (role === "student") {
         navigate("/courses", { replace: true });
       } else if (role === "instructor") {

@@ -54,12 +54,16 @@ const couponSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
     },
   },
-  
+
   { timestamps: true }
 );
 

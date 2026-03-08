@@ -47,6 +47,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
     success: true,
     accessToken,
     user: {
+      id: user._id,
       email: user.email,
       role: user.role,
     },
@@ -70,6 +71,7 @@ export const studentGoogleAuth = asyncHandler(async (req, res) => {
     success: true,
     accessToken,
     user: {
+      id: user._id,
       email: user.email,
       role: user.role,
     },

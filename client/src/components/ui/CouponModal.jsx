@@ -12,6 +12,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
     usageLimit: "",
     perUserLimit: "",
     description: "",
+    isPublic: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -30,6 +31,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
         usageLimit: coupon.usageLimit,
         perUserLimit: coupon.perUserLimit || "",
         description: coupon.description,
+        isPublic: coupon.isPublic || false,
       });
     } else {
       setFormData({
@@ -42,6 +44,7 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
         usageLimit: "",
         perUserLimit: "",
         description: "",
+        isPublic: false,
       });
     }
     setErrors({});
@@ -109,10 +112,10 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : name === "code" ? value.toUpperCase() : value,
     }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -340,6 +343,20 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
               {errors.description && (
                 <p className="text-red-500 text-sm mt-1">{errors.description}</p>
               )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="isPublic"
+                id="isPublic"
+                checked={formData.isPublic}
+                onChange={handleChange}
+                className="w-4 h-4 text-teal-500 border-gray-300 rounded focus:ring-teal-500"
+              />
+              <label htmlFor="isPublic" className="text-sm font-medium text-gray-700">
+                Is Public
+              </label>
             </div>
           </div>
 

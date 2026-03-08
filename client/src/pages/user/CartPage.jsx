@@ -5,27 +5,30 @@ import { useSelector, useDispatch } from "react-redux";
 import { useCart as useCartAPI, useRemoveFromCart, useClearCart } from "@/hooks/useCart";
 import { setCart, removeFromCart as removeFromCartRedux, clearCart as clearCartRedux } from "@/store/slices/cartSlice";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const CartPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const cartItems = useSelector((state) => state.cart.items);
+  const isLoggedIn = !!(user && (user.id || user._id));
 
   // api hooks
   const { data: apiCartData, isLoading } = useCartAPI();
   const { mutate: removeFromCartAPI } = useRemoveFromCart();
   const { mutate: clearCartAPI } = useClearCart();
 
+  console.log("apiCartData", apiCartData);
   // sync api cart to redux for authenticated users
   useEffect(() => {
-    if (user && user.id && apiCartData?.data) {
+    if (isLoggedIn && apiCartData?.data) {
       dispatch(setCart(apiCartData.data));
     }
-  }, [apiCartData, user, dispatch]);
+  }, [apiCartData, isLoggedIn, dispatch]);
 
   const handleRemoveItem = (courseId) => {
-    if (user && user.id) {
+    if (isLoggedIn) {
       // authenticated - call api
       removeFromCartAPI(courseId, {
         onSuccess: () => {
@@ -44,34 +47,58 @@ const CartPage = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm("Are you sure you want to clear your cart?")) {
-      if (user && user.id) {
-        // authenticated - call api
-        clearCartAPI(undefined, {
-          onSuccess: () => {
-            dispatch(clearCartRedux());
-            toast.success("Cart cleared");
-          },
-          onError: () => {
-            toast.error("Failed to clear cart");
-          }
-        });
-      } else {
-        // guest - redux only
-        dispatch(clearCartRedux());
-        toast.success("Cart cleared");
+    Swal.fire({
+      title: "Clear Cart?",
+      text: "Are you sure you want to remove all items from your cart?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      confirmButtonText: "Yes, clear it",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (isLoggedIn) {
+          clearCartAPI(undefined, {
+            onSuccess: () => {
+              dispatch(clearCartRedux());
+              toast.success("Cart cleared");
+            },
+            onError: () => {
+              toast.error("Failed to clear cart");
+            }
+          });
+        } else {
+          dispatch(clearCartRedux());
+          toast.success("Cart cleared");
+        }
       }
-    }
+    });
   };
 function checkoutHandler() {
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
-  if(cartItems.some(item => item.blocked)) {
-    toast.error("One or more courses in your cart are currently unavailable. Please remove them to proceed.");
-    return;
-  }
+    // guest user prompt
+    if (!isLoggedIn) {
+      Swal.fire({
+        icon: "info",
+        title: "Login Required",
+        text: "Please log in to proceed with checkout.",
+        confirmButtonText: "Log In",
+        showCancelButton: true,
+        confirmButtonColor: "#4f46e5",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+      return;
+    }
+    if (cartItems.some(item => item.blocked)) {
+      toast.error("One or more courses in your cart are currently unavailable. Please remove them to proceed.");
+      return;
+    }
     navigate("/checkout");
   }
   const calculateTotal = () => {
@@ -81,7 +108,7 @@ function checkoutHandler() {
     }, 0);
   };
 
-  if (isLoading && user && user.id) {
+  if (isLoading && isLoggedIn) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>

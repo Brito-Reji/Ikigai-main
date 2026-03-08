@@ -17,6 +17,7 @@ export const validateCoupon = asyncHandler(async (req, res) => {
     parseFloat(amount)
   );
 
+
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "Coupon is valid",
