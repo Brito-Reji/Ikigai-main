@@ -5,6 +5,7 @@ import AppRoutes from "./routes";
 import LoadingScreen from "@/components/common/LoadingScreen.jsx";
 import { useAuthCheck } from "./hooks/useAuthCheck.js";
 import SocketProvider from "@/context/SocketProvider";
+import { PendingPaymentProvider } from "./context/PendingPaymentProvider";
 
 function App() {
   const location = useLocation();
@@ -22,10 +23,12 @@ function App() {
 
   return (
     <SocketProvider>
-      <div>
-        <Toaster position="top-center" />
-        <AppRoutes />
-      </div>
+      <PendingPaymentProvider>
+        <div>
+          <Toaster position="top-center" />
+          <AppRoutes />
+        </div>
+      </PendingPaymentProvider>
     </SocketProvider>
   );
 }

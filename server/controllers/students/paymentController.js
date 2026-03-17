@@ -3,6 +3,7 @@ import * as paymentService from "../../services/student/paymentService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
 
+
 export const createOrder = asyncHandler(async (req, res) => {
   const { courseIds, couponCode, useWallet } = req.body;
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
@@ -85,5 +86,31 @@ export const getOrderHistory = asyncHandler(async (req, res) => {
   res.status(HTTP_STATUS.OK).json({
     success: true,
     data: orders,
+  });
+});
+
+export const getPendingPayment = asyncHandler(async (req, res) => {
+  const order = await paymentService.getPendingPaymentService(req.user._id);
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: order,
+  });
+});
+
+// cancel a pending order
+export const cancelOrder = asyncHandler(async (req, res) => {
+  const { orderId } = req.body;
+  if (!orderId) {
+    res.status(HTTP_STATUS.BAD_REQUEST);
+    throw new Error("Order ID is required");
+  }
+  const result = await paymentService.cancelOrderService({
+    orderId,
+    userId: req.user._id,
+  });
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "Order cancelled",
+    data: result,
   });
 });

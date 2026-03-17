@@ -98,6 +98,8 @@ export const getMonthlyRevenueData = async () => {
 
 // get all orders with pagination
 export const getAllOrders = async ({ page = 1, limit = 20, status }) => {
+  // filter orders by status neglat the status created
+  
   const query = {};
   if (status) {
     query.status = status;

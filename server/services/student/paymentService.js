@@ -43,7 +43,7 @@ export const createOrderService = async ({
       userId,
       originalAmount
     );
-    discountAmount = couponData.discountAmount * 100;
+    discountAmount = couponData.discountAmount;
     couponId = couponData.couponId;
     appliedCouponCode = couponData.code;
   }
@@ -425,4 +425,40 @@ export const retryOrderService = async ({ orderId, userId }) => {
     enrolledDetails: populatedOrder,
     message: "Order retry successful",
   };
+};
+
+export const getPendingPaymentService = async userId => {
+  const order = await Order.findOne({ userId, status: "CREATED" });
+  if (!order) {
+    return;
+  }
+  const populatedOrder = await Order.findById(order._id).populate({
+    path: "courseIds",
+    select: "title price thumbnail instructor",
+    populate: {
+      path: "instructor",
+      select: "firstName lastName",
+    },
+  });
+  return {
+    orderId: order._id,
+    razorpayOrderId: order.razorpayOrderId,
+    amount: order.amount,
+    currency: "INR",
+    enrolledDetails: populatedOrder,
+    message: "Pending payment found",
+  };
+};
+
+// cancel a CREATED order
+export const cancelOrderService = async ({ orderId, userId }) => {
+  const order = await Order.findOne({ _id: orderId, userId });
+
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "CREATED") throw new Error("Only pending orders can be cancelled");
+
+  order.status = "CANCELLED";
+  await order.save();
+
+  return { orderId: order._id, status: "CANCELLED" };
 };

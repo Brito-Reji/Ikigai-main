@@ -65,13 +65,6 @@ export const startRazorpayPayment = async (
     modal: {
       ondismiss: function () {
         console.log("Payment window closed by user");
-        navigate("/payment/failed", {
-          replace: true,
-          state: {
-            enrolledDetails: order.enrolledDetails,
-            orderId: order.orderId,
-          },
-        });
       },
     },
   };
@@ -144,13 +137,6 @@ export const retryPayment = async (
     modal: {
       ondismiss: function () {
         console.log("Payment window closed by user");
-        navigate("/payment/failed", {
-          replace: true,
-          state: {
-            enrolledDetails: order.enrolledDetails,
-            orderId: order.orderId,
-          },
-        });
       },
     },
   };
