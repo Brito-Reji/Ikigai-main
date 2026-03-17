@@ -111,10 +111,17 @@ export const verifyOTP = asyncHandler(async (req, res) => {
 
       return res.status(200).json({
         accessToken,
-        instructor: instructor,
+        user: {
+          _id: instructor._id,
+          email: instructor.email,
+          firstName: instructor.firstName,
+          lastName: instructor.lastName,
+          username: instructor.username,
+          role: instructor.role,
+          profileImageUrl: instructor.profileImageUrl,
+        },
         success: true,
-        message:
-          "user verified succesfully Email verified! Redirecting to dashboard...",
+        message: "user verified succesfully Email verified! Redirecting to dashboard...",
       });
     }
   } else {

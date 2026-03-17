@@ -32,8 +32,13 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     success: true,
     accessToken,
     user: {
+      _id: instructor._id,
       email: instructor.email,
+      firstName: instructor.firstName,
+      lastName: instructor.lastName,
+      username: instructor.username,
       role: instructor.role,
+      profileImageUrl: instructor.profileImageUrl,
     },
   });
 });
@@ -55,8 +60,13 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     success: true,
     accessToken,
     user: {
+      _id: instructor._id,
       email: instructor.email,
+      firstName: instructor.firstName,
+      lastName: instructor.lastName,
+      username: instructor.username,
       role: instructor.role,
+      profileImageUrl: instructor.profileImageUrl,
     },
   });
 });

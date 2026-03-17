@@ -50,7 +50,7 @@ const Courses = () => {
   const courses = coursesData?.data || [];
   const pagination = coursesData?.pagination || {};
   const statistics = statisticsData?.data || {};
-  const categories = categoriesData?.data || [];
+  const categories = categoriesData?.categories || [];
 
   // Update URL params
   const updateFilters = (newFilters) => {
@@ -208,7 +208,7 @@ const Courses = () => {
             <Clock className="w-8 h-8 text-yellow-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Awaiting Approval</p>
-              <p className="text-2xl font-semibold text-gray-900">{statistics.publishedCourses || 0}</p>
+              <p className="text-2xl font-semibold text-gray-900">{statistics.pendingCourses || 0}</p>
             </div>
           </div>
         </div>

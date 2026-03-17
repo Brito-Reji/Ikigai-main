@@ -12,11 +12,12 @@ export const getAllCoursesService = async (filters) => {
         deleted: { $ne: true }
     };
 
-    // Add visibility filter (published OR awaiting verification)
+    // all courses admin should see
     const visibilityFilter = {
         $or: [
             { published: true },
-            { verificationStatus: "inprocess" }
+            { verificationStatus: "inprocess" },
+            { verificationStatus: "rejected" }
         ]
     };
 
@@ -161,9 +162,9 @@ export const getCourseStatisticsService = async () => {
     const baseQuery = { deleted: { $ne: true }, published: true };
 
     const totalCourses = await Course.countDocuments(baseQuery);
-    const publishedCourses = await Course.countDocuments({ ...baseQuery, verificationStatus: "inprocess" });
+    const pendingCourses = await Course.countDocuments({ deleted: { $ne: true }, verificationStatus: "inprocess" });
     const approvedCourses = await Course.countDocuments({ ...baseQuery, verificationStatus: "verified" });
-    const rejectedCourses = await Course.countDocuments({ ...baseQuery, verificationStatus: "rejected" });
+    const rejectedCourses = await Course.countDocuments({ deleted: { $ne: true }, verificationStatus: "rejected" });
     const blockedCourses = await Course.countDocuments({ ...baseQuery, blocked: true });
 
     const coursesByCategory = await Course.aggregate([
@@ -188,7 +189,7 @@ export const getCourseStatisticsService = async () => {
 
     return {
         totalCourses,
-        publishedCourses, // Awaiting approval
+        pendingCourses,
         approvedCourses,
         rejectedCourses,
         blockedCourses,

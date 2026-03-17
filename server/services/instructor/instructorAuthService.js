@@ -53,6 +53,9 @@ export const instructorRegisterService = async data => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const defaultAvatar = `https://ui-avatars.com/api/?name=${initials}&background=4f46e5&color=ffffff&size=256&bold=true&rounded=true`;
+
   await Instructor.create({
     email: email.toLowerCase(),
     password: hashedPassword,
@@ -60,6 +63,7 @@ export const instructorRegisterService = async data => {
     firstName,
     lastName,
     role: "instructor",
+    profileImageUrl: defaultAvatar,
   });
 
   const response = await api.post("/auth/send-otp", { email });
