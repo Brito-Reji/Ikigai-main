@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useAdmin";
-import { Users, BookOpen, DollarSign, ShoppingCart, RefreshCcw, GraduationCap, Download } from "lucide-react";
+import { Users, BookOpen, TrendingUp, ShoppingCart, RefreshCcw, GraduationCap, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-5 shadow text-white">
           <div className="flex items-center gap-3">
-            <DollarSign className="w-8 h-8 opacity-80" />
+            <TrendingUp className="w-8 h-8 opacity-80" />
             <div>
               <div className="text-2xl font-bold">₹{formatAmount(stats?.totalRevenue || 0)}</div>
               <div className="text-indigo-100 text-sm">Total Revenue</div>

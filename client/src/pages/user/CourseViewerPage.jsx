@@ -26,7 +26,6 @@ const CourseViewerPage = () => {
 	const location = useLocation();
 
 	const { data: enrollment, isLoading } = useGetEnrolledCourseById(courseId);
-	console.log("enrollment", enrollment);
 	const course = enrollment?.data?.course
 	const initialLessonId = location.state?.lessonId || enrollment?.data?.progress?.lastAccessedLesson || course?.chapters?.[0]?.lessons?.[0]?._id;
 
@@ -79,7 +78,7 @@ const CourseViewerPage = () => {
 	}, [enrollment, location.state?.lessonId, currentLessonId]);
 
 
-	console.log("course", course);
+
 	
 	if (isLoading) {
 		return (
@@ -175,12 +174,14 @@ const CourseViewerPage = () => {
 				courseId: courseId
 			});
 			if (result?.data) {
+				
 				setConversation({
-					_id: result.data._id,
+					_id: result.data.data._id,
 					instructorName: `${course.instructor.firstName} ${course.instructor.lastName}`,
 					instructorAvatar: course.instructor.avatar,
 					courseTitle: course.title
 				});
+				
 				setChatMode('instructor');
 				setIsChatOpen(true);
 				setShowChatMenu(false);
@@ -445,7 +446,7 @@ const CourseViewerPage = () => {
 								{chatMode === 'instructor' ? 'Instructor Chat' : 'Course Discussion'}
 							</span>
 							<Link
-								to="/chat"
+								to={chatMode === 'instructor' ? `/chat/conversation/${conversation?._id}` : `/chat/room/${room?._id}`}
 								className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
 							>
 								<span>Open Full Chat</span>
