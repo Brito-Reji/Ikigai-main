@@ -72,7 +72,6 @@ export default function CourseCard({ course }) {
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-  {console.log("course id",course._id)}
         <WishlistHeart
           courseId={course._id}
           className="absolute top-3 left-3 z-10"

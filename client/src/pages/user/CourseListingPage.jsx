@@ -53,12 +53,14 @@ export default function CoursesPage() {
     const urlSort = searchParams.get("sort");
     const urlPage = searchParams.get("page");
     const urlPriceRange = searchParams.get("priceRange");
+    const urlRating = searchParams.get("rating");
 
     setSearchQuery(urlSearch || "");
     if (urlCategory) setSelectedCategories([urlCategory]);
     if (urlSort) setSortBy(urlSort);
     if (urlPage) setCurrentPage(Number(urlPage));
     if (urlPriceRange) setSelectedPriceRanges(urlPriceRange.split(","));
+    if (urlRating) setSelectedRatings(urlRating.split(",").map(Number));
   }, [searchParams]);
 
   // Update URL when filters change
@@ -68,6 +70,8 @@ export default function CoursesPage() {
     if (selectedCategories.length > 0) params.category = selectedCategories[0];
     if (selectedPriceRanges.length > 0)
       params.priceRange = selectedPriceRanges.join(",");
+    if (selectedRatings.length > 0)
+      params.rating = selectedRatings.join(",");
     if (sortBy !== "newest") params.sort = sortBy;
     if (currentPage > 1) params.page = currentPage;
 
@@ -76,12 +80,15 @@ export default function CoursesPage() {
     searchQuery,
     selectedCategories,
     selectedPriceRanges,
+    selectedRatings,
     sortBy,
     currentPage,
     setSearchParams,
   ]);
 
   // Fetch courses with TanStack Query
+  const minRating = selectedRatings.length > 0 ? Math.min(...selectedRatings) : null;
+
   const courseParams = {
     page: currentPage,
     limit: 12,
@@ -89,6 +96,7 @@ export default function CoursesPage() {
     ...(searchQuery && { search: searchQuery }),
     ...(selectedCategories.length > 0 && { category: selectedCategories[0] }),
     ...(selectedPriceRanges.length > 0 && { priceRange: selectedPriceRanges.join(",") }),
+    ...(minRating && { rating: minRating }),
   };
 
   const { data: coursesData, isLoading: loading, error: coursesError } = usePublicCourses(courseParams);
@@ -97,14 +105,6 @@ export default function CoursesPage() {
   const courses = coursesData?.data || [];
   const categories = categoriesData?.categories || [];
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Course Params:", courseParams);
-    console.log("Courses Data:", coursesData);
-    console.log("Courses Array:", courses);
-    console.log("Loading:", loading);
-    console.log("Error:", coursesError);
-  }, [coursesData, courses, loading, coursesError]);
 
   // Update pagination when data changes
   useEffect(() => {
@@ -119,7 +119,8 @@ export default function CoursesPage() {
     _id: course._id || course.id,
     title: course.title,
     instructor: course.instructor,
-    rating: course.rating || 0,
+    averageRating: course.averageRating || 0,
+    totalReviews: course.totalReviews || 0,
     hours: course.duration || 0,
     price: `₹${course.price}`,
     thumbnail: course.thumbnail,
@@ -438,12 +439,9 @@ export default function CoursesPage() {
             ) : transformedCourses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                 {transformedCourses.map((course, idx) => (
-                  <>
-                  {console.log("course",course)}
-                    <Link to={`/course/${course.id}`} key={course.id || idx}>
-                      <CourseCard course={course} />
-                    </Link>
-                  </>
+                  <Link to={`/course/${course.id}`} key={course.id || idx}>
+                    <CourseCard course={course} />
+                  </Link>
                 ))}
               </div>
             ) : (

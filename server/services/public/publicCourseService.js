@@ -158,8 +158,14 @@ export const getPublishedCoursesService = async (queryParams, userId) => {
 
   const coursesWithStats = await attachCourseStats(coursesPlain);
 
+  // rating post-filter
+  const minRating = queryParams.rating ? parseInt(queryParams.rating) : null;
+  const finalCourses = minRating
+    ? coursesWithStats.filter(c => c.averageRating >= minRating)
+    : coursesWithStats;
+
   return {
-    courses: coursesWithStats,
+    courses: finalCourses,
     pagination: {
       currentPage: page,
       totalPages,
