@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAdminOrders, useAdminDashboard } from "@/hooks/useAdmin";
-import { ShoppingCart, Search, ChevronLeft, ChevronRight, Download, X, Filter, Calendar } from "lucide-react";
+import { ShoppingCart, Search, ChevronLeft, ChevronRight, Download, X, Filter, Calendar, User, CreditCard, Tag, Wallet, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 
@@ -34,10 +34,157 @@ const getDateRange = (range) => {
   return { from: start, to: now };
 };
 
+// order detail panel
+function OrderDetailPanel({ order, onClose, formatDate }) {
+  if (!order) return null;
+
+  const totalCharged = (order.amount || 0);
+  const original = (order.originalAmount || order.amount || 0);
+  const discount = (order.discountAmount || 0);
+  const wallet = (order.walletAmountUsed || 0);
+
+  const statusColor = order.status === "PAID"
+    ? "bg-green-100 text-green-800"
+    : order.status === "REFUNDED"
+    ? "bg-red-100 text-red-800"
+    : "bg-yellow-100 text-yellow-800";
+
+  return (
+    <>
+      {/* backdrop */}
+      <div
+        className="fixed inset-0 bg-black/30 z-40"
+        onClick={onClose}
+      />
+      {/* panel */}
+      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+        {/* header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-indigo-50">
+          <div>
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Order Details</p>
+            <p className="font-mono text-sm text-gray-800 font-semibold mt-0.5">#{order.razorpayOrderId?.slice(-14)}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusColor}`}>
+              {order.status}
+            </span>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          {/* customer */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" /> Customer
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
+                {order.userId?.firstName?.charAt(0) || "?"}
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">{order.userId?.firstName} {order.userId?.lastName}</p>
+                <p className="text-xs text-gray-500">{order.userId?.email}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* courses */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5" /> Courses ({order.courseIds?.length || 0})
+            </p>
+            <div className="space-y-2">
+              {order.courseIds?.map((course) => (
+                <div key={course._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  {course.thumbnail ? (
+                    <img src={course.thumbnail} alt={course.title} className="w-12 h-8 object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-12 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 text-indigo-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{course.title}</p>
+                    <p className="text-xs text-gray-500">₹{course.price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* payment breakdown */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <CreditCard className="w-3.5 h-3.5" /> Payment
+            </p>
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Method</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  order.paymentMethod === "wallet" ? "bg-purple-100 text-purple-700"
+                  : order.paymentMethod === "mixed" ? "bg-blue-100 text-blue-700"
+                  : "bg-gray-100 text-gray-700"
+                }`}>{order.paymentMethod || "razorpay"}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Original amount</span>
+                <span className="font-medium text-gray-900">₹{original}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 flex items-center gap-1">
+                    <Tag className="w-3 h-3" /> Coupon {order.couponCode && `(${order.couponCode})`}
+                  </span>
+                  <span className="text-green-600 font-medium">-₹{discount}</span>
+                </div>
+              )}
+              {wallet > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500 flex items-center gap-1">
+                    <Wallet className="w-3 h-3" /> Wallet used
+                  </span>
+                  <span className="text-purple-600 font-medium">-₹{wallet}</span>
+                </div>
+              )}
+              <div className="border-t pt-2 flex justify-between text-sm font-semibold">
+                <span className="text-gray-700">Total charged</span>
+                <span className="text-gray-900">₹{totalCharged}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* timestamps */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" /> Timeline
+            </p>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Placed on</span>
+                <span className="text-gray-800">{formatDate(order.createdAt)}</span>
+              </div>
+              {order.updatedAt && order.updatedAt !== order.createdAt && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Last updated</span>
+                  <span className="text-gray-800">{formatDate(order.updatedAt)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 const AdminOrdersPage = () => {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // report modal state
   const [showModal, setShowModal] = useState(false);
@@ -212,7 +359,11 @@ const AdminOrdersPage = () => {
                 </tr>
               ) : (
                 filteredOrders?.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
+                  <tr
+                    key={order._id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setSelectedOrder(order)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">
                         #{order.razorpayOrderId?.slice(-10)}
@@ -426,6 +577,15 @@ const AdminOrdersPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Order Detail Panel */}
+      {selectedOrder && (
+        <OrderDetailPanel
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          formatDate={formatDate}
+        />
       )}
     </div>
   );

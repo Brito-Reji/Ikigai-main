@@ -105,13 +105,6 @@ export const applyForVerification = asyncHandler(async (req, res) => {
     });
   }
 
-  if (course.verificationStatus === "verified") {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      success: false,
-      message: "Course is already verified. You can now publish it.",
-    });
-  }
-
   course.verificationStatus = "inprocess";
   course.rejectionReason = null;
   await course.save();
