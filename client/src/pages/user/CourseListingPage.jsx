@@ -13,6 +13,7 @@ import CourseCard from "../../components/student/CourseCard.jsx";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePublicCourses } from "@/hooks/useCourses.js";
 import { useCategories } from "@/hooks/useCategories.js";
+import Footer from "../../components/layout/Footer.jsx";
 
 export default function CoursesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -521,119 +522,7 @@ export default function CoursesPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 sm:py-12 mt-12 sm:mt-16">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">I</span>
-                </div>
-                <span className="text-lg font-bold">Ikigai</span>
-              </div>
-              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-                Empowering learners through accessible and engaging online
-                education. Ikigai is a leading learning platform dedicated to
-                providing high-quality, flexible, and affordable educational
-                experiences.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm">Get Help</h3>
-              <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Latest Articles
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm">Programs</h3>
-              <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Art & Design
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Business
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    IT & Software
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Languages
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Programming
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm">Contact Us</h3>
-              <p className="text-xs sm:text-sm text-gray-400 mb-2">
-                Address: 123 Main Street, Anytown, CA 12345
-              </p>
-              <p className="text-xs sm:text-sm text-gray-400 mb-4">
-                Tel: +123 456 7890
-                <br />
-                Mail: ikigai@web.in
-              </p>
-              <div className="flex space-x-3">
-                <a
-                  href="#"
-                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition text-xs font-bold"
-                >
-                  f
-                </a>
-                <a
-                  href="#"
-                  className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition text-xs font-bold"
-                >
-                  in
-                </a>
-                <a
-                  href="#"
-                  className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition text-xs font-bold"
-                >
-                  G
-                </a>
-                <a
-                  href="#"
-                  className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition text-xs font-bold"
-                >
-                  X
-                </a>
-                <a
-                  href="#"
-                  className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition text-xs font-bold"
-                >
-                  M
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

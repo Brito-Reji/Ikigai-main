@@ -13,11 +13,11 @@ const PurchaseHistoryPage = () => {
   const { data: orders = [], isLoading } = useOrderHistory();
   const { mutate: partialRefund } = usePartialRefund();
   const handleRefundCourse = async (order, courseId, courseTitle, originalPrice) => {
-    // calculate base refund
-    console.log("order", order);
+    // total user paid = razorpay + wallet
+    const totalPaid = Math.round(order.amount) + Math.round(order.walletAmountUsed || 0);
     let baseRefundAmount;
-    if (order.originalAmount && order.originalAmount !== order.amount) {
-      baseRefundAmount = Math.round((originalPrice / order.originalAmount) * order.amount);
+    if (order.originalAmount && order.originalAmount > 0) {
+      baseRefundAmount = Math.round((originalPrice / order.originalAmount) * totalPaid);
     } else {
       baseRefundAmount = originalPrice;
     }
@@ -79,9 +79,9 @@ const PurchaseHistoryPage = () => {
         { courseId, razorpayOrderId: order.razorpayOrderId, reason: "Customer request", refundMethod },
         {
           onSuccess: (response) => {
-            const msg = refundMethod === "wallet" 
-              ? `₹${response.data.refundAmount / 100} credited to wallet!`
-              : `₹${response.data.refundAmount / 100} refund to bank (5-7 days)`;
+            const msg = refundMethod === "wallet"
+              ? `₹${response.data.refundAmount} credited to wallet!`
+              : `₹${response.data.refundAmount} refund to bank (5-7 days)`;
             toast.success(msg);
             setRefundLoading(null);
           },

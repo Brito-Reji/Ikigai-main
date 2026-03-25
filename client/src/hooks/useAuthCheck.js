@@ -1,41 +1,48 @@
 import { useState, useEffect } from "react";
-import api from "@/api/axiosConfig.js";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCurrentUser, logout } from "@/store/slices/authSlice.js";
 
 export const useAuthCheck = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
+  const accessToken = useSelector(state => state.auth.accessToken);
 
   useEffect(() => {
-    const checkUserStatus = async () => {
-      const accessToken = localStorage.getItem("accessToken");
+    let isMounted = true;
 
-      if (!accessToken) {
-        setIsLoading(false);
+    const checkUserStatus = async () => {
+      const tokenLocal = localStorage.getItem("accessToken");
+      
+      if (!tokenLocal || tokenLocal === "null" || tokenLocal === "undefined") {
+        if (isMounted) setIsLoading(false);
         return;
       }
 
       try {
-        // try refreshing if token is expired
-        const userResponse = await api.get("/auth/me");
-
-        if (userResponse.data.user?.isBlocked) {
-          localStorage.removeItem("accessToken");
+        const resultAction = await dispatch(fetchCurrentUser()).unwrap();
+        
+        if (resultAction?.isBlocked) {
+          dispatch(logout());
           window.location.href = "/login";
-          return;
         }
       } catch (error) {
-        if (error.response?.data?.isBlocked) {
-          localStorage.removeItem("accessToken");
-          window.location.href = "/login";
-        } else if (error.response?.status === 401) {
-          localStorage.removeItem("accessToken");
+        if (error?.isBlocked) {
+           dispatch(logout());
+           window.location.href = "/login";
+        } else if (!error?.shouldRetry) {
+           dispatch(logout());
         }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     checkUserStatus();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch]);
 
   return { isLoading };
 };

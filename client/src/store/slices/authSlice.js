@@ -218,10 +218,18 @@ export const googleAuth = createAsyncThunk(
   }
 );
 
+const getValidToken = () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token || token === "undefined" || token === "null") {
+    return null;
+  }
+  return token;
+};
+
 const initialState = {
   user: null,
-  accessToken: localStorage.getItem("accessToken"),
-  isAuthenticated: !!localStorage.getItem("accessToken"),
+  accessToken: getValidToken(),
+  isAuthenticated: !!getValidToken(),
   loading: false,
   error: null,
   requiresVerification: false,

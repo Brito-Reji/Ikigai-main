@@ -12,13 +12,14 @@ import CartIcon from "../common/CartIcon.jsx";
 
 export default function Header({ onMenuToggle, menuOpen }) {
   const { isAuthenticated, user } = useAuth();
+  // alert(isAuthenticated)
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
 
-  console.log("Header auth state:", { isAuthenticated, user });
+
 
   const handleLogout = () => {
     dispatch(clearCart());
@@ -66,10 +67,10 @@ export default function Header({ onMenuToggle, menuOpen }) {
             </button>
 
             {/* Logo */}
-            <Link to='/'>
+            <Link to={isAuthenticated && user?.role === "student" ? "/courses" : "/"}>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8  rounded-full flex items-center justify-center">
-                  <img src={logo} className="text-white font-bold text-sm"></img>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                  <img src={logo} className="text-white font-bold text-sm" />
                 </div>
                 <span className="text-lg sm:text-xl font-bold text-gray-900">
                   Ikigai
@@ -78,12 +79,12 @@ export default function Header({ onMenuToggle, menuOpen }) {
             </Link>
 
             {/* Desktop Categories Link */}
-            <a
-              href="#"
+            <Link
+              to="/courses"
               className="hidden md:block text-gray-700 hover:text-gray-900 transition"
             >
               Categories
-            </a>
+            </Link>
           </div>
 
           {/* Center - Desktop Search Bar */}
@@ -231,12 +232,12 @@ export default function Header({ onMenuToggle, menuOpen }) {
       {menuOpen && (
         <div className="md:hidden fixed inset-0 top-16 bg-white z-30 overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
-            <a
-              href="#"
+            <Link
+              to="/courses"
               className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
             >
               Categories
-            </a>
+            </Link>
 
             {isAuthenticated ? (
               <>
