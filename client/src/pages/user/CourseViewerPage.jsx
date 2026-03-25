@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
 	Menu,
@@ -15,6 +15,7 @@ import LessonViewer from '@/components/student/LessonViewer';
 import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
 import CourseReviewModal from '@/components/student/CourseReviewModal';
+import CourseCertificate from '@/components/student/CourseCertificate';
 import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
 import { useCourseReviews } from '@/hooks/useReview';
 import api from '@/api/axiosConfig';
@@ -39,6 +40,8 @@ const CourseViewerPage = () => {
 	);
 	const [conversation, setConversation] = useState(null);
 	const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+	const [showCertificate, setShowCertificate] = useState(false);
+	const prevProgressRef = useRef(0);
 
 	// chat hooks
 	const { data: roomData, isLoading: roomLoading } = useGetRoomByCourse(courseId);
@@ -159,7 +162,15 @@ const CourseViewerPage = () => {
 			{ courseId, lessonId },
 			{
 				onSuccess: () => {
-					setCompletedLessons((prev) => new Set([...prev, lessonId]));
+					setCompletedLessons((prev) => {
+						const updated = new Set([...prev, lessonId]);
+						const newProgress = totalLessons > 0 ? Math.round((updated.size / totalLessons) * 100) : 0;
+						if (newProgress === 100 && prevProgressRef.current < 100) {
+							setShowCertificate(true);
+						}
+						prevProgressRef.current = newProgress;
+						return updated;
+					});
 				},
 			}
 		);
@@ -238,14 +249,25 @@ const CourseViewerPage = () => {
 							</nav>
 						</div>
 
-						{/* Review button - visible on all screens */}
-						<button
-							onClick={() => setIsReviewModalOpen(true)}
-							className="flex items-center gap-1.5 lg:gap-2 px-3 py-1.5 lg:px-4 lg:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-						>
-							<Star className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-							<span className="text-xs lg:text-sm font-medium">Rate</span>
-						</button>
+						{/* action buttons */}
+						<div className="flex items-center gap-2">
+							{courseProgress === 100 && (
+								<button
+									onClick={() => setShowCertificate(true)}
+									className="flex items-center gap-1.5 lg:gap-2 px-3 py-1.5 lg:px-4 lg:py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all shadow-sm"
+								>
+									<Award className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+									<span className="text-xs lg:text-sm font-medium">Get Certificate</span>
+								</button>
+							)}
+							<button
+								onClick={() => setIsReviewModalOpen(true)}
+								className="flex items-center gap-1.5 lg:gap-2 px-3 py-1.5 lg:px-4 lg:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								<Star className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+								<span className="text-xs lg:text-sm font-medium">Rate</span>
+							</button>
+						</div>
 					</div>
 
 					<div className="flex items-center gap-4">
@@ -473,6 +495,15 @@ const CourseViewerPage = () => {
 				onClose={() => setIsReviewModalOpen(false)}
 				courseId={courseId}
 				courseTitle={course?.title}
+			/>
+
+			<CourseCertificate
+				isOpen={showCertificate}
+				onClose={() => setShowCertificate(false)}
+				studentName={`${enrollment?.data?.user?.firstName || ''} ${enrollment?.data?.user?.lastName || ''}`.trim() || 'Student'}
+				courseTitle={course?.title}
+				instructorName={`${course?.instructor?.firstName || ''} ${course?.instructor?.lastName || ''}`.trim() || 'Instructor'}
+				completedAt={enrollment?.data?.completedAt}
 			/>
 		</div>
 	);

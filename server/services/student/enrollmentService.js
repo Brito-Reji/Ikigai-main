@@ -119,6 +119,7 @@ export const getEnrolledCourseByIdService = async (userId, courseId) => {
     course: courseId,
     status: "active",
   })
+    .populate("user", "firstName lastName email")
     .populate({
       path: "course",
       populate: [

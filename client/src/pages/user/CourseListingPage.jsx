@@ -308,7 +308,7 @@ export default function CoursesPage() {
               </div>
 
               {/* Number of Chapters Filter */}
-              <div className="bg-white lg:bg-transparent rounded-lg p-4 lg:p-0 lg:mb-0 mb-4">
+              {/* <div className="bg-white lg:bg-transparent rounded-lg p-4 lg:p-0 lg:mb-0 mb-4">
                 <button
                   onClick={() => toggleSection("chapters")}
                   className="flex justify-between items-center w-full mb-4"
@@ -343,7 +343,7 @@ export default function CoursesPage() {
                     </button>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* Price Filter */}
               <div className="bg-white lg:bg-transparent rounded-lg p-4 lg:p-0 lg:mb-0 mb-4">
