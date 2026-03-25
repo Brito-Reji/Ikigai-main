@@ -69,6 +69,14 @@ export const useConversationMessages = conversationId => {
     const handleNewMessage = ({ message }) => {
       if (message.conversationId === conversationId) {
         setMessages(prev => [...prev, message]);
+        // Update TanStack query cache so messages persist on page switch
+        queryClient.setQueryData(["messages", conversationId], old => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: [...old.data, message]
+          };
+        });
       }
     };
 
@@ -126,6 +134,14 @@ export const useRoomMessages = roomId => {
     const handleNewMessage = ({ message }) => {
       if (message.roomId === roomId) {
         setMessages(prev => [...prev, message]);
+        // Update TanStack query cache for course rooms too
+        queryClient.setQueryData(["room-messages", roomId], old => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: [...old.data, message]
+          };
+        });
       }
     };
 

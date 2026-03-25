@@ -234,6 +234,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
           <nav className="px-4 py-6 space-y-4">
             <Link
               to="/courses"
+              onClick={onMenuToggle}
               className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
             >
               Categories
@@ -245,6 +246,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                   <>
                     <Link
                       to="/my-courses"
+                      onClick={onMenuToggle}
                       className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                     >
                       <BookOpen className="w-5 h-5" />
@@ -252,6 +254,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                     </Link>
                     <Link
                       to="/chat"
+                      onClick={onMenuToggle}
                       className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                     >
                       <MessageCircle className="w-5 h-5" />
@@ -261,6 +264,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 )}
                 <Link
                   to="/wishlist"
+                  onClick={onMenuToggle}
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <Heart className="w-5 h-5" />
@@ -268,27 +272,33 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 </Link>
                 <Link
                   to="/cart"
+                  onClick={onMenuToggle}
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <CartIcon />
                   <span>Cart</span>
                 </Link>
-                <a
-                  href="#"
+                <Link
+                  to="#"
+                  onClick={onMenuToggle}
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <Bell className="w-5 h-5" />
                   <span>Notifications</span>
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to={user?.role === "instructor" ? "/instructor/profile" : "/profile"}
+                  onClick={onMenuToggle}
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <User className="w-5 h-5" />
                   <span>{user?.firstName || user?.email || "Profile"}</span>
-                </a>
+                </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    onMenuToggle();
+                  }}
                   className="block w-full text-left py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium"
                 >
                   Logout
@@ -298,20 +308,25 @@ export default function Header({ onMenuToggle, menuOpen }) {
               <>
                 <Link
                   to="/cart"
+                  onClick={onMenuToggle}
                   className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
                 >
                   <CartIcon />
                   <span>Cart</span>
                 </Link>
-                <Link to="/login">
-                  <a className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium">
-                    Log In
-                  </a>
+                <Link
+                  to="/login"
+                  onClick={onMenuToggle}
+                  className="block py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition font-medium"
+                >
+                  Log In
                 </Link>
-                <Link to="/signup">
-                  <a className="block py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-4 transition font-medium text-center">
-                    Sign Up
-                  </a>
+                <Link
+                  to="/signup"
+                  onClick={onMenuToggle}
+                  className="block py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg px-4 transition font-medium text-center"
+                >
+                  Sign Up
                 </Link>
               </>
             )}

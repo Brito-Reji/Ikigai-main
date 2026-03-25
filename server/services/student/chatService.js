@@ -4,25 +4,67 @@ import { CourseRoom } from "../../models/CourseRoom.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { Course } from "../../models/Course.js";
 
-// get student conversations
+// get student conversations (based on active purchased courses)
 export const getConversations = async userId => {
-  const conversations = await Conversation.find({ student: userId })
-    .populate("instructor", "username profileImageUrl")
-    .populate("course", "title thumbnail")
-    .sort({ updatedAt: -1 });
+  // get all active enrollments for the student
+  const enrollments = await Enrollment.find({
+    user: userId,
+    status: "active",
+  }).populate({
+    path: "course",
+    select: "title thumbnail instructor",
+    populate: {
+      path: "instructor",
+      select: "username profileImageUrl",
+    },
+  });
 
-  return conversations.map(conv => ({
-    _id: conv._id,
-    instructorId: conv.instructor._id,
-    instructorName: conv.instructor.username || "Instructor",
-    instructorAvatar: conv.instructor.profileImageUrl,
-    courseId: conv.course._id,
-    courseTitle: conv.course.title,
-    lastMessage: conv.lastMessage?.content || "",
-    lastMessageTime: conv.lastMessage?.timestamp || conv.updatedAt,
-    unreadCount: conv.studentUnread,
-    isOnline: false,
-  }));
+  const conversationList = [];
+
+  for (const enrollment of enrollments) {
+    if (!enrollment.course || !enrollment.course.instructor) continue;
+
+    const courseId = enrollment.course._id;
+    const instructorId = enrollment.course.instructor._id;
+
+    // find existing conversation or create a new one
+    let conversation = await Conversation.findOne({
+      student: userId,
+      instructor: instructorId,
+      course: courseId,
+    }).populate("instructor", "username profileImageUrl")
+      .populate("course", "title thumbnail");
+
+    if (!conversation) {
+      conversation = await Conversation.create({
+        student: userId,
+        instructor: instructorId,
+        course: courseId,
+      });
+      // populate it for display
+      conversation = await Conversation.findById(conversation._id)
+        .populate("instructor", "username profileImageUrl")
+        .populate("course", "title thumbnail");
+    }
+
+    conversationList.push({
+      _id: conversation._id,
+      instructorId: conversation.instructor._id,
+      instructorName: conversation.instructor.username || "Instructor",
+      instructorAvatar: conversation.instructor.profileImageUrl,
+      courseId: conversation.course._id,
+      courseTitle: conversation.course.title,
+      lastMessage: conversation.lastMessage?.content || "",
+      lastMessageTime: conversation.lastMessage?.timestamp || conversation.updatedAt,
+      unreadCount: conversation.studentUnread || 0,
+      isOnline: false,
+    });
+  }
+
+  // sort by latest message time descending
+  conversationList.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
+
+  return conversationList;
 };
 
 // get or create conversation

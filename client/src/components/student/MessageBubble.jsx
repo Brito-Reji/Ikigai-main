@@ -27,7 +27,7 @@ const MessageBubble = ({ message, isOwn }) => {
 					isOwn ? 'text-blue-100' : 'text-gray-500'
 				}`}>
 					<span className="text-xs">
-						{formatTime(message.timestamp)}
+						{formatTime(message.timestamp || message.createdAt)}
 					</span>
 					{isOwn && (
 						<span>
