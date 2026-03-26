@@ -1,14 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, GripVertical, Video, Upload } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  Video,
+  Upload,
+} from "lucide-react";
 import { useChapter } from "@/hooks/useRedux.js";
 import {
   fetchChapters,
   createChapter,
   updateChapter,
   deleteChapter,
-  clearChapterState
+  clearChapterState,
 } from "@/store/slices/chapterSlice.js";
-import { useInstructorLessons, useCreateLesson, useUpdateLesson, useDeleteLesson, useUploadVideo } from "@/hooks/useLessons.js";
+import {
+  useInstructorLessons,
+  useCreateLesson,
+  useUpdateLesson,
+  useDeleteLesson,
+  useUploadVideo,
+} from "@/hooks/useLessons.js";
 import Swal from "sweetalert2";
 
 const ChapterManager = ({ courseId }) => {
@@ -18,7 +33,7 @@ const ChapterManager = ({ courseId }) => {
   const [expandedChapters, setExpandedChapters] = useState({});
   const [formData, setFormData] = useState({
     title: "",
-    description: ""
+    description: "",
   });
 
   useEffect(() => {
@@ -33,37 +48,41 @@ const ChapterManager = ({ courseId }) => {
     };
   }, [dispatch]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (editingChapter) {
-      await dispatch(updateChapter({
-        courseId,
-        chapterId: editingChapter._id,
-        chapterData: formData
-      }));
+      await dispatch(
+        updateChapter({
+          courseId,
+          chapterId: editingChapter._id,
+          chapterData: formData,
+        })
+      );
       setEditingChapter(null);
     } else {
-      await dispatch(createChapter({
-        courseId,
-        chapterData: formData
-      }));
+      await dispatch(
+        createChapter({
+          courseId,
+          chapterData: formData,
+        })
+      );
       setShowAddChapter(false);
     }
 
     setFormData({ title: "", description: "" });
   };
 
-  const handleEdit = (chapter) => {
+  const handleEdit = chapter => {
     setEditingChapter(chapter);
     setFormData({
       title: chapter.title,
-      description: chapter.description || ""
+      description: chapter.description || "",
     });
     setShowAddChapter(true);
   };
 
-  const handleDelete = async (chapterId) => {
+  const handleDelete = async chapterId => {
     const result = await Swal.fire({
       title: "Delete Chapter?",
       text: "This will also delete all lessons in this chapter",
@@ -80,10 +99,10 @@ const ChapterManager = ({ courseId }) => {
     }
   };
 
-  const toggleChapter = (chapterId) => {
+  const toggleChapter = chapterId => {
     setExpandedChapters(prev => ({
       ...prev,
-      [chapterId]: !prev[chapterId]
+      [chapterId]: !prev[chapterId],
     }));
   };
 
@@ -127,7 +146,9 @@ const ChapterManager = ({ courseId }) => {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 placeholder="e.g., Introduction to React"
                 required
@@ -140,7 +161,9 @@ const ChapterManager = ({ courseId }) => {
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 placeholder="Brief description of what this chapter covers"
                 rows="3"
@@ -153,7 +176,11 @@ const ChapterManager = ({ courseId }) => {
                 disabled={createLoading}
                 className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
               >
-                {createLoading ? "Saving..." : editingChapter ? "Update Chapter" : "Add Chapter"}
+                {createLoading
+                  ? "Saving..."
+                  : editingChapter
+                    ? "Update Chapter"
+                    : "Add Chapter"}
               </button>
               <button
                 type="button"
@@ -171,12 +198,26 @@ const ChapterManager = ({ courseId }) => {
         {chapters.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Chapters Yet</h3>
-            <p className="text-gray-600 mb-6">Start building your course curriculum by adding chapters</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Chapters Yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Start building your course curriculum by adding chapters
+            </p>
             <button
               onClick={() => setShowAddChapter(true)}
               className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
@@ -204,7 +245,15 @@ const ChapterManager = ({ courseId }) => {
   );
 };
 
-function ChapterItem({ chapter, index, courseId, isExpanded, onToggle, onEdit, onDelete }) {
+function ChapterItem({
+  chapter,
+  index,
+  courseId,
+  isExpanded,
+  onToggle,
+  onEdit,
+  onDelete,
+}) {
   const { data: lessonsData } = useInstructorLessons(courseId, chapter._id);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
@@ -273,7 +322,9 @@ function ChapterItem({ chapter, index, courseId, isExpanded, onToggle, onEdit, o
           </div>
 
           {lessons.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center py-4">No lessons yet</p>
+            <p className="text-gray-500 text-sm text-center py-4">
+              No lessons yet
+            </p>
           ) : (
             <div className="space-y-2">
               {lessons.map((lesson, idx) => (
@@ -325,10 +376,18 @@ function LessonItem({ lesson, index, onEdit, courseId, chapterId }) {
 
     if (result.isConfirmed) {
       try {
-        await deleteLessonMutation.mutateAsync({ courseId, chapterId, lessonId: lesson._id });
+        await deleteLessonMutation.mutateAsync({
+          courseId,
+          chapterId,
+          lessonId: lesson._id,
+        });
         Swal.fire("Deleted!", "Lesson has been deleted.", "success");
       } catch (error) {
-        Swal.fire("Error!", error.response?.data?.message || "Failed to delete", "error");
+        Swal.fire(
+          "Error!",
+          error.response?.data?.message || "Failed to delete",
+          "error"
+        );
       }
     }
   };
@@ -342,7 +401,9 @@ function LessonItem({ lesson, index, onEdit, courseId, chapterId }) {
             <p className="font-medium text-sm text-gray-900">
               {index + 1}. {lesson.title}
             </p>
-            <p className="text-xs text-gray-500">{lesson.duration} min {lesson.isFree && "• Free"}</p>
+            <p className="text-xs text-gray-500">
+              {lesson.duration} min {lesson.isFree && "• Free"}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -355,10 +416,16 @@ function LessonItem({ lesson, index, onEdit, courseId, chapterId }) {
               <Video className="w-3.5 h-3.5" />
             </button>
           )}
-          <button onClick={onEdit} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded">
+          <button
+            onClick={onEdit}
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+          >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          <button onClick={handleDelete} className="p-1.5 text-red-600 hover:bg-red-50 rounded">
+          <button
+            onClick={handleDelete}
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+          >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -388,7 +455,7 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
   const createLessonMutation = useCreateLesson();
   const updateLessonMutation = useUpdateLesson();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     try {
@@ -429,7 +496,11 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
 
       onClose();
     } catch (error) {
-      Swal.fire("Error!", error.response?.data?.message || "Failed to save lesson", "error");
+      Swal.fire(
+        "Error!",
+        error.response?.data?.message || "Failed to save lesson",
+        "error"
+      );
     } finally {
       setUploading(false);
     }
@@ -439,7 +510,7 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">
-          {lesson ? 'Edit Lesson' : 'Add Lesson'}
+          {lesson ? "Edit Lesson" : "Add Lesson"}
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -470,7 +541,7 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">
-                Video {!lesson && '*'}
+                Video {!lesson && "*"}
               </label>
               <input
                 type="file"
@@ -481,8 +552,8 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
 
                   setVideoFile(file);
 
-                  const video = document.createElement('video');
-                  video.preload = 'metadata';
+                  const video = document.createElement("video");
+                  video.preload = "metadata";
 
                   video.onloadedmetadata = () => {
                     URL.revokeObjectURL(video.src);
@@ -490,8 +561,8 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
                     const durationInSeconds = video.duration;
                     const minutes = Math.ceil(durationInSeconds / 60);
 
-                    console.log('Duration in seconds:', durationInSeconds);
-                    console.log('Duration in minutes (rounded up):', minutes);
+                    console.log("Duration in seconds:", durationInSeconds);
+                    console.log("Duration in minutes (rounded up):", minutes);
 
                     setFormData(prev => ({
                       ...prev,
@@ -500,7 +571,9 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
                   };
 
                   video.onerror = () => {
-                    alert('Error loading video file. Please select a valid video file.');
+                    alert(
+                      "Error loading video file. Please select a valid video file."
+                    );
                     URL.revokeObjectURL(video.src);
                     setVideoFile(null); // Clear the invalid file from state
                     e.target.value = ""; // Reset file input
@@ -555,7 +628,7 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
               disabled={uploading}
               className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-50"
             >
-              {uploading ? 'Uploading...' : lesson ? 'Update' : 'Create'}
+              {uploading ? "Uploading..." : lesson ? "Update" : "Create"}
             </button>
           </div>
         </form>
@@ -563,8 +636,6 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
     </div>
   );
 }
-
-
 
 function VideoPreviewModal({ lesson, onClose }) {
   const [videoUrl, setVideoUrl] = useState(null);
@@ -575,28 +646,29 @@ function VideoPreviewModal({ lesson, onClose }) {
   useEffect(() => {
     const loadVideo = async () => {
       if (!lesson.videoUrl) {
-        setError('No video URL provided');
+        setError("No video URL provided");
         setLoading(false);
         return;
       }
 
       try {
-        console.log('[VideoPreview] Loading video:', {
+        console.log("[VideoPreview] Loading video:", {
           lessonTitle: lesson.title,
-          videoPath: lesson.videoUrl
+          videoPath: lesson.videoUrl,
         });
 
-        const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api';
+        const API_BASE_URL =
+          (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api";
         const apiEndpoint = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
 
-        console.log('[VideoPreview] Fetching signed URL from:', apiEndpoint);
+        console.log("[VideoPreview] Fetching signed URL from:", apiEndpoint);
 
         // Fetch the JSON response to get the signed URL
         const response = await fetch(apiEndpoint, {
-          method: 'GET',
+          method: "GET",
         });
 
-        console.log('[VideoPreview] Response status:', response.status);
+        console.log("[VideoPreview] Response status:", response.status);
 
         if (!response.ok) {
           let errorMessage = `Failed to access video: ${response.status} ${response.statusText}`;
@@ -611,21 +683,21 @@ function VideoPreviewModal({ lesson, onClose }) {
 
         // Parse JSON and extract the signed URL
         const data = await response.json();
-        
-        console.log('[VideoPreview] API Response:', data);
+
+        console.log("[VideoPreview] API Response:", data);
 
         if (!data.success || !data.data?.url) {
-          throw new Error('Invalid response format: missing signed URL');
+          throw new Error("Invalid response format: missing signed URL");
         }
 
         const signedUrl = data.data.url;
-        console.log('[VideoPreview] Signed URL extracted:', signedUrl);
+        console.log("[VideoPreview] Signed URL extracted:", signedUrl);
 
         setVideoUrl(signedUrl);
         setLoading(false);
       } catch (err) {
-        console.error('[VideoPreview] Error loading video:', err);
-        setError(err.message || 'Failed to load video. Please try again.');
+        console.error("[VideoPreview] Error loading video:", err);
+        setError(err.message || "Failed to load video. Please try again.");
         setLoading(false);
       }
     };
@@ -633,7 +705,7 @@ function VideoPreviewModal({ lesson, onClose }) {
     loadVideo();
   }, [lesson.videoUrl, lesson.title]);
 
-  const handleVideoError = (e) => {
+  const handleVideoError = e => {
     const video = e.target;
     const errorDetails = {
       error: video.error?.code,
@@ -646,28 +718,30 @@ function VideoPreviewModal({ lesson, onClose }) {
       // Error codes: 1=ABORTED, 2=NETWORK, 3=DECODE, 4=SRC_NOT_SUPPORTED
     };
 
-    console.error('[VideoPreview] Video element error:', errorDetails);
+    console.error("[VideoPreview] Video element error:", errorDetails);
 
-    let errorMsg = 'Failed to play video. ';
+    let errorMsg = "Failed to play video. ";
     if (video.error) {
       switch (video.error.code) {
         case 1:
-          errorMsg += 'Video loading was aborted. Try refreshing the page.';
+          errorMsg += "Video loading was aborted. Try refreshing the page.";
           break;
         case 2:
-          errorMsg += 'Network error while loading video. Check your connection.';
+          errorMsg +=
+            "Network error while loading video. Check your connection.";
           break;
         case 3:
-          errorMsg += 'Video format not supported or file is corrupted.';
+          errorMsg += "Video format not supported or file is corrupted.";
           break;
         case 4:
-          errorMsg += 'Video source not supported by your browser. The file may be corrupted or in an unsupported format.';
+          errorMsg +=
+            "Video source not supported by your browser. The file may be corrupted or in an unsupported format.";
           break;
         default:
-          errorMsg += 'Unknown error occurred.';
+          errorMsg += "Unknown error occurred.";
       }
     } else {
-      errorMsg += 'Could not load video source.';
+      errorMsg += "Could not load video source.";
     }
 
     setError(errorMsg);
@@ -700,14 +774,26 @@ function VideoPreviewModal({ lesson, onClose }) {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-red-800">Failed to load video</p>
+                  <p className="text-sm font-medium text-red-800">
+                    Failed to load video
+                  </p>
                   <p className="text-sm text-red-700 mt-1">{error}</p>
                   <details className="mt-2">
-                    <summary className="text-xs text-red-600 cursor-pointer">Technical details</summary>
+                    <summary className="text-xs text-red-600 cursor-pointer">
+                      Technical details
+                    </summary>
                     <div className="mt-1 text-xs text-gray-600 space-y-1">
                       <p>Video path: {lesson.videoUrl}</p>
                       <p>Check browser console for more information</p>
@@ -724,23 +810,27 @@ function VideoPreviewModal({ lesson, onClose }) {
                 ref={videoRef}
                 controls
                 className="w-full rounded-lg bg-black"
-                style={{ maxHeight: '70vh' }}
+                style={{ maxHeight: "70vh" }}
                 onError={handleVideoError}
-                onLoadStart={() => console.log('[VideoPreview] Video load started')}
-                onLoadedMetadata={(e) => {
-                  console.log('[VideoPreview] Video metadata loaded:', {
+                onLoadStart={() =>
+                  console.log("[VideoPreview] Video load started")
+                }
+                onLoadedMetadata={e => {
+                  console.log("[VideoPreview] Video metadata loaded:", {
                     duration: e.target.duration,
                     videoWidth: e.target.videoWidth,
-                    videoHeight: e.target.videoHeight
+                    videoHeight: e.target.videoHeight,
                   });
                 }}
                 onCanPlay={() => {
-                  console.log('[VideoPreview] Video can play');
+                  console.log("[VideoPreview] Video can play");
                   setLoading(false);
                 }}
-                onPlaying={() => console.log('[VideoPreview] Video is playing')}
-                onWaiting={() => console.log('[VideoPreview] Video is buffering')}
-                onStalled={() => console.warn('[VideoPreview] Video stalled')}
+                onPlaying={() => console.log("[VideoPreview] Video is playing")}
+                onWaiting={() =>
+                  console.log("[VideoPreview] Video is buffering")
+                }
+                onStalled={() => console.warn("[VideoPreview] Video stalled")}
               >
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.

@@ -235,13 +235,68 @@ export const getPublicCourseDetailsService = async (courseId, userId) => {
       "instructor",
       "firstName lastName email profileImageUrl headline description social"
     );
-  let chapter = await Chapter.find({ course: courseId })
-  // let lesson = await Lesson.find()
-  console.log("chapeter length",chapter.length)
+  let chapters = await Chapter.find({ course: courseId }).select("_id");
+  const chapterIds = chapters.map(ch => ch._id);
+  const lessons = await Lesson.find({ chapter: { $in: chapterIds } });
+  const totalDuration =
+    (lessons || [])
+      .map(data => data?.duration || 0) 
+      .reduce((acc, curr) => acc + curr, 0) / 60; 
+  console.log(totalDuration);
+  // calculate instructor-level stats for dynamic display
+  let instructorCourseCount = 0;
+  let instructorStudentCount = 0;
+  let instructorReviewCount = 0;
+  let instructorRating = 0;
+
+  const instructorId = course.instructor?._id;
+  if (instructorId) {
+    const instructorCourses = await Course.find({
+      instructor: instructorId,
+      published: true,
+      blocked: false,
+      deleted: { $ne: true },
+    }).select("_id");
+
+    const instructorCourseIds = instructorCourses.map(c => c._id);
+    instructorCourseCount = instructorCourses.length;
+
+    instructorStudentCount = await Enrollment.countDocuments({
+      course: { $in: instructorCourseIds },
+      status: "active",
+    });
+
+    const instructorReviewStats = await Review.aggregate([
+      { $match: { course: { $in: instructorCourseIds } } },
+      {
+        $group: {
+          _id: null,
+          avg: { $avg: "$rating" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    if (instructorReviewStats.length > 0) {
+      instructorReviewCount = instructorReviewStats[0].count;
+      instructorRating = parseFloat(instructorReviewStats[0].avg.toFixed(1));
+    }
+  }
+
   const coursePlain = {
     ...course.toObject(),
     price: (course.price / 100).toFixed(2),
     isEnrolled,
+    chapterCount: chapters.length,
+    lessonCount: lessons.length,
+    totalDuration,
+    instructor: {
+      ...course.toObject().instructor,
+      courseCount: instructorCourseCount,
+      totalStudents: instructorStudentCount,
+      totalReviews: instructorReviewCount,
+      averageRating: instructorRating,
+    },
   };
 
   const [withStats] = await attachCourseStats([coursePlain]);
