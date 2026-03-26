@@ -32,18 +32,23 @@ export const createOrderService = async ({
     0
   );
 
-  let discountAmount = 0;
+  // convert paise to rupees for coupon calc (coupon is stored in INR)
+  const originalAmountInRupees = originalAmount / 100;
+
   let couponId = null;
   let appliedCouponCode = null;
+  let discountAmount = 0;
 
   // validate and apply coupon
   if (couponCode) {
     const couponData = await validateCouponService(
       couponCode,
       userId,
-      originalAmount
+      originalAmountInRupees
     );
-    discountAmount = couponData.discountAmount;
+
+    // coupon values are in INR; convert to paise for payment math
+    discountAmount = Math.round(couponData.discountAmount * 100);
     couponId = couponData.couponId;
     appliedCouponCode = couponData.code;
   }
@@ -455,7 +460,8 @@ export const cancelOrderService = async ({ orderId, userId }) => {
   const order = await Order.findOne({ _id: orderId, userId });
 
   if (!order) throw new Error("Order not found");
-  if (order.status !== "CREATED") throw new Error("Only pending orders can be cancelled");
+  if (order.status !== "CREATED")
+    throw new Error("Only pending orders can be cancelled");
 
   order.status = "CANCELLED";
   await order.save();
