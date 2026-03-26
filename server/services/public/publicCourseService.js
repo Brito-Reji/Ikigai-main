@@ -3,6 +3,7 @@ import { Lesson } from "../../models/Lesson.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { Review } from "../../models/Review.js";
 import { checkEnrollment } from "../student/enrollmentService.js";
+import { Chapter } from "../../models/Chapter.js";
 
 // compute rating and enrollment stats for courses
 const attachCourseStats = async courses => {
@@ -234,7 +235,9 @@ export const getPublicCourseDetailsService = async (courseId, userId) => {
       "instructor",
       "firstName lastName email profileImageUrl headline description social"
     );
-
+  let chapter = await Chapter.find({ course: courseId })
+  // let lesson = await Lesson.find()
+  console.log("chapeter length",chapter.length)
   const coursePlain = {
     ...course.toObject(),
     price: (course.price / 100).toFixed(2),

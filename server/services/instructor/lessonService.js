@@ -64,6 +64,7 @@ export const createLessonService = async (chapterId, courseId, lessonData) => {
 // Update lesson
 export const updateLessonService = async (lessonId, chapterId, courseId, updateData) => {
   await verifyChapter(chapterId, courseId);
+  let course = await Course.find({_id:courseId})
 
   const existing = await Lesson.findOne({ _id: lessonId, chapter: chapterId });
 
@@ -84,7 +85,7 @@ export const updateLessonService = async (lessonId, chapterId, courseId, updateD
   );
 
   // new video URL added — course needs re-verification
-  if (videoChanged) {
+  if (videoChanged && course.verificationStatus === "verified") {
     await resetCourseVerification(chapterId);
   }
 

@@ -594,7 +594,6 @@ function VideoPreviewModal({ lesson, onClose }) {
         // Fetch the JSON response to get the signed URL
         const response = await fetch(apiEndpoint, {
           method: 'GET',
-          credentials: 'include',
         });
 
         console.log('[VideoPreview] Response status:', response.status);
