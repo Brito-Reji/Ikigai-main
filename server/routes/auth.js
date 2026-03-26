@@ -41,6 +41,7 @@ router.post("/admin/login", adminLogin);
 
 // OTP
 router.post("/send-otp", sentOTP);
+router.post("/resend",sentOTP)
 router.post("/verify-otp", verifyOTP);
 
 // Forget Password

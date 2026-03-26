@@ -3,6 +3,7 @@ import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { verifyOTP, clearError, clearVerificationState } from "@/store/slices/authSlice.js";
+import api from "@/api/axiosConfig.js";
 
 export default function OTPVerificationPage() {
   const location = useLocation();
@@ -164,8 +165,7 @@ export default function OTPVerificationPage() {
     setResendingOtp(true);
 
     try {
-      // In a real implementation, you would call an API to resend OTP
-      // For now, we'll just reset the timer and form
+   await api.post(import.meta.env.VITE_API_URL+"/api/auth/resend",{email:email});
       startNewTimer(120);
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
@@ -264,7 +264,7 @@ export default function OTPVerificationPage() {
                     </span>
                   </>
                 ) : (
-                  <span className="text-red-500 text-sm">OTP expired</span>
+                  <span className="text-red-500 text-sm">Try resending the otp</span>
                 )}
               </div>
 
