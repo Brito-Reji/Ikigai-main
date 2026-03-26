@@ -14,7 +14,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(HTTP_STATUS.OK).json({
+  const response = {
     success: true,
     message: "Admin login successful",
     accessToken,
@@ -23,5 +23,12 @@ export const adminLogin = asyncHandler(async (req, res) => {
       email: admin.email,
       role: admin.role,
     },
-  });
+  };
+
+  // In development, include refreshToken in response since cookies may not work
+  if (process.env.NODE_ENV === "development") {
+    response.refreshToken = refreshToken;
+  }
+
+  res.status(HTTP_STATUS.OK).json(response);
 });

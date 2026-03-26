@@ -26,8 +26,11 @@ api.interceptors.request.use(config => {
       // console.log(e)
     }
 
-    config.headers.Authorization = `Bearer ${accessToken}`;
-    console.log("Adding token to request:", accessToken);
+    // Don't add Authorization header for refresh token requests
+    if (!config.url.includes("/auth/refresh")) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+      console.log("Adding token to request:", accessToken);
+    }
   } else {
     console.log("No token found in localStorage");
   }
@@ -107,7 +110,14 @@ api.interceptors.response.use(
       console.log("Attempting to refresh token");
 
       try {
-        const response = await api.post("/auth/refresh");
+        let refreshData = {};
+        if (isDev) {
+          const refreshToken = localStorage.getItem("refreshToken");
+          if (refreshToken) {
+            refreshData.refreshToken = refreshToken;
+          }
+        }
+        const response = await api.post("/auth/refresh", refreshData);
         if (response.data.success && response.data.accessToken) {
           const { accessToken } = response.data;
           localStorage.setItem("accessToken", accessToken);

@@ -43,7 +43,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(HTTP_STATUS.OK).json({
+  const response = {
     success: true,
     accessToken,
     user: {
@@ -51,7 +51,14 @@ export const studentLogin = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
     },
-  });
+  };
+
+  // In development, include refreshToken in response since cookies may not work
+  if (process.env.NODE_ENV === "development") {
+    response.refreshToken = refreshToken;
+  }
+
+  res.status(HTTP_STATUS.OK).json(response);
 });
 
 export const studentGoogleAuth = asyncHandler(async (req, res) => {
@@ -67,7 +74,7 @@ export const studentGoogleAuth = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(HTTP_STATUS.OK).json({
+  const response = {
     success: true,
     accessToken,
     user: {
@@ -75,5 +82,12 @@ export const studentGoogleAuth = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
     },
-  });
+  };
+
+  // In development, include refreshToken in response since cookies may not work
+  if (process.env.NODE_ENV === "development") {
+    response.refreshToken = refreshToken;
+  }
+
+  res.status(HTTP_STATUS.OK).json(response);
 });

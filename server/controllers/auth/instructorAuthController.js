@@ -28,7 +28,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(HTTP_STATUS.OK).json({
+  const response = {
     success: true,
     accessToken,
     user: {
@@ -40,7 +40,14 @@ export const instructorSignin = asyncHandler(async (req, res) => {
       role: instructor.role,
       profileImageUrl: instructor.profileImageUrl,
     },
-  });
+  };
+
+  // In development, include refreshToken in response since cookies may not work
+  if (process.env.NODE_ENV === "development") {
+    response.refreshToken = refreshToken;
+  }
+
+  res.status(HTTP_STATUS.OK).json(response);
 });
 
 export const instructorGoogleAuth = asyncHandler(async (req, res) => {
@@ -56,7 +63,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(HTTP_STATUS.OK).json({
+  const response = {
     success: true,
     accessToken,
     user: {
@@ -68,5 +75,12 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
       role: instructor.role,
       profileImageUrl: instructor.profileImageUrl,
     },
-  });
+  };
+
+  // In development, include refreshToken in response since cookies may not work
+  if (process.env.NODE_ENV === "development") {
+    response.refreshToken = refreshToken;
+  }
+
+  res.status(HTTP_STATUS.OK).json(response);
 });

@@ -6,7 +6,8 @@ export const refreshToken = asyncHandler(async (req, res) => {
   const incomingToken =
     req.cookies?.refreshToken ||
     req.headers["x-refresh-token"] ||
-    req.query.refreshToken;
+    req.query.refreshToken ||
+    req.body.refreshToken;
 
   const { accessToken, refreshToken: newRefreshToken } =
     await refreshTokenService(incomingToken);

@@ -27,6 +27,10 @@ export const loginUser = createAsyncThunk(
         } else {
           localStorage.setItem(tokenKey, accessToken);
         }
+        // Store refreshToken in development
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
         sessionStorage.removeItem("refreshFailed");
         return {
           user: response.data.user || { email, role },
@@ -199,6 +203,10 @@ export const googleAuth = createAsyncThunk(
       if (response.data.success) {
         const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);
+        // Store refreshToken in development
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
         sessionStorage.removeItem("refreshFailed");
         return {
           user: response.data.user || { role },
