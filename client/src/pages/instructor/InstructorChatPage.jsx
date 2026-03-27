@@ -161,7 +161,7 @@ const InstructorChatPage = () => {
 											}`}
 										>
 											<img
-												src={conv.studentAvatar || 'https://i.pravatar.cc/150'}
+												src={conv.studentAvatar || 'https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png'}
 												alt={conv.studentName}
 												className="w-10 h-10 rounded-full object-cover"
 											/>

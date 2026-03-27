@@ -49,7 +49,7 @@ const ConversationList = ({ conversations, selectedConversationId, onSelectConve
 						>
 							<div className="relative flex-shrink-0">
 								<img
-									src={conversation.instructorAvatar || 'https://i.pravatar.cc/150'}
+									src={conversation.instructorAvatar || 'https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png'}
 									alt={conversation.instructorName}
 									className="w-10 h-10 rounded-full object-cover"
 								/>

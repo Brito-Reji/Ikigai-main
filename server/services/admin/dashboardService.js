@@ -1,6 +1,7 @@
 import { Order } from "../../models/Order.js";
 import { Course } from "../../models/Course.js";
 import { User } from "../../models/User.js";
+import { Instructor } from "../../models/Instructor.js";
 
 // get dashboard stats
 export const getDashboardStats = async () => {
@@ -15,10 +16,10 @@ export const getDashboardStats = async () => {
   const totalCourses = await Course.countDocuments();
 
   // total students
-  const totalStudents = await User.countDocuments({ role: "student" });
+  const totalStudents = await User.countDocuments();
 
   // total instructors
-  const totalInstructors = await User.countDocuments({ role: "instructor" });
+  const totalInstructors = await Instructor.countDocuments();
 
   // total orders
   const totalOrders = await Order.countDocuments({ status: "PAID" });

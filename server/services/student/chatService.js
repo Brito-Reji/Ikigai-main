@@ -175,13 +175,14 @@ export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
 
   return messages.reverse().map(msg => ({
     _id: msg._id,
-    senderId: msg.sender?._id?.toString() || msg.sender?.toString(),
+    sender: msg.sender?._id?.toString() || msg.sender?.toString(),
+    senderModel: msg.senderModel,
     senderName: msg.senderName,
     senderAvatar: msg.senderAvatar,
     senderType: msg.senderModel === "Instructor" ? "instructor" : "student",
     content: msg.content,
     mentions: msg.mentions,
-    timestamp: msg.createdAt,
+    createdAt: msg.createdAt,
   }));
 };
 

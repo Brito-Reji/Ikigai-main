@@ -5,7 +5,9 @@ export const createCouponService = coupon => {
 };
 
 export const getAllCouponsService = () => {
-  return Coupon.find({ isDeleted: false });
+  return Coupon.find({ isDeleted: false })
+    .sort({ createdAt: -1 }) 
+    .lean();
 };
 
 export const updateCouponService = (couponId, coupon) => {

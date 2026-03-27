@@ -102,6 +102,7 @@ export const useConversationMessages = conversationId => {
 // get room messages with socket updates
 export const useRoomMessages = roomId => {
   const [messages, setMessages] = useState([]);
+  const queryClient = useQueryClient();
 
   // fetch initial messages
   const { data, isLoading } = useQuery({
@@ -134,7 +135,6 @@ export const useRoomMessages = roomId => {
     const handleNewMessage = ({ message }) => {
       if (message.roomId === roomId) {
         setMessages(prev => [...prev, message]);
-        // Update TanStack query cache for course rooms too
         queryClient.setQueryData(["room-messages", roomId], old => {
           if (!old?.data) return old;
           return {
@@ -151,7 +151,7 @@ export const useRoomMessages = roomId => {
       leaveRoom(roomId);
       socket.off("room:message:new", handleNewMessage);
     };
-  }, [roomId]);
+  }, [roomId, queryClient]);
 
   // send message
   const sendMessage = useCallback(

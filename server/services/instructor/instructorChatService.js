@@ -7,21 +7,23 @@ import { Enrollment } from "../../models/Enrollment.js";
 // get instructor conversations
 export const getConversations = async instructorId => {
   const conversations = await Conversation.find({ instructor: instructorId })
-    .populate("student", "firstName lastName avatar")
+    .populate("student", "firstName lastName profileImageUrl username")
     .populate("course", "title thumbnail")
     .sort({ updatedAt: -1 });
 
-  return conversations.map(conv => ({
-    _id: conv._id,
-    studentId: conv.student._id,
-    studentName: `${conv.student.firstName} ${conv.student.lastName}`,
-    studentAvatar: conv.student.avatar,
-    courseId: conv.course._id,
-    courseTitle: conv.course.title,
-    lastMessage: conv.lastMessage?.content || "",
-    lastMessageTime: conv.lastMessage?.timestamp || conv.updatedAt,
-    unreadCount: conv.instructorUnread,
-  }));
+  return conversations
+    .filter(conv => conv.student && conv.course)
+    .map(conv => ({
+      _id: conv._id,
+      studentId: conv.student._id,
+      studentName: conv.student.username || `${conv.student.firstName} ${conv.student.lastName}`.trim() || "Student",
+      studentAvatar: conv.student.profileImageUrl || null,
+      courseId: conv.course._id,
+      courseTitle: conv.course.title,
+      lastMessage: conv.lastMessage?.content || "",
+      lastMessageTime: conv.lastMessage?.timestamp || conv.updatedAt,
+      unreadCount: conv.instructorUnread,
+    }));
 };
 
 // get messages for conversation
@@ -90,13 +92,14 @@ export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
 
   return messages.reverse().map(msg => ({
     _id: msg._id,
-    senderId: msg.sender.toString(), // convert to string for frontend
+    sender: msg.sender.toString(),
+    senderModel: msg.senderModel,
     senderName: msg.senderName,
     senderAvatar: msg.senderAvatar,
     senderType: msg.senderModel === "Instructor" ? "instructor" : "student",
     content: msg.content,
     mentions: msg.mentions,
-    timestamp: msg.createdAt,
+    createdAt: msg.createdAt,
   }));
 };
 
