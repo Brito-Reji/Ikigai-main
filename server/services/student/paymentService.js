@@ -235,10 +235,11 @@ const processWalletOnlyPayment = async ({
   await Payment.insertMany(paymentsData);
 
   // create or reactivate enrollments
-  for (const courseId of courseIds) {
+  const payments = await Payment.find({ razorpayOrderId: walletOrderId });
+  for (const p of payments) {
     await Enrollment.findOneAndUpdate(
-      { user: userId, course: courseId },
-      { $set: { payment: order._id, status: "active" } },
+      { user: userId, course: p.courseId },
+      { $set: { payment: p._id, status: "active" } },
       { upsert: true, new: true }
     );
   }
@@ -335,10 +336,11 @@ export const updatePaymentStatusService = async ({
     }
   );
   // create or reactivate enrollments
-  for (const courseId of order.courseIds) {
+  const payments = await Payment.find({ razorpayOrderId: razorpay_order_id });
+  for (const p of payments) {
     await Enrollment.findOneAndUpdate(
-      { user: order.userId, course: courseId },
-      { $set: { payment: order._id, status: "active" } },
+      { user: order.userId, course: p.courseId },
+      { $set: { payment: p._id, status: "active" } },
       { upsert: true, new: true }
     );
   }

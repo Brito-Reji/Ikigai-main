@@ -1,10 +1,11 @@
 import { Course } from "../../models/Course.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
+import { Notification } from "../../models/Notification.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { Payment } from "../../models/Payment.js";
-import { Wallet } from "../../models/Wallet.js";
-import { Notification } from "../../models/Notification.js";
+import { Order } from "../../models/Order.js";
+import { creditWallet } from "../student/walletService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all courses
@@ -201,25 +202,45 @@ export const deleteCourseService = async (courseId, reason) => {
         throw error;
     }
 
-    // get all active enrollments
-    const enrollments = await Enrollment.find({ course: courseId, status: "active" })
-        .populate("payment");
+    // get all eligible enrollments for refund (active or completed)
+    const enrollments = await Enrollment.find({ 
+        course: courseId, 
+        status: { $in: ["active", "completed"] } 
+    }).populate("payment");
+    console.log("delete course service enrollement",enrollments)
+
+    console.log(`Found ${enrollments.length} enrollments to refund for course ${courseId}`);
 
     const studentNotifications = [];
 
     for (const enrollment of enrollments) {
-        const payment = enrollment.payment;
+        let payment = enrollment.payment;
+
+        // Fallback: If payment is null or points to an Order (bug fix for existing data)
+        if (!payment || !payment.amount) {
+            payment = await Payment.findOne({ 
+                userId: enrollment.user, 
+                courseId: courseId,
+                status: "PAID"
+            });
+        }
+
+        console.log(`Processing enrollment for user ${enrollment.user}, payment status: ${payment?.status}`);
+
         let refundAmount = 0;
 
-        if (payment && payment.status === "PAID") {
+        // check for "PAID" or "paid" (case-insensitive)
+        if (payment && payment.status?.toUpperCase() === "PAID") {
             refundAmount = payment.amount;
+            console.log(`Refunding ${refundAmount} to user ${enrollment.user}`);
 
-            // credit to wallet (amount is in paise, store as paise)
-            await Wallet.findOneAndUpdate(
-                { userId: enrollment.user },
-                { $inc: { balance: refundAmount } },
-                { upsert: true, new: true }
-            );
+            // credit to wallet (uses centralized service for balance + history)
+            await creditWallet({
+                userId: enrollment.user,
+                amount: refundAmount,
+                reason: `Refund for deleted course "${course.title}"`,
+                relatedPaymentId: payment._id,
+            });
 
             payment.status = "REFUNDED";
             payment.releaseStatus = "REFUNDED";
@@ -227,6 +248,14 @@ export const deleteCourseService = async (courseId, reason) => {
             payment.refundAmount = refundAmount;
             payment.refundMethod = "wallet";
             await payment.save();
+
+            // update order history status if order exists
+            if (payment.razorpayOrderId) {
+                await Order.findOneAndUpdate(
+                    { razorpayOrderId: payment.razorpayOrderId },
+                    { status: "REFUNDED" }
+                );
+            }
         }
 
         enrollment.status = "refunded";

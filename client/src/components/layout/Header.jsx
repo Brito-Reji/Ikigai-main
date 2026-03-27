@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Search, Heart, Bell, User, Menu, X, BookOpen, MessageCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, Heart, Bell, User, Menu, X, BookOpen, MessageCircle, CheckCheck } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
 import { logoutStudent } from "@/store/slices/studentAuthSlice.js";
@@ -8,6 +8,115 @@ import { clearCart } from "@/store/slices/cartSlice.js";
 import { useDispatch } from "react-redux";
 import logo from "@/assets/images/logo.png";
 import CartIcon from "../common/CartIcon.jsx";
+import { useGetNotifications, useMarkNotificationRead, useMarkAllRead } from "@/hooks/useReport";
+
+// Notification Bell Dropdown
+function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const { data, isLoading } = useGetNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllRead();
+
+  const notifications = data?.data || [];
+  const unread = notifications.filter((n) => !n.read);
+
+  // close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleClick = (n) => {
+    if (!n.read) markRead.mutate(n._id);
+  };
+
+  const TYPE_COLORS = {
+    course_blocked: "bg-amber-100 text-amber-600",
+    course_unblocked: "bg-green-100 text-green-600",
+    course_deleted: "bg-red-100 text-red-600",
+    report_actioned: "bg-blue-100 text-blue-600",
+  };
+
+  return (
+    <div ref={ref} className="relative hidden md:block">
+      <button
+        onClick={() => setOpen(!open)}
+        className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+      >
+        <Bell className="w-5 h-5" />
+        {unread.length > 0 && (
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+          {/* header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <span className="font-semibold text-gray-900 text-sm">
+              Notifications
+              {unread.length > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">{unread.length}</span>
+              )}
+            </span>
+            {unread.length > 0 && (
+              <button
+                onClick={() => markAll.mutate()}
+                className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
+              >
+                <CheckCheck className="w-3.5 h-3.5" />
+                Mark all read
+              </button>
+            )}
+          </div>
+
+          {/* list */}
+          <div className="max-h-80 overflow-y-auto">
+            {isLoading ? (
+              <div className="flex justify-center py-6">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="py-10 text-center">
+                <Bell className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">No notifications yet</p>
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <div
+                  key={n._id}
+                  onClick={() => handleClick(n)}
+                  className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-50 ${
+                    !n.read ? "bg-indigo-50/40" : ""
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${!n.read ? "bg-indigo-500" : "bg-transparent"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-sm font-medium ${!n.read ? "text-gray-900" : "text-gray-600"} truncate`}>
+                        {n.title}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${TYPE_COLORS[n.type] || "bg-gray-100 text-gray-500"}`}>
+                        {n.type?.replace("_", " ")}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed line-clamp-2">{n.message}</p>
+                    <p className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 
 export default function Header({ onMenuToggle, menuOpen }) {
@@ -138,9 +247,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
                 <div className="hidden md:block">
                   <CartIcon />
                 </div>
-                <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
-                  <Bell className="w-5 h-5" />
-                </button>
+                <NotificationBell />
                 <div className="relative group">
                   <button className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gray-800 transition">
                     <User className="w-5 h-5 text-white" />
