@@ -83,6 +83,12 @@ const courseSchema = new mongoose.Schema({
     default: false,
   },
 
+  blockReason: {
+    type: String,
+    default: null,
+    trim: true,
+  },
+
   deleted: {
     type: Boolean,
     default: false,

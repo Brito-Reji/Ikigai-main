@@ -47,6 +47,12 @@ import {
   getCourseReviews,
   getUserReview,
 } from "../controllers/students/reviewController.js";
+import { submitReport } from "../controllers/students/reportController.js";
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllRead,
+} from "../controllers/students/notificationController.js";
 
 const router = Router();
 
@@ -99,5 +105,13 @@ router.get("/chat/rooms/course/:courseId", getRoomByCourse);
 router.post("/reviews", addOrUpdateReview);
 router.get("/reviews/course/:courseId", getCourseReviews);
 router.get("/reviews/my/:courseId", getUserReview);
+
+// Course reports
+router.post("/reports", submitReport);
+
+// Notifications
+router.get("/notifications", getNotifications);
+router.patch("/notifications/:id/read", markNotificationRead);
+router.patch("/notifications/read-all", markAllRead);
 
 export default router;

@@ -1,6 +1,10 @@
 import { Course } from "../../models/Course.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
+import { Enrollment } from "../../models/Enrollment.js";
+import { Payment } from "../../models/Payment.js";
+import { Wallet } from "../../models/Wallet.js";
+import { Notification } from "../../models/Notification.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all courses
@@ -112,8 +116,9 @@ export const getCourseDetailsService = async (courseId) => {
 };
 
 // Toggle course block
-export const toggleCourseBlockService = async (courseId) => {
-    const course = await Course.findById(courseId);
+export const toggleCourseBlockService = async (courseId, reason) => {
+    const course = await Course.findById(courseId)
+        .populate("instructor", "_id firstName lastName");
 
     if (!course) {
         const error = new Error("Course not found");
@@ -121,8 +126,47 @@ export const toggleCourseBlockService = async (courseId) => {
         throw error;
     }
 
-    course.blocked = !course.blocked;
+    const isBlocking = !course.blocked;
+
+    if (isBlocking && !reason?.trim()) {
+        const error = new Error("Block reason is required");
+        error.statusCode = HTTP_STATUS.BAD_REQUEST;
+        throw error;
+    }
+
+    course.blocked = isBlocking;
+    course.blockReason = isBlocking ? reason.trim() : null;
     await course.save();
+
+    // notify the instructor
+    if (course.instructor?._id) {
+        await Notification.create({
+            userId: course.instructor._id,
+            userType: "instructor",
+            type: isBlocking ? "course_blocked" : "course_unblocked",
+            title: isBlocking ? "Your course has been blocked" : "Your course has been unblocked",
+            message: isBlocking
+                ? `Your course "${course.title}" has been blocked. Reason: ${reason.trim()}`
+                : `Your course "${course.title}" has been unblocked and is now accessible again.`,
+            courseId: course._id,
+        });
+    }
+
+    // notify enrolled students (no reason shown)
+    if (isBlocking) {
+        const enrollments = await Enrollment.find({ course: courseId, status: "active" }).select("user");
+        const studentNotifications = enrollments.map((e) => ({
+            userId: e.user,
+            userType: "student",
+            type: "course_blocked",
+            title: "Course temporarily unavailable",
+            message: `The course "${course.title}" has been temporarily blocked by the admin. You still have access to your content.`,
+            courseId: course._id,
+        }));
+        if (studentNotifications.length > 0) {
+            await Notification.insertMany(studentNotifications);
+        }
+    }
 
     const updatedCourse = await Course.findById(courseId)
         .populate("category", "name")
@@ -130,13 +174,20 @@ export const toggleCourseBlockService = async (courseId) => {
 
     return {
         course: updatedCourse,
-        action: course.blocked ? "blocked" : "unblocked"
+        action: isBlocking ? "blocked" : "unblocked",
     };
 };
 
-// Delete course
-export const deleteCourseService = async (courseId) => {
-    const course = await Course.findById(courseId);
+// Delete course with wallet refund for enrolled students
+export const deleteCourseService = async (courseId, reason) => {
+    if (!reason?.trim()) {
+        const error = new Error("Deletion reason is required");
+        error.statusCode = HTTP_STATUS.BAD_REQUEST;
+        throw error;
+    }
+
+    const course = await Course.findById(courseId)
+        .populate("instructor", "_id firstName lastName");
 
     if (!course) {
         const error = new Error("Course not found");
@@ -148,6 +199,67 @@ export const deleteCourseService = async (courseId) => {
         const error = new Error("Course is already deleted");
         error.statusCode = HTTP_STATUS.BAD_REQUEST;
         throw error;
+    }
+
+    // get all active enrollments
+    const enrollments = await Enrollment.find({ course: courseId, status: "active" })
+        .populate("payment");
+
+    const studentNotifications = [];
+
+    for (const enrollment of enrollments) {
+        const payment = enrollment.payment;
+        let refundAmount = 0;
+
+        if (payment && payment.status === "PAID") {
+            refundAmount = payment.amount;
+
+            // credit to wallet (amount is in paise, store as paise)
+            await Wallet.findOneAndUpdate(
+                { userId: enrollment.user },
+                { $inc: { balance: refundAmount } },
+                { upsert: true, new: true }
+            );
+
+            payment.status = "REFUNDED";
+            payment.releaseStatus = "REFUNDED";
+            payment.refundedAt = new Date();
+            payment.refundAmount = refundAmount;
+            payment.refundMethod = "wallet";
+            await payment.save();
+        }
+
+        enrollment.status = "refunded";
+        await enrollment.save();
+
+        const refundMsg = refundAmount > 0
+            ? ` A refund of ₹${(refundAmount / 100).toFixed(2)} has been credited to your wallet.`
+            : "";
+
+        studentNotifications.push({
+            userId: enrollment.user,
+            userType: "student",
+            type: "course_deleted",
+            title: "Course has been removed",
+            message: `The course "${course.title}" has been removed by the admin. Reason: ${reason.trim()}.${refundMsg}`,
+            courseId: course._id,
+        });
+    }
+
+    if (studentNotifications.length > 0) {
+        await Notification.insertMany(studentNotifications);
+    }
+
+    // notify instructor
+    if (course.instructor?._id) {
+        await Notification.create({
+            userId: course.instructor._id,
+            userType: "instructor",
+            type: "course_deleted",
+            title: "Your course has been deleted",
+            message: `Your course "${course.title}" has been permanently deleted. Reason: ${reason.trim()}`,
+            courseId: course._id,
+        });
     }
 
     course.deleted = true;

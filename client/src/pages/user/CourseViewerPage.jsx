@@ -8,7 +8,9 @@ import {
 	Award,
 	MessageCircle,
 	Star,
-	Users
+	Users,
+	Flag,
+	AlertTriangle
 } from 'lucide-react';
 import ChapterList from '@/components/student/ChapterList';
 import LessonViewer from '@/components/student/LessonViewer';
@@ -16,6 +18,7 @@ import ChatWindow from '@/components/student/ChatWindow';
 import ChatRoomWindow from '@/components/student/ChatRoomWindow';
 import CourseReviewModal from '@/components/student/CourseReviewModal';
 import CourseCertificate from '@/components/student/CourseCertificate';
+import CourseReportModal from '@/components/student/CourseReportModal';
 import { useGetRoomByCourse, useCreateConversation } from '@/hooks/useChat';
 import { useCourseReviews } from '@/hooks/useReview';
 import api from '@/api/axiosConfig';
@@ -41,6 +44,7 @@ const CourseViewerPage = () => {
 	const [conversation, setConversation] = useState(null);
 	const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 	const [showCertificate, setShowCertificate] = useState(false);
+	const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 	const prevProgressRef = useRef(0);
 
 	// chat hooks
@@ -267,6 +271,14 @@ const CourseViewerPage = () => {
 								<Star className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
 								<span className="text-xs lg:text-sm font-medium">Rate</span>
 							</button>
+							<button
+								onClick={() => setIsReportModalOpen(true)}
+								className="flex items-center gap-1.5 lg:gap-2 px-3 py-1.5 lg:px-4 lg:py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+								title="Report this course"
+							>
+								<Flag className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+								<span className="text-xs lg:text-sm font-medium hidden sm:inline">Report</span>
+							</button>
 						</div>
 					</div>
 
@@ -295,6 +307,14 @@ const CourseViewerPage = () => {
 							</div>
 						)}
 					</div>
+
+					{/* blocked course banner */}
+					{course?.blocked && (
+						<div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-sm text-amber-800">
+							<AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-500" />
+							<span>This course has been temporarily restricted by the admin. You still have full access to your content.</span>
+						</div>
+					)}
 				</div>
 			</div>
 
@@ -493,6 +513,13 @@ const CourseViewerPage = () => {
 			<CourseReviewModal
 				isOpen={isReviewModalOpen}
 				onClose={() => setIsReviewModalOpen(false)}
+				courseId={courseId}
+				courseTitle={course?.title}
+			/>
+
+			<CourseReportModal
+				isOpen={isReportModalOpen}
+				onClose={() => setIsReportModalOpen(false)}
 				courseId={courseId}
 				courseTitle={course?.title}
 			/>

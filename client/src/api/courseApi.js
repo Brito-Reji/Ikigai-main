@@ -157,16 +157,19 @@ export const courseApi = {
       return data;
     },
 
-    toggleBlock: async courseId => {
+    toggleBlock: async ({ courseId, reason }) => {
       const { data } = await adminApi.patch(
-        courseEndpoints.admin.toggleBlock(courseId)
+        courseEndpoints.admin.toggleBlock(courseId),
+        { reason }
       );
       return data;
     },
 
-    deleteCourse: async courseId => {
-      const { data } = await adminApi.delete(
-        courseEndpoints.admin.delete(courseId)
+    deleteCourse: async ({ courseId, reason }) => {
+      console.log("courseId", courseId);
+      const { data } = await adminApi.patch(
+        courseEndpoints.admin.delete(courseId),
+        { reason }
       );
       return data;
     },

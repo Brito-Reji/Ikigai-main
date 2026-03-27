@@ -60,7 +60,8 @@ import Instructors from "@/pages/admin/Instructors";
 import InstructorDetail from "@/pages/admin/InstructorDetail";
 import Coupons from "@/pages/admin/Coupons";
 import OrdersPage from "@/pages/admin/OrdersPage.jsx";
-
+import ReportsPage from "@/pages/admin/Reports.jsx";
+import ReportDetail from "@/pages/admin/ReportDetail";
 export default function AppRoutes() {
   return (
     <Routes>
@@ -364,6 +365,16 @@ export default function AppRoutes() {
         <Route path="orders" element={
           <AuthGuard requireAuth={true} roles={["admin"]}>
             <OrdersPage />
+          </AuthGuard>
+        } />
+        <Route path="reports" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <ReportsPage />
+          </AuthGuard>
+        } />
+        <Route path="reports/:reportId" element={
+          <AuthGuard requireAuth={true} roles={["admin"]}>
+            <ReportDetail />
           </AuthGuard>
         } />
       </Route>

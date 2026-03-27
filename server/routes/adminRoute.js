@@ -29,6 +29,11 @@ import {
   deleteCoupon,
   togglePauseCoupon,
 } from "../controllers/admin/couponController.js";
+import {
+  getAllReports,
+  getReportDetails,
+  updateReportStatus,
+} from "../controllers/admin/reportController.js";
 const router = Router();
 
 // DASHBOARD
@@ -50,7 +55,7 @@ router.get("/courses/statistics", getCourseStatistics);
 router.get("/courses/:courseId", getCourseDetails);
 router.get("/courses/:courseId/chapters", getAdminCourseChapters);
 router.patch("/courses/:courseId/toggle-block", toggleCourseBlock);
-router.delete("/courses/:courseId", deleteCourse);
+router.patch("/courses/:courseId/delete", deleteCourse);
 
 // COURSE VERIFICATION
 router.patch("/courses/:courseId/verification", updateVerificationStatus);
@@ -63,5 +68,10 @@ router.get("/coupons", getAllCoupons);
 router.put("/coupons/:couponId", updateCoupon);
 router.delete("/coupons/:couponId", deleteCoupon);
 router.patch("/coupons/:couponId/toggle-pause", togglePauseCoupon);
+
+// REPORTS
+router.get("/reports", getAllReports);
+router.get("/reports/:reportId", getReportDetails);
+router.patch("/reports/:reportId/status", updateReportStatus);
 
 export default router;

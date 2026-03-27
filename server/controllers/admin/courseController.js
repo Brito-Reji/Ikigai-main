@@ -56,7 +56,8 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
 export const toggleCourseBlock = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
-    const result = await toggleCourseBlockService(courseId);
+    const { reason } = req.body;
+    const result = await toggleCourseBlockService(courseId, reason);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -76,7 +77,9 @@ export const toggleCourseBlock = asyncHandler(async (req, res) => {
 export const deleteCourse = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
-    await deleteCourseService(courseId);
+    console.log("reqqes",req)
+    const { reason } = req.body;
+    await deleteCourseService(courseId, reason);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,

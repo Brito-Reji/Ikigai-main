@@ -32,6 +32,10 @@ const CourseDetail = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [expandedChapters, setExpandedChapters] = useState({});
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [blockReason, setBlockReason] = useState('');
+  const [deleteReason, setDeleteReason] = useState('');
 
   // Fetch data using TanStack Query
   const { data: courseData, isLoading: courseLoading } = useAdminCourseDetails(courseId);
@@ -53,72 +57,47 @@ const CourseDetail = () => {
   };
 
   const handleToggleBlock = async () => {
-    const action = course?.blocked ? 'unblock' : 'block';
-
-    const result = await Swal.fire({
-      title: `${action === 'block' ? 'Block' : 'Unblock'} this course?`,
-      text: `Are you sure you want to ${action} this course?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: action === 'block' ? '#eab308' : '#22c55e',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: `Yes, ${action} it!`,
-      cancelButtonText: 'Cancel'
-    });
-
-    if (result.isConfirmed) {
-      try {
-      
-        const response = await toggleBlockMutation.mutateAsync(courseId);
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: response.message,
-          confirmButtonColor: '#14b8a6',
-          timer: 2000
-        });
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to update course status',
-          confirmButtonColor: '#ef4444'
-        });
-      }
+    const isBlocking = !course?.blocked;
+    if (isBlocking) {
+      setBlockReason('');
+      setShowBlockModal(true);
+      return;
+    }
+    // unblocking — no reason needed
+    try {
+      const response = await toggleBlockMutation.mutateAsync({ courseId, reason: '' });
+      Swal.fire({ icon: 'success', title: 'Unblocked!', text: response.message, confirmButtonColor: '#14b8a6', timer: 2000 });
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Error!', text: 'Failed to unblock course', confirmButtonColor: '#ef4444' });
     }
   };
 
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "This course will be deleted. You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel'
-    });
+  const handleConfirmBlock = async () => {
+    if (!blockReason.trim()) return;
+    try {
+      const response = await toggleBlockMutation.mutateAsync({ courseId, reason: blockReason });
+      Swal.fire({ icon: 'success', title: 'Blocked!', text: response.message, confirmButtonColor: '#14b8a6', timer: 2000 });
+      setShowBlockModal(false);
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Error!', text: 'Failed to block course', confirmButtonColor: '#ef4444' });
+    }
+  };
 
-    if (result.isConfirmed) {
-      try {
-        const response = await deleteMutation.mutateAsync(courseId);
-        Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'Course has been deleted successfully.',
-          confirmButtonColor: '#14b8a6',
-          timer: 2000
-        });
-        navigate('/admin/courses');
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to delete course',
-          confirmButtonColor: '#ef4444'
-        });
-      }
+  const handleDelete = () => {
+    setDeleteReason('');
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteReason.trim()) return;
+    try {
+      console.log("courseId in try", courseId);
+      await deleteMutation.mutateAsync({ courseId, reason: deleteReason });
+      Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Course deleted. Students will be refunded.', confirmButtonColor: '#14b8a6', timer: 2000 });
+      setShowDeleteModal(false);
+      navigate('/admin/courses');
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Error!', text: 'Failed to delete course', confirmButtonColor: '#ef4444' });
     }
   };
 
@@ -269,34 +248,55 @@ const CourseDetail = () => {
         </div>
       </div>
 
-      {/* Rejection Modal */}
-      {showRejectModal && (
+      {/* Block Reason Modal */}
+      {showBlockModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Reject Course</h3>
-            <p className="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this course:</p>
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Block Course</h3>
+            <p className="text-sm text-gray-500 mb-4">This reason will be shown to the instructor.</p>
             <textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
-              rows="4"
-              placeholder="Enter rejection reason..."
+              value={blockReason}
+              onChange={(e) => setBlockReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4"
+              rows="3"
+              placeholder="Enter reason for blocking..."
             />
             <div className="flex justify-end gap-3">
+              <button onClick={() => setShowBlockModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
               <button
-                onClick={() => {
-                  setShowRejectModal(false);
-                  setRejectionReason('');
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                onClick={handleConfirmBlock}
+                disabled={!blockReason.trim() || toggleBlockMutation.isPending}
+                className="px-4 py-2 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600 disabled:opacity-50 transition-colors"
               >
-                Cancel
+                {toggleBlockMutation.isPending ? 'Blocking...' : 'Block Course'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Reason Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Delete Course</h3>
+            <p className="text-sm text-gray-500 mb-1">This action is permanent. All enrolled students will receive a wallet refund.</p>
+            <p className="text-sm text-gray-500 mb-4">Please provide a reason:</p>
+            <textarea
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 mb-4"
+              rows="3"
+              placeholder="Enter reason for deletion..."
+            />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
               <button
-                onClick={() => handleVerificationUpdate('rejected')}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                onClick={handleConfirmDelete}
+                disabled={!deleteReason.trim() || deleteMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
-                Reject Course
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete & Refund'}
               </button>
             </div>
           </div>
