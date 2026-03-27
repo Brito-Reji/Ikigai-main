@@ -7,7 +7,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     req.body
   );
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("adminRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",

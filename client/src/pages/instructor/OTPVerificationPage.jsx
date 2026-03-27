@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useRedux.js";
-import { verifyOTP, clearError } from "@/store/slices/authSlice.js";
+import { useInstructorAuth } from "@/hooks/useRedux.js";
+import { verifyInstructorOTP, clearInstructorError } from "@/store/slices/instructorAuthSlice.js";
 
 export default function OTPVerificationPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loading, error, dispatch } = useAuth();
+  const { loading, error, dispatch } = useInstructorAuth();
 
   // Get email and role from navigation state
   const [email] = useState(location.state?.email || "");
@@ -65,7 +65,7 @@ export default function OTPVerificationPage() {
 
   // Clear errors on mount
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearInstructorError());
   }, [dispatch]);
 
   // Helper function to start a new timer
@@ -138,8 +138,7 @@ export default function OTPVerificationPage() {
     }
 
     try {
-      // Use Redux action to verify OTP
-      await dispatch(verifyOTP({ email, otp: otpValue })).unwrap();
+      await dispatch(verifyInstructorOTP({ email, otp: otpValue })).unwrap();
 
       // Clear timer from localStorage on successful verification
       localStorage.removeItem("otpExpiry");

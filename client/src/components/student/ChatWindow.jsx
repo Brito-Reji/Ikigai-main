@@ -7,7 +7,7 @@ import { useConversationMessages, useTypingIndicator } from '@/hooks/useChat';
 
 const ChatWindow = ({ conversation }) => {
 	const messagesEndRef = useRef(null);
-	const { user } = useSelector(state => state.auth);
+	const { user } = useSelector(state => state.studentAuth);
 	const currentUserId = user?.id || user?._id;
 
 	// use real-time hooks

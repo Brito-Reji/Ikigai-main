@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, CheckCircle, XCircle, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useRedux.js";
-import { registerUser, clearError } from "@/store/slices/authSlice.js";
+import { useInstructorAuth } from "@/hooks/useRedux.js";
+import { registerInstructor, clearInstructorError } from "@/store/slices/instructorAuthSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import logo from "../../assets/images/logo.png";
@@ -11,7 +11,7 @@ import { useUsernameCheck } from "@/hooks/useUsernameCheck.js";
 export default function SignUpPage() {
   const navigate = useNavigate();
   const { loading, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
-    useAuth();
+    useInstructorAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -28,16 +28,14 @@ export default function SignUpPage() {
   // Check username availability
   const { isChecking, isAvailable, message } = useUsernameCheck(formData.username);
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated || localStorage.getItem("accessToken")) {
+    if (isAuthenticated || localStorage.getItem("instructorAccessToken")) {
       navigate("/instructor/dashboard", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // Clear errors when component mounts
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearInstructorError());
   }, [dispatch]);
 
   // Handle verification requirement
@@ -139,17 +137,13 @@ export default function SignUpPage() {
 
     if (validateForm()) {
       try {
-        // Use Redux action to register instructor
         await dispatch(
-          registerUser({
-            userData: {
-              email: formData.email,
-              username: formData.username,
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              password: formData.password,
-            },
-            role: "instructor",
+          registerInstructor({
+            email: formData.email,
+            username: formData.username,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            password: formData.password,
           })
         ).unwrap();
       } catch (err) {

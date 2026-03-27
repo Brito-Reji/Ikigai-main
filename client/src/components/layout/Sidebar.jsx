@@ -10,8 +10,8 @@ import {
   User,
   LogOut,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useRedux.js";
-import { logout } from "@/store/slices/authSlice.js";
+import { useInstructorAuth } from "@/hooks/useRedux.js";
+import { logoutInstructor } from "@/store/slices/instructorAuthSlice.js";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
@@ -19,7 +19,7 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useAuth();
+  const { user } = useInstructorAuth();
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -34,7 +34,7 @@ export default function Sidebar() {
     });
 
     if (result.isConfirmed) {
-      dispatch(logout());
+      dispatch(logoutInstructor());
       navigate('/instructor/login');
     }
   };

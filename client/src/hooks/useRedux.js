@@ -3,15 +3,25 @@ import { useDispatch, useSelector } from "react-redux";
 export const useAppDispatch = () => useDispatch();
 export const useAppSelector = useSelector;
 
-// auth hook
+// student auth
 export const useAuth = () => {
   const dispatch = useAppDispatch();
-  const auth = useAppSelector(state => state.auth);
+  const auth = useAppSelector(state => state.studentAuth);
+  return { ...auth, dispatch };
+};
 
-  return {
-    ...auth,
-    dispatch,
-  };
+// instructor auth
+export const useInstructorAuth = () => {
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector(state => state.instructorAuth);
+  return { ...auth, dispatch };
+};
+
+// admin auth
+export const useAdminAuth = () => {
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector(state => state.adminAuth);
+  return { ...auth, dispatch };
 };
 
 // courses hook

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import api from "@/api/axiosConfig";
+import instructorApi from "@/api/instructorAxiosConfig";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -31,7 +31,7 @@ export default function SalesChart() {
     const fetchMonthly = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/instructor/revenue/monthly?year=${year}`);
+        const res = await instructorApi.get(`/instructor/revenue/monthly?year=${year}`);
         if (res.data.success) {
           const formatted = res.data.data.map((m) => ({
             month: MONTHS[m.month - 1],

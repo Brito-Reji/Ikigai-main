@@ -11,7 +11,7 @@ export default function CourseCard({ course }) {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const { items, dispatch } = useCart();
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.studentAuth.user);
   const { mutate: addToCartAPI, isPending } = useAddToCart();
 
   // const isInCart = items.some((item) => item._id === course._id);

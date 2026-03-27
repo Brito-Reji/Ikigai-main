@@ -9,7 +9,7 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 export const studentRegister = asyncHandler(async (req, res) => {
   const { refreshToken, message } = await studentRegisterService(req.body);
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("studentRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -36,7 +36,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   const { user, accessToken, refreshToken } = result;
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("studentRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -67,7 +67,7 @@ export const studentGoogleAuth = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } =
     await studentGoogleAuthService(token);
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("studentRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",

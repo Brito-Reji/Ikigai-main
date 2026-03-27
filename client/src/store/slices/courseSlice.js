@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "@/api/axiosConfig.js";
 import adminApi from "@/api/adminAxiosConfig.js";
+import instructorApi from "@/api/instructorAxiosConfig.js";
 
 // fetch courses
 export const fetchCourses = createAsyncThunk(
@@ -24,7 +25,7 @@ export const createCourse = createAsyncThunk(
   "courses/createCourse",
   async (courseData, { rejectWithValue }) => {
     try {
-      const response = await api.post("/instructor/courses", courseData);
+      const response = await instructorApi.post("/instructor/courses", courseData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -39,7 +40,7 @@ export const fetchInstructorCourses = createAsyncThunk(
   "courses/fetchInstructorCourses",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/instructor/courses");
+      const response = await instructorApi.get("/instructor/courses");
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -89,7 +90,7 @@ export const fetchCourseById = createAsyncThunk(
   "courses/fetchCourseById",
   async (courseId, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/instructor/courses/${courseId}`);
+      const response = await instructorApi.get(`/instructor/courses/${courseId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -104,7 +105,7 @@ export const updateCourse = createAsyncThunk(
   "courses/updateCourse",
   async ({ courseId, courseData }, { rejectWithValue }) => {
     try {
-      const response = await api.put(
+      const response = await instructorApi.put(
         `/instructor/courses/${courseId}`,
         courseData
       );

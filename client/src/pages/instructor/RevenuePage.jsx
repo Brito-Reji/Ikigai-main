@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Download } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "@/api/axiosConfig";
+import instructorApi from "@/api/instructorAxiosConfig";
 import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 import RevenueStats from "@/components/instructor/RevenueStats.jsx";
 import RevenueChart from "@/components/instructor/RevenueChart.jsx";
@@ -10,17 +10,17 @@ import CourseRevenue from "@/components/instructor/CourseRevenue.jsx";
 
 // api
 const fetchRevenueStats = async () => {
-  const { data } = await api.get("/instructor/revenue/stats");
+  const { data } = await instructorApi.get("/instructor/revenue/stats");
   return data.data;
 };
 
 const fetchMonthlyRevenue = async (year) => {
-  const { data } = await api.get(`/instructor/revenue/monthly?year=${year}`);
+  const { data } = await instructorApi.get(`/instructor/revenue/monthly?year=${year}`);
   return data.data;
 };
 
 const fetchCourseRevenue = async () => {
-  const { data } = await api.get("/instructor/revenue/by-course");
+  const { data } = await instructorApi.get("/instructor/revenue/by-course");
   return data.data;
 };
 

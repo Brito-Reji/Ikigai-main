@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import { useAuth } from "@/hooks/useRedux.js";
-import { loginUser, clearError, fetchCurrentUser } from "@/store/slices/authSlice.js";
+import { loginStudent, clearStudentError, fetchCurrentStudent } from "@/store/slices/studentAuthSlice.js";
 import { setCart, clearCart } from "@/store/slices/cartSlice.js";
 import { useSyncCart } from "@/hooks/useCart.js";
 import logo from "../../assets/images/logo.png";
@@ -19,16 +19,15 @@ function LoginPage() {
   const cartItems = useSelector((state) => state.cart.items);
   const { mutate: syncCartMutation } = useSyncCart();
 
-  // Redirect if already authenticated
+  // redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated || localStorage.getItem("accessToken")) {
+    if (isAuthenticated || localStorage.getItem("studentAccessToken")) {
       navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // Clear any previous errors when component mounts
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearStudentError());
   }, [dispatch]);
 
   // Pre-fill email if coming from OTP verification
@@ -153,17 +152,13 @@ function LoginPage() {
     if (!emailError && !passwordError) {
       try {
         const resultAction = await dispatch(
-          loginUser({
+          loginStudent({
             email: formData.email,
             password: formData.password,
-            role: "student",
           })
         );
 
-        console.log("Login result:", resultAction);
-
-        if (loginUser.fulfilled.match(resultAction)) {
-          console.log("Login successful, redirecting to course page");
+        if (loginStudent.fulfilled.match(resultAction)) {
           // Check if user needs OTP verification
           if (resultAction.payload?.requiresVerification) {
             navigate("/verify-otp", {
@@ -172,10 +167,10 @@ function LoginPage() {
               },
             });
           } else {
-            // fetch full user data
-            dispatch(fetchCurrentUser());
+            // fetch full student data
+            dispatch(fetchCurrentStudent());
 
-            // Sync guest cart if exists
+            // sync guest cart
             if (cartItems.length > 0) {
               const courseIds = cartItems.map(item => item._id);
               syncCartMutation(courseIds, {
@@ -200,13 +195,8 @@ function LoginPage() {
               navigate("/courses", { replace: true });
             }, 100);
           }
-        } else if (loginUser.rejected.match(resultAction)) {
-          // Handle login error
-          console.log("Login failed:", resultAction.payload);
-
-          // Clear any existing tokens to prevent stale authentication
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("userAuth");
+        } else if (loginStudent.rejected.match(resultAction)) {
+          localStorage.removeItem("studentAccessToken");
 
           // Check if user is blocked
           if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes("blocked")) {

@@ -11,7 +11,7 @@ const CourseHero = ({ course }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.studentAuth.user);
   const { mutate: addToCartAPI, isPending } = useAddToCart();
 
   if (!course) return null;

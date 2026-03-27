@@ -1,4 +1,5 @@
 import api from "./axiosConfig";
+import instructorApi from "./instructorAxiosConfig";
 
 export const chatApi = {
   // conversations
@@ -27,20 +28,20 @@ export const chatApi = {
 
 // instructor chat API
 export const instructorChatApi = {
-  getConversations: () => api.get("/instructor/chat/conversations"),
+  getConversations: () => instructorApi.get("/instructor/chat/conversations"),
 
   getConversationMessages: (conversationId, page = 1) =>
-    api.get(
+    instructorApi.get(
       `/instructor/chat/conversations/${conversationId}/messages?page=${page}`
     ),
 
-  getCourseRooms: () => api.get("/instructor/chat/rooms"),
+  getCourseRooms: () => instructorApi.get("/instructor/chat/rooms"),
 
   getRoomMessages: (roomId, page = 1) =>
-    api.get(`/instructor/chat/rooms/${roomId}/messages?page=${page}`),
+    instructorApi.get(`/instructor/chat/rooms/${roomId}/messages?page=${page}`),
 
   getRoomParticipants: roomId =>
-    api.get(`/instructor/chat/rooms/${roomId}/participants`),
+    instructorApi.get(`/instructor/chat/rooms/${roomId}/participants`),
 };
 
 export default chatApi;

@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import api from "@/api/axiosConfig.js";
+import instructorApi from "@/api/instructorAxiosConfig.js";
 
 // Fetch chapters for a course
 export const fetchChapters = createAsyncThunk(
     "chapters/fetchChapters",
     async (courseId, { rejectWithValue }) => {
         try {
-            const response = await api.get(`/instructor/courses/${courseId}/chapters`);
+            const response = await instructorApi.get(`/instructor/courses/${courseId}/chapters`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to fetch chapters" });
@@ -19,7 +19,7 @@ export const createChapter = createAsyncThunk(
     "chapters/createChapter",
     async ({ courseId, chapterData }, { rejectWithValue }) => {
         try {
-            const response = await api.post(`/instructor/courses/${courseId}/chapters`, chapterData);
+            const response = await instructorApi.post(`/instructor/courses/${courseId}/chapters`, chapterData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to create chapter" });
@@ -32,7 +32,7 @@ export const updateChapter = createAsyncThunk(
     "chapters/updateChapter",
     async ({ courseId, chapterId, chapterData }, { rejectWithValue }) => {
         try {
-            const response = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}`, chapterData);
+            const response = await instructorApi.put(`/instructor/courses/${courseId}/chapters/${chapterId}`, chapterData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to update chapter" });
@@ -45,7 +45,7 @@ export const deleteChapter = createAsyncThunk(
     "chapters/deleteChapter",
     async ({ courseId, chapterId }, { rejectWithValue }) => {
         try {
-            const response = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}`);
+            const response = await instructorApi.delete(`/instructor/courses/${courseId}/chapters/${chapterId}`);
             return { ...response.data, chapterId };
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to delete chapter" });
@@ -58,7 +58,7 @@ export const addLesson = createAsyncThunk(
     "chapters/addLesson",
     async ({ courseId, chapterId, lessonData }, { rejectWithValue }) => {
         try {
-            const response = await api.post(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons`, lessonData);
+            const response = await instructorApi.post(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons`, lessonData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to add lesson" });
@@ -71,7 +71,7 @@ export const updateLesson = createAsyncThunk(
     "chapters/updateLesson",
     async ({ courseId, chapterId, lessonId, lessonData }, { rejectWithValue }) => {
         try {
-            const response = await api.put(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, lessonData);
+            const response = await instructorApi.put(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, lessonData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to update lesson" });
@@ -84,7 +84,7 @@ export const deleteLesson = createAsyncThunk(
     "chapters/deleteLesson",
     async ({ courseId, chapterId, lessonId }, { rejectWithValue }) => {
         try {
-            const response = await api.delete(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
+            const response = await instructorApi.delete(`/instructor/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to delete lesson" });

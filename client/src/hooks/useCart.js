@@ -5,7 +5,7 @@ import { addToCart } from "@/store/slices/cartSlice";
 
 // get cart
 export const useCart = () => {
-  const user = useSelector(state => state.auth.user);
+  const user = useSelector(state => state.studentAuth.user);
 
   return useQuery({
     queryKey: ["cart", user?._id || user?.id || null],

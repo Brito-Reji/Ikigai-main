@@ -8,7 +8,7 @@ import { setCart } from "@/store/slices/cartSlice";
 const CartIcon = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.studentAuth.user);
   const reduxItems = useSelector((state) => state.cart.items);
   const { data: apiCartData } = useCartAPI();
   const isLoggedIn = !!(user && (user.id || user._id));

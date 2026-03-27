@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "../../hooks/useRedux.js";
-import { loginUser, clearError } from "../../store/slices/authSlice.js";
+import { loginStudent, clearStudentError } from "../../store/slices/studentAuthSlice.js";
 import GoogleAuth from "../../components/GoogleAuth.jsx";
 import Header from "@/components/Header.jsx";
 
@@ -20,9 +20,8 @@ export default function LoginPageRedux() {
     password: "",
   });
 
-  // Clear errors when component mounts
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearStudentError());
   }, [dispatch]);
 
   // Redirect if already authenticated
@@ -88,7 +87,7 @@ export default function LoginPageRedux() {
     
     // Clear global error
     if (error) {
-      dispatch(clearError());
+      dispatch(clearStudentError());
     }
   };
 
@@ -96,10 +95,9 @@ export default function LoginPageRedux() {
     e.preventDefault();
     
     if (validateForm()) {
-      dispatch(loginUser({
+      dispatch(loginStudent({
         email: formData.email,
         password: formData.password,
-        role: "student" // or determine based on route/context
       }));
     }
   };

@@ -3,7 +3,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
-import { googleAuth, fetchCurrentUser } from "@/store/slices/authSlice";
+import { googleStudentAuth, fetchCurrentStudent } from "@/store/slices/studentAuthSlice";
+import { googleInstructorAuth, fetchCurrentInstructor } from "@/store/slices/instructorAuthSlice";
 import { clearCart } from "@/store/slices/cartSlice";
 import Swal from "sweetalert2";
 
@@ -14,22 +15,12 @@ function GoogleAuth({ role }) {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      console.log("Google credential received:", credentialResponse.credential);
+      const authAction = role === "instructor" ? googleInstructorAuth : googleStudentAuth;
+      const fetchAction = role === "instructor" ? fetchCurrentInstructor : fetchCurrentStudent;
 
-      const result = await dispatch(
-        googleAuth({
-          token: credentialResponse.credential,
-          role,
-        })
-      ).unwrap();
+      await dispatch(authAction({ token: credentialResponse.credential })).unwrap();
+      await dispatch(fetchAction()).unwrap();
 
-      console.log("Google auth successful:", result);
-
-      await dispatch(fetchCurrentUser()).unwrap();
-
-      console.log("User data fetched successfully");
-
-      // reset cart for new session
       dispatch(clearCart());
       queryClient.invalidateQueries({ queryKey: ["cart"] });
 

@@ -7,8 +7,8 @@ import toast from "react-hot-toast";
 
 const WishlistHeart = ({ courseId, className = "" }) => {
     const navigate = useNavigate();
-    const user = useSelector((state) => state.auth.user);
-    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+    const user = useSelector((state) => state.studentAuth.user);
+    const isAuthenticated = useSelector((state) => state.studentAuth.isAuthenticated);
     const { data: wishlistData } = useWishlist();
     const { mutate: toggleWishlist, isPending } = useToggleWishlist();
     const [isInWishlist, setIsInWishlist] = useState(false);

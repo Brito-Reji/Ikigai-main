@@ -7,7 +7,7 @@ const getProfileEndpoint = (role) => {
 }
 
 export const useProfile = () => {
-    const user = useSelector((state) => state.auth.user)
+    const user = useSelector((state) => state.studentAuth.user)
     const endpoint = getProfileEndpoint(user?.role)
 
     return useQuery({
@@ -22,7 +22,7 @@ export const useProfile = () => {
 
 export const useUpdateProfile = () => {
     const queryClient = useQueryClient()
-    const user = useSelector((state) => state.auth.user)
+    const user = useSelector((state) => state.studentAuth.user)
     const endpoint = getProfileEndpoint(user?.role)
 
     return useMutation({

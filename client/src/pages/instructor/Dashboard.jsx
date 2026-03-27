@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, Download, Filter, Calendar, X
 } from "lucide-react";
 import SalesChart from "@/components/instructor/SalesChart.jsx";
-import api from "@/api/axiosConfig";
+import instructorApi from "@/api/instructorAxiosConfig";
 import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
 import toast from "react-hot-toast";
 
@@ -65,7 +65,7 @@ export default function InstructorDashboard() {
     const fetchStats = async () => {
       setStatsLoading(true);
       try {
-        const res = await api.get("/instructor/dashboard/stats");
+        const res = await instructorApi.get("/instructor/dashboard/stats");
         if (res.data.success) setStats(res.data.data);
       } catch (err) {
         console.error("Failed to fetch stats:", err);
@@ -81,7 +81,7 @@ export default function InstructorDashboard() {
     const fetchTransactions = async () => {
       setTransactionsLoading(true);
       try {
-        const res = await api.get(
+        const res = await instructorApi.get(
           `/instructor/dashboard/transactions?page=${pagination.page}&limit=${pagination.limit}`
         );
         if (res.data.success) {
@@ -134,7 +134,7 @@ export default function InstructorDashboard() {
     // fetch all transactions for filtering (up to 500)
     let allTxns = transactions;
     try {
-      const res = await api.get("/instructor/dashboard/transactions?page=1&limit=500");
+      const res = await instructorApi.get("/instructor/dashboard/transactions?page=1&limit=500");
       if (res.data.success) allTxns = res.data.data.transactions;
     } catch (_) {}
 
@@ -173,8 +173,8 @@ export default function InstructorDashboard() {
     let courseRevenue = [];
     try {
       const [statsRes, courseRes] = await Promise.all([
-        api.get("/instructor/revenue/stats"),
-        api.get("/instructor/revenue/by-course"),
+        instructorApi.get("/instructor/revenue/stats"),
+        instructorApi.get("/instructor/revenue/by-course"),
       ]);
       if (statsRes.data.success) revenueStats = statsRes.data.data;
       if (courseRes.data.success) courseRevenue = courseRes.data.data;

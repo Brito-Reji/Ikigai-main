@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
-import { useAuth } from "@/hooks/useRedux.js";
-import { loginUser, clearError } from "@/store/slices/authSlice.js";
+import { useInstructorAuth } from "@/hooks/useRedux.js";
+import { loginInstructor, clearInstructorError } from "@/store/slices/instructorAuthSlice.js";
 import Swal from "sweetalert2";
 import AuthHeader from "@/components/layout/AuthHeader.jsx";
 import AuthFooter from "@/components/layout/AuthFooter.jsx";
@@ -11,7 +11,7 @@ import Footer from "@/components/layout/Footer.jsx";
 
 function LoginPage() {
   let navigate = useNavigate()
-  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } = useAuth();
+  const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } = useInstructorAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -27,16 +27,14 @@ function LoginPage() {
     password: false,
   });
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated || localStorage.getItem("accessToken")) {
+    if (isAuthenticated || localStorage.getItem("instructorAccessToken")) {
       navigate("/instructor/dashboard", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // Clear errors when component mounts
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearInstructorError());
   }, [dispatch]);
 
   // Handle verification requirement
@@ -138,19 +136,12 @@ function LoginPage() {
     if (!emailError && !passwordError) {
       try {
         await dispatch(
-          loginUser({
+          loginInstructor({
             email: formData.email,
             password: formData.password,
-            role: "instructor",
           })
         ).unwrap();
-        // Success - will be redirected by useEffect
-      } catch (err) {
-        console.error("Login failed:", err);
-
-        // Clear any existing tokens to prevent stale authentication
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("userAuth");
+        } catch (err) {
 
         if (!err.requiresVerification) {
           // Check if user is blocked

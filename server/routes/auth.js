@@ -20,7 +20,7 @@ import {
   verifyForgetPasswordOtp,
   resetPassword,
 } from "../controllers/auth/forgetPassword.js";
-import { refreshToken } from "../controllers/auth/refreshToken.js";
+import { studentRefreshToken, instructorRefreshToken, adminRefreshToken } from "../controllers/auth/refreshToken.js";
 import { checkUsernameAvailabilty } from "../controllers/auth/checkUsername.js";
 import { currentUser } from "../controllers/auth/currentUser.js";
 import { logout } from "../controllers/auth/logout.js";
@@ -52,8 +52,10 @@ router.post("/reset-password", resetPassword);
 // Check username availability using query params
 router.get("/check-username", checkUsernameAvailabilty);
 
-// Refresh token endpoint
-router.post("/refresh", refreshToken);
+// Refresh token endpoints
+router.post("/student/refresh", studentRefreshToken);
+router.post("/instructor/refresh", instructorRefreshToken);
+router.post("/admin/refresh", adminRefreshToken);
 
 // Get current user from access token
 router.get("/me", currentUser);

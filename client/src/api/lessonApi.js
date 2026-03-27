@@ -1,25 +1,26 @@
 import api from './axiosConfig'
+import instructorApi from './instructorAxiosConfig'
 import { lessonEndpoints } from './endpoints/lessonEndpoints'
 
 export const lessonApi = {
     instructor: {
         getLessons: async (courseId, chapterId) => {
-            const { data } = await api.get(lessonEndpoints.instructor.list(courseId, chapterId))
+            const { data } = await instructorApi.get(lessonEndpoints.instructor.list(courseId, chapterId))
             return data
         },
 
         createLesson: async ({ courseId, chapterId, lessonData }) => {
-            const { data } = await api.post(lessonEndpoints.instructor.create(courseId, chapterId), lessonData)
+            const { data } = await instructorApi.post(lessonEndpoints.instructor.create(courseId, chapterId), lessonData)
             return data
         },
 
         updateLesson: async ({ courseId, chapterId, lessonId, lessonData }) => {
-            const { data } = await api.put(lessonEndpoints.instructor.update(courseId, chapterId, lessonId), lessonData)
+            const { data } = await instructorApi.put(lessonEndpoints.instructor.update(courseId, chapterId, lessonId), lessonData)
             return data
         },
 
         deleteLesson: async ({ courseId, chapterId, lessonId }) => {
-            const { data } = await api.delete(lessonEndpoints.instructor.delete(courseId, chapterId, lessonId))
+            const { data } = await instructorApi.delete(lessonEndpoints.instructor.delete(courseId, chapterId, lessonId))
             return data
         },
 
@@ -29,7 +30,7 @@ export const lessonApi = {
             formData.append('courseId', courseId)
             formData.append('chapterId', chapterId)
 
-            const { data } = await api.post(lessonEndpoints.instructor.uploadVideo(), formData, {
+            const { data } = await instructorApi.post(lessonEndpoints.instructor.uploadVideo(), formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
             return data

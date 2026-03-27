@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Mail, Lock, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile.js";
-import api from "@/api/axiosConfig.js";
+import instructorApi from "@/api/instructorAxiosConfig.js";
 import Swal from "sweetalert2";
 
 export default function InstructorSettingsPage() {
@@ -32,7 +32,7 @@ export default function InstructorSettingsPage() {
     setLoading({ ...loading, email: true });
 
     try {
-      const response = await api.post(`${baseEndpoint}/request-email-change`, emailData);
+      const response = await instructorApi.post(`${baseEndpoint}/request-email-change`, emailData);
       
       const { value: otp } = await Swal.fire({
         title: "Enter OTP",
@@ -45,7 +45,7 @@ export default function InstructorSettingsPage() {
       });
 
       if (otp) {
-        const verifyResponse = await api.post(`${baseEndpoint}/verify-email-change`, {
+        const verifyResponse = await instructorApi.post(`${baseEndpoint}/verify-email-change`, {
           newEmail: emailData.newEmail,
           otp,
         });
@@ -86,7 +86,7 @@ export default function InstructorSettingsPage() {
     setLoading({ ...loading, password: true });
 
     try {
-      const response = await api.put(`${baseEndpoint}/change-password`, {
+      const response = await instructorApi.put(`${baseEndpoint}/change-password`, {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });

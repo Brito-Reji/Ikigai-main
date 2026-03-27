@@ -1,21 +1,22 @@
 import api from "./axiosConfig";
+import instructorApi from "./instructorAxiosConfig";
 import adminApi from "./adminAxiosConfig";
 import { courseEndpoints } from "./endpoints/courseEndpoints";
 
 export const courseApi = {
   instructor: {
     getCourses: async () => {
-      const { data } = await api.get(courseEndpoints.instructor.list());
+      const { data } = await instructorApi.get(courseEndpoints.instructor.list());
       return data;
     },
 
     getCourseById: async courseId => {
-      const { data } = await api.get(courseEndpoints.instructor.byId(courseId));
+      const { data } = await instructorApi.get(courseEndpoints.instructor.byId(courseId));
       return data;
     },
 
     createCourse: async courseData => {
-      const { data } = await api.post(
+      const { data } = await instructorApi.post(
         courseEndpoints.instructor.create(),
         courseData
       );
@@ -23,7 +24,7 @@ export const courseApi = {
     },
 
     updateCourse: async ({ courseId, courseData }) => {
-      const { data } = await api.put(
+      const { data } = await instructorApi.put(
         courseEndpoints.instructor.update(courseId),
         courseData
       );
@@ -31,14 +32,14 @@ export const courseApi = {
     },
 
     applyForVerification: async courseId => {
-      const { data } = await api.post(
+      const { data } = await instructorApi.post(
         courseEndpoints.instructor.applyVerification(courseId)
       );
       return data;
     },
 
     togglePublish: async courseId => {
-      const { data } = await api.patch(
+      const { data } = await instructorApi.patch(
         courseEndpoints.instructor.togglePublish(courseId)
       );
       return data;

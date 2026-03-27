@@ -7,7 +7,7 @@ const CourseSyllabus = ({ course, chapters = [], isLoading = false }) => {
   const [expandedSections, setExpandedSections] = useState({});
   const [previewLesson, setPreviewLesson] = useState(null);
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.studentAuth.user);
 
   // redirect to signup if not logged in
   const handlePreviewClick = (lesson) => {

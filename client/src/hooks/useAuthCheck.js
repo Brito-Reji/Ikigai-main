@@ -1,36 +1,36 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCurrentUser, logout } from "@/store/slices/authSlice.js";
+import { fetchCurrentStudent, logoutStudent } from "@/store/slices/studentAuthSlice.js";
 
 export const useAuthCheck = () => {
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
-  const accessToken = useSelector(state => state.auth.accessToken);
+  const accessToken = useSelector(state => state.studentAuth.accessToken);
 
   useEffect(() => {
     let isMounted = true;
 
     const checkUserStatus = async () => {
-      const tokenLocal = localStorage.getItem("accessToken");
-      
+      const tokenLocal = localStorage.getItem("studentAccessToken");
+
       if (!tokenLocal || tokenLocal === "null" || tokenLocal === "undefined") {
         if (isMounted) setIsLoading(false);
         return;
       }
 
       try {
-        const resultAction = await dispatch(fetchCurrentUser()).unwrap();
-        
+        const resultAction = await dispatch(fetchCurrentStudent()).unwrap();
+
         if (resultAction?.isBlocked) {
-          dispatch(logout());
+          dispatch(logoutStudent());
           window.location.href = "/login";
         }
       } catch (error) {
         if (error?.isBlocked) {
-           dispatch(logout());
-           window.location.href = "/login";
+          dispatch(logoutStudent());
+          window.location.href = "/login";
         } else if (!error?.shouldRetry) {
-           dispatch(logout());
+          dispatch(logoutStudent());
         }
       } finally {
         if (isMounted) setIsLoading(false);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, Mail, Clock, CheckCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
-import { verifyOTP, clearError, clearVerificationState } from "@/store/slices/authSlice.js";
+import { verifyStudentOTP, clearStudentError, clearStudentVerificationState } from "@/store/slices/studentAuthSlice.js";
 import api from "@/api/axiosConfig.js";
 
 export default function OTPVerificationPage() {
@@ -66,7 +66,7 @@ export default function OTPVerificationPage() {
 
   // Clear errors on mount
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearStudentError());
   }, [dispatch]);
 
   // Helper function to start a new timer
@@ -139,8 +139,7 @@ export default function OTPVerificationPage() {
     }
 
     try {
-      // Use Redux action to verify OTP
-      await dispatch(verifyOTP({ email, otp: otpValue })).unwrap();
+      await dispatch(verifyStudentOTP({ email, otp: otpValue })).unwrap();
 
       // Clear timer from localStorage on successful verification
       localStorage.removeItem("otpExpiry");
@@ -183,7 +182,7 @@ export default function OTPVerificationPage() {
 
   // Handle change email
   const handleChangeEmail = () => {
-    dispatch(clearVerificationState());
+    dispatch(clearStudentVerificationState());
     localStorage.removeItem("otpExpiry");
     navigate("/signup");
   };

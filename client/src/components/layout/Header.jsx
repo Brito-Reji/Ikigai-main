@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Search, Heart, Bell, User, Menu, X, BookOpen, MessageCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
-import { logout } from "@/store/slices/authSlice.js";
+import { logoutStudent } from "@/store/slices/studentAuthSlice.js";
 import { clearCart } from "@/store/slices/cartSlice.js";
 import { useDispatch } from "react-redux";
 import logo from "@/assets/images/logo.png";
@@ -23,7 +23,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
 
   const handleLogout = () => {
     dispatch(clearCart());
-    dispatch(logout());
+    dispatch(logoutStudent());
     navigate("/");
   };
 

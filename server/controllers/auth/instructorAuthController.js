@@ -21,7 +21,7 @@ export const instructorSignin = asyncHandler(async (req, res) => {
   const { instructor, accessToken, refreshToken } =
     await instructorSigninService(email, password);
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("instructorRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -56,7 +56,7 @@ export const instructorGoogleAuth = asyncHandler(async (req, res) => {
   const { instructor, accessToken, refreshToken } =
     await instructorGoogleAuthService(token);
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("instructorRefreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",

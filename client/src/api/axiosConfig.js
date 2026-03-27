@@ -8,31 +8,22 @@ const api = axios.create({
 });
 console.log("api", import.meta.env.VITE_API_URL);
 api.interceptors.request.use(config => {
-  let accessToken = localStorage.getItem("accessToken");
+  let accessToken = localStorage.getItem("studentAccessToken");
 
-  // Handle case where token might be stored as JSON object
   if (accessToken) {
     try {
-      // Try to parse as JSON in case it was stored incorrectly
       const parsed = JSON.parse(accessToken);
       if (parsed.accessToken) {
-        // If it's an object with accessToken property, extract it
         accessToken = parsed.accessToken;
-        // Fix the storage
-        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("studentAccessToken", accessToken);
       }
-    } catch (e) {
-      // Not JSON, use as is (this is the correct case)
-      // console.log(e)
+    } catch {
+      // not JSON, use as is
     }
 
-    // Don't add Authorization header for refresh token requests
     if (!config.url.includes("/auth/refresh")) {
       config.headers.Authorization = `Bearer ${accessToken}`;
-      console.log("Adding token to request:", accessToken);
     }
-  } else {
-    console.log("No token found in localStorage");
   }
   return config;
 });
@@ -60,8 +51,8 @@ api.interceptors.response.use(
     console.log("Response error:", error.response?.status, error.config?.url);
 
     // Don't try to refresh if it's the refresh endpoint itself that failed
-    if (originalRequest.url?.includes("/auth/refresh")) {
-      console.log("Refresh endpoint failed, not retrying");
+    if (originalRequest.url?.includes("/auth/refresh") || originalRequest.url?.includes("/auth/student/refresh") || originalRequest.url?.includes("/auth/student/login")) {
+      console.log("Refresh or login endpoint failed, not retrying");
       isRefreshing = false;
       processQueue(error, null);
       return Promise.reject(error);
@@ -86,8 +77,7 @@ api.interceptors.response.use(
 
     // Check if error.response exists to avoid crashes
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Don't retry if we already failed to refresh
-      if (sessionStorage.getItem("refreshFailed")) {
+      if (sessionStorage.getItem("studentRefreshFailed")) {
         return Promise.reject(error);
       }
 
@@ -117,13 +107,12 @@ api.interceptors.response.use(
             refreshData.refreshToken = refreshToken;
           }
         }
-        const response = await api.post("/auth/refresh", refreshData);
+        const response = await api.post("/auth/student/refresh", refreshData);
         if (response.data.success && response.data.accessToken) {
           const { accessToken } = response.data;
-          localStorage.setItem("accessToken", accessToken);
-          sessionStorage.removeItem("refreshFailed");
+          localStorage.setItem("studentAccessToken", accessToken);
+          sessionStorage.removeItem("studentRefreshFailed");
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          console.log("Token refreshed successfully");
           isRefreshing = false;
           processQueue(null, accessToken);
           return api(originalRequest);
@@ -132,19 +121,17 @@ api.interceptors.response.use(
           throw new Error("Refresh failed - no token returned");
         }
       } catch (err) {
-        console.log("Refresh failed:", err.message);
         isRefreshing = false;
         processQueue(err, null);
-        localStorage.removeItem("accessToken");
-        sessionStorage.setItem("refreshFailed", "true");
+        localStorage.removeItem("studentAccessToken");
+        sessionStorage.setItem("studentRefreshFailed", "true");
         return Promise.reject(err);
       }
     }
 
     // If user is blocked, clear token
     if (error.response?.data?.isBlocked) {
-      console.log("User is blocked, clearing token");
-      localStorage.removeItem("accessToken");
+      localStorage.removeItem("studentAccessToken");
     }
 
     return Promise.reject(error);

@@ -2,59 +2,57 @@ import axios from "axios";
 
 const isDev = import.meta.env.DEV;
 
-const adminApi = axios.create({
+const instructorApi = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api",
   withCredentials: !isDev,
 });
 
-// attach admin token
-adminApi.interceptors.request.use(config => {
-  let accessToken = localStorage.getItem("adminAccessToken");
+// attach instructor token
+instructorApi.interceptors.request.use(config => {
+  let accessToken = localStorage.getItem("instructorAccessToken");
 
   if (accessToken) {
     try {
       const parsed = JSON.parse(accessToken);
       if (parsed.accessToken) {
         accessToken = parsed.accessToken;
-        localStorage.setItem("adminAccessToken", accessToken);
+        localStorage.setItem("instructorAccessToken", accessToken);
       }
-    } catch (e) {
+    } catch {
       // not JSON, use as is
     }
 
-    config.headers.Authorization = `Bearer ${accessToken}`;
+    if (!config.url.includes("/auth/refresh")) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
   }
   return config;
 });
 
-// refresh handling
 let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
   failedQueue = [];
 };
 
-adminApi.interceptors.response.use(
+instructorApi.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
 
-    if (originalRequest.url?.includes("/auth/refresh") || originalRequest.url?.includes("/auth/admin/refresh") || originalRequest.url?.includes("/auth/admin/login")) {
+    if (originalRequest.url?.includes("/auth/refresh") || originalRequest.url?.includes("/auth/instructor/refresh") || originalRequest.url?.includes("/auth/instructor/signin")) {
       isRefreshing = false;
       processQueue(error, null);
       return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (sessionStorage.getItem("adminRefreshFailed")) {
+      if (sessionStorage.getItem("instructorRefreshFailed")) {
         return Promise.reject(error);
       }
 
@@ -64,7 +62,7 @@ adminApi.interceptors.response.use(
         })
           .then(token => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
-            return adminApi(originalRequest);
+            return instructorApi(originalRequest);
           })
           .catch(err => Promise.reject(err));
       }
@@ -73,29 +71,38 @@ adminApi.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await adminApi.post("/auth/admin/refresh");
+        let refreshData = {};
+        if (isDev) {
+          const refreshToken = localStorage.getItem("instructorRefreshToken");
+          if (refreshToken) refreshData.refreshToken = refreshToken;
+        }
+        const response = await instructorApi.post("/auth/instructor/refresh", refreshData);
         if (response.data.success && response.data.accessToken) {
           const { accessToken } = response.data;
-          localStorage.setItem("adminAccessToken", accessToken);
-          sessionStorage.removeItem("adminRefreshFailed");
+          localStorage.setItem("instructorAccessToken", accessToken);
+          sessionStorage.removeItem("instructorRefreshFailed");
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           isRefreshing = false;
           processQueue(null, accessToken);
-          return adminApi(originalRequest);
+          return instructorApi(originalRequest);
         } else {
           throw new Error("Refresh failed");
         }
       } catch (err) {
         isRefreshing = false;
         processQueue(err, null);
-        localStorage.removeItem("adminAccessToken");
-        sessionStorage.setItem("adminRefreshFailed", "true");
+        localStorage.removeItem("instructorAccessToken");
+        sessionStorage.setItem("instructorRefreshFailed", "true");
         return Promise.reject(err);
       }
+    }
+
+    if (error.response?.data?.isBlocked) {
+      localStorage.removeItem("instructorAccessToken");
     }
 
     return Promise.reject(error);
   }
 );
 
-export default adminApi;
+export default instructorApi;

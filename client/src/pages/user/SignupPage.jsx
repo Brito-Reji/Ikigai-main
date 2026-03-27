@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, CheckCircle, XCircle, Loader } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useRedux.js";
-import { registerUser, clearError } from "@/store/slices/authSlice.js";
+import { registerStudent, clearStudentError } from "@/store/slices/studentAuthSlice.js";
 import Swal from "sweetalert2";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import Footer from "@/components/layout/Footer.jsx";
@@ -14,9 +14,8 @@ export default function SignUpPage() {
   const { loading, error, requiresVerification, verificationEmail, dispatch, isAuthenticated } =
     useAuth();
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated || localStorage.getItem("accessToken")) {
+    if (isAuthenticated || localStorage.getItem("studentAccessToken")) {
       navigate("/courses", { replace: true });
     }
   }, [isAuthenticated, navigate]);
@@ -36,9 +35,8 @@ export default function SignUpPage() {
   // Check username availability
   const { isChecking, isAvailable, message } = useUsernameCheck(formData.username);
 
-  // Clear errors when component mounts
   useEffect(() => {
-    dispatch(clearError());
+    dispatch(clearStudentError());
   }, [dispatch]);
 
   // Handle verification requirement
@@ -142,17 +140,13 @@ export default function SignUpPage() {
 
     if (validateForm()) {
       try {
-        // Use Redux action to register user
         await dispatch(
-          registerUser({
-            userData: {
-              email: formData.email,
-              username: formData.username,
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              password: formData.password,
-            },
-            role: "student",
+          registerStudent({
+            email: formData.email,
+            username: formData.username,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            password: formData.password,
           })
         ).unwrap();
       } catch (err) {
