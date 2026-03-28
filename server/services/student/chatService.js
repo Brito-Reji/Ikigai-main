@@ -4,7 +4,7 @@ import { CourseRoom } from "../../models/CourseRoom.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { Course } from "../../models/Course.js";
 
-// get student conversations (based on active purchased courses)
+// get student conversations (one per instructor)
 export const getConversations = async userId => {
   // get all active enrollments for the student
   const enrollments = await Enrollment.find({
@@ -19,41 +19,46 @@ export const getConversations = async userId => {
     },
   });
 
-  const conversationList = [];
+  // group enrollments by instructor
+  const instructorMap = new Map();
 
   for (const enrollment of enrollments) {
     if (!enrollment.course || !enrollment.course.instructor) continue;
+    const instructorId = enrollment.course.instructor._id.toString();
 
-    const courseId = enrollment.course._id;
-    const instructorId = enrollment.course.instructor._id;
-
-    // find existing conversation or create a new one
-    let conversation = await Conversation.findOne({
-      student: userId,
-      instructor: instructorId,
-      course: courseId,
-    }).populate("instructor", "username profileImageUrl")
-      .populate("course", "title thumbnail");
-
-    if (!conversation) {
-      conversation = await Conversation.create({
-        student: userId,
-        instructor: instructorId,
-        course: courseId,
+    if (!instructorMap.has(instructorId)) {
+      instructorMap.set(instructorId, {
+        instructor: enrollment.course.instructor,
+        courses: [],
       });
-      // populate it for display
-      conversation = await Conversation.findById(conversation._id)
-        .populate("instructor", "username profileImageUrl")
-        .populate("course", "title thumbnail");
     }
+    instructorMap.get(instructorId).courses.push(enrollment.course);
+  }
+
+  const conversationList = [];
+
+  for (const [instructorId, data] of instructorMap) {
+    // find or create conversation for this instructor-student pair
+    let conversation = await Conversation.findOneAndUpdate(
+      { student: userId, instructor: instructorId },
+      {
+        $addToSet: { courses: { $each: data.courses.map(c => c._id) } },
+      },
+      { upsert: true, new: true }
+    )
+      .populate("instructor", "username profileImageUrl")
+      .populate("courses", "title thumbnail");
 
     conversationList.push({
       _id: conversation._id,
       instructorId: conversation.instructor._id,
       instructorName: conversation.instructor.username || "Instructor",
       instructorAvatar: conversation.instructor.profileImageUrl,
-      courseId: conversation.course._id,
-      courseTitle: conversation.course.title,
+      courses: conversation.courses.map(c => ({
+        id: c._id,
+        title: c.title,
+        thumbnail: c.thumbnail,
+      })),
       lastMessage: conversation.lastMessage?.content || "",
       lastMessageTime: conversation.lastMessage?.timestamp || conversation.updatedAt,
       unreadCount: conversation.studentUnread || 0,
@@ -61,7 +66,7 @@ export const getConversations = async userId => {
     });
   }
 
-  // sort by latest message time descending
+  // sort by latest message time
   conversationList.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
 
   return conversationList;
@@ -73,19 +78,11 @@ export const getOrCreateConversation = async (
   instructorId,
   courseId
 ) => {
-  let conversation = await Conversation.findOne({
-    student: studentId,
-    instructor: instructorId,
-    course: courseId,
-  });
-
-  if (!conversation) {
-    conversation = await Conversation.create({
-      student: studentId,
-      instructor: instructorId,
-      course: courseId,
-    });
-  }
+  const conversation = await Conversation.findOneAndUpdate(
+    { student: studentId, instructor: instructorId },
+    { $addToSet: { courses: courseId } },
+    { upsert: true, new: true }
+  );
 
   return conversation;
 };

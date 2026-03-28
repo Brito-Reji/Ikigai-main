@@ -68,7 +68,9 @@ const ConversationList = ({ conversations, selectedConversationId, onSelectConve
 									</span>
 								</div>
 								<p className="text-xs text-gray-500 truncate">
-									{conversation.courseTitle}
+									{conversation.courses?.length > 1 
+										? `${conversation.courses.length} Courses: ${conversation.courses.map(c => c.title).join(', ')}`
+										: conversation.courses?.[0]?.title || 'No courses'}
 								</p>
 								<div className="flex items-center justify-between mt-1">
 									<p className="text-sm text-gray-600 truncate flex-1">

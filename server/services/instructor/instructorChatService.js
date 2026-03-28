@@ -8,18 +8,21 @@ import { Enrollment } from "../../models/Enrollment.js";
 export const getConversations = async instructorId => {
   const conversations = await Conversation.find({ instructor: instructorId })
     .populate("student", "firstName lastName profileImageUrl username")
-    .populate("course", "title thumbnail")
+    .populate("courses", "title thumbnail")
     .sort({ updatedAt: -1 });
 
   return conversations
-    .filter(conv => conv.student && conv.course)
+    .filter(conv => conv.student)
     .map(conv => ({
       _id: conv._id,
       studentId: conv.student._id,
       studentName: conv.student.username || `${conv.student.firstName} ${conv.student.lastName}`.trim() || "Student",
       studentAvatar: conv.student.profileImageUrl || null,
-      courseId: conv.course._id,
-      courseTitle: conv.course.title,
+      courses: conv.courses.map(c => ({
+        id: c._id,
+        title: c.title,
+        thumbnail: c.thumbnail,
+      })),
       lastMessage: conv.lastMessage?.content || "",
       lastMessageTime: conv.lastMessage?.timestamp || conv.updatedAt,
       unreadCount: conv.instructorUnread,

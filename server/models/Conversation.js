@@ -14,12 +14,13 @@ const conversationSchema = new mongoose.Schema(
       ref: "Instructor",
       required: true,
     },
-    // course this conversation is about
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
-    },
+    // courses this conversation is about
+    courses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
     lastMessage: {
       content: String,
       sender: mongoose.Schema.Types.ObjectId,
@@ -42,9 +43,9 @@ const conversationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// unique conversation per student-instructor-course combo
+// unique conversation per student-instructor pair
 conversationSchema.index(
-  { student: 1, instructor: 1, course: 1 },
+  { student: 1, instructor: 1 },
   { unique: true }
 );
 

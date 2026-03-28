@@ -170,7 +170,11 @@ const InstructorChatPage = () => {
 													<h3 className="font-medium text-gray-900 truncate text-sm">{conv.studentName}</h3>
 													<span className="text-xs text-gray-500 ml-2">{formatTime(conv.lastMessageTime)}</span>
 												</div>
-												<p className="text-xs text-gray-500 truncate">{conv.courseTitle}</p>
+												<p className="text-xs text-gray-500 truncate">
+													{conv.courses?.length > 1 
+														? `${conv.courses.length} Courses: ${conv.courses.map(c => c.title).join(', ')}`
+														: conv.courses?.[0]?.title || 'No courses'}
+												</p>
 												<div className="flex items-center justify-between mt-1">
 													<p className="text-sm text-gray-600 truncate">{conv.lastMessage || 'No messages'}</p>
 													{conv.unreadCount > 0 && (

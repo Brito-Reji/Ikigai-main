@@ -67,7 +67,7 @@ const ChatWindow = ({ conversation }) => {
 			<div className="flex-shrink-0">
 				<ChatHeader
 					instructor={instructor}
-					courseTitle={conversation.courseTitle}
+					courses={conversation.courses}
 					isOnline={conversation.isOnline}
 				/>
 			</div>

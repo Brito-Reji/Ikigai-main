@@ -62,7 +62,11 @@ const InstructorChatWindow = ({ conversation }) => {
 							<h3 className="font-semibold text-gray-900 text-sm">
 								{conversation.studentName}
 							</h3>
-							<p className="text-xs text-gray-500">{conversation.courseTitle}</p>
+							<p className="text-xs text-gray-500" title={conversation.courses?.map(c => c.title).join(', ')}>
+								{conversation.courses?.length > 1 
+									? `${conversation.courses.length} Courses: ${conversation.courses.map(c => c.title).join(', ')}`
+									: conversation.courses?.[0]?.title || 'No courses'}
+							</p>
 						</div>
 					</div>
 					<button className="p-2 hover:bg-gray-100 rounded-full">

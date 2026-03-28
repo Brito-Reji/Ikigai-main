@@ -1,7 +1,11 @@
 import React from 'react';
 import { MoreVertical, Phone, Video } from 'lucide-react';
 
-const ChatHeader = ({ instructor, courseTitle, isOnline }) => {
+const ChatHeader = ({ instructor, courses, isOnline }) => {
+	const courseText = courses?.length > 1 
+		? `${courses.length} Courses: ${courses.map(c => c.title).join(', ')}`
+		: courses?.[0]?.title || 'No courses';
+
 	return (
 		<div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
 			<div className="flex items-center gap-3 flex-1 min-w-0">
@@ -20,8 +24,8 @@ const ChatHeader = ({ instructor, courseTitle, isOnline }) => {
 					<h3 className="font-semibold text-gray-900 truncate">
 						{instructor.name}
 					</h3>
-					<p className="text-xs text-gray-500 truncate">
-						{courseTitle}
+					<p className="text-xs text-gray-500 truncate" title={courseText}>
+						{courseText}
 					</p>
 				</div>
 			</div>
