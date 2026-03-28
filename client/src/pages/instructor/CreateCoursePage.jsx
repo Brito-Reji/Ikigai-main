@@ -77,6 +77,7 @@ export default function CreateCoursePage() {
     if (formData.overview.length > 1000) newErrors.overview = "Overview is too long (max 1000 characters)";
     if (!formData.actualPrice) newErrors.actualPrice = "Please enter the price";
     if (formData.actualPrice < 0) newErrors.actualPrice = "Price must be a positive number";
+    if (formData.actualPrice > 50000) newErrors.actualPrice = "Price cannot exceed 50,000";
     if (formData.discountType !== "none" && !formData.discountValue) {
       newErrors.discountValue = "Please enter discount amount";
     }

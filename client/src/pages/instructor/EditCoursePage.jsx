@@ -113,6 +113,7 @@ const EditCoursePage = () => {
     if (formData.overview && formData.overview.length > 1000) newErrors.overview = "Overview cannot exceed 1000 characters";
     if (!formData.actualPrice || formData.actualPrice === "") newErrors.actualPrice = "Actual price is required";
     if (formData.actualPrice && parseFloat(formData.actualPrice) < 0) newErrors.actualPrice = "Actual price cannot be negative";
+    if (formData.actualPrice && parseFloat(formData.actualPrice) > 50000) newErrors.actualPrice = "Actual price cannot exceed 50,000";
     if (formData.discountType !== "none" && (!formData.discountValue || formData.discountValue === "")) {
       newErrors.discountValue = "Discount value is required";
     }

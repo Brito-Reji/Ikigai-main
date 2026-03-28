@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Flag, User, BookOpen, Calendar, MessageSquare, Ban } from "lucide-react";
 import adminApi from "@/api/adminAxiosConfig";
 import toast from "react-hot-toast";
@@ -36,6 +36,7 @@ const ReportDetail = () => {
     });
 
     const report = data?.data;
+    console.log("course report", report);
 
     const updateStatus = useMutation({
         mutationFn: async ({ status, blockCourse }) => {
@@ -91,6 +92,7 @@ const ReportDetail = () => {
 
             <div className="space-y-4">
                 {/* course info */}
+                <Link to={report.courseId ? `/admin/courses/${report.courseId._id}` : "#"} className="block">
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
                     <div className="flex items-center gap-2 mb-3">
                         <BookOpen className="w-4 h-4 text-gray-400" />
@@ -112,7 +114,7 @@ const ReportDetail = () => {
                         <p className="text-gray-500 text-sm">Course has been deleted</p>
                     )}
                 </div>
-
+</Link>
                 {/* reporter info */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
                     <div className="flex items-center gap-2 mb-3">

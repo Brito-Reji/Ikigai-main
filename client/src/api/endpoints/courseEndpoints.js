@@ -7,6 +7,7 @@ export const courseEndpoints = {
     applyVerification: courseId =>
       `/instructor/courses/${courseId}/apply-verification`,
     togglePublish: courseId => `/instructor/courses/${courseId}/toggle-publish`,
+    delete: courseId => `/instructor/courses/${courseId}`,
   },
 
   public: {

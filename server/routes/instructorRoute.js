@@ -6,6 +6,7 @@ import {
   getCourseById,
   applyForVerification,
   togglePublish,
+  deleteCourse,
 } from "../controllers/instructor/courseController.js";
 import {
   getCourseChapters,
@@ -66,6 +67,7 @@ router.get("/courses/:courseId", getCourseById);
 router.put("/courses/:courseId", updateCourse);
 router.post("/courses/:courseId/apply-verification", applyForVerification);
 router.patch("/courses/:courseId/toggle-publish", togglePublish);
+router.delete("/courses/:courseId", deleteCourse);
 
 // Chapter routes
 router.get("/courses/:courseId/chapters", getCourseChapters);

@@ -4,6 +4,7 @@ import {
   createCourseService,
   updateCourseService,
   getCourseByIdService,
+  deleteCourseByInstructorService,
 } from "../../services/instructor/courseService.js";
 import { Course } from "../../models/Course.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
@@ -155,5 +156,18 @@ export const togglePublish = asyncHandler(async (req, res) => {
       ? "Course published successfully"
       : "Course unpublished",
     data: course,
+  });
+});
+// DELETE COURSE
+export const deleteCourse = asyncHandler(async (req, res) => {
+  const instructorId = req.user._id;
+  const { courseId } = req.params;
+
+  await deleteCourseByInstructorService(courseId, instructorId);
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "COURSE DELETED SUCCESSFULLY",
+    data: {},
   });
 });

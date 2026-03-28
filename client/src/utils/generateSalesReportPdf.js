@@ -121,7 +121,7 @@ const generateSalesReportPdf = ({
     ];
     const monthlyBody = monthlyData.map((m, i) => [
       monthNames[m.month ? m.month - 1 : i] || monthNames[i],
-      `₹${formatCurrency(m.revenue)}`,
+      `Rs. ${formatCurrency(m.revenue)}`,
       `${m.transactions || m.orders || 0}`,
     ]);
 
@@ -152,7 +152,7 @@ const generateSalesReportPdf = ({
   // course revenue table (instructor) or orders table (admin)
   if (mode === "instructor" && courses.length > 0) {
     checkPageBreak(doc, y, 40);
-    y = doc.lastAutoTable?.finalY ? y : y;
+    y = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 12 : y;
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -163,9 +163,9 @@ const generateSalesReportPdf = ({
     const courseBody = courses.map(c => [
       c.title || "Untitled",
       `${c.salesCount || 0}`,
-      `₹${formatCurrency(c.totalRevenue)}`,
-      `₹${formatCurrency(c.heldAmount)}`,
-      `₹${formatCurrency(c.releasedAmount)}`,
+      `Rs. ${formatCurrency(c.totalRevenue)}`,
+      `Rs. ${formatCurrency(c.heldAmount)}`,
+      `Rs. ${formatCurrency(c.releasedAmount)}`,
     ]);
 
     doc.autoTable({
@@ -208,7 +208,7 @@ const generateSalesReportPdf = ({
         `${o.userId?.firstName || ""} ${o.userId?.lastName || ""}`.trim() ||
           "-",
         `${o.courseIds?.length || 0}`,
-        `₹${formatCurrency((o.originalAmount || o.amount) / 100)}`,
+        `Rs. ${formatCurrency((o.originalAmount || o.amount) / 100)}`,
         o.status,
         formatShortDate(o.createdAt),
       ]);
@@ -264,7 +264,7 @@ const generateSalesReportPdf = ({
 const getAdminStats = s => [
   {
     label: "Total Revenue",
-    value: `₹${formatCurrency((s.totalRevenue || 0) / 100)}`,
+    value: `Rs. ${formatCurrency((s.totalRevenue || 0) / 100)}`,
     color: GREEN,
   },
   { label: "Total Orders", value: `${s.totalOrders || 0}`, color: INDIGO },
@@ -282,22 +282,22 @@ const getAdminStats = s => [
 const getInstructorStats = s => [
   {
     label: "Total Revenue",
-    value: `₹${formatCurrency(s.totalRevenue || 0)}`,
+    value: `Rs. ${formatCurrency(s.totalRevenue || 0)}`,
     color: GREEN,
   },
   {
     label: "Held Funds",
-    value: `₹${formatCurrency(s.heldFunds || 0)}`,
+    value: `Rs. ${formatCurrency(s.heldFunds || 0)}`,
     color: YELLOW,
   },
   {
     label: "Released Funds",
-    value: `₹${formatCurrency(s.releasedFunds || 0)}`,
+    value: `Rs. ${formatCurrency(s.releasedFunds || 0)}`,
     color: GREEN,
   },
   {
     label: "Refunded",
-    value: `₹${formatCurrency(s.refundedAmount || 0)}`,
+    value: `Rs. ${formatCurrency(s.refundedAmount || 0)}`,
     color: RED,
   },
   {

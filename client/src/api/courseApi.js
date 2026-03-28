@@ -44,6 +44,12 @@ export const courseApi = {
       );
       return data;
     },
+    deleteCourse: async courseId => {
+      const { data } = await instructorApi.delete(
+        courseEndpoints.instructor.delete(courseId)
+      );
+      return data;
+    },
   },
 
   student: {

@@ -53,6 +53,7 @@ const courseSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Actual price is required"],
     min: [0, "Actual price cannot be negative"],
+    max: [50000, "Actual price cannot exceed 50000"],
   },
 
   discountType: {
@@ -71,6 +72,7 @@ const courseSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Final price is required"],
     min: [0, "Price cannot be negative"],
+    max: [5000000, "Price cannot exceed 5000000"],
   },
 
   published: {

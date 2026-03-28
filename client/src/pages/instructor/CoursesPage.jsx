@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Plus, Search, Filter, Grid, List, MoreVertical, Edit, Trash2, Eye, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CourseCard from "@/components/instructor/CourseCard.jsx";
-import { useInstructorCourses } from "@/hooks/useCourses.js";
+import { useInstructorCourses, useDeleteCourse } from "@/hooks/useCourses.js";
+import Swal from "sweetalert2";
 
 export default function CoursesPage() {
   const navigate = useNavigate();
@@ -46,8 +47,42 @@ export default function CoursesPage() {
     navigate("/instructor/courses/create");
   };
 
+  const deleteMutation = useDeleteCourse();
+
   const handleViewCourse = (courseId) => {
     navigate(`/instructor/courses/${courseId}`);
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this! (Only courses with no students can be deleted)",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteMutation.mutateAsync(courseId);
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Your course has been deleted.",
+          confirmButtonColor: "#4f46e5",
+          timer: 2000,
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: error.response?.data?.message || "Failed to delete course",
+          confirmButtonColor: "#ef4444",
+        });
+      }
+    }
   };
 
   return (
@@ -213,7 +248,15 @@ export default function CoursesPage() {
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-2 hover:bg-red-50 rounded" title="Delete Course">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCourse(course.id);
+                        }}
+                        className="p-2 hover:bg-red-50 rounded"
+                        disabled={deleteMutation.isPending}
+                        title="Delete Course"
+                      >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
                     </div>
@@ -292,7 +335,11 @@ export default function CoursesPage() {
                         >
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+                        <button
+                          onClick={() => handleDeleteCourse(course.id)}
+                          disabled={deleteMutation.isPending}
+                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                        >
                           Delete
                         </button>
                       </td>

@@ -70,6 +70,17 @@ export const useTogglePublish = () => {
   });
 };
 
+export const useDeleteCourse = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: courseApi.instructor.deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["instructor-courses"] });
+    },
+  });
+};
+
 // Student hooks
 export const useStudentCourses = params => {
   return useQuery({

@@ -1,5 +1,7 @@
-
 import { Course } from "../../models/Course.js";
+import { Chapter } from "../../models/Chapter.js";
+import { Lesson } from "../../models/Lesson.js";
+import { Enrollment } from "../../models/Enrollment.js";
 
 // GET ALL COURSES BY INSTRUCTOR
 export const getAllCourseByInstructorService = async (instructorId) => {
@@ -48,6 +50,10 @@ export const validateCourseInput = async (data) => {
     const numericActualPrice = parseFloat(actualPrice);
     if (isNaN(numericActualPrice) || numericActualPrice < 0) {
         throw new Error("Actual price must be a valid positive number");
+    }
+
+    if (numericActualPrice > 50000) {
+        throw new Error("Actual price cannot exceed 50,000");
     }
 
     const validTypes = ["percentage", "fixed", "none"];
@@ -174,4 +180,39 @@ export const getCourseByIdService = async (courseId, instructorId) => {
        ...course.toObject(),
         price: (course.price / 100).toFixed(2),
     };
+};
+
+// DELETE COURSE BY INSTRUCTOR (Hard delete if no enrollments)
+export const deleteCourseByInstructorService = async (courseId, instructorId) => {
+    const course = await Course.findById(courseId);
+    if (!course) throw new Error("Course not found");
+
+    if (course.instructor.toString() !== instructorId.toString()) {
+        throw new Error("You can only delete your own courses");
+    }
+
+    // Check if any active or completed enrollments exist
+    const enrollmentsCount = await Enrollment.countDocuments({
+        course: courseId,
+        status: { $in: ["active", "completed"] },
+    });
+
+    if (enrollmentsCount > 0) {
+        throw new Error("Cannot delete course with active or completed enrollments.");
+    }
+
+    // Perform hard delete and cleanup
+    const chapters = await Chapter.find({ course: courseId }).select("_id");
+    const chapterIds = chapters.map((c) => c._id);
+
+    // 1. Delete all lessons in those chapters
+    await Lesson.deleteMany({ chapter: { $in: chapterIds } });
+
+    // 2. Delete all chapters
+    await Chapter.deleteMany({ course: courseId });
+
+    // 3. Delete the course itself
+    await Course.findByIdAndDelete(courseId);
+
+    return { message: "Course deleted successfully" };
 };
