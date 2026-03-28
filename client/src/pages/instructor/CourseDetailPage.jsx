@@ -18,7 +18,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useInstructorCourse, useApplyVerification, useTogglePublish } from "@/hooks/useCourses.js";
+import { useInstructorCourse, useApplyVerification, useTogglePublish, useDeleteCourse } from "@/hooks/useCourses.js";
 import ChapterManager from "@/components/instructor/ChapterManager.jsx";
 import Swal from "sweetalert2";
 
@@ -28,6 +28,7 @@ export default function CourseDetailPage() {
   const { data: courseData, isLoading: courseLoading } = useInstructorCourse(courseId);
   const applyVerificationMutation = useApplyVerification();
   const togglePublishMutation = useTogglePublish();
+  const deleteMutation = useDeleteCourse();
 
   const handleApplyForVerification = async () => {
     const result = await Swal.fire({
@@ -94,6 +95,41 @@ export default function CourseDetailPage() {
           title: "Oops!",
           text: error.response?.data?.message || "Something went wrong",
           confirmButtonColor: "#ef4444"
+        });
+      }
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this! (Only courses with no students can be deleted)",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteMutation.mutateAsync(courseId);
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Your course has been deleted.",
+          confirmButtonColor: "#4f46e5",
+          timer: 2000,
+        }).then(() => {
+          navigate("/instructor/courses");
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: error.response?.data?.message || "Failed to delete course",
+          confirmButtonColor: "#ef4444",
         });
       }
     }
@@ -404,8 +440,12 @@ export default function CourseDetailPage() {
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition">
                   View Reviews
                 </button>
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg transition">
-                  Delete Course
+                <button 
+                  onClick={handleDeleteCourse}
+                  disabled={deleteMutation.isPending}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                  >
+                  {deleteMutation.isPending ? "Deleting..." : "Delete Course"}
                 </button>
               </div>
             </div>
