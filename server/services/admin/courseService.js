@@ -7,6 +7,7 @@ import { Payment } from "../../models/Payment.js";
 import { Order } from "../../models/Order.js";
 import { creditWallet } from "../student/walletService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { Instructor } from "../../models/Instructor.js";
 
 // Get all courses
 export const getAllCoursesService = async (filters) => {
@@ -279,19 +280,16 @@ export const deleteCourseService = async (courseId, reason) => {
         await Notification.insertMany(studentNotifications);
     }
 
-    // notify instructor
+    // block the instructor once the course is deleted
     if (course.instructor?._id) {
-        await Notification.create({
-            userId: course.instructor._id,
-            userType: "instructor",
-            type: "course_deleted",
-            title: "Your course has been deleted",
-            message: `Your course "${course.title}" has been permanently deleted. Reason: ${reason.trim()}`,
-            courseId: course._id,
-        });
+    const instructor = await Instructor.findById(course.instructor._id)
+    instructor.isBlocked = true;
+    instructor.blockedReason = reason;
+    await instructor.save();
     }
 
     course.deleted = true;
+    
     await course.save();
 
     return course;

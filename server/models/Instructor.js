@@ -78,6 +78,10 @@ const instructorSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    blockedReason: {
+      type: String,
+      default: "",
+    },
     refreshToken: String,
   },
   {
