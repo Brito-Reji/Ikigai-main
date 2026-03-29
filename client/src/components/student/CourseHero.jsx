@@ -72,7 +72,7 @@ const CourseHero = ({ course }) => {
             </h1>
 
             <p className="text-xl text-blue-100 mb-6 leading-relaxed">
-              {course.description}
+              {course.overview}
             </p>
 
             {/* Course Stats */}

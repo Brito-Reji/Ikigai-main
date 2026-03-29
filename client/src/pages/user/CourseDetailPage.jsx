@@ -144,7 +144,8 @@ const CourseDetailPage = () => {
                     About This Course
                   </h2>
                   <p className="text-gray-700 leading-relaxed mb-6">
-                    {publicCourseDetails.overview}
+                   
+                    {publicCourseDetails.description}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
