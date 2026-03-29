@@ -152,7 +152,16 @@ export const studentGoogleAuthService = async token => {
   const [firstName, ...lastNameArr] = name.split(" ");
   const lastName = lastNameArr.join(" ");
 
+  const isInstructor = await Instructor.findOne({ email });
+  if (isInstructor) {
+    throw {
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: "This user is registered as instructor use another email",
+    };
+  }
+
   let user = await User.findOne({ email });
+  
 
   if (user) {
     if (user.isBlocked) {
