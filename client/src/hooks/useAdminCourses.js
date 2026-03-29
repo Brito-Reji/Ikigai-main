@@ -59,11 +59,10 @@ export const useToggleCourseBlock = () => {
 
     return useMutation({
         mutationFn: courseApi.admin.toggleBlock,
-        onSuccess: (_,courseId) => {
-        
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['admin-courses'] })
             queryClient.invalidateQueries({
-              queryKey: ["admin-course", courseId],
+              queryKey: ["admin-course", variables.courseId],
             });
             queryClient.invalidateQueries({ queryKey: ['admin-course-statistics'] })
         },
@@ -75,8 +74,9 @@ export const useDeleteAdminCourse = () => {
 
     return useMutation({
         mutationFn: courseApi.admin.deleteCourse,
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['admin-courses'] })
+            queryClient.invalidateQueries({ queryKey: ['admin-course', variables.courseId] })
             queryClient.invalidateQueries({ queryKey: ['admin-course-statistics'] })
         },
     })

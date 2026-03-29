@@ -303,6 +303,41 @@ const CourseDetail = () => {
         </div>
       )}
 
+      {/* Reject Reason Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Reject Course</h3>
+            <p className="text-sm text-gray-500 mb-4">Please provide a reason for rejection. This will be sent to the instructor.</p>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 mb-4"
+              rows="3"
+              placeholder="Enter rejection reason..."
+            />
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason('');
+                }} 
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleVerificationUpdate('rejected')}
+                disabled={!rejectionReason.trim() || updateVerificationMutation.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {updateVerificationMutation.isPending ? 'Rejecting...' : 'Reject Course'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Video Preview Modal */}
       {selectedVideo && (
         <AdminVideoPreview

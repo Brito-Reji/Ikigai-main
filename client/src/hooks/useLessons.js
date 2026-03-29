@@ -17,6 +17,8 @@ export const useCreateLesson = () => {
         mutationFn: lessonApi.instructor.createLesson,
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', variables.courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }
@@ -28,6 +30,8 @@ export const useUpdateLesson = () => {
         mutationFn: lessonApi.instructor.updateLesson,
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', variables.courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }
@@ -39,6 +43,8 @@ export const useDeleteLesson = () => {
         mutationFn: lessonApi.instructor.deleteLesson,
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['instructor-lessons', variables.courseId, variables.chapterId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-course', variables.courseId] })
+            queryClient.invalidateQueries({ queryKey: ['instructor-courses'] })
         },
     })
 }

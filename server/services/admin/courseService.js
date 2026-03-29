@@ -377,6 +377,8 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
 
     await course.save();
 
+
+
     const updatedCourse = await Course.findById(courseId)
         .populate("category", "name")
         .populate("instructor", "firstName lastName email");

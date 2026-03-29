@@ -2,12 +2,18 @@ import { Lesson } from "../../models/Lesson.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Course } from "../../models/Course.js";
 
-// reset course to pending when new video is added
-const resetCourseVerification = async (chapterId) => {
+/**
+ * If the course was already admin-approved, changing curriculum/video means it is no longer
+ * in that verified state — but we do NOT auto-submit to the admin queue ("inprocess").
+ * The instructor must click "Apply for verification" again when ready.
+ */
+const markVerifiedCourseNeedsNewApplication = async (chapterId) => {
   const chapter = await Chapter.findById(chapterId);
   if (!chapter) return;
+  const course = await Course.findById(chapter.course);
+  if (!course || course.verificationStatus !== "verified") return;
   await Course.findByIdAndUpdate(chapter.course, {
-    verificationStatus: "inprocess",
+    verificationStatus: "pending",
     published: false,
     rejectionReason: null,
   });
@@ -53,9 +59,9 @@ export const createLessonService = async (chapterId, courseId, lessonData) => {
     resources: lessonData.resources || [],
   });
 
-  // new video uploaded — course needs re-verification
+  // New video after the course was verified — must re-apply manually; do not auto-queue admin review.
   if (lessonData.videoUrl) {
-    await resetCourseVerification(chapterId);
+    await markVerifiedCourseNeedsNewApplication(chapterId);
   }
 
   return lesson;
@@ -64,7 +70,7 @@ export const createLessonService = async (chapterId, courseId, lessonData) => {
 // Update lesson
 export const updateLessonService = async (lessonId, chapterId, courseId, updateData) => {
   await verifyChapter(chapterId, courseId);
-  let course = await Course.find({_id:courseId})
+  const course = await Course.findById(courseId);
 
   const existing = await Lesson.findOne({ _id: lessonId, chapter: chapterId });
 
@@ -84,9 +90,8 @@ export const updateLessonService = async (lessonId, chapterId, courseId, updateD
     { new: true, runValidators: true }
   );
 
-  // new video URL added — course needs re-verification
-  if (videoChanged && course.verificationStatus === "verified") {
-    await resetCourseVerification(chapterId);
+  if (videoChanged && course?.verificationStatus === "verified") {
+    await markVerifiedCourseNeedsNewApplication(chapterId);
   }
 
   return lesson;
