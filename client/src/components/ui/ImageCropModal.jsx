@@ -24,11 +24,14 @@ const ImageCropModal = ({ image, onCropComplete, onClose, aspectRatio = 16 / 9 }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-      <div className="bg-white rounded-lg w-full max-w-4xl mx-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold">Crop Image</h3>
+        <div className="flex items-center justify-between p-4 border-b bg-white">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Crop Thumbnail</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Adjust to fit the frame (recommended 16:9)</p>
+          </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -38,7 +41,8 @@ const ImageCropModal = ({ image, onCropComplete, onClose, aspectRatio = 16 / 9 }
         </div>
 
         {/* Cropper */}
-        <div className="relative h-96 bg-gray-900">
+        <div className="p-4">
+          <div className="relative w-full bg-gray-900 rounded-xl overflow-hidden aspect-video max-h-[65vh]">
           <Cropper
             image={image}
             crop={crop}
@@ -47,15 +51,19 @@ const ImageCropModal = ({ image, onCropComplete, onClose, aspectRatio = 16 / 9 }
             onCropChange={onCropChange}
             onZoomChange={onZoomChange}
             onCropComplete={onCropCompleteCallback}
+            showGrid={true}
+            restrictPosition={true}
           />
+          </div>
         </div>
 
         {/* Controls */}
-        <div className="p-4 space-y-4">
+        <div className="px-4 pb-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Zoom
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">Zoom</label>
+              <span className="text-xs text-gray-500">{zoom.toFixed(1)}x</span>
+            </div>
             <input
               type="range"
               min={1}

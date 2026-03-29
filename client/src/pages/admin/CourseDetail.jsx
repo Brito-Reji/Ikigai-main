@@ -250,7 +250,7 @@ const CourseDetail = () => {
 
       {/* Block Reason Modal */}
       {showBlockModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Block Course</h3>
             <p className="text-sm text-gray-500 mb-4">This reason will be shown to the instructor.</p>
@@ -277,7 +277,7 @@ const CourseDetail = () => {
 
       {/* Delete Reason Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Delete Course</h3>
             <p className="text-sm text-gray-500 mb-1">This action is permanent. All enrolled students will receive a wallet refund.</p>
@@ -591,7 +591,7 @@ function AdminVideoPreview({ lesson, onClose }) {
   }, [lesson.videoUrl]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-lg p-4 max-w-4xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">{lesson.title}</h3>

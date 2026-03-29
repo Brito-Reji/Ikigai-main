@@ -22,6 +22,8 @@ const ImageUpload = ({
   const [showCropModal, setShowCropModal] = useState(false);
   const [originalImage, setOriginalImage] = useState(null);
 
+  const isThumbnail = Math.abs(aspectRatio - 16 / 9) < 0.001;
+
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -152,19 +154,28 @@ const ImageUpload = ({
             <p className="text-xs text-gray-500">
               PNG, JPG, WEBP up to {maxSize}MB
             </p>
+            {isThumbnail && (
+              <p className="text-xs text-gray-400 mt-2">
+                Recommended: 1280×720 (16:9)
+              </p>
+            )}
           </label>
         ) : (
           <div className="relative">
-            <img
-              src={preview}
-              alt="Preview"
-              className="max-h-48 mx-auto rounded-lg"
-            />
+            <div className="mx-auto w-full max-w-xl">
+              <div className={isThumbnail ? "relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden" : "relative w-full bg-gray-100 rounded-xl overflow-hidden"}>
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+            </div>
             {!uploading && (
               <button
                 type="button"
                 onClick={handleRemove}
-                className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md"
               >
                 <X className="w-4 h-4" />
               </button>

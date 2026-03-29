@@ -461,7 +461,7 @@ const AdminOrdersPage = () => {
 
       {/* Report Filter Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-teal-950/20 backdrop-blur-md p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
             {/* modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b bg-indigo-50">
