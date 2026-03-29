@@ -8,8 +8,7 @@ const courseSchema = new mongoose.Schema({
     trim: true,
   },
 
-  // COURSE STATUS FIELDS
-  // Status flow: pending (draft) -> inprocess (published, awaiting approval) -> verified (approved) / rejected
+
   verificationStatus: {
     type: String,
     enum: ["pending", "inprocess", "verified", "rejected"],
