@@ -108,38 +108,48 @@ export const getRoomMessages = async (roomId, page = 1, limit = 50) => {
 
 // get room participants
 export const getRoomParticipants = async roomId => {
-  const room = await CourseRoom.findById(roomId);
+  const room = await CourseRoom.findById(roomId).populate({
+    path: "course",
+    select: "instructor",
+    populate: {
+      path: "instructor",
+      select: "username profileImageUrl",
+    },
+  });
+
   if (!room) return [];
 
-  const course = await Course.findById(room.course).populate(
-    "instructor",
-    "firstName lastName avatar"
-  );
+  // add AI as default mention
+  const participants = [
+    {
+      id: "ai-assistant",
+      name: "AI",
+      avatar: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+      type: "ai",
+    },
+  ];
 
-  const participants = [];
-
-  // add instructor
-  if (course?.instructor) {
+  if (room.course?.instructor) {
     participants.push({
-      id: course.instructor._id,
-      name: `${course.instructor.firstName} ${course.instructor.lastName}`,
-      avatar: course.instructor.avatar,
+      id: room.course.instructor._id,
+      name: room.course.instructor.username || "Instructor",
+      avatar: room.course.instructor.profileImageUrl,
       type: "instructor",
     });
   }
 
   // get enrolled students
   const enrollments = await Enrollment.find({
-    course: room.course,
+    course: room.course._id,
     status: "active",
-  }).populate("user", "firstName lastName avatar");
+  }).populate("user", "username profileImageUrl");
 
   for (const enrollment of enrollments) {
     if (enrollment.user) {
       participants.push({
         id: enrollment.user._id,
-        name: `${enrollment.user.firstName} ${enrollment.user.lastName}`,
-        avatar: enrollment.user.avatar,
+        name: enrollment.user.username || "User",
+        avatar: enrollment.user.profileImageUrl,
         type: "student",
       });
     }

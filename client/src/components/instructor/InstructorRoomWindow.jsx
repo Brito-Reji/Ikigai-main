@@ -34,11 +34,19 @@ const InstructorRoomWindow = ({ room }) => {
 
 	// render message with mentions highlighted
 	const renderMessage = (content) => {
-		const parts = content.split(/(@\w+(?:\s\w+)?)/g);
+		const parts = content.split(/(@[\w\s]+?(?=\s@|$|\s\W|$))/g);
 		return parts.map((part, i) => {
 			if (part.startsWith('@')) {
+				const isAI = part.toLowerCase().includes('ai');
 				return (
-					<span key={i} className="text-blue-600 font-medium bg-blue-50 px-1 rounded">
+					<span 
+						key={i} 
+						className={`font-medium px-1.5 py-0.5 rounded-md ${
+							isAI 
+								? 'text-purple-700 bg-purple-100 border border-purple-200' 
+								: 'text-blue-700 bg-blue-100 border border-blue-200'
+						}`}
+					>
 						{part}
 					</span>
 				);

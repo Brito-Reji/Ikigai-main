@@ -18,7 +18,7 @@ const messageSchema = new mongoose.Schema(
     senderModel: {
       type: String,
       required: true,
-      enum: ["User", "Instructor"],
+      enum: ["User", "Instructor", "AI"],
     },
     senderName: {
       type: String,
@@ -34,26 +34,24 @@ const messageSchema = new mongoose.Schema(
     },
     mentions: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        refPath: "mentionModels",
+        type: mongoose.Schema.Types.Mixed,
       },
     ],
     mentionModels: [
       {
         type: String,
-        enum: ["User", "Instructor"],
+        enum: ["User", "Instructor", "AI"],
       },
     ],
     readBy: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        refPath: "readByModels",
+        type: mongoose.Schema.Types.Mixed,
       },
     ],
     readByModels: [
       {
         type: String,
-        enum: ["User", "Instructor"],
+        enum: ["User", "Instructor", "AI"],
       },
     ],
     messageType: {

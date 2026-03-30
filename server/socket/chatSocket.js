@@ -173,7 +173,13 @@ export const initChatSocket = io => {
           senderAvatar: socket.userAvatar,
           content,
           mentions,
-          mentionModels: mentions.map(() => "User"),
+          mentionModels: mentions.map(m => {
+            if (m === "ai-assistant") return "AI";
+            // default to User/Instructor based on socket role if not specified
+            // but since we don't know the mentioned user's role here easily, 
+            // we'll just allow Mixed types in the model and maybe simplify this.
+            return "User"; 
+          }),
         });
 
         // update room

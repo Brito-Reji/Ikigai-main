@@ -152,10 +152,10 @@ console.log(participants);
 	const renderMessagePreview = () => {
 		if (!message) return null;
 		
-		const parts = message.split(/(@\w+(?:\s\w+)?)/g);
+		const parts = message.split(/(@[\w\s]+?(?=\s@|$|\s\W|$))/g);
 		return parts.map((part, i) => {
 			if (part.startsWith('@')) {
-				const name = part.slice(1);
+				const name = part.slice(1).trim();
 				const isValid = participants.some(p => 
 					p.name.toLowerCase() === name.toLowerCase()
 				);
@@ -190,17 +190,29 @@ console.log(participants);
 								index === selectedIndex ? 'bg-blue-50' : 'hover:bg-gray-50'
 							}`}
 						>
-							<img 
-								src={participant.avatar} 
-								alt={participant.name}
-								className="w-8 h-8 rounded-full object-cover"
-							/>
-							<div className="text-left">
-								<p className="font-medium text-gray-900 text-sm">{participant.name}</p>
+							<div className="relative">
+								<img 
+									src={participant.avatar} 
+									alt={participant.name}
+									className="w-8 h-8 rounded-full object-cover shadow-sm"
+								/>
+								{participant.type === 'ai' && (
+									<div className="absolute -bottom-1 -right-1 bg-purple-500 rounded-full p-0.5 border border-white">
+										<div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+									</div>
+								)}
+							</div>
+							<div className="text-left flex-1">
+								<div className="flex items-center gap-2">
+									<p className="font-medium text-gray-900 text-sm">{participant.name}</p>
+									{participant.type === 'ai' && (
+										<span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 rounded-full font-bold uppercase tracking-wider">AI</span>
+									)}
+								</div>
 								<p className="text-xs text-gray-500 capitalize">{participant.type}</p>
 							</div>
 							{participant.type === 'instructor' && (
-								<span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+								<span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
 									Instructor
 								</span>
 							)}
