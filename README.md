@@ -1,143 +1,246 @@
 # Ikigai - Find Your Purpose Through Learning
 
-
-
 Ikigai is a comprehensive, modern Educational Platform designed to bridge the gap between passionate instructors and eager learners. Built with a robust MERN stack architecture, it offers a seamless experience for multi-role users including Students, Instructors, and Administrators.
+
+---
 
 ## ✨ Features
 
 ### 🎓 For Students
-*   **Course Discovery:** Search, filter, and browse a wide variety of courses across different categories.
-*   **Seamless Learning:** Intuitive video player and curriculum tracking.
-*   **Secure Payments:** Integrated with Razorpay for safe and swift course purchases.
-*   **Real-time Communication:** Chat directly with instructors via integrated Socket.io rooms.
-*   **Progress Tracking:** Track learning progress, earn certificates, and download invoices (PDF).
-*   **Wishlist & Cart:** Save courses for later or purchase multiple at once.
-*   **Notifications:** Real-time bell notifications for course updates and announcements.
+- **Course Discovery:** Search, filter, and browse a wide variety of courses across different categories.
+- **Seamless Learning:** Intuitive video player and curriculum tracking.
+- **Secure Payments:** Integrated with Razorpay for safe and swift course purchases.
+- **Real-time Communication:** Chat directly with instructors via integrated Socket.io rooms.
+- **Progress Tracking:** Track learning progress, earn certificates, and download invoices (PDF).
+- **Wishlist & Cart:** Save courses for later or purchase multiple at once.
+- **Notifications:** Real-time bell notifications for course updates and announcements.
 
 ### 👨‍🏫 For Instructors
-*   **Course Management:** Create, edit, and publish courses with an intuitive builder.
-*   **Curriculum Builder:** Manage chapters and upload video lessons seamlessly (Cloudinary/AWS S3 integration).
-*   **Revenue Dashboard:** Track sales, revenue, and enrollments with interactive charts (Recharts).
-*   **Direct Student Interaction:** Respond to student queries in real-time.
-*   **Course Analytics:** Monitor course performance and reviews.
+- **Course Management:** Create, edit, and publish courses with an intuitive builder.
+- **Curriculum Builder:** Manage chapters and upload video lessons seamlessly (Cloudinary/AWS S3 integration).
+- **Revenue Dashboard:** Track sales, revenue, and enrollments with interactive charts (Recharts).
+- **Direct Student Interaction:** Respond to student queries in real-time.
+- **Course Analytics:** Monitor course performance and reviews.
 
 ### 🛡️ For Administrators
-*   **Comprehensive Dashboard:** Oversee platform metrics, total revenue, and user growth.
-*   **User Management:** Manage students and instructors (block/unblock functionality).
-*   **Course Verification:** Review and approve submitted courses before they go live.
-*   **Category & Coupon Management:** Create and manage course categories and discount coupons.
-*   **Financial Reports:** Generate and download detailed sales reports.
+- **Comprehensive Dashboard:** Oversee platform metrics, total revenue, and user growth.
+- **User Management:** Manage students and instructors (block/unblock functionality).
+- **Course Verification:** Review and approve submitted courses before they go live.
+- **Category & Coupon Management:** Create and manage course categories and discount coupons.
+- **Financial Reports:** Generate and download detailed sales reports.
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-*   **React 19** & **Vite**: Lightning-fast UI development and build tooling.
-*   **Tailwind CSS**: Utility-first CSS framework for beautiful, responsive design.
-*   **Redux Toolkit** & **React Query (@tanstack/react-query)**: State management and server-state caching.
-*   **React Router DOM**: Declarative routing for React.
-*   **Socket.io-client**: Real-time bidirectional event-based communication.
-*   **Axios**: Promise-based HTTP client for the browser.
-*   **Recharts**: Composable charting library for analytic dashboards.
+| Technology | Purpose |
+|---|---|
+| **React 19** & **Vite** | Lightning-fast UI development and build tooling |
+| **Tailwind CSS** | Utility-first CSS framework for responsive design |
+| **Redux Toolkit** & **React Query** | State management and server-state caching |
+| **React Router DOM** | Declarative routing for React |
+| **Socket.io-client** | Real-time bidirectional communication |
+| **Axios** | Promise-based HTTP client |
+| **Recharts** | Composable charting library for analytics |
 
 ### Backend
-*   **Node.js** & **Express.js**: Scalable backend RESTful API architecture.
-*   **MongoDB** & **Mongoose**: NoSQL database and elegant object modeling.
-*   **Socket.IO**: Real-time web socket communication for chats and notifications.
-*   **JWT & Bcrypt**: Secure user authentication and password hashing.
-*   **Razorpay**: Payment gateway integration.
-*   **Cloudinary** & **AWS S3 SDK**: Efficient cloud storage for images and large video course assets.
-*   **Nodemailer**: Email service for OTP verification and notifications.
-*   **Google GenAI**: Integrated AI features to enhance the learning experience.
+| Technology | Purpose |
+|---|---|
+| **Node.js** & **Express.js** | Scalable RESTful API architecture |
+| **MongoDB** & **Mongoose** | NoSQL database and object modeling |
+| **Socket.IO** | Real-time WebSocket communication |
+| **JWT & Bcrypt** | Secure authentication and password hashing |
+| **Razorpay** | Payment gateway integration |
+| **Cloudinary** & **AWS S3 SDK** | Cloud storage for images and video assets |
+|**AWS CloudFront**| Implemented secure video delivery using AWS CloudFront signed URLs
+| **Nodemailer** | Email service for OTP verification |
+| **Google GenAI** | Integrated AI features for enhanced learning |
 
-## 🚀 Getting Started
+---
+
+##  Getting Started
 
 ### Prerequisites
-Make sure you have Node.js and MongoDB installed on your local machine.
+
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [MongoDB](https://www.mongodb.com/) (local or Atlas)
+- [Git](https://git-scm.com/)
 
 ### Installation
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/yourusername/ikigai.git
-    cd ikigai
-    ```
+#### 1. Clone the repository
 
-2.  **Install Application Dependencies**
-    Open two terminal windows/tabs, one for the client and one for the server.
+```bash
+git clone https://github.com/Brito-Rej/ikigai.git
+cd ikigai
+```
 
-    *Backend Setup:*
-    ```bash
-    cd server
-    npm install
-    ```
+#### 2. Set up the Backend
 
-    *Frontend Setup:*
-    ```bash
-    cd client
-    npm install
-    ```
+```bash
+cd server
+npm install
+```
 
-3.  **Environment Variables**
-    Create a `.env` file in both the `client` and `server` directories based on `.env.example`.
+Create a `.env` file inside `server/`:
 
-    *Required Server env variables (example):*
-    ```env
-    PORT=5000
-    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret
-    RAZORPAY_KEY_ID=your_razorpay_id
-    RAZORPAY_KEY_SECRET=your_razorpay_secret
-    CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-    CLOUDINARY_API_KEY=your_cloudinary_key
-    CLOUDINARY_API_SECRET=your_cloudinary_secret
-    # Add AWS and Email config as required
-    ```
+```env
+# Server
+PORT=5000
+NODE_ENV=development
 
-    *Required Client env variables (example):*
-    ```env
-    VITE_API_URL=http://localhost:5000/api
-    VITE_GOOGLE_ID=your_google_oauth_client_id
-    ```
+# MongoDB
+MONGO_URI=your_mongodb_connection_string
 
-4.  **Run the Application**
+# JWT
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
 
-    *Start the server:*
-    ```bash
-    cd server
-    npm run dev
-    ```
+# Razorpay
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 
-    *Start the client:*
-    ```bash
-    cd client
-    npm run dev
-    ```
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-5.  **Access the application**
-    Open [http://localhost:5173](http://localhost:5173) in your browser.
+#Cloudfront
 
-## 📁 Directory Structure
+CF_KEY_PAIR_ID=your_cloudfront_pair_id
+CF_PRIVATE_KEY_PATH=./keys/private_key.pem
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=your_aws_region
+AWS_S3_BUCKET_NAME=your_s3_bucket_name
+
+# Nodemailer
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
+
+# Google GenAI
+GOOGLE_GENAI_API_KEY=your_google_genai_api_key
+
+# Frontend URL (for CORS)
+CLIENT_URL=http://localhost:5173
+```
+
+#### 3. Set up the Frontend
+
+```bash
+cd ../client
+npm install
+```
+
+Create a `.env` file inside `client/`:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+VITE_SOCKET_URL=http://localhost:5000
+```
+
+#### 4. Run the Application
+
+Open two terminals and run both servers.
+
+**Terminal 1 — Backend:**
+```bash
+cd server
+npm run dev
+```
+
+**Terminal 2 — Frontend:**
+```bash
+cd client
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+---
+
+##  Project Structure
+
 ```
 ikigai/
-├── client/          # React + Vite Frontend application
-│   ├── public/      # Static assets
-│   └── src/
-│       ├── api/     # Axios configs & API wrappers
-│       ├── assets/  # Images and icons
-│       ├── components/# Reusable UI components
-│       ├── hooks/   # Custom React hooks
-│       ├── pages/   # Application pages (Admin, Instructor, Student)
-│       └── store/   # Redux store and slices
-└── server/          # Node.js + Express Backend application
-    ├── controllers/ # Route controllers (Logic)
-    ├── models/      # Mongoose Database Models
-    ├── routes/      # Express API Routes
-    └── services/    # Business logic layer
+├── client/                   # React frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/           # Images, icons, static files
+│   │   ├── components/       # Reusable UI components
+│   │   ├── features/         # Redux slices / feature modules
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── pages/            # Route-level page components
+│   │   ├── services/         # Axios API service functions
+│   │   ├── store/            # Redux store configuration
+│   │   └── utils/            # Utility/helper functions
+│   ├── .env
+│   ├── index.html
+│   └── vite.config.js
+│
+├── server/                   # Node.js / Express backend
+│   ├── config/               # DB connection, cloud config
+│   ├── controllers/          # Route handler logic
+│   ├── middlewares/          # Auth, error handling, etc.
+│   ├── models/               # Mongoose schemas
+│   ├── routes/               # Express route definitions
+│   ├── sockets/              # Socket.IO event handlers
+│   ├── utils/                # Helper utilities, email templates
+│   ├── app.js                # Express app setup (middleware, routes)
+│   ├── server.js             # Entry point (HTTP + Socket.IO server)
+│   └── .env
+│
+└── README.md
 ```
 
-## 🤝 Contributing
-This project is a personal portfolio piece designed to showcase my skills and development capabilities. As such, I am **not** currently accepting pull requests or external contributions. However, feel free to fork the repository for your own learning purposes!
+---
+
+##  User Roles
+
+| Role | Description |
+|---|---|
+| **Student** | Browse, purchase, and learn from courses |
+| **Instructor** | Create and manage courses, interact with students |
+| **Admin** | Oversee platform operations, users, and revenue |
+
+---
+
+##  Scripts
+
+### Backend (`server/`)
+| Command | Description |
+|---|---|
+| `npm run dev` | Start server in development mode with nodemon |
+| `npm start` | Start server in production mode |
+
+### Frontend (`client/`)
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview the production build |
+
+---
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+##  Author
+
+**Brito-Reji**  
+GitHub: [@Brito-Reji](https://github.com/Brito-Reji)
+
+---
+
+> *Ikigai (生き甲斐) — Japanese concept meaning "reason for being." Find yours through learning.*
