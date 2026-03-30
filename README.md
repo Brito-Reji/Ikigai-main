@@ -1,6 +1,6 @@
 # Ikigai - Find Your Purpose Through Learning
 
-![Ikigai Banner](client/src/assets/images/logo.png) <!-- Update banner if needed -->
+
 
 Ikigai is a comprehensive, modern Educational Platform designed to bridge the gap between passionate instructors and eager learners. Built with a robust MERN stack architecture, it offers a seamless experience for multi-role users including Students, Instructors, and Administrators.
 
