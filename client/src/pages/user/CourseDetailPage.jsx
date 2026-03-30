@@ -144,14 +144,13 @@ const CourseDetailPage = () => {
                     About This Course
                   </h2>
                   <p className="text-gray-700 leading-relaxed mb-6">
-                   
                     {publicCourseDetails.description}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600 mb-2">
-                        {publicCourseDetails.totalDuration}
+                        {publicCourseDetails.totalDuration.toFixed(2)}
                       </div>
                       <div className="text-sm text-gray-600">
                         Hours of Content
