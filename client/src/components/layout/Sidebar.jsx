@@ -14,6 +14,7 @@ import { useInstructorAuth } from "@/hooks/useRedux.js";
 import { logoutInstructor } from "@/store/slices/instructorAuthSlice.js";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
+import logo from "@/assets/images/logo.png";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -79,8 +80,8 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="p-6 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">I</span>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+            <img src={logo} alt="Ikigai Logo" className="w-full h-full object-cover" />
           </div>
           <span className="text-white font-semibold text-lg">Ikigai</span>
         </div>

@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
 import api from "@/api/adminAxiosConfig.js";
+import logo from "@/assets/images/logo.png";
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -68,14 +69,8 @@ const AdminLayout = () => {
       {/* Sidebar - Fixed */}
       <aside className="w-64 bg-white shadow-lg flex-shrink-0 h-screen sticky top-0 flex flex-col">
         <div className="flex items-center gap-3 p-6 border-b">
-          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-purple-500 rounded-full flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-            </svg>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+            <img src={logo} alt="Ikigai Logo" className="w-full h-full object-cover" />
           </div>
           <span className="text-xl font-semibold text-gray-800">Ikigai</span>
         </div>
