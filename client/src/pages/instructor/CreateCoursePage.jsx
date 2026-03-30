@@ -30,14 +30,15 @@ export default function CreateCoursePage() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+    const updated = { ...formData, [name]: type === "checkbox" ? checked : value };
+
+    // clear discount value when switching off discount
+    if (name === "discountType" && value === "none") {
+      updated.discountValue = "";
     }
+
+    setFormData(updated);
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
 
   const handleThumbnailChange = (url) => {
@@ -47,22 +48,20 @@ export default function CreateCoursePage() {
     }
   };
 
-  // Calculate final price based on discount
+  // Calculate final price
   useEffect(() => {
-    if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
-      let finalPrice = parseFloat(formData.actualPrice);
+    if (!formData.actualPrice) return;
 
-      if (formData.discountType === "percentage") {
-        const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
-        finalPrice = finalPrice - discount;
-      } else if (formData.discountType === "fixed") {
-        finalPrice = finalPrice - parseFloat(formData.discountValue);
-      }
+    let finalPrice = parseFloat(formData.actualPrice);
 
-      setFormData(prev => ({ ...prev, price: Math.round(finalPrice) }));
-    } else if (formData.actualPrice) {
-      setFormData(prev => ({ ...prev, price: Math.round(parseFloat(formData.actualPrice)) }));
+    if (formData.discountType === "percentage" && formData.discountValue) {
+      finalPrice = finalPrice - (finalPrice * parseFloat(formData.discountValue)) / 100;
+    } else if (formData.discountType === "fixed" && formData.discountValue) {
+      finalPrice = finalPrice - parseFloat(formData.discountValue);
     }
+
+    finalPrice = Math.max(0, finalPrice);
+    setFormData(prev => ({ ...prev, price: parseFloat(finalPrice.toFixed(2)) }));
   }, [formData.actualPrice, formData.discountType, formData.discountValue]);
 
   const validateForm = () => {

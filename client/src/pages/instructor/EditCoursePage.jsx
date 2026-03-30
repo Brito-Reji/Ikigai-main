@@ -55,20 +55,18 @@ const EditCoursePage = () => {
 
   // Calculate final price
   useEffect(() => {
-    if (formData.actualPrice && formData.discountType !== "none" && formData.discountValue) {
-      let finalPrice = parseFloat(formData.actualPrice);
+    if (!formData.actualPrice) return;
 
-      if (formData.discountType === "percentage") {
-        const discount = (finalPrice * parseFloat(formData.discountValue)) / 100;
-        finalPrice = finalPrice - discount;
-      } else if (formData.discountType === "fixed") {
-        finalPrice = finalPrice - parseFloat(formData.discountValue);
-      }
+    let finalPrice = parseFloat(formData.actualPrice);
 
-      setFormData(prev => ({ ...prev, price: Math.max(0, finalPrice).toFixed(2) }));
-    } else if (formData.actualPrice) {
-      setFormData(prev => ({ ...prev, price: parseFloat(formData.actualPrice).toFixed(2) }));
+    if (formData.discountType === "percentage" && formData.discountValue) {
+      finalPrice = finalPrice - (finalPrice * parseFloat(formData.discountValue)) / 100;
+    } else if (formData.discountType === "fixed" && formData.discountValue) {
+      finalPrice = finalPrice - parseFloat(formData.discountValue);
     }
+
+    finalPrice = Math.max(0, finalPrice);
+    setFormData(prev => ({ ...prev, price: parseFloat(finalPrice.toFixed(2)) }));
   }, [formData.actualPrice, formData.discountType, formData.discountValue]);
 
   const handleSave = async () => {
@@ -252,10 +250,15 @@ const EditCoursePage = () => {
 const CourseDetailsTab = ({ formData, setFormData, errors, setErrors, categories }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+    const updated = { ...formData, [name]: value };
+
+    // clear discount value when switching off discount
+    if (name === "discountType" && value === "none") {
+      updated.discountValue = "";
     }
+
+    setFormData(prev => ({ ...prev, ...updated }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
   const handleThumbnailChange = (url) => {
@@ -350,10 +353,15 @@ const CourseDetailsTab = ({ formData, setFormData, errors, setErrors, categories
 const PricingTab = ({ formData, setFormData, errors, setErrors }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+    const updated = { [name]: value };
+
+    // clear discount value when switching off discount
+    if (name === "discountType" && value === "none") {
+      updated.discountValue = "";
     }
+
+    setFormData(prev => ({ ...prev, ...updated }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
   return (

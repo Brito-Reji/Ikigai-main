@@ -83,7 +83,7 @@ export const validateCourseInput = async (data) => {
         finalPrice = numericActualPrice - numericDiscountValue;
     }
 
-    finalPrice = Math.max(0, finalPrice);
+    finalPrice = Math.max(0, parseFloat(finalPrice.toFixed(2)));
 
     return {
         numericActualPrice,
