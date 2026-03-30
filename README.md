@@ -142,7 +142,7 @@ npm install
 Create a `.env` file inside `client/`:
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:5000
 VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 VITE_SOCKET_URL=http://localhost:5000
 ```
