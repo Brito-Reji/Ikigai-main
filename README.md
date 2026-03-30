@@ -137,7 +137,7 @@ ikigai/
 ```
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
+This project is a personal portfolio piece designed to showcase my skills and development capabilities. As such, I am **not** currently accepting pull requests or external contributions. However, feel free to fork the repository for your own learning purposes!
 
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
