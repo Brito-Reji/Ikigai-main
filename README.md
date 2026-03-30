@@ -171,33 +171,50 @@ The app will be available at `http://localhost:5173`.
 
 ```
 ikigai/
-├── client/                   # React frontend
-│   ├── public/
+├── client/                         # React (Vite) frontend
+│   ├── public/                     # Static assets
+│   │   └── logo.png
 │   ├── src/
-│   │   ├── assets/           # Images, icons, static files
-│   │   ├── components/       # Reusable UI components
-│   │   ├── features/         # Redux slices / feature modules
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── pages/            # Route-level page components
-│   │   ├── services/         # Axios API service functions
-│   │   ├── store/            # Redux store configuration
-│   │   └── utils/            # Utility/helper functions
-│   ├── .env
+│   │   ├── api/                    # API calls (Axios)
+│   │   ├── assets/                 # Images, icons
+│   │   ├── components/             # Reusable UI components
+│   │   ├── context/                # React context providers
+│   │   ├── data/                   # Static/mock data
+│   │   ├── hooks/                  # Custom React hooks
+│   │   ├── lib/                    # External configs/helpers
+│   │   ├── pages/                  # Page-level components
+│   │   ├── routes/                 # Route definitions
+│   │   ├── services/               # Business logic / API layer
+│   │   ├── store/                  # State management (Redux)
+│   │   ├── styles/                 # Global styles / Tailwind
+│   │   ├── utils/                  # Helper functions
+│   │   ├── App.jsx                 # Root component
+│   │   └── main.jsx                # Entry point
 │   ├── index.html
 │   └── vite.config.js
 │
-├── server/                   # Node.js / Express backend
-│   ├── config/               # DB connection, cloud config
-│   ├── controllers/          # Route handler logic
-│   ├── middlewares/          # Auth, error handling, etc.
-│   ├── models/               # Mongoose schemas
-│   ├── routes/               # Express route definitions
-│   ├── sockets/              # Socket.IO event handlers
-│   ├── utils/                # Helper utilities, email templates
-│   ├── app.js                # Express app setup (middleware, routes)
-│   ├── server.js             # Entry point (HTTP + Socket.IO server)
-│   └── .env
+├── server/                         # Node.js / Express backend
+│   ├── config/                    # Configurations (DB, AWS, etc.)
+│   ├── controllers/               # Route controllers
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── instructor/
+│   │   ├── public/
+│   │   ├── students/
+│   │   └── upload/
+│   ├── cron/                      # Scheduled jobs (e.g., escrow release)
+│   ├── middlewares/               # Auth, error handling, logging
+│   ├── models/                    # Mongoose schemas
+│   ├── routes/                    # API route definitions
+│   ├── services/                  # Business logic layer
+│   ├── socket/                    # WebSocket (chat, realtime)
+│   ├── utils/                     # Helpers (tokens, email, logging)
+│   ├── uploads/                   # Uploaded files
+│   ├── app.js                     # Express app setup
+│   └── server.js                  # Server entry point
 │
+├── package.json                   # Root dependencies
+├── LICENSE
 └── README.md
 ```
 
