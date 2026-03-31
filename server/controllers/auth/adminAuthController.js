@@ -1,9 +1,9 @@
 import asyncHandler from "express-async-handler";
-import { adminLoginService } from "../../services/admin/adminLoginService.js";
+import { loginAdminService } from "../../services/admin/adminLoginService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const adminLogin = asyncHandler(async (req, res) => {
-  const { admin, accessToken, refreshToken } = await adminLoginService(
+  const { user, accessToken, refreshToken } = await loginAdminService(
     req.body
   );
 
@@ -19,9 +19,9 @@ export const adminLogin = asyncHandler(async (req, res) => {
     message: "Admin login successful",
     accessToken,
     user: {
-      id: admin._id,
-      email: admin.email,
-      role: admin.role,
+      id: user._id,
+      email: user.email,
+      role: user.role,
     },
   };
 

@@ -1,103 +1,79 @@
-import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
-import { User } from "../../models/User.js";
-import { Instructor } from "../../models/Instructor.js";
-import { generateTokens } from "../../utils/generateTokens.js";
+
+import {loginAdminService } from "../../services/admin/adminLoginService.js"
+import { getInstructorDetailsService, getInstructorsService, getStudentDetailsService, getStudentsService, toggleInstructorBlockService, toggleStudentBlockService } from "../../services/admin/adminService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
-import { Admin } from "../../models/Admin.js";
 
+
+
+//  Login
 export const adminLogin = asyncHandler(async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { user, accessToken, refreshToken } = await loginAdminService(req.body);
 
-    if (!email || !password) {
-      return res
-        .status(HTTP_STATUS.BAD_REQUEST)
-        .json({ success: false, message: "All fields are required" });
-    }
+  res.cookie("refreshToken", refreshToken);
 
-    const user = Admin.find();
-
-    if (!user) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ success: false, message: "User not found" });
-    }
-
-    if (user.role !== "admin") {
-      return res
-        .status(HTTP_STATUS.FORBIDDEN)
-        .json({ success: false, message: "Access denied. Not an admin." });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
-
-    const { accessToken, refreshToken } = generateTokens({
-      userId: user._id,
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "Admin login successful",
+    accessToken,
+    user: {
+      id: user._id,
+      email: user.email,
       role: user.role,
-    });
-    res.cookie("refreshToken", refreshToken);
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Admin login successful",
-      accessToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    console.error("Admin Login Error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
+    },
+  });
 });
 
+//  Students
 export const getStudents = asyncHandler(async (req, res) => {
-  const students = await User.find({ role: "student", isVerified: true });
+  const students = await getStudentsService();
 
-  res.status(HTTP_STATUS.OK).json({ success: true, data: students });
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: students,
+  });
 });
 
+//  Block Student
 export const blockStudent = asyncHandler(async (req, res) => {
-  let { studentId } = req.params;
-  const student = await User.findOne({ _id: studentId });
-  student.isBlocked = !student.isBlocked;
-  await student.save();
+  await toggleStudentBlockService(req.params.studentId);
+
   res.status(HTTP_STATUS.OK).json({ success: true });
 });
 
+//  Instructors
 export const getInstructors = asyncHandler(async (req, res) => {
-  const instructor = await Instructor.find({
-    role: "instructor",
-    isVerified: true,
+  const instructors = await getInstructorsService();
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: instructors,
   });
-  return res.status(HTTP_STATUS.OK).json({ success: true, data: instructor });
 });
 
+//  Block Instructor
 export const blockInstructor = asyncHandler(async (req, res) => {
-  let { instructorId } = req.params;
-  const instructor = await Instructor.findOne({ _id: instructorId });
-  instructor.isBlocked = !instructor.isBlocked;
-  await instructor.save();
-  return res.status(HTTP_STATUS.OK).json({ success: true });
+  await toggleInstructorBlockService(req.params.instructorId);
+
+  res.status(HTTP_STATUS.OK).json({ success: true });
 });
 
+//  Student Details
 export const getStudentDetails = asyncHandler(async (req, res) => {
-  let { id } = req.params;
-  const student = await User.findOne({ _id: id });
-  return res.status(HTTP_STATUS.OK).json({ success: true, data: student });
+  const student = await getStudentDetailsService(req.params.id);
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: student,
+  });
 });
 
+//  Instructor Details
 export const getInstructorDetails = asyncHandler(async (req, res) => {
-  let { id } = req.params;
-  const instructor = await Instructor.findOne({ _id: id });
-  return res.status(HTTP_STATUS.OK).json({ success: true, data: instructor });
+  const instructor = await getInstructorDetailsService(req.params.id);
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: instructor,
+  });
 });
