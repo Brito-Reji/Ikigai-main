@@ -345,7 +345,8 @@ const Courses = () => {
                       <Eye className="w-4 h-4 mr-2" />
                       View
                     </button>
-                    <button
+                    {/* course  blocking and delete in cousrse listing page (not avaible for now ) */}
+                    {/* <button
                       onClick={() => handleToggleBlock(course._id)}
                       className={`px-4 py-2 rounded-lg transition ${course.blocked
                         ? "bg-green-600 text-white hover:bg-green-700"
@@ -359,7 +360,7 @@ const Courses = () => {
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>

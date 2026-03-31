@@ -42,7 +42,7 @@ function LoginPage() {
 
   const [formData, setFormData] = useState({
     email: location.state?.email || "",
-    password: "Admin@123",
+    password: "",
   });
   const [successMessage, setSuccessMessage] = useState(location.state?.message || "");
   const [showPassword, setShowPassword] = useState(false);
