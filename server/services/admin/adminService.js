@@ -20,10 +20,13 @@ export const toggleStudentBlockService = async studentId => {
 
 //  Get Instructors
 export const getInstructorsService = async () => {
-  return await Instructor.find({
+  // GET ONLY INSTREU WHO MADE MORE THAN TWO COURSE
+  const instructors = await Instructor.find({
     role: "instructor",
     isVerified: true,
   });
+
+  return instructors.filter(instructor => instructor.courses.length > 2);
 };
 
 //  Toggle Instructor Block
