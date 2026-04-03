@@ -4,6 +4,8 @@ import { Enrollment } from "../../models/Enrollment.js";
 import { decrementCouponUsageService } from "./couponService.js";
 import { creditWallet } from "./walletService.js";
 import razorpayInstance from "../../config/razorpayConfig.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 export const processFullRefund = async ({
   razorpayOrderId,
@@ -14,22 +16,22 @@ export const processFullRefund = async ({
   const order = await Order.findOne({ razorpayOrderId, userId });
 
   if (!order) {
-    throw new Error("Order not found");
+    throw new AppError("Order not found",HTTP_STATUS.NOT_FOUND);
   }
 
   if (order.status === "REFUNDED") {
-    throw new Error("Order already refunded");
+    throw new AppError("Order already refunded",HTTP_STATUS.BAD_REQUEST);
   }
 
   const payments = await Payment.find({ razorpayOrderId, userId });
 
   if (!payments || payments.length === 0) {
-    throw new Error("No payments found for this order");
+    throw new AppError("No payments found for this order",HTTP_STATUS.NOT_FOUND);
   }
 
   const alreadyRefunded = payments.every(p => p.status === "REFUNDED");
   if (alreadyRefunded) {
-    throw new Error("All payments already refunded");
+    throw new AppError("All payments already refunded",HTTP_STATUS.BAD_REQUEST);
   }
 
   // wallet-only orders can only be refunded to wallet
@@ -127,7 +129,7 @@ export const processFullRefund = async ({
     console.error("Refund error:", error);
     const errorMessage =
       error?.error?.description || error?.message || "Unknown error";
-    throw new Error(`Refund failed: ${errorMessage}`);
+    throw new AppError(`Refund failed: ${errorMessage}`,HTTP_STATUS.BAD_REQUEST);
   }
 };
 
@@ -141,16 +143,16 @@ export const processPartialRefund = async ({
   const payment = await Payment.findOne({ courseId, userId, razorpayOrderId });
 
   if (!payment) {
-    throw new Error("Payment not found for this course");
+    throw new AppError("Payment not found for this course",HTTP_STATUS.NOT_FOUND);
   }
 
   if (payment.status === "REFUNDED") {
-    throw new Error("This course payment is already refunded");
+    throw new AppError("This course payment is already refunded",HTTP_STATUS.BAD_REQUEST);
   }
 
   const order = await Order.findOne({ razorpayOrderId, userId });
   if (!order) {
-    throw new Error("Order not found");
+    throw new AppError("Order not found",HTTP_STATUS.NOT_FOUND);
   }
 
   // wallet-only orders can only be refunded to wallet
@@ -249,7 +251,7 @@ export const processPartialRefund = async ({
     console.error("Refund error:", error);
     const errorMessage =
       error?.error?.description || error?.message || "Unknown error";
-    throw new Error(`Refund failed: ${errorMessage}`);
+    throw new AppError(`Refund failed: ${errorMessage}`,HTTP_STATUS.BAD_REQUEST);
   }
 };
 

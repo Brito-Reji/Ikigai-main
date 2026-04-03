@@ -7,23 +7,18 @@ import { sendOTPToEmail } from "../../utils/OTPServices.js";
 import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { generateUniqueUsername } from "../../utils/generateUniqueUsername.js";
+import { AppError } from "../../errors/AppError.js";
 
 export const studentRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
 
   if (!email || !username || !firstName || !lastName || !password) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Please provide all required fields",
-    };
+    throw new AppError("Please provide all required fields",HTTP_STATUS.BAD_REQUEST);
   }
 
   const isInstructor = await Instructor.findOne({ email });
   if (isInstructor) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "This user is registered as instructor use another email",
-    };
+    throw new AppError("This user is registered as instructor use another email",HTTP_STATUS.BAD_REQUEST);
   }
 
   const existingUser = await User.findOne({
@@ -31,25 +26,16 @@ export const studentRegisterService = async data => {
   });
 
   if (existingUser && existingUser.isVerified) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Email or username already exists",
-    };
+    throw new AppError("Email or username already exists",HTTP_STATUS.BAD_REQUEST);
   }
 
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Please provide a valid email address",
-    };
+    throw new AppError("Please provide a valid email address",HTTP_STATUS.BAD_REQUEST);
   }
 
   if (password.length < 6) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Password must be at least 6 characters long",
-    };
+    throw new AppError("Password must be at least 6 characters long",HTTP_STATUS.BAD_REQUEST);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -93,10 +79,7 @@ export const studentRegisterService = async data => {
 
 export const studentLoginService = async (email, password) => {
   if (!email || !password) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Fields cannot be empty",
-    };
+    throw new AppError("Fields cannot be empty",HTTP_STATUS.BAD_REQUEST);
   }
 
   const user = await User.findOne({
@@ -104,19 +87,15 @@ export const studentLoginService = async (email, password) => {
   }).select("+password");
 
   if (!user) {
-    throw { status: HTTP_STATUS.UNAUTHORIZED, message: "Invalid credentials" };
+    throw new AppError("Invalid credentials",HTTP_STATUS.UNAUTHORIZED);
   }
 
   if (user.isBlocked) {
-    throw { status: HTTP_STATUS.FORBIDDEN, message: "the user is blocked" };
+    throw new AppError("the user is blocked",HTTP_STATUS.FORBIDDEN);
   }
 
   if (user.authType === "google") {
-    throw {
-      status: HTTP_STATUS.UNAUTHORIZED,
-      message:
-        "This account was created with Google. Please use Google Sign-In to continue.",
-    };
+    throw new AppError("This account was created with Google. Please use Google Sign-In to continue.",HTTP_STATUS.UNAUTHORIZED);
   }
 
   if (!user.isVerified) {
@@ -126,7 +105,7 @@ export const studentLoginService = async (email, password) => {
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw { status: HTTP_STATUS.UNAUTHORIZED, message: "Invalid credentials" };
+    throw new AppError("Invalid credentials",HTTP_STATUS.UNAUTHORIZED);
   }
 
   const tokens = generateTokens({
@@ -154,10 +133,7 @@ export const studentGoogleAuthService = async token => {
 
   const isInstructor = await Instructor.findOne({ email });
   if (isInstructor) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "This user is registered as instructor use another email",
-    };
+    throw new AppError("This user is registered as instructor use another email",HTTP_STATUS.BAD_REQUEST);
   }
 
   let user = await User.findOne({ email });
@@ -165,18 +141,11 @@ export const studentGoogleAuthService = async token => {
 
   if (user) {
     if (user.isBlocked) {
-      throw {
-        status: HTTP_STATUS.FORBIDDEN,
-        message: "User is blocked by the admin",
-      };
+      throw new AppError("User is blocked by the admin",HTTP_STATUS.FORBIDDEN);
     }
 
     if (user.role !== "student") {
-      throw {
-        status: HTTP_STATUS.FORBIDDEN,
-        message:
-          "User is already registered with another role. Please use another account",
-      };
+      throw new AppError("User is already registered with another role. Please use another account",HTTP_STATUS.FORBIDDEN);
     }
 
     let needUpdate = false;

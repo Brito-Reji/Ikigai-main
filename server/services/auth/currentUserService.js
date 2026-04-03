@@ -3,6 +3,7 @@ import { User } from "../../models/User.js";
 import { Instructor } from "../../models/Instructor.js";
 import { Admin } from "../../models/Admin.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 export const getCurrentUserService = async accessToken => {
   if (!accessToken) {
@@ -16,10 +17,7 @@ export const getCurrentUserService = async accessToken => {
   try {
     decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
   } catch {
-    throw {
-      status: HTTP_STATUS.UNAUTHORIZED,
-      message: "Invalid token",
-    };
+    throw new AppError("Invalid token",HTTP_STATUS.UNAUTHORIZED)
   }
 
   let user =
@@ -28,18 +26,11 @@ export const getCurrentUserService = async accessToken => {
     (await Admin.findById(decoded.id));
 
   if (!user) {
-    throw {
-      status: HTTP_STATUS.UNAUTHORIZED,
-      message: "User not found",
-    };
+    throw new AppError("User not found",HTTP_STATUS.UNAUTHORIZED)
   }
 
   if (user.isBlocked) {
-    throw {
-      status: HTTP_STATUS.FORBIDDEN,
-      message: "Your account has been blocked. Please contact support.",
-      isBlocked: true,
-    };
+    throw new AppError("Your account has been blocked. Please contact support.",HTTP_STATUS.FORBIDDEN)
   }
 
   return {

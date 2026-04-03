@@ -3,6 +3,8 @@ import fs from "fs";
 import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
+import { AppError } from "../errors/AppError.js";
+import { HTTP_STATUS } from "./httpStatus.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +18,7 @@ if (cloudfrontConfig.privateKeyPath) {
 
 export function generateSignedUrl(objectPath, expiresIn = 1800) {
     if (!privateKey || !cloudfrontConfig.domain || !cloudfrontConfig.keyPairId) {
-        throw new Error("CloudFront is not configured. Please set CF_DOMAIN, CF_KEY_PAIR_ID, and CF_PRIVATE_KEY_PATH environment variables.");
+        throw new AppError("CloudFront is not configured. Please set CF_DOMAIN, CF_KEY_PAIR_ID, and CF_PRIVATE_KEY_PATH environment variables.",HTTP_STATUS.BAD_REQUEST);
     }
     
     const url = `https://${cloudfrontConfig.domain}${objectPath}`;

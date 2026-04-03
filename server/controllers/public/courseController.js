@@ -6,6 +6,7 @@ import {
   getCourseStatsService,
   getPublicCourseLessonsService,
 } from "../../services/public/publicCourseService.js";
+import { Review } from "../../models/Review.js";
 import { getPublicCourseChaptersService } from "../../services/public/publicChapterService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
@@ -96,7 +97,6 @@ export const getPublicCourseLessons = asyncHandler(async (req, res) => {
 export const getPublicCourseReviews = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
 
-  const { Review } = await import("../../models/Review.js");
 
   const reviews = await Review.find({ course: courseId })
     .populate({ path: "user", select: "firstName lastName avatar username" })

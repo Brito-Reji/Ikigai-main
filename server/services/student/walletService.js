@@ -1,5 +1,7 @@
+import { AppError } from "../../errors/AppError.js";
 import { Wallet } from "../../models/Wallet.js";
 import { WalletTransaction } from "../../models/WalletTransaction.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // get or create wallet
 export const getOrCreateWallet = async userId => {
@@ -46,7 +48,7 @@ export const debitWallet = async ({
   const wallet = await getOrCreateWallet(userId);
 
   if (wallet.balance < amount) {
-    throw new Error("Insufficient wallet balance");
+    throw new AppError("Insufficient wallet balance",HTTP_STATUS.BAD_REQUEST);
   }
 
   wallet.balance -= amount;

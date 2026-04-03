@@ -1,31 +1,36 @@
+import { AppError } from "../../errors/AppError.js";
 import { Coupon } from "../../models/Coupon.js";
 import { CouponUsage } from "../../models/CouponUsage.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const validateCouponService = async (code, userId, amount) => {
+  if (!amount || isNaN(Number(amount))) {
+  throw new AppError("Valid amount is required", HTTP_STATUS.BAD_REQUEST);
+}
   const coupon = await Coupon.findOne({
     code: code.toUpperCase(),
     isDeleted: false,
   });
 
   if (!coupon) {
-    throw new Error("Invalid coupon code");
+    throw new AppError("Invalid coupon code",HTTP_STATUS.BAD_REQUEST);
   }
 
   if (coupon.isPaused) {
-    throw new Error("Coupon is currently unavailable");
+    throw new AppError("Coupon is currently unavailable",HTTP_STATUS.BAD_REQUEST);
   }
 
   const now = new Date();
   if (new Date(coupon.expiryDate) < now) {
-    throw new Error("Coupon has expired");
+    throw new AppError("Coupon has expired",HTTP_STATUS.BAD_REQUEST);
   }
 
   if (amount < coupon.minAmount) {
-    throw new Error(`Minimum purchase amount of ₹${coupon.minAmount} required`);
+    throw new AppError(`Minimum purchase amount of ₹${coupon.minAmount} required`,HTTP_STATUS.BAD_REQUEST);
   }
 
   if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-    throw new Error("Coupon usage limit reached");
+    throw new AppError("Coupon usage limit reached",HTTP_STATUS.BAD_REQUEST);
   }
 
   if (coupon.perUserLimit) {
@@ -35,7 +40,7 @@ export const validateCouponService = async (code, userId, amount) => {
     });
 
     if (usage && usage.usedCount >= coupon.perUserLimit) {
-      throw new Error("You have reached the usage limit for this coupon");
+      throw new AppError("You have reached the usage limit for this coupon",HTTP_STATUS.BAD_REQUEST);
     }
   }
 

@@ -2,6 +2,8 @@ import { Course } from "../../models/Course.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Enrollment } from "../../models/Enrollment.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 // GET ALL COURSES BY INSTRUCTOR
 export const getAllCourseByInstructorService = async (instructorId) => {
@@ -32,35 +34,35 @@ export const validateCourseInput = async (data) => {
     } = data;
 
     if (!title || !description || !overview || !category || !actualPrice) {
-        throw new Error("All required fields must be provided");
+        throw new AppError("All required fields must be provided",HTTP_STATUS.BAD_REQUEST)
     }
 
     if (title.trim().length === 0 || title.length > 200) {
-        throw new Error("Title must be between 1 and 200 characters");
+        throw new AppError("Title must be between 1 and 200 characters",HTTP_STATUS.BAD_REQUEST)
     }
 
     if (description.trim().length === 0 || description.length > 2000) {
-        throw new Error("Description must be between 1 and 2000 characters");
+        throw new AppError("Description must be between 1 and 2000 characters",HTTP_STATUS.BAD_REQUEST)
     }
 
     if (overview.trim().length === 0 || overview.length > 1000) {
-        throw new Error("Overview must be between 1 and 1000 characters");
+        throw new AppError("Overview must be between 1 and 1000 characters",HTTP_STATUS.BAD_REQUEST)
     }
 
     const numericActualPrice = parseFloat(actualPrice);
     if (isNaN(numericActualPrice) || numericActualPrice < 0) {
-        throw new Error("Actual price must be a valid positive number");
+        throw new AppError("Actual price must be a valid positive number",HTTP_STATUS.BAD_REQUEST)
     }
 
     if (numericActualPrice > 50000) {
-        throw new Error("Actual price cannot exceed 50,000");
+        throw new AppError("Actual price cannot exceed 50,000",HTTP_STATUS.BAD_REQUEST)
     }
 
     const validTypes = ["percentage", "fixed", "none"];
     const chosenType = discountType || "none";
 
     if (!validTypes.includes(chosenType)) {
-        throw new Error("Invalid discount type");
+        throw new AppError("Invalid discount type",HTTP_STATUS.BAD_REQUEST)
     }
 
     let numericDiscountValue = 0;
@@ -68,10 +70,10 @@ export const validateCourseInput = async (data) => {
     if (chosenType !== "none") {
         numericDiscountValue = parseFloat(discountValue) || 0;
 
-        if (numericDiscountValue < 0) throw new Error("Discount value cannot be negative");
+        if (numericDiscountValue < 0) throw new AppError("Discount value cannot be negative",HTTP_STATUS.BAD_REQUEST)
 
         if (chosenType === "percentage" && numericDiscountValue > 100) {
-            throw new Error("Percentage discount cannot exceed 100%");
+            throw new AppError("Percentage discount cannot exceed 100%",HTTP_STATUS.BAD_REQUEST)
         }
     }
 
@@ -129,10 +131,10 @@ export const createCourseService = async (instructorId, data) => {
 // UPDATE COURSE
 export const updateCourseService = async (courseId, instructorId, data) => {
     const existing = await Course.findById(courseId);
-    if (!existing) throw new Error("Course not found");
+    if (!existing) throw new AppError("Course not found",HTTP_STATUS.NOT_FOUND)
 
     if (existing.instructor.toString() !== instructorId.toString()) {
-        throw new Error("You can only edit your own courses");
+        throw new AppError("You can only edit your own courses",HTTP_STATUS.FORBIDDEN)
     }
 
     const {
@@ -170,10 +172,10 @@ export const getCourseByIdService = async (courseId, instructorId) => {
         .populate("category", "name")
         .populate("instructor", "firstName lastName email profileImageUrl headline");
 
-    if (!course) throw new Error("Course not found");
+    if (!course) throw new AppError("Course not found",HTTP_STATUS.NOT_FOUND)
 
     if (course.instructor._id.toString() !== instructorId.toString()) {
-        throw new Error("You can only view your own courses");
+        throw new AppError("You can only view your own courses",HTTP_STATUS.FORBIDDEN)
     }
 
     return {
@@ -185,10 +187,10 @@ export const getCourseByIdService = async (courseId, instructorId) => {
 // DELETE COURSE BY INSTRUCTOR (Hard delete if no enrollments)
 export const deleteCourseByInstructorService = async (courseId, instructorId) => {
     const course = await Course.findById(courseId);
-    if (!course) throw new Error("Course not found");
+    if (!course) throw new AppError("Course not found",HTTP_STATUS.NOT_FOUND)
 
     if (course.instructor.toString() !== instructorId.toString()) {
-        throw new Error("You can only delete your own courses");
+        throw new AppError("You can only delete your own courses",HTTP_STATUS.FORBIDDEN)
     }
 
     // Check if any active or completed enrollments exist
@@ -198,7 +200,7 @@ export const deleteCourseByInstructorService = async (courseId, instructorId) =>
     });
 
     if (enrollmentsCount > 0) {
-        throw new Error("Cannot delete course with active or completed enrollments.");
+        throw new AppError("Cannot delete course with active or completed enrollments.",HTTP_STATUS.FORBIDDEN)
     }
 
     // Perform hard delete and cleanup

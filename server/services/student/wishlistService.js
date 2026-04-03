@@ -1,5 +1,7 @@
 import { Wishlist } from "../../models/Wishlist.js";
 import { Course } from "../../models/Course.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // get wishlist
 export const getWishlistService = async userId => {
@@ -59,7 +61,7 @@ export const removeFromWishlistService = async (userId, courseId) => {
   );
 
   if (!wishlist) {
-    throw new Error("Wishlist not found");
+    throw new AppError("Wishlist not found",HTTP_STATUS.BAD_REQUEST);
   }
 
   return wishlist;
@@ -82,7 +84,7 @@ export const toggleWishlistService = async (userId, courseId) => {
   } else {
     const course = await Course.findById(courseId);
     if (!course) {
-      throw new Error("Course not found");
+      throw new AppError("Course not found",HTTP_STATUS.BAD_REQUEST);
     }
     await Wishlist.findOneAndUpdate(
       { userId },

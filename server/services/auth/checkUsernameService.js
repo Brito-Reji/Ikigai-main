@@ -1,13 +1,12 @@
+import { AppError } from "../../errors/AppError.js";
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const checkUsernameAvailabilityService = async username => {
   if (!username || username.trim().length < 3) {
-    throw {
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: "Username must be at least 3 characters",
-    };
+    throw new AppError("Username must be least 3 characters",HTTP_STATUS.BAD_REQUEST)
+
   }
 
   const normalizedUsername = username.toLowerCase();

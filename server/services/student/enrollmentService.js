@@ -3,6 +3,8 @@ import { Enrollment } from "../../models/Enrollment.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Chapter } from "../../models/Chapter.js";
 import mongoose from "mongoose";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 export const getUserEnrollments = async userId => {
   const result = await Enrollment.aggregate([
@@ -172,7 +174,7 @@ export const updateProgress = async (userId, courseId, lessonId) => {
     status: "active",
   });
 
-  if (!enrollment) throw new Error("Not enrolled");
+  if (!enrollment) throw new AppError("Not enrolled",HTTP_STATUS.BAD_REQUEST);
 
   if (!enrollment.progress.completedLessons.includes(lessonId)) {
     enrollment.progress.completedLessons.push(lessonId);

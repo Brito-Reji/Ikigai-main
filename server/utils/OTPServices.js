@@ -5,6 +5,8 @@ import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 // import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
+import { AppError } from "../errors/AppError.js";
+import { HTTP_STATUS } from "./httpStatus.js";
 
 const testAccount = await nodemailer.createTestAccount();
 
@@ -14,7 +16,7 @@ function generateOTP() {
 
 export const sendOTPToEmail = async email => {
   if (!email) {
-    throw new Error("Email is required");
+    throw new AppError("Email is required",HTTP_STATUS.BAD_REQUEST);
   }
 
   const otp = generateOTP();

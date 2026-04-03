@@ -6,15 +6,13 @@ export const validateCoupon = asyncHandler(async (req, res) => {
   const { code } = req.params;
   const { amount } = req.query;
 
-  if (!amount || isNaN(amount)) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Valid amount is required");
-  }
+ 
 
   const couponData = await couponService.validateCouponService(
     code,
     req.user._id,
-    parseFloat(amount)
+     Number(amount)
+
   );
 
 

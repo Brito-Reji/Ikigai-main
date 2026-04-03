@@ -1,5 +1,7 @@
 import { Review } from "../../models/Review.js";
 import { Enrollment } from "../../models/Enrollment.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // add or update a review
 export const addOrUpdateReviewService = async (
@@ -15,7 +17,7 @@ export const addOrUpdateReviewService = async (
     status: "active",
   });
   if (!enrollment) {
-    throw new Error("You must be enrolled in this course to review it");
+    throw new AppError("You must be enrolled in this course to review it",HTTP_STATUS.BAD_REQUEST);
   }
 
   const review = await Review.findOneAndUpdate(

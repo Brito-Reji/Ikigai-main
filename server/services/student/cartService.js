@@ -1,5 +1,7 @@
+import { AppError } from "../../errors/AppError.js";
 import { Cart } from "../../models/Cart.js";
 import { Course } from "../../models/Course.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const getCartService = async userId => {
   const cart = await Cart.findOne({ userId })
@@ -36,11 +38,11 @@ export const getCartService = async userId => {
 export const addToCartService = async (userId, courseId) => {
   const course = await Course.findById(courseId);
   if (!course) {
-    throw new Error("Course not found");
+    throw new AppError("Course not found",HTTP_STATUS.NOT_FOUND);
   }
 
   if (!course.published || course.blocked) {
-    throw new Error("This course is not available");
+    throw new AppError("This course is not available",HTTP_STATUS.BAD_REQUEST);
   }
 
   const cart = await Cart.findOneAndUpdate(
@@ -79,7 +81,7 @@ export const removeFromCartService = async (userId, courseId) => {
   );
 
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new AppError("Cart not found",HTTP_STATUS.NOT_FOUND);
   }
 
   return cart;

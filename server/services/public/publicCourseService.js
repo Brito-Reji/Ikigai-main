@@ -4,6 +4,8 @@ import { Enrollment } from "../../models/Enrollment.js";
 import { Review } from "../../models/Review.js";
 import { checkEnrollment } from "../student/enrollmentService.js";
 import { Chapter } from "../../models/Chapter.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // compute rating and enrollment stats for courses
 const attachCourseStats = async courses => {
@@ -209,19 +211,19 @@ export const getPublicCourseDetailsService = async (courseId, userId) => {
   });
 
   if (!courseExists) {
-    throw new Error("Course not found");
+    throw new AppError("Course not found",HTTP_STATUS.NOT_FOUND);
   }
 
   // Check if course is blocked
   if (courseExists.blocked) {
-    throw new Error(
-      "This course has been temporarily blocked by the administrator"
+    throw new AppError(
+      "This course has been temporarily blocked by the administrator",HTTP_STATUS.BAD_REQUEST
     );
   }
 
   // Check if course is published
   if (!courseExists.published) {
-    throw new Error("This course is not yet published");
+    throw new AppError("This course is not yet published",HTTP_STATUS.BAD_REQUEST);
   }
 
   let course = await Course.findOne({

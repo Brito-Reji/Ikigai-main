@@ -2,6 +2,7 @@ import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Course } from "../../models/Course.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 // Verify course ownership
 export const verifyCourseOwnership = async (courseId, instructorId) => {
@@ -13,9 +14,7 @@ export const verifyCourseOwnership = async (courseId, instructorId) => {
     });
 
     if (!courseWithInstructor) {
-        const error = new Error("Course not found or you don't have permission");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Course not found or you don't have permission",HTTP_STATUS.NOT_FOUND)
     }
 
     return courseWithInstructor;
@@ -52,9 +51,7 @@ export const updateChapterService = async (chapterId, courseId, updateData) => {
     );
 
     if (!chapter) {
-        const error = new Error("Chapter not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Chapter not found",HTTP_STATUS.NOT_FOUND)
     }
 
     return chapter;
@@ -68,9 +65,7 @@ export const deleteChapterService = async (chapterId, courseId) => {
     });
 
     if (!chapter) {
-        const error = new Error("Chapter not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Chapter not found",HTTP_STATUS.NOT_FOUND)
     }
 
     await Lesson.deleteMany({ chapter: chapterId });

@@ -1,6 +1,8 @@
 import { Chapter } from "../../models/Chapter.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Course } from "../../models/Course.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const getPublicCourseChaptersService = async courseId => {
   const course = await Course.findOne({
@@ -10,9 +12,7 @@ export const getPublicCourseChaptersService = async courseId => {
   });
 
   if (!course) {
-    const error = new Error("Course not found or not available");
-    error.statusCode = 404;
-    throw error;
+    throw new AppError("Course not found or not available",HTTP_STATUS.NOT_FOUND);
   }
 
   const chapters = await Chapter.find({ course: courseId })

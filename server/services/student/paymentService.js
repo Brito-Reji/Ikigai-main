@@ -12,6 +12,7 @@ import {
 } from "./couponService.js";
 import { getWalletBalance, debitWallet } from "./walletService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 export const createOrderService = async ({
   courseIds,
@@ -25,16 +26,15 @@ export const createOrderService = async ({
   });
 
   if (courses.length !== courseIds.length) {
-    throw new Error("One or more courses are not published");
+    throw new AppError("One or more courses are not published",HTTP_STATUS.BAD_REQUEST);
   }
   const blockedCourses = courses.filter(data => data.blocked);
   if (blockedCourses.length > 0) {
     const names = blockedCourses.map(c => c.title).join(", ");
-    const error = new Error(
-      `The following course(s) are currently unavailable: ${names}`
+    throw new AppError(
+      `The following course(s) are currently unavailable: ${names}`,
+      HTTP_STATUS.BAD_REQUEST
     );
-    error.statusCode = HTTP_STATUS.BAD_REQUEST;
-    throw error;
   }
   const originalAmount = courses.reduce(
     (total, course) => total + course.price,
@@ -96,13 +96,14 @@ export const createOrderService = async ({
     razorpayOrder = await razorpayInstance.orders.create(options);
   } catch (err) {
     console.error("Razorpay order creation failed:", err);
-    throw new Error(
-      err?.error?.description || "Failed to create Razorpay order"
+    throw new AppError(
+      err?.error?.description || "Failed to create Razorpay order",
+      HTTP_STATUS.BAD_REQUEST
     );
   }
 
   if (!razorpayOrder || !razorpayOrder.id) {
-    throw new Error("Invalid response from Razorpay");
+    throw new AppError("Invalid response from Razorpay",HTTP_STATUS.BAD_REQUEST);
   }
 
   const newOrder = await Order.create({
@@ -299,7 +300,7 @@ export const verifyPaymentService = ({
     .digest("hex");
 
   if (expectedSignature !== razorpay_signature) {
-    throw new Error("Invalid payment signature");
+    throw new AppError("Invalid payment signature",HTTP_STATUS.BAD_REQUEST);
   }
 
   return true;
@@ -313,7 +314,7 @@ export const updatePaymentStatusService = async ({
   const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
 
   if (!order) {
-    throw new Error("Order not found");
+    throw new AppError("Order not found",HTTP_STATUS.NOT_FOUND);
   }
 
   order.status = "PAID";
@@ -413,15 +414,15 @@ export const retryOrderService = async ({ orderId, userId }) => {
   const order = await Order.findOne({ _id: orderId, userId });
 
   if (!order) {
-    throw new Error("Order not found");
+    throw new AppError("Order not found",HTTP_STATUS.NOT_FOUND);
   }
 
   if (order.status === "PAID") {
-    throw new Error("Order is already paid");
+    throw new AppError("Order is already paid",HTTP_STATUS.BAD_REQUEST);
   }
 
   if (order.status === "REFUNDED") {
-    throw new Error("Order is already refunded");
+    throw new AppError("Order is already refunded",HTTP_STATUS.BAD_REQUEST);
   }
 
   const populatedOrder = await Order.findById(order._id).populate({
@@ -470,9 +471,9 @@ export const getPendingPaymentService = async userId => {
 export const cancelOrderService = async ({ orderId, userId }) => {
   const order = await Order.findOne({ _id: orderId, userId });
 
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new AppError("Order not found",HTTP_STATUS.NOT_FOUND);
   if (order.status !== "CREATED")
-    throw new Error("Only pending orders can be cancelled");
+    throw new AppError("Only pending orders can be cancelled",HTTP_STATUS.BAD_REQUEST);
 
   order.status = "CANCELLED";
   await order.save();

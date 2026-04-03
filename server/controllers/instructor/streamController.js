@@ -33,7 +33,7 @@ export const getSecureStreamUrl = asyncHandler(async (req, res) => {
       data: { url: signedUrl },
     });
   } catch (error) {
-    console.error("❌ S3 Error Details:", {
+    console.error(" S3 Error Details:", {
       name: error.name,
       message: error.message,
       code: error.code,

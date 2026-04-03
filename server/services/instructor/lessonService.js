@@ -1,12 +1,10 @@
 import { Lesson } from "../../models/Lesson.js";
 import { Chapter } from "../../models/Chapter.js";
 import { Course } from "../../models/Course.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-/**
- * If the course was already admin-approved, changing curriculum/video means it is no longer
- * in that verified state — but we do NOT auto-submit to the admin queue ("inprocess").
- * The instructor must click "Apply for verification" again when ready.
- */
+// verified course reverify by admin when update
 const markVerifiedCourseNeedsNewApplication = async (chapterId) => {
   const chapter = await Chapter.findById(chapterId);
   if (!chapter) return;
@@ -24,9 +22,7 @@ const verifyChapter = async (chapterId, courseId) => {
   const chapter = await Chapter.findOne({ _id: chapterId, course: courseId });
 
   if (!chapter) {
-    const error = new Error("Chapter not found");
-    error.statusCode = 404;
-    throw error;
+    throw new AppError("Chapter not found",HTTP_STATUS.NOT_FOUND);
   }
 
   return chapter;
@@ -75,9 +71,7 @@ export const updateLessonService = async (lessonId, chapterId, courseId, updateD
   const existing = await Lesson.findOne({ _id: lessonId, chapter: chapterId });
 
   if (!existing) {
-    const error = new Error("Lesson not found");
-    error.statusCode = 404;
-    throw error;
+    throw new AppError("Lesson not found",HTTP_STATUS.NOT_FOUND);
   }
 
   const videoChanged =
@@ -107,9 +101,7 @@ export const deleteLessonService = async (lessonId, chapterId, courseId) => {
   });
 
   if (!lesson) {
-    const error = new Error("Lesson not found");
-    error.statusCode = 404;
-    throw error;
+    throw new AppError("Lesson not found",HTTP_STATUS.NOT_FOUND);
   }
 
   return lesson;
