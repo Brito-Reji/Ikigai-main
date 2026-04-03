@@ -205,13 +205,13 @@ export const deleteCourseByInstructorService = async (courseId, instructorId) =>
     const chapters = await Chapter.find({ course: courseId }).select("_id");
     const chapterIds = chapters.map((c) => c._id);
 
-    // 1. Delete all lessons in those chapters
+    //  Delete all lessons in those chapters
     await Lesson.deleteMany({ chapter: { $in: chapterIds } });
 
-    // 2. Delete all chapters
+    //  Delete all chapters
     await Chapter.deleteMany({ course: courseId });
 
-    // 3. Delete the course itself
+    //  Delete the course itself
     await Course.findByIdAndDelete(courseId);
 
     return { message: "Course deleted successfully" };

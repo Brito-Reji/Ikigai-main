@@ -76,7 +76,7 @@ export default function CoursesPage() {
     if (sortBy !== "newest") params.sort = sortBy;
     if (currentPage > 1) params.page = currentPage;
 
-    setSearchParams(params);
+    setSearchParams(params, { replace: true });
   }, [
     searchQuery,
     selectedCategories,

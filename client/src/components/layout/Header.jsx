@@ -8,6 +8,7 @@ import { clearCart } from "@/store/slices/cartSlice.js";
 import { useDispatch } from "react-redux";
 import logo from "@/assets/images/logo.png";
 import CartIcon from "../common/CartIcon.jsx";
+import WishlistIcon from "../common/WishlistIcon.jsx";
 import { useGetNotifications, useMarkNotificationRead, useMarkAllRead } from "@/hooks/useReport";
 
 // Notification Bell Dropdown
@@ -239,11 +240,9 @@ export default function Header({ onMenuToggle, menuOpen }) {
             {isAuthenticated ? (
               <>
                 {/* Authenticated User Actions - Always visible on desktop */}
-                <Link to="/wishlist">
-                  <button className="hidden md:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
-                    <Heart className="w-5 h-5" />
-                  </button>
-                </Link>
+                <div className="hidden md:block">
+                  <WishlistIcon className="!p-2" />
+                </div>
                 <div className="hidden md:block">
                   <CartIcon />
                 </div>
@@ -369,14 +368,10 @@ export default function Header({ onMenuToggle, menuOpen }) {
                     </Link>
                   </>
                 )}
-                <Link
-                  to="/wishlist"
-                  onClick={onMenuToggle}
-                  className="flex items-center space-x-3 py-3 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg px-4 transition"
-                >
-                  <Heart className="w-5 h-5" />
-                  <span>Wishlist</span>
-                </Link>
+                <div className="flex items-center w-full rounded-lg hover:bg-gray-50 transition px-4 py-3 cursor-pointer" onClick={() => { onMenuToggle(); document.querySelector('button[aria-label="Wishlist"]')?.click(); }}>
+                  <WishlistIcon className="!p-0 mr-3 w-5 h-5 flex-shrink-0 pointer-events-none" />
+                  <span className="text-gray-700 pointer-events-none">Wishlist</span>
+                </div>
                 <Link
                   to="/cart"
                   onClick={onMenuToggle}

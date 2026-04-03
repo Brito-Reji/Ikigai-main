@@ -1,3 +1,4 @@
+// import { Course } from "../../models/Course.js";
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 
@@ -25,8 +26,12 @@ export const getInstructorsService = async () => {
     role: "instructor",
     isVerified: true,
   });
+  
 
-  return instructors.filter(instructor => instructor.courses.length > 2);
+     
+    
+
+  return instructors
 };
 
 //  Toggle Instructor Block

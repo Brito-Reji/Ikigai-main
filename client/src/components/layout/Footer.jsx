@@ -14,9 +14,8 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                <img src={logo} className="text-white font-bold text-sm"></img>
-
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1 overflow-hidden">
+                <img src={logo} alt="Ikigai Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-bold">Ikigai</span>
             </div>
@@ -89,32 +88,30 @@ export default function Footer() {
               <a
                 href="#"
                 className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
+                aria-label="Facebook"
               >
-                <span className="text-gray-900 text-sm">{ }</span>
+                <FaFacebookF className="text-gray-900 text-sm" />
               </a>
               <a
                 href="#"
                 className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
+                aria-label="LinkedIn"
               >
-                <span className="text-gray-900 text-sm">in</span>
+                <FaLinkedin className="text-gray-900 text-sm" />
               </a>
               <a
                 href="#"
                 className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
+                aria-label="Twitter"
               >
-                <span className="text-gray-900 text-sm">G</span>
+                <FaTwitter className="text-gray-900 text-sm" />
               </a>
               <a
                 href="#"
                 className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
+                aria-label="Instagram"
               >
-                <span className="text-gray-900 text-sm">tw</span>
-              </a>
-              <a
-                href="#"
-                className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200"
-              >
-                <span className="text-gray-900 text-sm">ig</span>
+                <FaInstagram className="text-gray-900 text-sm" />
               </a>
             </div>
           </div>

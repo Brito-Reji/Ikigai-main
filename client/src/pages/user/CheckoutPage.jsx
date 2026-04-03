@@ -154,7 +154,8 @@ const CheckoutPage = () => {
 
     } catch (error) {
       console.error("Checkout Payment error:", error);
-      toast.error("Payment was cancelled or failed");
+      const msg = error?.response?.data?.message || "Payment was cancelled or failed";
+      toast.error(msg);
     } finally {
       setProcessing(false);
     }

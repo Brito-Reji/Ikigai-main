@@ -3,9 +3,7 @@ import { loginAdminService } from "../../services/admin/adminLoginService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const adminLogin = asyncHandler(async (req, res) => {
-  const { user, accessToken, refreshToken } = await loginAdminService(
-    req.body
-  );
+  const { user, accessToken, refreshToken } = await loginAdminService(req.body);
 
   res.cookie("adminRefreshToken", refreshToken, {
     httpOnly: true,

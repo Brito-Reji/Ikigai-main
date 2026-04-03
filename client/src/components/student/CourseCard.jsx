@@ -58,7 +58,7 @@ export default function CourseCard({ course }) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group relative">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group relative h-full flex flex-col">
       {showNotification && (
         <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-bounce">
           <Check className="w-4 h-4" />
@@ -95,7 +95,7 @@ export default function CourseCard({ course }) {
         </button> */}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base line-clamp-2 group-hover:text-indigo-600 transition">
           {course.title}
         </h3>
@@ -116,11 +116,12 @@ export default function CourseCard({ course }) {
           <span className="text-xs text-gray-600 ml-1">({course.averageRating || 0})</span>
         </div>
 
-        {course.category && (
-          <p className="text-xs sm:text-sm text-gray-600 mb-3">
-            {course.category}
-          </p>
-        )}
+        <div className="mt-auto">
+          {course.category && (
+            <p className="text-xs sm:text-sm text-gray-600 mb-3">
+              {course.category}
+            </p>
+          )}
         <div className="flex justify-between items-center">
           <p className="text-lg sm:text-xl font-bold text-gray-900">
             {course.price}
@@ -128,6 +129,7 @@ export default function CourseCard({ course }) {
           <button className="px-3 py-1 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-xs sm:text-sm font-medium">
             Enroll
           </button>
+          </div>
         </div>
       </div>
     </div>

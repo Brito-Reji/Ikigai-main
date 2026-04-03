@@ -11,6 +11,7 @@ import {
   incrementCouponUsageService,
 } from "./couponService.js";
 import { getWalletBalance, debitWallet } from "./walletService.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const createOrderService = async ({
   courseIds,
@@ -26,13 +27,21 @@ export const createOrderService = async ({
   if (courses.length !== courseIds.length) {
     throw new Error("One or more courses are not published");
   }
-
+  const blockedCourses = courses.filter(data => data.blocked);
+  if (blockedCourses.length > 0) {
+    const names = blockedCourses.map(c => c.title).join(", ");
+    const error = new Error(
+      `The following course(s) are currently unavailable: ${names}`
+    );
+    error.statusCode = HTTP_STATUS.BAD_REQUEST;
+    throw error;
+  }
   const originalAmount = courses.reduce(
     (total, course) => total + course.price,
     0
   );
 
-  // convert paise to rupees for coupon calc (coupon is stored in INR)
+  // convert paise to rupees
   const originalAmountInRupees = originalAmount / 100;
 
   let couponId = null;
@@ -47,7 +56,7 @@ export const createOrderService = async ({
       originalAmountInRupees
     );
 
-    // coupon values are in INR; convert to paise for payment math
+    // c convert to paise for payment math
     discountAmount = Math.round(couponData.discountAmount * 100);
     couponId = couponData.couponId;
     appliedCouponCode = couponData.code;

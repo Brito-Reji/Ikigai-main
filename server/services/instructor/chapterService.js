@@ -6,7 +6,6 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 // Verify course ownership
 export const verifyCourseOwnership = async (courseId, instructorId) => {
 
-    const course = await Course.findOne({ _id: courseId });
 
     const courseWithInstructor = await Course.findOne({
         _id: courseId,
