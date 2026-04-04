@@ -78,10 +78,10 @@ export default function CourseCard({ course }) {
           <div className="flex items-center">
             <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
             <span className="text-sm font-medium text-gray-900">
-              {course.rating || "0.0"}
+              {course.averageRating.toFixed(1) || "0.0"}
             </span>
             <span className="text-sm text-gray-500 ml-1">
-              ({course.reviews} Reviews)
+              ({course.totalReviews} Reviews)
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Lesson } from "../../models/Lesson.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { AppError } from "../../errors/AppError.js";
+import { Review } from "../../models/Review.js";
 
 // GET ALL COURSES BY INSTRUCTOR
 export const getAllCourseByInstructorService = async (instructorId) => {
@@ -12,13 +13,55 @@ export const getAllCourseByInstructorService = async (instructorId) => {
         deleted: { $ne: true },
     })
         .populate("category", "name")
-        .populate("instructor", "firstName lastName email profileImageUrl headline")
-        .sort({ createdAt: -1 });
+        .populate("instructor", "firstName lastName email profileImageUrl headline").sort({ createdAt: -1 });
+    let courseIds = courses.map((c) => c._id)
+    let ratingStats = await Review.aggregate([
+      { $match: { course: { $in: courseIds } } },
+      {
+        $group: {
+          _id: "$course",
+          avg: { $avg: "$rating" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+     const ratingMap = {};
+     ratingStats.forEach(r => {
+       ratingMap[r._id.toString()] = {
+         averageRating: parseFloat(r.avg.toFixed(1)),
+         totalReviews: r.count,
+       };
+     });
 
-    return courses.map((course) => ({
-        ...course.toObject(),
-        price: (course.price / 100).toFixed(2),
-    }));
+    // return courses.map((course) => ({
+    //     ...course.toObject(),
+    //     price: (course.price / 100).toFixed(2),
+    // })
+    
+    // );
+
+ const result = await Promise.all(
+  courses.map(async (course) => {
+    const id = course._id;
+
+    const stats = ratingMap[id] || {
+      averageRating: 0,
+      totalReviews: 0,
+    };
+
+    const chapters = (await Chapter.find({ course: id }).lean()).length;
+
+    return {
+      ...course.toObject(),
+      averageRating: stats.averageRating,
+      totalReviews: stats.totalReviews,
+      price: parseFloat((course.price / 100).toFixed(2)), // fix here too
+      chapters,
+    };
+  })
+);
+
+return result;
 };
 
 // VALIDATE COURSE INPUT

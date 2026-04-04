@@ -17,7 +17,7 @@ export default function CoursesPage() {
   // Transform backend data to match component expectations
   const courses = instructorCourses.map(course => ({
     id: course._id,
-    blocked:course.blocked,
+    blocked: course.blocked,
     title: course.title,
     price: `₹${course.price}`,
     chapters: course.chapters || 0,
@@ -28,13 +28,17 @@ export default function CoursesPage() {
     verificationStatus: course.verificationStatus || "pending",
     students: course.enrollments || 0,
     revenue: `₹${(course.price * (course.enrollments || 0)).toLocaleString()}`,
-    thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80",
+    thumbnail:
+      course.thumbnail ||
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80",
     lastUpdated: new Date(course.updatedAt).toLocaleDateString(),
     description: course.description,
     overview: course.overview,
-    category: course.category
+    category: course.category,
+    averageRating: course.averageRating || 0,
+    totalReviews: course.totalReviews || 0,
   }));
-
+console.log(courses);
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === "all" ||
@@ -129,7 +133,10 @@ export default function CoursesPage() {
               </div>
               <div className="bg-white p-4 rounded-lg shadow">
                 <div className="text-2xl font-bold text-blue-600">
-                  {courses.reduce((total, course) => total + course.students, 0)}
+                  {courses.reduce(
+                    (total, course) => total + course.students,
+                    0
+                  )}
                 </div>
                 <div className="text-sm text-gray-600">Total Students</div>
               </div>
@@ -145,7 +152,7 @@ export default function CoursesPage() {
                   type="text"
                   placeholder="Search courses..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 {searchQuery && (
@@ -162,7 +169,7 @@ export default function CoursesPage() {
             <div className="flex items-center gap-3">
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={e => setFilterStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="all">All Status</option>
@@ -210,7 +217,9 @@ export default function CoursesPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Error loading courses
             </h3>
-            <p className="text-gray-500 mb-4">{error?.message || "Failed to load courses"}</p>
+            <p className="text-gray-500 mb-4">
+              {error?.message || "Failed to load courses"}
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
@@ -221,15 +230,18 @@ export default function CoursesPage() {
         ) : filteredCourses.length > 0 ? (
           viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course) => (
+              {filteredCourses.map(course => (
                 <div key={course.id} className="relative group">
-                  <div onClick={() => handleViewCourse(course.id)} className="cursor-pointer">
+                  <div
+                    onClick={() => handleViewCourse(course.id)}
+                    className="cursor-pointer"
+                  >
                     <CourseCard course={course} />
                   </div>
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                     <div className="bg-white rounded-lg shadow-lg p-1">
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           navigate(`/instructor/courses/${course.id}/edit`);
                         }}
@@ -239,7 +251,7 @@ export default function CoursesPage() {
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleViewCourse(course.id);
                         }}
@@ -249,7 +261,7 @@ export default function CoursesPage() {
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleDeleteCourse(course.id);
                         }}
@@ -290,7 +302,7 @@ export default function CoursesPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredCourses.map((course) => (
+                  {filteredCourses.map(course => (
                     <tr key={course.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -311,10 +323,11 @@ export default function CoursesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${course.status === "Published"
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            course.status === "Published"
                               ? "bg-green-100 text-green-800"
                               : "bg-yellow-100 text-yellow-800"
-                            }`}
+                          }`}
                         >
                           {course.status}
                         </span>
@@ -326,11 +339,13 @@ export default function CoursesPage() {
                         {course.revenue}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ⭐ {course.rating}
+                        ⭐ {course.averageRating} { console.log("rating ",course.averageRating) }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => navigate(`/instructor/courses/${course.id}/edit`)}
+                          onClick={() =>
+                            navigate(`/instructor/courses/${course.id}/edit`)
+                          }
                           className="text-indigo-600 hover:text-indigo-900 mr-3"
                         >
                           Edit
@@ -355,13 +370,14 @@ export default function CoursesPage() {
               <Plus className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {searchQuery || filterStatus !== "all" ? "No courses found" : "No courses yet"}
+              {searchQuery || filterStatus !== "all"
+                ? "No courses found"
+                : "No courses yet"}
             </h3>
             <p className="text-gray-500 mb-4">
               {searchQuery || filterStatus !== "all"
                 ? "Try adjusting your search or filter criteria"
-                : "Create your first course to get started"
-              }
+                : "Create your first course to get started"}
             </p>
             {!searchQuery && filterStatus === "all" && (
               <button

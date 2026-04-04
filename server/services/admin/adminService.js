@@ -1,4 +1,4 @@
-// import { Course } from "../../models/Course.js";
+
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 
@@ -28,8 +28,6 @@ export const getInstructorsService = async () => {
   });
   
 
-     
-    
 
   return instructors
 };
