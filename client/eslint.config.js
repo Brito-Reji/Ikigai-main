@@ -1,3 +1,4 @@
+
 // eslint.config.js
 import js from "@eslint/js";
 import globals from "globals";
@@ -24,7 +25,8 @@ export default defineConfig([
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "react/jsx-filename-extension": [1, { extensions: [".js", ".jsx"] }],
-
+      "tailwindcss/classnames-order": "off",
+      "tailwindcss/no-custom-classname": "off",
       // Double quotes rule (allow backticks)
       quotes: [
         "error",
@@ -34,3 +36,4 @@ export default defineConfig([
     },
   },
 ]);
+

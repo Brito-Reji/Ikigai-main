@@ -26,7 +26,7 @@ export default function PaymentSuccessCard({ course, index }) {
       </div>
       <div className="flex-shrink-0 text-right">
         <p className="text-base font-bold text-gray-900">
-          ₹{typeof course.price === 'number' ? course.price.toFixed(2) : course.price}
+          ₹{typeof course.price === "number" ? course.price.toFixed(2) : course.price}
         </p>
       </div>
     </div>
