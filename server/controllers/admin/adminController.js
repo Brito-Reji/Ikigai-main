@@ -61,6 +61,7 @@ export const blockInstructor = asyncHandler(async (req, res) => {
 //  Student Details
 export const getStudentDetails = asyncHandler(async (req, res) => {
   const student = await getStudentDetailsService(req.params.id);
+  console.log(student)
 
   res.status(HTTP_STATUS.OK).json({
     success: true,

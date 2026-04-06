@@ -1,4 +1,6 @@
 
+import { Course } from "../../models/Course.js";
+import { Enrollment } from "../../models/Enrollment.js";
 import { Instructor } from "../../models/Instructor.js";
 import { User } from "../../models/User.js";
 
@@ -54,8 +56,25 @@ export const getStudentDetailsService = async id => {
 
 //  Instructor Details
 export const getInstructorDetailsService = async id => {
-  const instructor = await Instructor.findById(id);
+  const instructor = await Instructor.findById(id).lean();
   if (!instructor) throw new Error("Instructor not found");
-
-  return instructor;
+  let totalCourse = await Course.countDocuments({ instructor: id })
+  let courseinfo = await Enrollment.aggregate([{
+    $lookup: {
+      from: "courses",
+      localField: "course",
+      foreignField: "_id",
+      as:"courses"
+    }
+  }, { $unwind: "$courses" },
+    {
+      $group: {
+        _id: "$courses.instructor",
+        count: { $sum: 1 }
+    }}
+  ])
+  let totalStudents = courseinfo.filter((data) => data._id.toString() === id)[0].count
+  
+  console.log({ ...instructor, totalStudents, totalCourse });
+  return {...instructor,totalStudents,totalCourse};
 };

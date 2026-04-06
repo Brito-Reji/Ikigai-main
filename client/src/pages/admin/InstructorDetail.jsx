@@ -126,7 +126,10 @@ const InstructorDetail = () => {
     <div className="max-w-6xl mx-auto">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-        <Link to="/admin/dashboard" className="hover:text-indigo-600 flex items-center">
+        <Link
+          to="/admin/dashboard"
+          className="hover:text-indigo-600 flex items-center"
+        >
           <Home className="w-4 h-4" />
         </Link>
         <ChevronRight className="w-4 h-4" />
@@ -162,21 +165,25 @@ const InstructorDetail = () => {
                 </h1>
                 <Award className="w-6 h-6 text-yellow-500" />
               </div>
-              <p className="text-gray-600 text-lg mb-3">@{instructor.username || "N/A"}</p>
+              <p className="text-gray-600 text-lg mb-3">
+                @{instructor.username || "N/A"}
+              </p>
               <div className="flex items-center space-x-3">
                 <span
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${instructor.isBlocked
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
+                    instructor.isBlocked
                       ? "bg-red-100 text-red-800"
                       : "bg-green-100 text-green-800"
-                    }`}
+                  }`}
                 >
                   {instructor.isBlocked ? "Blocked" : "Active"}
                 </span>
                 <span
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${instructor.isVerified
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full ${
+                    instructor.isVerified
                       ? "bg-blue-100 text-blue-800"
                       : "bg-gray-100 text-gray-800"
-                    }`}
+                  }`}
                 >
                   {instructor.isVerified ? "Verified" : "Not Verified"}
                 </span>
@@ -188,10 +195,11 @@ const InstructorDetail = () => {
           </div>
           <button
             onClick={handleBlockToggle}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${instructor.isBlocked
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              instructor.isBlocked
                 ? "bg-green-500 text-white hover:bg-green-600"
                 : "bg-red-500 text-white hover:bg-red-600"
-              }`}
+            }`}
           >
             {instructor.isBlocked ? "Unblock Instructor" : "Block Instructor"}
           </button>
@@ -210,14 +218,18 @@ const InstructorDetail = () => {
               <Mail className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Email Address</p>
-                <p className="text-gray-800 font-medium">{instructor.email || "N/A"}</p>
+                <p className="text-gray-800 font-medium">
+                  {instructor.email || "N/A"}
+                </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <User className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Username</p>
-                <p className="text-gray-800 font-medium">{instructor.username || "N/A"}</p>
+                <p className="text-gray-800 font-medium">
+                  {instructor.username || "N/A"}
+                </p>
               </div>
             </div>
           </div>
@@ -233,14 +245,18 @@ const InstructorDetail = () => {
               <Shield className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Instructor ID</p>
-                <p className="text-gray-800 font-medium font-mono">#{instructor._id}</p>
+                <p className="text-gray-800 font-medium font-mono">
+                  #{instructor._id}
+                </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <Calendar className="w-5 h-5 text-indigo-500 mt-1" />
               <div>
                 <p className="text-sm text-gray-500">Joined Date</p>
-                <p className="text-gray-800 font-medium">{formatDate(instructor.createdAt)}</p>
+                <p className="text-gray-800 font-medium">
+                  {formatDate(instructor.createdAt)}
+                </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
@@ -270,13 +286,17 @@ const InstructorDetail = () => {
             {instructor.firstName && (
               <div>
                 <p className="text-sm text-gray-500 mb-1">First Name</p>
-                <p className="text-gray-800 font-medium">{instructor.firstName}</p>
+                <p className="text-gray-800 font-medium">
+                  {instructor.firstName}
+                </p>
               </div>
             )}
             {instructor.lastName && (
               <div>
                 <p className="text-sm text-gray-500 mb-1">Last Name</p>
-                <p className="text-gray-800 font-medium">{instructor.lastName}</p>
+                <p className="text-gray-800 font-medium">
+                  {instructor.lastName}
+                </p>
               </div>
             )}
           </div>
@@ -291,12 +311,16 @@ const InstructorDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="text-center p-4 bg-indigo-50 rounded-lg">
             <BookOpen className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-indigo-600">0</p>
+            <p className="text-3xl font-bold text-indigo-600">
+              {instructor.totalCourse}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Total Courses</p>
           </div>
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <User className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-blue-600">0</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {instructor.totalStudents}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Total Students</p>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
