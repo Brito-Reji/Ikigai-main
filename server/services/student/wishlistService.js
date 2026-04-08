@@ -40,7 +40,7 @@ export const getWishlistService = async userId => {
 export const addToWishlistService = async (userId, courseId) => {
   const course = await Course.findById(courseId);
   if (!course) {
-    throw new Error("Course not found");
+    throw new AppError("Course not found",HTTP_STATUS.BAD_REQUEST);
   }
 
   const wishlist = await Wishlist.findOneAndUpdate(

@@ -1,4 +1,6 @@
+import { AppError } from "../../errors/AppError.js";
 import { Coupon } from "../../models/Coupon.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 export const createCouponService = coupon => {
   return Coupon.create(coupon);
@@ -20,7 +22,7 @@ export const deleteCouponService = couponId => {
 
 export const togglePauseCouponService = async (couponId) => {
   let coupon = await Coupon.findById(couponId)
-  if(!coupon) throw new Error("Coupon not found")
+  if(!coupon) throw new AppError("Coupon not found", HTTP_STATUS.NOT_FOUND)
   coupon.isPaused = !coupon.isPaused
   return coupon.save()
  

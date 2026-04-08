@@ -15,7 +15,7 @@ export const getStudentsService = async () => {
 export const toggleStudentBlockService = async studentId => {
   const student = await User.findById(studentId);
 
-  if (!student) throw new Error("Student not found");
+  if (!student) throw new AppError("Student not found", HTTP_STATUS.NOT_FOUND);
 
   student.isBlocked = !student.isBlocked;
   await student.save();
@@ -40,7 +40,7 @@ export const getInstructorsService = async () => {
 export const toggleInstructorBlockService = async instructorId => {
   const instructor = await Instructor.findById(instructorId);
 
-  if (!instructor) throw new Error("Instructor not found");
+  if (!instructor) throw new AppError("Instructor not found", HTTP_STATUS.NOT_FOUND);
 
   instructor.isBlocked = !instructor.isBlocked;
   await instructor.save();

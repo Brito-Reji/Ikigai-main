@@ -3,6 +3,8 @@ import asyncHandler from "express-async-handler";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
 import { Admin } from "../models/Admin.js";
+import { AppError } from "../errors/AppError.js";
+import { HTTP_STATUS } from "../utils/httpStatus.js";
 
 const MODELS = {
   student: User,
@@ -32,19 +34,17 @@ const authenticate = asyncHandler(async (req, res, next) => {
 
     if (!Model) {
       res.status(401);
-      throw new Error("Invalid role");
+      throw new AppError("Invalid role", HTTP_STATUS.UNAUTHORIZED);
     }
 
     const user = await Model.findById(decoded.id).select("-password");
 
     if (!user) {
-      res.status(401);
-      throw new Error("User not found");
+      throw new AppError("User not found", HTTP_STATUS.UNAUTHORIZED);
     }
 
     if (user.isBlocked) {
-      res.status(403);
-      throw new Error("Account is blocked");
+      throw new AppError("Account is blocked", HTTP_STATUS.FORBIDDEN);
     }
 
     req.user = {

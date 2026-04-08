@@ -8,6 +8,7 @@ import {
 } from "../../services/student/cartService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
+import { AppError } from "../../errors/AppError.js";
 
 // get cart
 export const getCart = asyncHandler(async (req, res) => {
@@ -29,8 +30,7 @@ export const addToCart = asyncHandler(async (req, res) => {
   const { courseId } = req.body;
 
   if (!courseId) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error(MESSAGES.CART.COURSE_ID_REQUIRED);
+    throw new AppError(MESSAGES.CART.COURSE_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST);
   }
 
   const courses = await addToCartService(userId, courseId);
@@ -62,8 +62,7 @@ export const syncCart = asyncHandler(async (req, res) => {
   const { courseIds } = req.body;
 
   if (!Array.isArray(courseIds)) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("courseIds must be an array");
+    throw new AppError("courseIds must be an array", HTTP_STATUS.BAD_REQUEST);
   }
 
   const courses = await syncCartService(userId, courseIds);

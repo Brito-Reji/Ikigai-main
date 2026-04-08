@@ -2,14 +2,15 @@ import asyncHandler from "express-async-handler";
 import * as paymentService from "../../services/student/paymentService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
+import { AppError } from "../../errors/AppError.js";
 
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { courseIds, couponCode, useWallet } = req.body;
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error(
-      `Valid Course IDs are required. Received: ${JSON.stringify(req.body)}`
+    throw new AppError(
+      `Valid Course IDs are required. Received: ${JSON.stringify(req.body)}`,
+      HTTP_STATUS.BAD_REQUEST
     );
   }
 
@@ -33,8 +34,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
     req.body;
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Missing payment verification details");
+    throw new AppError("Missing payment verification details", HTTP_STATUS.BAD_REQUEST);
   }
 
   const isValid = paymentService.verifyPaymentService({
@@ -56,16 +56,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       data: result,
     });
   } else {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Invalid payment signature");
+    throw new AppError("Invalid payment signature", HTTP_STATUS.BAD_REQUEST);
   }
 });
 
 export const retryOrder = asyncHandler(async (req, res) => {
   const { orderId } = req.body;
   if (!orderId) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Order ID is required");
+    throw new AppError("Order ID is required", HTTP_STATUS.BAD_REQUEST);
   }
 
   const order = await paymentService.retryOrderService({
@@ -101,8 +99,7 @@ export const getPendingPayment = asyncHandler(async (req, res) => {
 export const cancelOrder = asyncHandler(async (req, res) => {
   const { orderId } = req.body;
   if (!orderId) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Order ID is required");
+    throw new AppError("Order ID is required", HTTP_STATUS.BAD_REQUEST);
   }
   const result = await paymentService.cancelOrderService({
     orderId,

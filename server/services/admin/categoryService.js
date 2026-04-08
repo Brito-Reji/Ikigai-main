@@ -1,6 +1,8 @@
 
+import { AppError } from "../../errors/AppError.js";
 import { Category } from "../../models/Category.js";
 import { Course } from "../../models/Course.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // GET CATEGORIES
 export const getCategoriesService = async ({ page, limit, search }) => {
@@ -51,11 +53,11 @@ export const getCategoriesService = async ({ page, limit, search }) => {
 // CREATE CATEGORIES
 export const createCategoryService = async ({ name, description }) => {
     if (!name || !description) {
-        throw new Error("Name and description are required");
+        throw new AppError("Name and description are required", HTTP_STATUS.BAD_REQUEST);
     }
 
     const exists = await Category.findOne({ name: name.trim() });
-    if (exists) throw new Error("Category already exists");
+    if (exists) throw new AppError("Category already exists", HTTP_STATUS.BAD_REQUEST);
 
     const category = await Category.create({
         name: name.trim(),
@@ -68,19 +70,19 @@ export const createCategoryService = async ({ name, description }) => {
 // EDIT CATEGORIES
 export const editCategoryService = async (categoryId, { name, description }) => {
     if (!name || !description) {
-        throw new Error("Name and description are required");
+        throw new AppError("Name and description are required", HTTP_STATUS.BAD_REQUEST);
     }
-    if (!categoryId) throw new Error("Category ID is required");
+    if (!categoryId) throw new AppError("Category ID is required", HTTP_STATUS.BAD_REQUEST);
 
     const exists = await Category.findOne({
         name: name.trim(),
         _id: { $ne: categoryId },
     });
 
-    if (exists) throw new Error("Another category with this name already exists");
+    if (exists) throw new AppError("Another category with this name already exists", HTTP_STATUS.BAD_REQUEST);
 
     const category = await Category.findById(categoryId);
-    if (!category) throw new Error("Category not found");
+    if (!category) throw new AppError("Category not found", HTTP_STATUS.NOT_FOUND);
 
     category.name = name.trim();
     category.description = description.trim();
@@ -92,7 +94,7 @@ export const editCategoryService = async (categoryId, { name, description }) => 
 // TOGGLE BLOCK
 export const toggleCategoryBlockService = async (categoryId) => {
     const category = await Category.findById(categoryId);
-    if (!category) throw new Error("Category not found");
+    if (!category) throw new AppError("Category not found", HTTP_STATUS.NOT_FOUND);
 
     category.isBlocked = !category.isBlocked;
     await category.save();

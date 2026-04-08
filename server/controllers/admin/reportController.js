@@ -4,6 +4,8 @@ import {
     getReportDetailsService,
     updateReportStatusService,
 } from "../../services/admin/reportService.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all reports
 export const getAllReports = asyncHandler(async (req, res) => {
@@ -36,8 +38,7 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
     const { status, adminNote, blockCourse } = req.body;
 
     if (!status) {
-        res.status(400);
-        throw new Error("Status is required");
+        throw new AppError("Status is required", HTTP_STATUS.BAD_REQUEST);
     }
 
     const report = await updateReportStatusService(reportId, status, adminNote, blockCourse);

@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import * as chatService from "../../services/student/chatService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { AppError } from "../../errors/AppError.js";
 
 // get conversations
 export const getConversations = asyncHandler(async (req, res) => {
@@ -16,8 +17,7 @@ export const getOrCreateConversation = asyncHandler(async (req, res) => {
   const { instructorId, courseId } = req.body;
 
   if (!instructorId || !courseId) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error("Instructor ID and Course ID required");
+    throw new AppError("Instructor ID and Course ID required", HTTP_STATUS.BAD_REQUEST);
   }
 
   const conversation = await chatService.getOrCreateConversation(

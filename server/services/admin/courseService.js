@@ -8,6 +8,7 @@ import { Order } from "../../models/Order.js";
 import { creditWallet } from "../student/walletService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { Instructor } from "../../models/Instructor.js";
+import { AppError } from "../../errors/AppError.js";
 
 // Get all courses
 export const getAllCoursesService = async (filters) => {
@@ -106,9 +107,7 @@ export const getCourseDetailsService = async (courseId) => {
         .populate("instructor", "firstName lastName email profileImageUrl headline description social").lean()
 
     if (!course) {
-        const error = new Error("Course not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Course not found", HTTP_STATUS.NOT_FOUND);
     }
 
    // update coures price paise to inr
@@ -123,17 +122,13 @@ export const toggleCourseBlockService = async (courseId, reason) => {
         .populate("instructor", "_id firstName lastName");
 
     if (!course) {
-        const error = new Error("Course not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Course not found", HTTP_STATUS.NOT_FOUND);
     }
 
     const isBlocking = !course.blocked;
 
     if (isBlocking && !reason?.trim()) {
-        const error = new Error("Block reason is required");
-        error.statusCode = HTTP_STATUS.BAD_REQUEST;
-        throw error;
+        throw new AppError("Block reason is required", HTTP_STATUS.BAD_REQUEST);
     }
 
     course.blocked = isBlocking;
@@ -183,24 +178,18 @@ export const toggleCourseBlockService = async (courseId, reason) => {
 // Delete course with wallet refund for enrolled students
 export const deleteCourseService = async (courseId, reason) => {
     if (!reason?.trim()) {
-        const error = new Error("Deletion reason is required");
-        error.statusCode = HTTP_STATUS.BAD_REQUEST;
-        throw error;
+        throw new AppError("Deletion reason is required", HTTP_STATUS.BAD_REQUEST);
     }
 
     const course = await Course.findById(courseId)
         .populate("instructor", "_id firstName lastName");
 
     if (!course) {
-        const error = new Error("Course not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Course not found", HTTP_STATUS.NOT_FOUND);
     }
 
     if (course.deleted) {
-        const error = new Error("Course is already deleted");
-        error.statusCode = HTTP_STATUS.BAD_REQUEST;
-        throw error;
+        throw new AppError("Course is already deleted", HTTP_STATUS.BAD_REQUEST);
     }
 
     // get all eligible enrollments for refund (active or completed)
@@ -339,23 +328,17 @@ export const getCourseStatisticsService = async () => {
 // Update verification status
 export const updateVerificationStatusService = async (courseId, status, rejectionReason) => {
     if (!["verified", "rejected"].includes(status)) {
-        const error = new Error("Invalid verification status. Must be 'verified' or 'rejected'");
-        error.statusCode = HTTP_STATUS.BAD_REQUEST;
-        throw error;
+        throw new AppError("Invalid verification status. Must be 'verified' or 'rejected'", HTTP_STATUS.BAD_REQUEST);
     }
 
     const course = await Course.findById(courseId);
 
     if (!course) {
-        const error = new Error("Course not found");
-        error.statusCode = HTTP_STATUS.NOT_FOUND;
-        throw error;
+        throw new AppError("Course not found", HTTP_STATUS.NOT_FOUND);
     }
 
     if (course.verificationStatus !== "inprocess") {
-        const error = new Error("Course is not in verification process");
-        error.statusCode = HTTP_STATUS.BAD_REQUEST;
-        throw error;
+        throw new AppError("Course is not in verification process", HTTP_STATUS.BAD_REQUEST);
     }
 
     if (status === "verified") {
@@ -365,9 +348,7 @@ export const updateVerificationStatusService = async (courseId, status, rejectio
 
     if (status === "rejected") {
         if (!rejectionReason || rejectionReason.trim() === "") {
-            const error = new Error("Rejection reason is required when rejecting a course");
-            error.statusCode = HTTP_STATUS.BAD_REQUEST;
-            throw error;
+            throw new AppError("Rejection reason is required when rejecting a course", HTTP_STATUS.BAD_REQUEST);
         }
         course.verificationStatus = status
         course.rejectionReason = rejectionReason;

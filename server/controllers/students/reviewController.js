@@ -6,6 +6,7 @@ import {
 } from "../../services/student/reviewService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
+import { AppError } from "../../errors/AppError.js";
 
 // submit or update a review
 export const addOrUpdateReview = asyncHandler(async (req, res) => {
@@ -13,8 +14,7 @@ export const addOrUpdateReview = asyncHandler(async (req, res) => {
   const { courseId, rating, reviewText } = req.body;
 
   if (!courseId || !rating) {
-    res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new Error(MESSAGES.ERROR.FIELDS_REQUIRED);
+    throw new AppError(MESSAGES.ERROR.FIELDS_REQUIRED, HTTP_STATUS.BAD_REQUEST);
   }
 
   const review = await addOrUpdateReviewService(

@@ -1,6 +1,7 @@
 import { CourseReport } from "../../models/CourseReport.js";
-import { Course } from "../../models/Course.js";
 import { toggleCourseBlockService } from "./courseService.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Get all reports paginated
 export const getAllReportsService = async ({ page = 1, limit = 20, status }) => {
@@ -38,9 +39,8 @@ export const getReportDetailsService = async (reportId) => {
         .populate("reportedBy", "firstName lastName email avatar");
 
     if (!report) {
-        const error = new Error("Report not found");
-        error.statusCode = 404;
-        throw error;
+        throw new AppError("Report not found", HTTP_STATUS.NOT_FOUND);
+
     }
 
     return report;
@@ -51,9 +51,7 @@ export const updateReportStatusService = async (reportId, status, adminNote, blo
     const report = await CourseReport.findById(reportId).populate("courseId");
 
     if (!report) {
-        const error = new Error("Report not found");
-        error.statusCode = 404;
-        throw error;
+        throw new AppError("Report not found", HTTP_STATUS.NOT_FOUND);
     }
 
     report.status = status;

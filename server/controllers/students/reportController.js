@@ -1,5 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { submitReportService } from "../../services/student/reportService.js";
+import { AppError } from "../../errors/AppError.js";
+import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Submit course report
 export const submitReport = asyncHandler(async (req, res) => {
@@ -7,13 +9,12 @@ export const submitReport = asyncHandler(async (req, res) => {
     const { courseId, reason, otherReason } = req.body;
 
     if (!courseId || !reason) {
-        res.status(400);
-        throw new Error("courseId and reason are required");
+        throw new AppError("courseId and reason are required", HTTP_STATUS.BAD_REQUEST);
     }
 
     const report = await submitReportService(userId, courseId, reason, otherReason);
 
-    res.status(201).json({
+    res.status(HTTP_STATUS.CREATED).json({
         success: true,
         message: "Report submitted successfully",
         data: report,
