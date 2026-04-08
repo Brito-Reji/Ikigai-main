@@ -16,7 +16,6 @@ import {
 import {
   getWishlist,
   toggleWishlist,
-  removeFromWishlist,
 } from "../controllers/students/wishlistController.js";
 import {
   fullRefund,
@@ -73,7 +72,7 @@ router.delete("/cart", clearCart);
 // Wishlist
 router.get("/wishlist", getWishlist);
 router.post("/wishlist/toggle", toggleWishlist);
-router.delete("/wishlist/:courseId", removeFromWishlist);
+// router.delete("/wishlist/:courseId", removeFromWishlist);
 
 // Refunds
 router.post("/refund/full", fullRefund);

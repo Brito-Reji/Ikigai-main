@@ -1,8 +1,7 @@
 import asyncHandler from "express-async-handler";
 import {
   getWishlistService,
-  addToWishlistService,
-  removeFromWishlistService,
+
   toggleWishlistService,
 } from "../../services/student/wishlistService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
@@ -44,15 +43,3 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
   });
 });
 
-// remove from wishlist
-export const removeFromWishlist = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  const { courseId } = req.params;
-
-  await removeFromWishlistService(userId, courseId);
-
-  res.status(HTTP_STATUS.OK).json({
-    success: true,
-    message: MESSAGES.WISHLIST.REMOVED,
-  });
-});
