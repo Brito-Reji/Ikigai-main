@@ -1,4 +1,5 @@
 import api from "@/api/adminAxiosConfig";
+import { useAdminGetStudents } from "@/hooks/useAdmin.js";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -7,9 +8,11 @@ import Swal from "sweetalert2";
 const Students = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [students, setStudents] = useState([]);
+  // const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  let { data: response, isLoading } = useAdminGetStudents();
+  const students = response?.data?.data || [];
+
   // Get initial values from URL or defaults
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
@@ -25,68 +28,9 @@ const Students = () => {
     return student.username || "N/A";
   };
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/admin/students");
-        console.log(response.data.data);
-        setStudents(response.data.data);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
 
-  const handleBlockToggle = async (studentId) => {
-    const student = students.find(s => s._id === studentId);
-    const action = student.isBlocked ? "unblock" : "block";
-    
-    const result = await Swal.fire({
-      title: `${action === "block" ? "Block" : "Unblock"} Student?`,
-      html: `
-        <p>Are you sure you want to ${action} <strong>${getFullName(student)}</strong>?</p>
-      `,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: "Cancel"
-    });
 
-    if (result.isConfirmed) {
-      try {
-        await api.patch(`/admin/students/${studentId}/toggle-block`);
-        
-        // Update local state
-        setStudents(students.map(s => 
-          s._id === studentId 
-            ? { ...s, isBlocked: !s.isBlocked }
-            : s
-        ));
-        
-        Swal.fire({
-          title: "Success!",
-          text: `Student has been ${action}ed successfully.`,
-          icon: "success",
-          confirmButtonColor: "#3b82f6",
-          timer: 2000
-        });
-      } catch (error) {
-        console.error("Error toggling block status:", error);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to update student status.",
-          icon: "error",
-          confirmButtonColor: "#dc2626"
-        });
-      }
-    }
-  };
+
 
   const handleViewDetails = (studentId) => {
     navigate(`/admin/students/${studentId}`);
@@ -179,7 +123,7 @@ const Students = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-xl text-gray-600">Loading students...</div>
@@ -323,16 +267,7 @@ const Students = () => {
                         >
                           View
                         </button>
-                        <button
-                          onClick={() => handleBlockToggle(student._id)}
-                          className={`px-4 py-1.5 rounded transition-colors ${
-                            student.isBlocked
-                              ? "bg-green-500 text-white hover:bg-green-600"
-                              : "bg-red-500 text-white hover:bg-red-600"
-                          }`}
-                        >
-                          {student.isBlocked ? "Unblock" : "Block"}
-                        </button>
+                     
                       </div>
                     </td>
                   </tr>

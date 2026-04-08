@@ -1,4 +1,4 @@
-import api from "@/api/adminAxiosConfig";
+import { useAdminGetInstrucors, useToggleBlockInstructor } from "@/hooks/useAdmin.js";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -7,8 +7,6 @@ import Swal from "sweetalert2";
 const Instructors = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [instructors, setInstructors] = useState([]);
-  const [loading, setLoading] = useState(true);
   
   // Get initial values from URL or defaults
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -25,21 +23,11 @@ const Instructors = () => {
     return instructor.username || "N/A";
   };
 
-  useEffect(() => {
-    const fetchInstructors = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/admin/instructors");
-        console.log(response.data.data);
-        setInstructors(response.data.data);
-      } catch (error) {
-        console.error("Error fetching instructors:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInstructors();
-  }, []);
+  let { data: response, isLoading } = useAdminGetInstrucors();
+  const toggleMutation = useToggleBlockInstructor();
+
+  // Renaming the deep data to 'instructors' and defaulting to empty array
+  const instructors = response?.data?.data || [];
 
   const handleBlockToggle = async (instructorId) => {
     const instructor = instructors.find(i => i._id === instructorId);
@@ -60,16 +48,7 @@ const Instructors = () => {
 
     if (result.isConfirmed) {
       try {
-        await api.patch(`/admin/instructors/${instructorId}/toggle-block`);
-
-        // Update local state
-        setInstructors(
-          instructors.map((i) =>
-            i._id === instructorId
-              ? { ...i, isBlocked: !i.isBlocked }
-              : i
-          )
-        );
+        await toggleMutation.mutateAsync(instructorId);
         
         Swal.fire({
           title: "Success!",
@@ -185,7 +164,7 @@ const Instructors = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-xl text-gray-600">Loading instructors...</div>
@@ -335,7 +314,7 @@ const Instructors = () => {
                         >
                           View
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleBlockToggle(instructor._id)}
                           className={`px-4 py-1.5 rounded transition-colors ${
                             instructor.isBlocked
@@ -344,7 +323,7 @@ const Instructors = () => {
                           }`}
                         >
                           {instructor.isBlocked ? "Unblock" : "Block"}
-                        </button>
+                        </button> */}
                       </div>
                     </td>
                   </tr>

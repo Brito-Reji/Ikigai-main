@@ -12,32 +12,39 @@ import {
   ChevronRight,
   Home,
   Award,
-  BookOpen
+  BookOpen,
 } from "lucide-react";
 import ThreeDotLoader from "@/components/common/ThreeDotLoader";
 import Swal from "sweetalert2";
-
+import {
+  useAdminGetInstructorById,
+  useToggleBlockInstructor,
+} from "@/hooks/useAdmin.js";
 const InstructorDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [instructor, setInstructor] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { data: response, isLoading } = useAdminGetInstructorById(id);
+  const toggleMutation = useToggleBlockInstructor();
 
-  useEffect(() => {
-    fetchInstructorDetails();
-  }, [id]);
+  // useEffect(() => {
+  //   fetchInstructorDetails();
+  // }, [id]);
 
-  const fetchInstructorDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/admin/instructors/${id}`);
-      setInstructor(response.data.data);
-    } catch (error) {
-      console.error("Error fetching instructor details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchInstructorDetails = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await api.get(`/admin/instructors/${id}`);
+  //     setInstructor(response.data.data);
+  //   } catch (error) {
+  //     console.error("Error fetching instructor details:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  let instructor = response?.data?.data || null;
+
+  console.log("Instructor data from hook:", response);
 
   const handleBlockToggle = async () => {
     const action = instructor.isBlocked ? "unblock" : "block";
@@ -52,19 +59,17 @@ const InstructorDetail = () => {
       confirmButtonColor: action === "block" ? "#dc2626" : "#16a34a",
       cancelButtonColor: "#6b7280",
       confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: "Cancel"
+      cancelButtonText: "Cancel",
     });
 
     if (result.isConfirmed) {
       try {
-        await api.patch(`/admin/instructors/${id}/toggle-block`);
-        setInstructor({ ...instructor, isBlocked: !instructor.isBlocked });
-
+await toggleMutation.mutateAsync(instructor._id);        
         Swal.fire({
           title: `Instructor ${action === "block" ? "Blocked" : "Unblocked"}!`,
           text: `${getFullName(instructor)} has been ${action}ed successfully.`,
           icon: "success",
-          confirmButtonColor: "#3b82f6"
+          confirmButtonColor: "#3b82f6",
         });
       } catch (error) {
         console.error("Error toggling block status:", error);
@@ -72,13 +77,13 @@ const InstructorDetail = () => {
           title: "Error!",
           text: "Failed to update instructor status. Please try again.",
           icon: "error",
-          confirmButtonColor: "#dc2626"
+          confirmButtonColor: "#dc2626",
         });
       }
     }
   };
 
-  const getFullName = (instructor) => {
+  const getFullName = instructor => {
     if (!instructor) return "N/A";
     if (instructor.fullName) return instructor.fullName;
     if (instructor.firstName && instructor.lastName) {
@@ -88,7 +93,7 @@ const InstructorDetail = () => {
     return instructor.username || "N/A";
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -96,11 +101,11 @@ const InstructorDetail = () => {
       month: "long",
       year: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <ThreeDotLoader size="lg" color="indigo" />
@@ -194,7 +199,7 @@ const InstructorDetail = () => {
             </div>
           </div>
           <button
-            onClick={handleBlockToggle}
+            onClick={() => handleBlockToggle(instructor._id)}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               instructor.isBlocked
                 ? "bg-green-500 text-white hover:bg-green-600"

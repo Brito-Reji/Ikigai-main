@@ -1,51 +1,35 @@
-import { useCategory } from "@/hooks/useRedux";
-import { createCategory, updateCategory, toggleCategoryBlock } from "@/store/slices/categorySlice";
-import React, { useEffect, useState } from "react";
+import { useAdminCategories, useAdminCreateCategory, useAdminUpdateCategory, useAdminToggleCategoryBlock } from "@/hooks/useAdminCategories.js";
+import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "@/api/adminAxiosConfig.js";
 import Swal from "sweetalert2";
 
 const Categories = () => {
-  const { dispatch } = useCategory();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [currentCategory, setCurrentCategory] = useState({ _id: null, name: "", description: "" });
   const [errors, setErrors] = useState({});
-  
-  // Pagination state with URL sync
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
 
-  // Fetch categories
-  const fetchCategoriesData = async (page = 1) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "5"
-      });
-      
-      if (searchTerm) params.append("search", searchTerm);
+  const { data, isLoading } = useAdminCategories({ page: currentPage, limit: 5, search: searchTerm });
+  const createMutation = useAdminCreateCategory();
+  const updateMutation = useAdminUpdateCategory();
+  const toggleBlockMutation = useAdminToggleCategoryBlock();
 
-      const response = await api.get(`/public?${params.toString()}`);
-      
-      if (response.data.success) {
-        setCategories(response.data.categories);
-        setPagination(response.data.pagination);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const categories = data?.categories || [];
+  const pagination = data?.pagination || {};
+
+  // Update URL params
+  React.useEffect(() => {
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    if (currentPage > 1) params.page = currentPage;
+    setSearchParams(params);
+  }, [searchTerm, currentPage, setSearchParams]);
 
   const handleAddCategory = () => {
     setModalMode("add");
@@ -64,7 +48,7 @@ const Categories = () => {
   const handleUnlist = async (categoryId) => {
     const category = categories.find(c => c._id === categoryId);
     const action = category?.isBlocked ? "unblock" : "block";
-    
+
     const result = await Swal.fire({
       title: `${action === "block" ? "Block" : "Unblock"} this category?`,
       text: `Are you sure you want to ${action} this category?`,
@@ -78,23 +62,19 @@ const Categories = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await dispatch(toggleCategoryBlock(categoryId)).unwrap();
-        
+        await toggleBlockMutation.mutateAsync(categoryId);
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: response.message || "Category status updated successfully",
+          text: "Category status updated successfully",
           confirmButtonColor: "#14b8a6",
           timer: 2000
         });
-        
-        // Refresh categories
-        fetchCategoriesData(currentPage);
       } catch (error) {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: error || "Failed to update category status",
+          text: "Failed to update category status",
           confirmButtonColor: "#ef4444"
         });
       }
@@ -107,60 +87,31 @@ const Categories = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!currentCategory.name.trim()) {
-      newErrors.name = "Category name is required";
-    }
-    
-    if (!currentCategory.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-    
+    if (!currentCategory.name.trim()) newErrors.name = "Category name is required";
+    if (!currentCategory.description.trim()) newErrors.description = "Description is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       if (modalMode === "add") {
-        const newCategory = {
-          ...currentCategory,
-        };
-        await dispatch(createCategory(newCategory)).unwrap();
-        
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Category created successfully",
-          confirmButtonColor: "#14b8a6",
-          timer: 2000
-        });
+        await createMutation.mutateAsync({ name: currentCategory.name, description: currentCategory.description });
+        Swal.fire({ icon: "success", title: "Success!", text: "Category created successfully", confirmButtonColor: "#14b8a6", timer: 2000 });
       } else {
-        await dispatch(updateCategory(currentCategory)).unwrap();
-        
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Category updated successfully",
-          confirmButtonColor: "#14b8a6",
-          timer: 2000
-        });
+        await updateMutation.mutateAsync({ id: currentCategory._id, data: { name: currentCategory.name, description: currentCategory.description } });
+        Swal.fire({ icon: "success", title: "Success!", text: "Category updated successfully", confirmButtonColor: "#14b8a6", timer: 2000 });
       }
-      
-      fetchCategoriesData(currentPage);
       setIsModalOpen(false);
       setCurrentCategory({ _id: null, name: "", description: "" });
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: error || "Failed to save category",
+        text: error?.response?.data?.message || "Failed to save category",
         confirmButtonColor: "#ef4444"
       });
     }
@@ -172,40 +123,15 @@ const Categories = () => {
     setErrors({});
   };
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = {};
-    if (searchTerm) params.search = searchTerm;
-    if (currentPage > 1) params.page = currentPage;
-    setSearchParams(params);
-  }, [searchTerm, currentPage, setSearchParams]);
-
-  // Fetch categories when filters change
-  useEffect(() => {
-    fetchCategoriesData(currentPage);
-  }, [searchTerm, currentPage]);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePrevious = () => {
-    if (pagination.hasPrev) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (pagination.hasNext) setCurrentPage(currentPage + 1);
-  };
+  const handlePrevious = () => { if (pagination.hasPrev) setCurrentPage(currentPage - 1); };
+  const handleNext = () => { if (pagination.hasNext) setCurrentPage(currentPage + 1); };
 
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
     const totalPages = pagination.totalPages || 1;
-    
     if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) pageNumbers.push(i);
@@ -231,7 +157,7 @@ const Categories = () => {
       <h1 className="text-2xl font-semibold text-gray-800 mb-8">Categories Management</h1>
 
       <div className="bg-white rounded-lg shadow p-6">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
           <button
@@ -242,31 +168,18 @@ const Categories = () => {
           </button>
         </div>
 
-        {/* Search Section */}
+        {/* Search */}
         <div className="mb-6">
           <div className="relative">
             <input
               type="text"
               placeholder="Search categories by name or description..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
+            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {searchTerm && (
               <button
@@ -290,7 +203,7 @@ const Categories = () => {
 
         {/* Category List */}
         <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-8 text-gray-500">Loading categories...</div>
           ) : categories.length > 0 ? (
             categories.map((category) => (
@@ -302,7 +215,6 @@ const Categories = () => {
                   <span className="text-gray-800 font-medium text-lg">{category.name}</span>
                   <p className="text-gray-600 text-sm mt-1">{category.description}</p>
                 </div>
-                
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleView(category._id)}
@@ -356,50 +268,33 @@ const Categories = () => {
               <div className="text-sm text-gray-600">
                 Page {currentPage} of {pagination.totalPages}
               </div>
-              
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrevious}
                   disabled={!pagination.hasPrev}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    !pagination.hasPrev
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                  }`}
+                  className={`px-4 py-2 rounded-lg transition-colors ${!pagination.hasPrev ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"}`}
                 >
                   Previous
                 </button>
-
                 <div className="flex gap-1">
                   {getPageNumbers().map((pageNum, index) =>
                     pageNum === "..." ? (
-                      <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
-                        ...
-                      </span>
+                      <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">...</span>
                     ) : (
                       <button
                         key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
-                          currentPage === pageNum
-                            ? "bg-teal-500 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                        }`}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${currentPage === pageNum ? "bg-teal-500 text-white" : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"}`}
                       >
                         {pageNum}
                       </button>
                     )
                   )}
                 </div>
-
                 <button
                   onClick={handleNext}
                   disabled={!pagination.hasNext}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    !pagination.hasNext
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                  }`}
+                  className={`px-4 py-2 rounded-lg transition-colors ${!pagination.hasNext ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"}`}
                 >
                   Next
                 </button>
@@ -409,29 +304,22 @@ const Categories = () => {
         )}
       </div>
 
-      {/* Modal Overlay */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-800">
                 {modalMode === "add" ? "Add New Category" : "Edit Category"}
               </h3>
-              <button
-                onClick={handleCancel}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
+              <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-
-            {/* Modal Body */}
             <form onSubmit={handleSubmit}>
               <div className="p-6 space-y-4">
-                {/* Category Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category Name <span className="text-red-500">*</span>
@@ -440,17 +328,11 @@ const Categories = () => {
                     type="text"
                     value={currentCategory.name}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.name ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${errors.name ? "border-red-500" : "border-gray-300"}`}
                     placeholder="Enter category name"
                   />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                  )}
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                 </div>
-
-                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Description <span className="text-red-500">*</span>
@@ -458,31 +340,18 @@ const Categories = () => {
                   <textarea
                     value={currentCategory.description}
                     onChange={(e) => setCurrentCategory({ ...currentCategory, description: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                      errors.description ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${errors.description ? "border-red-500" : "border-gray-300"}`}
                     placeholder="Enter category description"
                     rows="4"
                   />
-                  {errors.description && (
-                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                  )}
+                  {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                 </div>
               </div>
-
-              {/* Modal Footer */}
               <div className="flex justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-lg">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-                >
+                <button type="button" onClick={handleCancel} className="px-6 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-                >
+                <button type="submit" className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
                   {modalMode === "add" ? "Add Category" : "Save Changes"}
                 </button>
               </div>
