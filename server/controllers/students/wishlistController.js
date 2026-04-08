@@ -1,12 +1,12 @@
 import asyncHandler from "express-async-handler";
 import {
   getWishlistService,
-  ,
   removeFromWishlistService,
   toggleWishlistService,
 } from "../../services/student/wishlistService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { MESSAGES } from "../../utils/messages.js";
+import { AppError } from "../../errors/AppError.js";
 
 // get wishlist
 export const getWishlist = asyncHandler(async (req, res) => {
@@ -29,7 +29,7 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
 
   if (!courseId) {
     res.status(HTTP_STATUS.BAD_REQUEST);
-    throw new A(MESSAGES.CART.COURSE_ID_REQUIRED);
+    throw new AppError(MESSAGES.CART.COURSE_ID_REQUIRED,HTTP_STATUS.BAD_REQUEST);
   }
 
   const result = await toggleWishlistService(userId, courseId);
