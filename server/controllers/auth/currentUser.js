@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { getCurrentUserService } from "../../services/auth/currentUserService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-export const currentUser = asyncHandler(async (req, res,next) => {
+export const currentUser = asyncHandler(async (req, res) => {
   let accessToken = null;
 
   if (
