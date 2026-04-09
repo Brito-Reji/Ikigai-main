@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import api from "@/api/adminAxiosConfig";
 import {
   ArrowLeft,
   Mail,
@@ -13,15 +14,33 @@ import {
 } from "lucide-react";
 import ThreeDotLoader from "@/components/common/ThreeDotLoader";
 import Swal from "sweetalert2";
-import { useAdminGetStudentById, useToggleBlockStudent } from "@/hooks/useAdmin.js";
 
 const StudentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const { data: response, isLoading, error } = useAdminGetStudentById(id);
-  const toggleMutation = useToggleBlockStudent();
-  const student = response?.data?.data || null;
+  useEffect(() => {
+    fetchStudentDetails();
+  }, [id]);
+
+  const fetchStudentDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/admin/students/${id}`);
+      console.log(response)
+      setStudent(response.data.data);
+    } catch (error) {
+      console.error("Error fetching student details:", error);
+      setError(error.response?.data?.message || error.message || "Failed to load student details");
+      setStudent(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBlockToggle = async () => {
     const action = student.isBlocked ? "unblock" : "block";
@@ -41,7 +60,8 @@ const StudentDetail = () => {
 
     if (result.isConfirmed) {
       try {
-        await toggleMutation.mutateAsync(id);
+        await api.patch(`/admin/students/${id}/toggle-block`);
+        setStudent({ ...student, isBlocked: !student.isBlocked });
 
         Swal.fire({
           title: `Student ${action === "block" ? "Blocked" : "Unblocked"}!`,
@@ -83,7 +103,7 @@ const StudentDetail = () => {
     });
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <ThreeDotLoader size="lg" color="indigo" />
@@ -94,7 +114,7 @@ const StudentDetail = () => {
   if (!student) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <p className="text-xl text-gray-600 mb-4">{error?.message || "Student not found"}</p>
+        <p className="text-xl text-gray-600 mb-4">{error || "Student not found"}</p>
         <button
           onClick={() => navigate("/admin/students")}
           className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
