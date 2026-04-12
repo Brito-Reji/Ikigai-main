@@ -30,10 +30,10 @@ const SELECTORS = {
 const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [fetchAttempted, setFetchAttempted] = React.useState(false);
+  const fetchingRef = React.useRef(false);
   const [isValidating, setIsValidating] = React.useState(false);
 
-  // pick the first required role (routes only have one)
+  // pick the first required role
   const role = roles[0] || "student";
   const tokenKey = TOKEN_KEYS[role] || "studentAccessToken";
   const selector = SELECTORS[role] || SELECTORS.student;
@@ -43,18 +43,10 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
   const hasToken = !!localStorage.getItem(tokenKey);
 
   useEffect(() => {
-    const initAuth = async () => {
-      if (!user && !loading && !fetchAttempted && hasToken) {
-        setFetchAttempted(true);
-        setIsValidating(true);
-        await dispatch(fetchAction());
-        setIsValidating(false);
-      }
-    };
-    initAuth();
-
-    if (!hasToken && fetchAttempted && !isValidating) {
-      setFetchAttempted(false);
+    if (!user && !loading && !fetchingRef.current && hasToken) {
+      fetchingRef.current = true;
+      setIsValidating(true);
+      dispatch(fetchAction()).finally(() => setIsValidating(false));
     }
 
     if (requireAuth && !isAuthenticated && !loading && !isValidating && !hasToken) {
@@ -64,7 +56,7 @@ const AuthGuard = ({ children, requireAuth = false, roles = [] }) => {
     if (requireAuth && isAuthenticated && roles.length > 0 && user && !roles.includes(user.role)) {
       navigate("/");
     }
-  }, [dispatch, user, loading, hasToken, fetchAttempted, requireAuth, isAuthenticated, roles, navigate, isValidating, fetchAction]);
+  }, [dispatch, user, loading, hasToken, requireAuth, isAuthenticated, roles, navigate, isValidating, fetchAction]);
 
   if (loading || (hasToken && !user && isValidating)) {
     return (

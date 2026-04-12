@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import Swal from "sweetalert2";
-import { jwtDecode } from "jwt-decode";
 import api from "@/api/adminAxiosConfig.js";
 import logo from "@/assets/images/logo.png";
 import { queryClient } from "@/lib/queryClient.js";
@@ -10,23 +9,6 @@ import { queryClient } from "@/lib/queryClient.js";
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // decode admin token
-  const user = useMemo(() => {
-    const token = localStorage.getItem("adminAccessToken");
-    if (!token) return null;
-    try {
-      return jwtDecode(token);
-    } catch {
-      return null;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!user || user?.role !== "admin") {
-      navigate("/");
-    }
-  }, [user, navigate]);
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard" },
