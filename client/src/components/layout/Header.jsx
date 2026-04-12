@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useRedux.js";
 import { logoutStudent } from "@/store/slices/studentAuthSlice.js";
 import { clearCart } from "@/store/slices/cartSlice.js";
 import { useDispatch } from "react-redux";
+import { queryClient } from "@/lib/queryClient.js";
 import logo from "@/assets/images/logo.png";
 import CartIcon from "../common/CartIcon.jsx";
 import WishlistIcon from "../common/WishlistIcon.jsx";
@@ -134,6 +135,7 @@ export default function Header({ onMenuToggle, menuOpen }) {
   const handleLogout = () => {
     dispatch(clearCart());
     dispatch(logoutStudent());
+    queryClient.clear();
     navigate("/");
   };
 

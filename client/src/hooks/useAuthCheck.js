@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCurrentStudent, logoutStudent } from "@/store/slices/studentAuthSlice.js";
+import { queryClient } from "@/lib/queryClient.js";
 
 export const useAuthCheck = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,14 +24,17 @@ export const useAuthCheck = () => {
 
         if (resultAction?.isBlocked) {
           dispatch(logoutStudent());
+          queryClient.clear();
           window.location.href = "/login";
         }
       } catch (error) {
         if (error?.isBlocked) {
           dispatch(logoutStudent());
+          queryClient.clear();
           window.location.href = "/login";
         } else if (!error?.shouldRetry) {
           dispatch(logoutStudent());
+          queryClient.clear();
         }
       } finally {
         if (isMounted) setIsLoading(false);

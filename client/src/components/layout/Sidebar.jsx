@@ -15,6 +15,7 @@ import { logoutInstructor } from "@/store/slices/instructorAuthSlice.js";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 import logo from "@/assets/images/logo.png";
+import { queryClient } from "@/lib/queryClient.js";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -36,6 +37,7 @@ export default function Sidebar() {
 
     if (result.isConfirmed) {
       dispatch(logoutInstructor());
+      queryClient.clear();
       navigate('/instructor/login');
     }
   };

@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
 import api from "@/api/adminAxiosConfig.js";
 import logo from "@/assets/images/logo.png";
+import { queryClient } from "@/lib/queryClient.js";
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -53,6 +54,7 @@ const AdminLayout = () => {
     if (result.isConfirmed) {
       localStorage.removeItem("adminAccessToken");
       api.post("/auth/logout").catch(() => {});
+      queryClient.clear();
       navigate('/admin/login');
       Swal.fire({
         icon: 'success',
