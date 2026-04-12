@@ -100,6 +100,7 @@ const PurchaseHistoryPage = () => {
       generateInvoicePdf({
         paymentId: order.razorpayOrderId,
         courses: order.courseIds,
+        payments: order.payments,
         date: order.createdAt,
         orderAmount: order.amount,
         discountAmount: order.discountAmount,

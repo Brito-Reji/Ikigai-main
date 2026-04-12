@@ -7,10 +7,12 @@ const PURPLE = [124, 58, 237];
 const DARK = [17, 24, 39];
 const GRAY = [107, 114, 128];
 const LIGHT_BG = [243, 244, 246];
+const RED = [220, 38, 38];
 
 const generateInvoicePdf = ({
   paymentId,
   courses = [],
+  payments = [],
   date,
   orderAmount,
   discountAmount,
@@ -81,16 +83,21 @@ const generateInvoicePdf = ({
   doc.text("Course Details", 20, y);
   y += 6;
 
-  const tableBody = courses.map((course, i) => [
-    `${i + 1}`,
-    course.title || "Untitled Course",
-    `${course.instructor?.firstName || ""} ${course.instructor?.lastName || ""}`.trim() || "-",
-    `Rs. ${formatPrice(course.price)}`,
-  ]);
+  const tableBody = courses.map((course, i) => {
+    const payment = payments?.find(p => p.courseId?.toString() === course._id?.toString());
+    const isRefunded = payment?.status === "REFUNDED";
+    return [
+      `${i + 1}`,
+      course.title || "Untitled Course",
+      `${course.instructor?.firstName || ""} ${course.instructor?.lastName || ""}`.trim() || "-",
+      `Rs. ${formatPrice(course.price)}`,
+      isRefunded ? "Refunded" : "Active",
+    ];
+  });
 
   autoTable(doc, {
     startY: y,
-    head: [["#", "Course", "Instructor", "Price"]],
+    head: [["#", "Course", "Instructor", "Price", "Status"]],
     body: tableBody,
     margin: { left: 20, right: 20 },
     headStyles: {
@@ -109,13 +116,24 @@ const generateInvoicePdf = ({
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       1: { cellWidth: "auto" },
-      2: { cellWidth: 45 },
-      3: { cellWidth: 30, halign: "right" },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 28, halign: "right" },
+      4: { cellWidth: 22, halign: "center" },
     },
     styles: {
       cellPadding: 4,
       lineColor: [229, 231, 235],
       lineWidth: 0.3,
+    },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index === 4) {
+        if (data.cell.raw === "Refunded") {
+          data.cell.styles.textColor = RED;
+          data.cell.styles.fontStyle = "bold";
+        } else {
+          data.cell.styles.textColor = [22, 163, 74];
+        }
+      }
     },
   });
 
