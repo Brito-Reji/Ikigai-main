@@ -10,6 +10,7 @@ import {
   blockInstructor,
   getStudentDetails,
   getInstructorDetails,
+  getWating,
 } from "../controllers/admin/adminController.js";
 import {
   getAllCourses,
@@ -73,5 +74,7 @@ router.patch("/coupons/:couponId/toggle-pause", togglePauseCoupon);
 router.get("/reports", getAllReports);
 router.get("/reports/:reportId", getReportDetails);
 router.patch("/reports/:reportId/status", updateReportStatus);
+
+router.get("/wating",getWating)
 
 export default router;

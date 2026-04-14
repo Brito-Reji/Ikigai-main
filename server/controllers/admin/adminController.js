@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import {loginAdminService } from "../../services/admin/adminLoginService.js"
 import { getInstructorDetailsService, getInstructorsService, getStudentDetailsService, getStudentsService, toggleInstructorBlockService, toggleStudentBlockService } from "../../services/admin/adminService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { Course } from "../../models/Course.js";
 
 
 
@@ -78,3 +79,9 @@ export const getInstructorDetails = asyncHandler(async (req, res) => {
     data: instructor,
   });
 });
+export const getWating = asyncHandler(async (req, res) => {
+  const courses = await Course.find({ $or: [{ verificationStatus: "pending" }, { verificationStatus: "inprocess" }] }).lean()
+  console.log(courses)
+  
+  res.json(courses)
+})

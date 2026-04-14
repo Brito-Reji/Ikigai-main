@@ -328,6 +328,7 @@ export default function AppRoutes() {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="reports/:reportId" element={<ReportDetail />} />
+      
       </Route>
 
       {/* 404 */}

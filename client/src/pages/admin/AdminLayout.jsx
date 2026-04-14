@@ -18,6 +18,7 @@ const AdminLayout = () => {
     { name: "Instructors", path: "/admin/instructors" },
     { name: "Orders", path: "/admin/orders" },
     { name: "Coupons", path: "/admin/coupons" },
+  
     { name: "Reports", path: "/admin/reports" },
   ];
 
