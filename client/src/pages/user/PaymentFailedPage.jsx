@@ -149,32 +149,7 @@ export default function PaymentFailedPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="bg-indigo-100 p-2 rounded-xl mr-3">
-                    <RefreshCcw className="w-6 h-6 text-indigo-600" />
-                  </span>
-                  Need Help?
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  If you continue to face issues, please contact our support team. 
-                  We're here to help you 24/7.
-                </p>
-                <div className="space-y-3">
-                  <a 
-                    href="mailto:support@ikigai.com" 
-                    className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-base font-semibold bg-gray-50 text-indigo-900 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all group"
-                  >
-                    Email Support
-                  </a>
-                  <a 
-                    href="/chat" 
-                    className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-base font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200 hover:shadow-lg transition-all"
-                  >
-                    Live Chat
-                  </a>
-                </div>
-              </div>
+            
             </div>
           </div>
         </div>
