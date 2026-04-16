@@ -31,8 +31,8 @@ export const usePartialRefund = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ courseId, razorpayOrderId, reason }) =>
-      refundApi.requestPartial({ courseId, razorpayOrderId, reason }),
+    mutationFn: ({ courseId, razorpayOrderId, reason, refundMethod }) =>
+      refundApi.requestPartial({ courseId, razorpayOrderId, reason, refundMethod }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["enrolled-courses"] });
@@ -46,8 +46,8 @@ export const useFullRefund = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ razorpayOrderId, reason }) =>
-      refundApi.requestFull({ razorpayOrderId, reason }),
+    mutationFn: ({ razorpayOrderId, reason, refundMethod }) =>
+      refundApi.requestFull({ razorpayOrderId, reason, refundMethod }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["enrolled-courses"] });

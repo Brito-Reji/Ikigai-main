@@ -108,7 +108,7 @@ function OrderDetailPanel({ order, onClose, formatDate }) {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{course.title}</p>
-                    <p className="text-xs text-gray-500">₹{course.price}</p>
+                    <p className="text-xs text-gray-500">₹{course.price/100}</p>
                   </div>
                 </div>
               ))}
@@ -131,7 +131,7 @@ function OrderDetailPanel({ order, onClose, formatDate }) {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Original amount</span>
-                <span className="font-medium text-gray-900">₹{original}</span>
+                <span className="font-medium text-gray-900">₹{original/100}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm">
@@ -151,7 +151,7 @@ function OrderDetailPanel({ order, onClose, formatDate }) {
               )}
               <div className="border-t pt-2 flex justify-between text-sm font-semibold">
                 <span className="text-gray-700">Total charged</span>
-                <span className="text-gray-900">₹{totalCharged}</span>
+                <span className="text-gray-900">₹{totalCharged/100}</span>
               </div>
             </div>
           </div>

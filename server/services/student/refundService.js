@@ -183,9 +183,16 @@ export const processPartialRefund = async ({
       ? Math.round(baseRefundAmount * 0.8)
       : baseRefundAmount;
 
+  // proportional wallet portion for this course
+  const walletPortion = Math.round(order.walletAmountUsed || 0);
+  const courseWalletPortion =
+    order.originalAmount && order.originalAmount > 0
+      ? Math.round((coursePrice / order.originalAmount) * walletPortion)
+      : 0;
+
   try {
     if (refundMethod === "bank" && order.paymentMethod !== "wallet") {
-      // razorpay refund
+      // bank refund via razorpay
       const refund = await razorpayInstance.payments.refund(
         payment.razorpayPaymentId,
         {
@@ -196,6 +203,17 @@ export const processPartialRefund = async ({
 
       payment.razorpayRefundId = refund.id;
       payment.refundMethod = "bank";
+
+      // credit wallet portion back
+      if (courseWalletPortion > 0) {
+        await creditWallet({
+          userId,
+          amount: courseWalletPortion,
+          reason: "Wallet portion refund for course",
+          relatedPaymentId: payment._id,
+          relatedOrderId: order._id,
+        });
+      }
     } else {
       // wallet refund
       await creditWallet({
