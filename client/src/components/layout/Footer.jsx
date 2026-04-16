@@ -1,4 +1,3 @@
-"use client";
 
 import { FaFacebookF, FaLinkedin, FaInstagram, FaTwitter } from "react-icons/fa"
 

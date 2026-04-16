@@ -1,8 +1,8 @@
-"use client";
+
 
 import { Button } from "@/components/ui/Button";
 import { Link } from "react-router-dom";
-// import img from "next/img";
+
 
 export default function Hero() {
   return (

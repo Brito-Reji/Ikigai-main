@@ -68,11 +68,7 @@ export default function Sidebar() {
       path: "/instructor/profile",
       icon: User,
     },
-    {
-      name: "Setting",
-      path: "/instructor/settings",
-      icon: Settings,
-    },
+   
   ];
 
   const isActive = (path) => location.pathname === path;
