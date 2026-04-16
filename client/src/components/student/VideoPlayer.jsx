@@ -10,6 +10,7 @@ import {
     Loader2
 } from 'lucide-react';
 import axios from 'axios';
+import Hls from 'hls.js';
 
 const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
     const videoRef = useRef(null);
@@ -24,6 +25,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
     const [streamingUrl, setStreamingUrl] = useState(null);
     const [isBuffering, setIsBuffering] = useState(true);
+    const hlsSigningParamsRef = useRef(null);
     const controlsTimeoutRef = useRef(null);
     const urlRefreshTimerRef = useRef(null);
 
@@ -39,6 +41,10 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
             const { data } = await axios.get(vUrl);
             
             if (data.success && data.data?.url) {
+                // Store signing params for HLS chunk requests
+                if (data.data.signingParams) {
+                    hlsSigningParamsRef.current = data.data.signingParams;
+                }
                 setStreamingUrl(data.data.url);
                 return data.data.url;
             } else {
@@ -109,9 +115,40 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
         };
     }, [videoUrl]);
 
+    // Handle HLS and MP4 Sources
     useEffect(() => {
         const video = videoRef.current;
-        if (!video) return;
+        if (!video || !streamingUrl) return;
+
+        let hls;
+
+        if (streamingUrl.endsWith('.m3u8') || streamingUrl.includes('.m3u8?')) {
+            // HLS playback
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    xhrSetup: (xhr, url) => {
+                        // Append CloudFront signing params to each .ts chunk request
+                        const params = hlsSigningParamsRef.current;
+                        if (params && !url.includes('Policy=')) {
+                            const qs = new URLSearchParams(params).toString();
+                            const sep = url.includes('?') ? '&' : '?';
+                            xhr.open('GET', `${url}${sep}${qs}`, true);
+                        }
+                    }
+                });
+                hls.loadSource(streamingUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    setIsBuffering(false);
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari native HLS
+                video.src = streamingUrl;
+            }
+        } else {
+            // Classic MP4 Playback
+            video.src = streamingUrl;
+        }
 
         const handleLoadedMetadata = () => setDuration(video.duration);
         const handleTimeUpdate = () => {
@@ -131,8 +168,11 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('timeupdate', handleTimeUpdate);
             video.removeEventListener('ended', handleEnded);
+            if (hls) {
+                hls.destroy();
+            }
         };
-    }, [onTimeUpdate, onEnded]);
+    }, [streamingUrl, onTimeUpdate, onEnded]);
 
     const togglePlay = () => {
         const video = videoRef.current;
@@ -219,7 +259,6 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
             <video
                 ref={videoRef}
                 className="w-full max-h-[70vh] object-contain"
-                src={streamingUrl}
                 onClick={togglePlay}
                 onError={handleVideoError} // CRITICAL FIX
                 onWaiting={() => setIsBuffering(true)}

@@ -23,6 +23,7 @@ import {
   useUpdateVerificationStatus
 } from '@/hooks/useAdminCourses.js';
 import Swal from 'sweetalert2';
+import VideoPlayer from '@/components/student/VideoPlayer.jsx';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
@@ -589,70 +590,19 @@ const CourseDetail = () => {
 
 export default CourseDetail;
 
-// Fetch signed URL and play video
+// Use reusable HLS-supported VideoPlayer
 function AdminVideoPreview({ lesson, onClose }) {
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const loadVideo = async () => {
-      if (!lesson.videoUrl) {
-        setError("No video URL");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000") + '/api';
-        const res = await fetch(
-          `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`
-        );
-
-        if (!res.ok) throw new Error(`Failed to load video: ${res.status}`);
-
-        const data = await res.json();
-        if (!data.success || !data.data?.url) throw new Error("Invalid response");
-
-        setVideoUrl(data.data.url);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadVideo();
-  }, [lesson.videoUrl]);
-
   return (
     <div className="fixed inset-0 bg-teal-950/20 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg p-4 max-w-4xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-black rounded-lg p-4 max-w-4xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{lesson.title}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h3 className="text-lg font-semibold text-white">{lesson.title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <XCircle className="w-6 h-6" />
           </button>
         </div>
-
-        {loading && (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {videoUrl && !loading && !error && (
-          <video controls className="w-full rounded-lg bg-black" style={{ maxHeight: "70vh" }}>
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        )}
+        
+        <VideoPlayer videoUrl={lesson.videoUrl} />
       </div>
     </div>
   );

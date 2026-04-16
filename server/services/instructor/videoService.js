@@ -1,5 +1,6 @@
-import { uploadVideoToS3 } from "../../utils/s3Upload.js";
+import {  uploadFolderToS3 } from "../../utils/s3Upload.js";
 import { generateSignedUrl } from "../../utils/cloudfrontSignedUrl.js";
+import { convertVideoToHls } from "../../utils/videoTranscoder.js";
 import fs from "fs";
 import path from "path";
 
@@ -12,15 +13,20 @@ export const uploadVideoService = async (file, courseId, chapterId) => {
         .replace(/-+/g, "-")
         .toLowerCase();
 
-    const s3Key = `courses/${courseId}/chapters/${chapterId}/${timestamp}-${cleanName}${ext}`;
+    const baseS3Key = `courses/${courseId}/chapters/${chapterId}/${timestamp}-${cleanName}`;
+    const outputDir = path.join("uploads", `${timestamp}-${cleanName}`);
 
-    await uploadVideoToS3(file.path, s3Key);
+    await convertVideoToHls(file.path, outputDir);
+    await uploadFolderToS3(outputDir, baseS3Key);
 
     fs.unlinkSync(file.path);
+    fs.rmSync(outputDir, { recursive: true, force: true });
+
+    const m3u8Key = `${baseS3Key}/playlist.m3u8`;
 
     return {
-        s3Key,
-        videoPath: `/${s3Key}`,
+        s3Key: m3u8Key,
+        videoPath: `/${m3u8Key}`,
     };
 };
 

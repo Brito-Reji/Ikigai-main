@@ -25,6 +25,7 @@ import {
   useUploadVideo,
 } from "@/hooks/useLessons.js";
 import Swal from "sweetalert2";
+import VideoPlayer from "@/components/student/VideoPlayer.jsx";
 
 const ChapterManager = ({ courseId }) => {
   const { chapters, loading, createLoading, dispatch } = useChapter();
@@ -637,121 +638,13 @@ function LessonModal({ courseId, chapterId, lesson, onClose }) {
   );
 }
 
+// Use reusable HLS-supported VideoPlayer
 function VideoPreviewModal({ lesson, onClose }) {
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    const loadVideo = async () => {
-      if (!lesson.videoUrl) {
-        setError("No video URL provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        console.log("[VideoPreview] Loading video:", {
-          lessonTitle: lesson.title,
-          videoPath: lesson.videoUrl,
-        });
-
-        const API_BASE_URL =
-          (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api";
-        const apiEndpoint = `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`;
-
-        console.log("[VideoPreview] Fetching signed URL from:", apiEndpoint);
-
-        // Fetch the JSON response to get the signed URL
-        const response = await fetch(apiEndpoint, {
-          method: "GET",
-        });
-
-        console.log("[VideoPreview] Response status:", response.status);
-
-        if (!response.ok) {
-          let errorMessage = `Failed to access video: ${response.status} ${response.statusText}`;
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorMessage;
-          } catch (e) {
-            // Response is not JSON, use status text
-          }
-          throw new Error(errorMessage);
-        }
-
-        // Parse JSON and extract the signed URL
-        const data = await response.json();
-
-        console.log("[VideoPreview] API Response:", data);
-
-        if (!data.success || !data.data?.url) {
-          throw new Error("Invalid response format: missing signed URL");
-        }
-
-        const signedUrl = data.data.url;
-        console.log("[VideoPreview] Signed URL extracted:", signedUrl);
-
-        setVideoUrl(signedUrl);
-        setLoading(false);
-      } catch (err) {
-        console.error("[VideoPreview] Error loading video:", err);
-        setError(err.message || "Failed to load video. Please try again.");
-        setLoading(false);
-      }
-    };
-
-    loadVideo();
-  }, [lesson.videoUrl, lesson.title]);
-
-  const handleVideoError = e => {
-    const video = e.target;
-    const errorDetails = {
-      error: video.error?.code,
-      errorMessage: video.error?.message,
-      currentSrc: video.currentSrc,
-      networkState: video.networkState,
-      readyState: video.readyState,
-      // Network states: 0=EMPTY, 1=IDLE, 2=LOADING, 3=NO_SOURCE
-      // Ready states: 0=NOTHING, 1=METADATA, 2=CURRENT_DATA, 3=FUTURE_DATA, 4=ENOUGH_DATA
-      // Error codes: 1=ABORTED, 2=NETWORK, 3=DECODE, 4=SRC_NOT_SUPPORTED
-    };
-
-    console.error("[VideoPreview] Video element error:", errorDetails);
-
-    let errorMsg = "Failed to play video. ";
-    if (video.error) {
-      switch (video.error.code) {
-        case 1:
-          errorMsg += "Video loading was aborted. Try refreshing the page.";
-          break;
-        case 2:
-          errorMsg +=
-            "Network error while loading video. Check your connection.";
-          break;
-        case 3:
-          errorMsg += "Video format not supported or file is corrupted.";
-          break;
-        case 4:
-          errorMsg +=
-            "Video source not supported by your browser. The file may be corrupted or in an unsupported format.";
-          break;
-        default:
-          errorMsg += "Unknown error occurred.";
-      }
-    } else {
-      errorMsg += "Could not load video source.";
-    }
-
-    setError(errorMsg);
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h3 className="text-lg font-semibold">{lesson.title}</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-black rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-white">
+          <h3 className="text-lg font-semibold text-gray-900">{lesson.title}</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
@@ -760,94 +653,8 @@ function VideoPreviewModal({ lesson, onClose }) {
             ×
           </button>
         </div>
-
-        <div className="p-4">
-          {loading && (
-            <div className="flex items-center justify-center h-96">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                <p className="mt-3 text-gray-600">Loading video...</p>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
-              <div className="flex items-start">
-                <svg
-                  className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-red-800">
-                    Failed to load video
-                  </p>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
-                  <details className="mt-2">
-                    <summary className="text-xs text-red-600 cursor-pointer">
-                      Technical details
-                    </summary>
-                    <div className="mt-1 text-xs text-gray-600 space-y-1">
-                      <p>Video path: {lesson.videoUrl}</p>
-                      <p>Check browser console for more information</p>
-                    </div>
-                  </details>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {videoUrl && !loading && !error && (
-            <div>
-              <video
-                ref={videoRef}
-                controls
-                className="w-full rounded-lg bg-black"
-                style={{ maxHeight: "70vh" }}
-                onError={handleVideoError}
-                onLoadStart={() =>
-                  console.log("[VideoPreview] Video load started")
-                }
-                onLoadedMetadata={e => {
-                  console.log("[VideoPreview] Video metadata loaded:", {
-                    duration: e.target.duration,
-                    videoWidth: e.target.videoWidth,
-                    videoHeight: e.target.videoHeight,
-                  });
-                }}
-                onCanPlay={() => {
-                  console.log("[VideoPreview] Video can play");
-                  setLoading(false);
-                }}
-                onPlaying={() => console.log("[VideoPreview] Video is playing")}
-                onWaiting={() =>
-                  console.log("[VideoPreview] Video is buffering")
-                }
-                onStalled={() => console.warn("[VideoPreview] Video stalled")}
-              >
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="mt-2 text-xs text-gray-500 space-y-1">
-                <p>Video path: {lesson.videoUrl}</p>
-                {lesson.duration && <p>Duration: {lesson.duration} minutes</p>}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {lesson.description && (
-          <div className="p-4 border-t bg-gray-50">
-            <p className="text-sm text-gray-600">{lesson.description}</p>
-          </div>
-        )}
+        
+        <VideoPlayer videoUrl={lesson.videoUrl} />
       </div>
     </div>
   );

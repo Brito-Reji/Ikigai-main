@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ChevronDown, ChevronRight, Play, FileText, Clock, X } from "lucide-react";
+import VideoPlayer from "@/components/student/VideoPlayer.jsx";
 
 const CourseSyllabus = ({ course, chapters = [], isLoading = false }) => {
   const [expandedSections, setExpandedSections] = useState({});
@@ -226,81 +227,25 @@ const CourseSyllabus = ({ course, chapters = [], isLoading = false }) => {
   );
 };
 
-// Free preview video modal
+// Free preview video modal using reusable HLS-supported VideoPlayer
 function FreePreviewModal({ lesson, onClose }) {
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const loadVideo = async () => {
-      if (!lesson.videoUrl) {
-        setError("No video available for preview");
-        setLoading(false);
-        return;
-      }
-
-      const API_BASE_URL =
-        (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api";
-
-      const res = await fetch(
-        `${API_BASE_URL}/public/stream-video?videoPath=${encodeURIComponent(lesson.videoUrl)}`
-      );
-
-      if (!res.ok) {
-        setError("Failed to load video");
-        setLoading(false);
-        return;
-      }
-
-      const data = await res.json();
-      if (!data.success || !data.data?.url) {
-        setError("Failed to load video");
-        setLoading(false);
-        return;
-      }
-
-      setVideoUrl(data.data.url);
-      setLoading(false);
-    };
-
-    loadVideo();
-  }, [lesson.videoUrl]);
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-4 max-w-4xl w-full mx-4"
+        className="bg-black rounded-lg p-4 max-w-4xl w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 bg-white p-2 rounded-t-lg">
           <h3 className="text-lg font-semibold text-gray-900">{lesson.title}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        {loading && (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {videoUrl && !loading && !error && (
-          <video controls autoPlay className="w-full rounded-lg bg-black" style={{ maxHeight: "70vh" }}>
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        )}
+        <VideoPlayer videoUrl={lesson.videoUrl} />
       </div>
     </div>
   );

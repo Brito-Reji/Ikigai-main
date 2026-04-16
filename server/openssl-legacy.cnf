@@ -1,0 +1,10 @@
+# Custom OpenSSL config that allows SHA-1 signing (required by CloudFront)
+# Fedora's DEFAULT crypto policy blocks SHA-1 signatures, but AWS CloudFront requires them.
+
+.include /etc/ssl/openssl.cnf
+
+[openssl_init]
+alg_section = evp_properties
+
+[evp_properties]
+rh-allow-sha1-signatures = yes
