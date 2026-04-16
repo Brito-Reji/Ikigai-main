@@ -26,6 +26,7 @@ export const validateCouponService = async (code, userId, amount) => {
   }
 
   if (amount < coupon.minAmount) {
+    console.log(amount)
     throw new AppError(`Minimum purchase amount of ₹${coupon.minAmount} required`,HTTP_STATUS.BAD_REQUEST);
   }
 

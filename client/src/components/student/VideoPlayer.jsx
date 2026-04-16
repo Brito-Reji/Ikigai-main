@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 import {
     Play,
     Pause,
@@ -7,13 +7,19 @@ import {
     Maximize,
     Minimize,
     Settings,
-    Loader2
-} from 'lucide-react';
-import axios from 'axios';
-import Hls from 'hls.js';
+    Loader2,
+} from "lucide-react";
+import axios from "axios";
+import Hls from "hls.js";
+
+const API = (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api";
 
 const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
     const videoRef = useRef(null);
+    const hlsRef = useRef(null);
+    const signingParamsRef = useRef(null);
+    const controlsTimeoutRef = useRef(null);
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -23,156 +29,114 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
     const [showControls, setShowControls] = useState(true);
     const [playbackRate, setPlaybackRate] = useState(1);
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-    const [streamingUrl, setStreamingUrl] = useState(null);
-    const [isBuffering, setIsBuffering] = useState(true);
-    const hlsSigningParamsRef = useRef(null);
-    const controlsTimeoutRef = useRef(null);
-    const urlRefreshTimerRef = useRef(null);
+    const [isBuffering, setIsBuffering] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
-    // 1. Fetch Fresh Signed URL Logic
-    const refreshStreamingUrl = async () => {
-        if (!videoUrl) {
-            console.error("No video URL provided");
-            return null;
-        }
-
-        try {
-            const vUrl = `${(import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api'}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}`;
-            const { data } = await axios.get(vUrl);
-            
-            if (data.success && data.data?.url) {
-                // Store signing params for HLS chunk requests
-                if (data.data.signingParams) {
-                    hlsSigningParamsRef.current = data.data.signingParams;
-                }
-                setStreamingUrl(data.data.url);
-                return data.data.url;
-            } else {
-                console.error("Invalid response format:", data);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching secure streaming URL:', error.response?.data || error.message);
-            return null;
-        }
+    // Fetch signed HLS URL + signing params
+    const fetchSignedUrl = async () => {
+        const { data } = await axios.get(
+            `${API}/public/stream-video?videoPath=${encodeURIComponent(videoUrl)}`
+        );
+        if (!data.success || !data.data?.url) throw new Error("Invalid response");
+        signingParamsRef.current = data.data.signingParams || null;
+        return data.data.url;
     };
 
-    // 2. THE FIX: Handle expiry when skipping/seeking
-    const handleVideoError = async () => {
+    // Init HLS player
+    const initHls = (signedUrl) => {
         const video = videoRef.current;
         if (!video) return;
 
-        console.log("URL expired or error occurred, refreshing link...");
-        const savedTime = video.currentTime; 
-        
-        const newUrl = await refreshStreamingUrl();
-
-        if (newUrl) {
-            video.load();
-            video.onloadedmetadata = () => {
-                video.currentTime = savedTime;
-                video.play();
-                setIsPlaying(true);
-            };
-        } else {
-            console.error("Failed to refresh video URL");
+        if (hlsRef.current) {
+            hlsRef.current.destroy();
+            hlsRef.current = null;
         }
+
+        if (!Hls.isSupported()) {
+            // Safari native HLS
+            video.src = signedUrl;
+            return;
+        }
+
+        const hls = new Hls({
+            xhrSetup: (xhr, url) => {
+                const params = signingParamsRef.current;
+                if (params && !url.includes("Policy=")) {
+                    const qs = new URLSearchParams(params).toString();
+                    const sep = url.includes("?") ? "&" : "?";
+                    xhr.open("GET", `${url}${sep}${qs}`, true);
+                }
+            },
+        });
+
+        hlsRef.current = hls;
+        hls.loadSource(signedUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => setIsBuffering(false));
+
+        hls.on(Hls.Events.ERROR, (_, err) => {
+            if (!err.fatal) return;
+            if (err.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                hls.startLoad();
+            } else if (err.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                hls.recoverMediaError();
+            } else {
+                hls.destroy();
+                hlsRef.current = null;
+                setHasError(true);
+                setIsBuffering(false);
+            }
+        });
     };
 
+    // Load on mount / videoUrl change
     useEffect(() => {
         if (!videoUrl) return;
-        
+
         setIsBuffering(true);
-        refreshStreamingUrl().finally(() => setIsBuffering(false));
+        setHasError(false);
 
-        // Proactively refresh URL every 50 minutes (before 1 hour expiry)
-        // This prevents interruption during long videos
-        const refreshInterval = 50 * 60 * 1000; // 50 minutes in ms
-        
-        urlRefreshTimerRef.current = setInterval(async () => {
-            const video = videoRef.current;
-            if (!video) return;
-
-            const savedTime = video.currentTime;
-            const wasPlaying = !video.paused;
-            
-            console.log("🔄 Proactively refreshing URL before expiry...");
-            const newUrl = await refreshStreamingUrl();
-            
-            if (newUrl && savedTime > 0) {
-                video.load();
-                video.onloadedmetadata = () => {
-                    video.currentTime = savedTime;
-                    if (wasPlaying) video.play();
-                };
-            }
-        }, refreshInterval);
+        fetchSignedUrl()
+            .then(initHls)
+            .catch(() => {
+                setHasError(true);
+                setIsBuffering(false);
+            });
 
         return () => {
-            if (urlRefreshTimerRef.current) {
-                clearInterval(urlRefreshTimerRef.current);
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+                hlsRef.current = null;
             }
         };
     }, [videoUrl]);
 
-    // Handle HLS and MP4 Sources
+    // Video event listeners
     useEffect(() => {
         const video = videoRef.current;
-        if (!video || !streamingUrl) return;
+        if (!video) return;
 
-        let hls;
-
-        if (streamingUrl.endsWith('.m3u8') || streamingUrl.includes('.m3u8?')) {
-            // HLS playback
-            if (Hls.isSupported()) {
-                hls = new Hls({
-                    xhrSetup: (xhr, url) => {
-                        // Append CloudFront signing params to each .ts chunk request
-                        const params = hlsSigningParamsRef.current;
-                        if (params && !url.includes('Policy=')) {
-                            const qs = new URLSearchParams(params).toString();
-                            const sep = url.includes('?') ? '&' : '?';
-                            xhr.open('GET', `${url}${sep}${qs}`, true);
-                        }
-                    }
-                });
-                hls.loadSource(streamingUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    setIsBuffering(false);
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari native HLS
-                video.src = streamingUrl;
-            }
-        } else {
-            // Classic MP4 Playback
-            video.src = streamingUrl;
-        }
-
-        const handleLoadedMetadata = () => setDuration(video.duration);
-        const handleTimeUpdate = () => {
+        const onMetadata = () => setDuration(video.duration);
+        const onTimeUpd = () => {
             setCurrentTime(video.currentTime);
             if (onTimeUpdate) onTimeUpdate(video.currentTime);
         };
-        const handleEnded = () => {
+        const onEnded_ = () => {
             setIsPlaying(false);
             if (onEnded) onEnded();
         };
 
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
-        video.addEventListener('timeupdate', handleTimeUpdate);
-        video.addEventListener('ended', handleEnded);
+        video.addEventListener("loadedmetadata", onMetadata);
+        video.addEventListener("timeupdate", onTimeUpd);
+        video.addEventListener("ended", onEnded_);
 
         return () => {
-            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-            video.removeEventListener('timeupdate', handleTimeUpdate);
-            video.removeEventListener('ended', handleEnded);
-            if (hls) {
-                hls.destroy();
-            }
+            video.removeEventListener("loadedmetadata", onMetadata);
+            video.removeEventListener("timeupdate", onTimeUpd);
+            video.removeEventListener("ended", onEnded_);
         };
-    }, [streamingUrl, onTimeUpdate, onEnded]);
+    }, [onTimeUpdate, onEnded]);
 
     const togglePlay = () => {
         const video = videoRef.current;
@@ -182,21 +146,20 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
         } else {
             video.pause();
             setIsPlaying(false);
-        };
+        }
     };
 
     const handleSeek = (e) => {
         const video = videoRef.current;
         const rect = e.currentTarget.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        video.currentTime = pos * duration;
+        video.currentTime = ((e.clientX - rect.left) / rect.width) * duration;
     };
 
     const handleVolumeChange = (e) => {
-        const newVolume = parseFloat(e.target.value);
-        setVolume(newVolume);
-        videoRef.current.volume = newVolume;
-        setIsMuted(newVolume === 0);
+        const val = parseFloat(e.target.value);
+        setVolume(val);
+        videoRef.current.volume = val;
+        setIsMuted(val === 0);
     };
 
     const toggleMute = () => {
@@ -227,26 +190,55 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
         setShowSpeedMenu(false);
     };
 
-    const formatTime = (time) => {
-        if (isNaN(time)) return '0:00';
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const formatTime = (t) => {
+        if (isNaN(t)) return "0:00";
+        return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
     };
 
     const handleMouseMove = () => {
         setShowControls(true);
-        if (controlsTimeoutRef.current) {
-            clearTimeout(controlsTimeoutRef.current);
-        }
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
         controlsTimeoutRef.current = setTimeout(() => {
             if (isPlaying) setShowControls(false);
         }, 3000);
     };
 
+    // No video
+    if (!videoUrl) {
+        return (
+            <div className="bg-gray-900 rounded-lg min-h-[400px] flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No video for this lesson</p>
+            </div>
+        );
+    }
+
+    // Error
+    if (hasError) {
+        return (
+            <div className="bg-gray-900 rounded-lg min-h-[400px] flex flex-col items-center justify-center gap-3">
+                <p className="text-red-400 text-sm">Failed to load video</p>
+                <button
+                    onClick={() => {
+                        setHasError(false);
+                        setIsBuffering(true);
+                        fetchSignedUrl()
+                            .then(initHls)
+                            .catch(() => {
+                                setHasError(true);
+                                setIsBuffering(false);
+                            });
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div
-            className="relative bg-black rounded-lg overflow-hidden group min-h-[400px] flex items-center justify-center"
+            className="relative bg-black rounded-lg overflow-hidden min-h-[400px] flex items-center justify-center"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
         >
@@ -260,34 +252,34 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
                 ref={videoRef}
                 className="w-full max-h-[70vh] object-contain"
                 onClick={togglePlay}
-                onError={handleVideoError} // CRITICAL FIX
                 onWaiting={() => setIsBuffering(true)}
                 onPlaying={() => setIsBuffering(false)}
                 controlsList="nodownload"
                 onContextMenu={(e) => e.preventDefault()}
             />
 
-            {/* CUSTOM CONTROLS UI */}
+            {/* Controls overlay */}
             <div
                 className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300 pointer-events-none ${
-                    showControls ? 'opacity-100' : 'opacity-0'
+                    showControls ? "opacity-100" : "opacity-0"
                 }`}
             >
                 <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2 pointer-events-auto">
-                    {/* Progress Bar */}
+                    {/* Progress bar */}
                     <div
                         className="w-full h-1 bg-gray-600 rounded-full cursor-pointer group/progress"
                         onClick={handleSeek}
                     >
                         <div
                             className="h-full bg-blue-600 rounded-full relative group-hover/progress:h-1.5 transition-all"
-                            style={{ width: `${(currentTime / duration) * 100}%` }}
+                            style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
                         >
                             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-600 rounded-full opacity-0 group-hover/progress:opacity-100" />
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between">
+                        {/* Left controls */}
                         <div className="flex items-center gap-3">
                             <button onClick={togglePlay} className="text-white hover:text-blue-400 transition-colors">
                                 {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
@@ -305,11 +297,12 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
                                 />
                             </div>
 
-                            <div className="text-white text-sm font-medium">
+                            <span className="text-white text-sm font-medium">
                                 {formatTime(currentTime)} / {formatTime(duration)}
-                            </div>
+                            </span>
                         </div>
 
+                        {/* Right controls */}
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <button
@@ -327,7 +320,7 @@ const VideoPlayer = ({ videoUrl, onTimeUpdate, onEnded }) => {
                                                 key={rate}
                                                 onClick={() => changePlaybackRate(rate)}
                                                 className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-800 transition-colors ${
-                                                    playbackRate === rate ? 'text-blue-400' : 'text-white'
+                                                    playbackRate === rate ? "text-blue-400" : "text-white"
                                                 }`}
                                             >
                                                 {rate}x

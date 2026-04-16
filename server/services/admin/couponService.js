@@ -4,6 +4,11 @@ import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
 // Validate discount vs min amount
 const validateCouponAmounts = ({ discountType, discountValue, minAmount }) => {
+  if (discountType == "fixed" && discountValue >minAmount) {
+    throw new AppError("min amoutn should be greater ",HTTP_STATUS.FORBIDDEN)
+  }
+
+
   if (discountType === "fixed" && Number(discountValue) === Number(minAmount)) {
     throw new AppError(
       "Discount value cannot equal minimum purchase amount",
@@ -23,8 +28,15 @@ export const getAllCouponsService = () => {
     .lean();
 };
 
-export const updateCouponService = (couponId, coupon) => {
+export const updateCouponService = async (couponId, coupon) => {
   validateCouponAmounts(coupon);
+  
+  let coupons = await Coupon.findOne({ code: coupon })
+  console.log(coupons)
+
+  if (coupons) {
+    throw new AppError("Coupon is already exit",HTTP_STATUS.FORBIDDEN)
+  }
   return Coupon.findByIdAndUpdate(couponId, coupon, { new: true });
 };
 
