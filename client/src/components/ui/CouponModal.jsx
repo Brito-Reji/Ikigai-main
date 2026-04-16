@@ -71,6 +71,17 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
       newErrors.minAmount = "Minimum amount must be 0 or greater";
     }
 
+    // fixed discount value can't equal min purchase amount
+    if (
+      formData.discountType === "fixed" &&
+      formData.discountValue &&
+      formData.minAmount &&
+      Number(formData.discountValue) === Number(formData.minAmount)
+    ) {
+      newErrors.discountValue = "Discount value cannot equal minimum purchase amount";
+      newErrors.minAmount = "Minimum purchase amount cannot equal discount value";
+    }
+
     if (formData.discountType === "percentage" && formData.maxDiscount && formData.maxDiscount <= 0) {
       newErrors.maxDiscount = "Maximum discount must be greater than 0";
     }

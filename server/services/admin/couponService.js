@@ -2,7 +2,18 @@ import { AppError } from "../../errors/AppError.js";
 import { Coupon } from "../../models/Coupon.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
+// Validate discount vs min amount
+const validateCouponAmounts = ({ discountType, discountValue, minAmount }) => {
+  if (discountType === "fixed" && Number(discountValue) === Number(minAmount)) {
+    throw new AppError(
+      "Discount value cannot equal minimum purchase amount",
+      HTTP_STATUS.BAD_REQUEST
+    );
+  }
+};
+
 export const createCouponService = coupon => {
+  validateCouponAmounts(coupon);
   return Coupon.create(coupon);
 };
 
@@ -13,6 +24,7 @@ export const getAllCouponsService = () => {
 };
 
 export const updateCouponService = (couponId, coupon) => {
+  validateCouponAmounts(coupon);
   return Coupon.findByIdAndUpdate(couponId, coupon, { new: true });
 };
 
