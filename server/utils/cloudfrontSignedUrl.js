@@ -9,8 +9,21 @@ import { HTTP_STATUS } from "./httpStatus.js";
 let privateKey = null;
 
 if (cloudfrontConfig.privateKeyPath) {
-    const privateKeyPath = path.resolve(process.cwd(), cloudfrontConfig.privateKeyPath);
+  try {
+    const cleanPath = cloudfrontConfig.privateKeyPath?.trim();
+
+    console.log("CONFIG PATH:", cleanPath);
+
+    const privateKeyPath = path.resolve(process.cwd(), cleanPath);
+
+    console.log("RESOLVED PATH:", privateKeyPath);
+
     privateKey = fs.readFileSync(privateKeyPath, "utf8");
+
+    console.log("PRIVATE KEY LOADED SUCCESS");
+  } catch (err) {
+    console.error("PRIVATE KEY ERROR:", err);
+  }
    
 }
 
