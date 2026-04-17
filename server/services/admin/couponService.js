@@ -17,8 +17,14 @@ const validateCouponAmounts = ({ discountType, discountValue, minAmount }) => {
   }
 };
 
-export const createCouponService = coupon => {
+export const createCouponService = async (coupon) => {
   validateCouponAmounts(coupon);
+
+  const exists = await Coupon.findOne({ 
+    code: { $regex: `^${coupon.code.trim()}$`, $options: "i" } 
+  });
+  if (exists) throw new AppError("Coupon code already exists", HTTP_STATUS.BAD_REQUEST);
+
   return Coupon.create(coupon);
 };
 
@@ -31,11 +37,13 @@ export const getAllCouponsService = () => {
 export const updateCouponService = async (couponId, coupon) => {
   validateCouponAmounts(coupon);
   
-  let coupons = await Coupon.findOne({ code: coupon })
-  console.log(coupons)
+  const exists = await Coupon.findOne({ 
+    code: { $regex: `^${coupon.code.trim()}$`, $options: "i" },
+    _id: { $ne: couponId }
+  });
 
-  if (coupons) {
-    throw new AppError("Coupon is already exit",HTTP_STATUS.FORBIDDEN)
+  if (exists) {
+    throw new AppError("Coupon code already exists", HTTP_STATUS.FORBIDDEN);
   }
   return Coupon.findByIdAndUpdate(couponId, coupon, { new: true });
 };

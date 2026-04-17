@@ -1,8 +1,8 @@
 import logger from "../utils/logger.js";
 
 // Global error handler
+// eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next) => {
-  // pick status from error, or from res if set before throw
   const resCode = res.statusCode !== 200 ? res.statusCode : null;
   const statusCode = err.statusCode || err.status || resCode || 500;
 

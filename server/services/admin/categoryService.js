@@ -56,7 +56,9 @@ export const createCategoryService = async ({ name, description }) => {
         throw new AppError("Name and description are required", HTTP_STATUS.BAD_REQUEST);
     }
 
-    const exists = await Category.findOne({ name: name.trim() });
+    const exists = await Category.findOne({ 
+        name: { $regex: `^${name.trim()}$`, $options: "i" } 
+    });
     if (exists) throw new AppError("Category already exists", HTTP_STATUS.BAD_REQUEST);
 
     const category = await Category.create({
@@ -75,7 +77,7 @@ export const editCategoryService = async (categoryId, { name, description }) => 
     if (!categoryId) throw new AppError("Category ID is required", HTTP_STATUS.BAD_REQUEST);
 
     const exists = await Category.findOne({
-        name: name.trim(),
+        name: { $regex: `^${name.trim()}$`, $options: "i" },
         _id: { $ne: categoryId },
     });
 
