@@ -2,7 +2,7 @@ name: Deploy Backend to EC2
 
 on:
   push:
-    branches: [ main ] # This only triggers when you merge/push to main
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -18,9 +18,22 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Load NVM (Node Version Manager) environment
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            # Navigate to the server folder
             cd ~/Ikigai-main/server
+
+            # Pull latest code and force-align with GitHub
             git fetch --all
             git reset --hard origin/main
+
+            # Install dependencies
             npm install
-            # Restart the app and pass the legacy provider for Node 17+ compatibility
+
+            # Restart the backend with legacy OpenSSL support for compatibility
             NODE_OPTIONS=--openssl-legacy-provider pm2 restart ikigai-backend || NODE_OPTIONS=--openssl-legacy-provider pm2 start server.js --name "ikigai-backend"
+            
+            # Save the PM2 list so it persists after server restarts
+            pm2 save
