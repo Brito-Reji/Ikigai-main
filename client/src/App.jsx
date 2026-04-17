@@ -6,6 +6,7 @@ import LoadingScreen from "@/components/common/LoadingScreen.jsx";
 import { useAuthCheck } from "./hooks/useAuthCheck.js";
 import SocketProvider from "@/context/SocketProvider";
 import { PendingPaymentProvider } from "./context/PendingPaymentProvider";
+import ScrollToTop from "./components/layout/ScrollToTop.jsx";
 
 function App() {
   const location = useLocation();
@@ -26,6 +27,8 @@ function App() {
       <PendingPaymentProvider>
         <div>
           <Toaster position="top-center" />
+          <ScrollToTop />
+
           <AppRoutes />
         </div>
       </PendingPaymentProvider>
