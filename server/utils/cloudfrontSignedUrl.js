@@ -2,18 +2,16 @@ import { getSignedUrl as cfSignedUrl } from "@aws-sdk/cloudfront-signer";
 import { cloudfrontConfig } from "../config/cloudfront.js";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { AppError } from "../errors/AppError.js";
 import { HTTP_STATUS } from "./httpStatus.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 let privateKey = null;
 
 if (cloudfrontConfig.privateKeyPath) {
-    const privateKeyPath = path.resolve(__dirname, "..", cloudfrontConfig.privateKeyPath);
+    const privateKeyPath = path.resolve(process.cwd(), cloudfrontConfig.privateKeyPath);
     privateKey = fs.readFileSync(privateKeyPath, "utf8");
+   
 }
 
 // Signed URL for a single resource (MP4 etc)
