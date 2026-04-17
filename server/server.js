@@ -47,7 +47,7 @@ initChatSocket(io);
 // make io available to routes
 app.set("io", io);
 
-httpServer.listen(PORT, "0.0.0.0", () => {
+httpServer.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
   logger.info(`Socket.IO enabled`);
 });
