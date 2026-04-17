@@ -1,0 +1,26 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [ main ] # This only triggers when you merge/push to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/Ikigai-main/server
+            git fetch --all
+            git reset --hard origin/main
+            npm install
+            # Restart the app and pass the legacy provider for Node 17+ compatibility
+            NODE_OPTIONS=--openssl-legacy-provider pm2 restart ikigai-backend || NODE_OPTIONS=--openssl-legacy-provider pm2 start server.js --name "ikigai-backend"
