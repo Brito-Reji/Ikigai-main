@@ -3,6 +3,7 @@ import { useAdminOrders, useAdminDashboard } from "@/hooks/useAdmin";
 import { ShoppingCart, Search, ChevronLeft, ChevronRight, Download, X, Filter, Calendar, User, CreditCard, Tag, Wallet, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 import generateSalesReportPdf from "@/utils/generateSalesReportPdf";
+import generateSalesReportExcel from "@/utils/generateSalesReportExcel";
 
 // preset time ranges
 const RANGES = [
@@ -222,16 +223,14 @@ const AdminOrdersPage = () => {
     );
   });
 
-  // apply report filters and download
-  const handleDownload = () => {
+  // filter orders by selected status + date range
+  const getFilteredOrders = () => {
     let orders = data?.orders || [];
 
-    // status filter
     if (reportStatus) {
       orders = orders.filter((o) => o.status === reportStatus);
     }
 
-    // date filter
     if (reportRange !== "all" && reportRange !== "custom") {
       const range = getDateRange(reportRange);
       if (range) {
@@ -251,18 +250,38 @@ const AdminOrdersPage = () => {
       });
     }
 
+    return orders;
+  };
+
+  const handleDownload = (format) => {
+    const orders = getFilteredOrders();
+
     if (orders.length === 0) {
       toast.error("No orders match the selected filters");
       return;
     }
 
-    generateSalesReportPdf({
-      mode: "admin",
-      stats: dashboardData?.stats || {},
-      orders,
-    });
+    const dateLabel = reportRange === "custom"
+      ? `${reportStartDate || "?"} → ${reportEndDate || "now"}`
+      : RANGES.find((r) => r.value === reportRange)?.label || "All Time";
 
-    toast.success(`Report downloaded (${orders.length} orders)`);
+    if (format === "excel") {
+      generateSalesReportExcel({
+        stats: dashboardData?.stats || {},
+        orders,
+        dateLabel,
+      });
+      toast.success(`Excel downloaded (${orders.length} orders)`);
+    } else {
+      generateSalesReportPdf({
+        mode: "admin",
+        stats: dashboardData?.stats || {},
+        orders,
+        dateLabel,
+      });
+      toast.success(`PDF downloaded (${orders.length} orders)`);
+    }
+
     setShowModal(false);
   };
 
@@ -568,11 +587,18 @@ const AdminOrdersPage = () => {
                 Cancel
               </button>
               <button
-                onClick={handleDownload}
+                onClick={() => handleDownload("excel")}
+                className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+              >
+                <Download className="w-4 h-4" />
+                Excel
+              </button>
+              <button
+                onClick={() => handleDownload("pdf")}
                 className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
-                Download PDF
+                PDF
               </button>
             </div>
           </div>

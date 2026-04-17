@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApiService } from "@/api/adminApi.js";
 
-export const useAdminDashboard = () => {
+// dashboard with optional date filter
+export const useAdminDashboard = (dateParams = {}) => {
   return useQuery({
-    queryKey: ["admin", "dashboard"],
+    queryKey: ["admin", "dashboard", dateParams],
     queryFn: async () => {
-      const response = await adminApiService.getDashboard();
+      const response = await adminApiService.getDashboard(dateParams);
       return response.data.data;
     },
     staleTime: 1000 * 60 * 5,
@@ -35,7 +36,7 @@ export const useAdminGetInstrucors = () => {
   });
 };
 
-export const useAdminGetInstructorById = id => {
+export const useAdminGetInstructorById = (id) => {
   return useQuery({
     queryKey: ["admin", "instructors", id],
     queryFn: async () => {
@@ -50,7 +51,7 @@ export const useToggleBlockInstructor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async id => {
+    mutationFn: async (id) => {
       return await adminApiService.toggleInstructorBlock(id);
     },
     onSuccess: (data, id) => {
@@ -71,7 +72,7 @@ export const useAdminGetStudents = () => {
   });
 };
 
-export const useAdminGetStudentById = id => {
+export const useAdminGetStudentById = (id) => {
   return useQuery({
     queryKey: ["admin", "students", id],
     queryFn: async () => {
@@ -87,7 +88,7 @@ export const useToggleBlockStudent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async id => {
+    mutationFn: async (id) => {
       return await adminApiService.toggleStudentBlock(id);
     },
     onSuccess: (data, id) => {

@@ -20,6 +20,7 @@ const generateSalesReportPdf = ({
   courses = [],
   orders = [],
   monthlyData = [],
+  dateLabel = "All Time",
 }) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -55,11 +56,13 @@ const generateSalesReportPdf = ({
 
   y = 58;
 
-  // report date
+  // report metadata
   doc.setFontSize(9);
   doc.setTextColor(...GRAY);
   doc.text(`Generated on: ${formatDate(new Date())}`, 20, y);
-  y += 12;
+  y += 6;
+  doc.text(`Period: ${dateLabel}`, 20, y);
+  y += 10;
 
   // stats cards
   doc.setFontSize(12);
