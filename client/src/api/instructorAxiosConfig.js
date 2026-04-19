@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const instructorApi = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api",
   withCredentials: true,
@@ -70,12 +69,7 @@ instructorApi.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        let refreshData = {};
-        if (isDev) {
-          const refreshToken = localStorage.getItem("instructorRefreshToken");
-          if (refreshToken) refreshData.refreshToken = refreshToken;
-        }
-        const response = await instructorApi.post("/auth/instructor/refresh", refreshData);
+        const response = await instructorApi.post("/auth/instructor/refresh");
         if (response.data.success && response.data.accessToken) {
           const { accessToken } = response.data;
           localStorage.setItem("instructorAccessToken", accessToken);
