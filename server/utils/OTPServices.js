@@ -11,41 +11,50 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export const sendOTPToEmail = async email => {
+export const sendOTPToEmail = async (email) => {
   if (!email) {
     throw new AppError("Email is required", HTTP_STATUS.BAD_REQUEST);
   }
 
   const otp = generateOTP();
-  await Otp.create({ email, otp });
 
+  // Send email first to avoid orphaned OTPs in DB
   const result = await sendOtpEmail(email, otp);
 
-  return { 
-    success: result.success,
-    message: result.message,
-    data: { otp }
-  };
-};
+  if (result.success) {
+    // Only persist if email send was successful
+    await Otp.create({ email, otp });
+  }
 
+  return result;
+};
 
 // Route handler for sending OTP
 export const sentOTP = asyncHandler(async (req, res) => {
   const { email } = req.body;
+  
   if (!email) {
-    return res.status(400).json({
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
       success: false,
       message: "Email is required",
-      data: null
+      data: null,
     });
   }
 
   const result = await sendOTPToEmail(email);
 
-  res.status(200).json({
+  if (!result.success) {
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: result.message || "Failed to send OTP",
+      data: null,
+    });
+  }
+
+  res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "OTP sent successfully",
-    data: { otp: result.data.otp }
+    data: null, // Removed otp from response for security
   });
 });
 

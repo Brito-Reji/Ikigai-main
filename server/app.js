@@ -19,6 +19,8 @@ import authenticate from "./middlewares/authenticate.js";
 import authorize from "./middlewares/authorize.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 
+import { corsOptions } from "./config/corsOptions.js";
+
 const app = express();
 
 app.use(express.json({ limit: "50mb" }));
@@ -30,13 +32,10 @@ app.use(
   })
 );
 
-// cors config
-const isDev = process.env.NODE_ENV === "development";
-
+// Unified CORS config
 app.use(
   cors({
-    origin: isDev ? "*" : process.env.FRONTEND_URL,
-    credentials: !isDev,
+    ...corsOptions,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
     allowedHeaders: ["authorization", "content-type", "range"],
     exposedHeaders: [
