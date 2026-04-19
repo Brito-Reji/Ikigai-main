@@ -8,9 +8,8 @@ export const loginStudent = createAsyncThunk(
     try {
       const response = await api.post("/auth/student/login", { email, password });
       if (response.data.success) {
-        const { accessToken, refreshToken } = response.data;
+        const { accessToken } = response.data;
         localStorage.setItem("studentAccessToken", accessToken);
-        if (refreshToken) localStorage.setItem("studentRefreshToken", refreshToken);
         sessionStorage.removeItem("studentRefreshFailed");
         return { user: response.data.user || { email, role: "student" }, accessToken };
       }
@@ -57,13 +56,14 @@ export const verifyStudentOTP = createAsyncThunk(
     try {
       const response = await api.post("/auth/verify-otp", { email, otp });
       if (response.data.success) {
-        localStorage.setItem("studentAccessToken", response.data.accessToken);
+        const { accessToken, user } = response.data.data || {};
+        localStorage.setItem("studentAccessToken", accessToken);
         sessionStorage.removeItem("studentRefreshFailed");
         return {
           message: response.data.message,
           verified: true,
-          accessToken: response.data.accessToken,
-          user: response.data.user || null,
+          accessToken: accessToken,
+          user: user || null,
         };
       }
       return rejectWithValue({ message: response.data?.message || "OTP verification failed" });
@@ -122,9 +122,8 @@ export const googleStudentAuth = createAsyncThunk(
     try {
       const response = await api.post("/auth/student/google", { token });
       if (response.data.success) {
-        const { accessToken, refreshToken } = response.data;
+        const { accessToken } = response.data;
         localStorage.setItem("studentAccessToken", accessToken);
-        if (refreshToken) localStorage.setItem("studentRefreshToken", refreshToken);
         sessionStorage.removeItem("studentRefreshFailed");
         return { user: response.data.user || { role: "student" }, accessToken };
       }
@@ -163,7 +162,6 @@ const studentAuthSlice = createSlice({
       state.requiresVerification = false;
       state.verificationEmail = null;
       localStorage.removeItem("studentAccessToken");
-      localStorage.removeItem("studentRefreshToken");
       api.post("/auth/logout").catch(() => {});
     },
     clearStudentError: state => {

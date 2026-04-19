@@ -8,9 +8,8 @@ export const loginInstructor = createAsyncThunk(
     try {
       const response = await instructorApi.post("/auth/instructor/signin", { email, password });
       if (response.data.success) {
-        const { accessToken, refreshToken } = response.data;
+        const { accessToken } = response.data;
         localStorage.setItem("instructorAccessToken", accessToken);
-        if (refreshToken) localStorage.setItem("instructorRefreshToken", refreshToken);
         sessionStorage.removeItem("instructorRefreshFailed");
         return { user: response.data.user || { email, role: "instructor" }, accessToken };
       }
@@ -57,13 +56,14 @@ export const verifyInstructorOTP = createAsyncThunk(
     try {
       const response = await instructorApi.post("/auth/verify-otp", { email, otp });
       if (response.data.success) {
-        localStorage.setItem("instructorAccessToken", response.data.accessToken);
+        const { accessToken, user } = response.data.data || {};
+        localStorage.setItem("instructorAccessToken", accessToken);
         sessionStorage.removeItem("instructorRefreshFailed");
         return {
           message: response.data.message,
           verified: true,
-          accessToken: response.data.accessToken,
-          user: response.data.user || null,
+          accessToken: accessToken,
+          user: user || null,
         };
       }
       return rejectWithValue({ message: response.data?.message || "OTP verification failed" });
@@ -104,9 +104,8 @@ export const googleInstructorAuth = createAsyncThunk(
     try {
       const response = await instructorApi.post("/auth/instructor/google", { token });
       if (response.data.success) {
-        const { accessToken, refreshToken } = response.data;
+        const { accessToken } = response.data;
         localStorage.setItem("instructorAccessToken", accessToken);
-        if (refreshToken) localStorage.setItem("instructorRefreshToken", refreshToken);
         sessionStorage.removeItem("instructorRefreshFailed");
         return { user: response.data.user || { role: "instructor" }, accessToken };
       }
@@ -145,7 +144,6 @@ const instructorAuthSlice = createSlice({
       state.requiresVerification = false;
       state.verificationEmail = null;
       localStorage.removeItem("instructorAccessToken");
-      localStorage.removeItem("instructorRefreshToken");
       instructorApi.post("/auth/logout").catch(() => {});
     },
     clearInstructorError: state => {

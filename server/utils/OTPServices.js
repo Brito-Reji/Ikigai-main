@@ -1,63 +1,63 @@
 import asyncHandler from "express-async-handler";
-import nodemailer from "nodemailer";
 import { Otp } from "../models/Otp.js";
 import { User } from "../models/User.js";
 import { Instructor } from "../models/Instructor.js";
-// import { Users } from "lucide-react";
 import { generateTokens } from "./generateTokens.js";
 import { AppError } from "../errors/AppError.js";
 import { HTTP_STATUS } from "./httpStatus.js";
-
-const testAccount = await nodemailer.createTestAccount();
+import { sendOtpEmail } from "./emailService.js";
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export const sendOTPToEmail = async email => {
+export const sendOTPToEmail = async (email) => {
   if (!email) {
-    throw new AppError("Email is required",HTTP_STATUS.BAD_REQUEST);
+    throw new AppError("Email is required", HTTP_STATUS.BAD_REQUEST);
   }
 
   const otp = generateOTP();
-  await Otp.create({ email, otp });
-  const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
-    },
-  });
-  const mailOptions = {
-    from: '"My App" <your-email@gmail.com>',
-    to: email,
-    subject: "Your OTP Code",
-    html: `<h2>Your OTP is: ${otp}</h2><p>Expires in 2 minutes.</p>`,
-  };
-  await transporter.sendMail(mailOptions);
 
-  return { otp, success: true };
+  // Send email first to avoid orphaned OTPs in DB
+  const result = await sendOtpEmail(email, otp);
+
+  if (result.success) {
+    // Only persist if email send was successful
+    await Otp.create({ email, otp });
+  }
+
+  return result;
 };
 
 // Route handler for sending OTP
 export const sentOTP = asyncHandler(async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: "email is required" });
-    }
-
-    const result = await sendOTPToEmail(email);
-
-    res
-      .status(200)
-      .json({ message: "OTP generated", otp: result.otp, success: true });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      message: "Email is required",
+      data: null,
+    });
   }
+
+  const result = await sendOTPToEmail(email);
+
+  if (!result.success) {
+    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: result.message || "Failed to send OTP",
+      data: null,
+    });
+  }
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "OTP sent successfully",
+    data: null, // Removed otp from response for security
+  });
 });
+
 
 export const verifyOTP = asyncHandler(async (req, res) => {
   let { email, otp } = req.body;
@@ -85,11 +85,12 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       });
 
       return res.status(200).json({
-        accessToken,
-        user: student,
         success: true,
-        message:
-          "user verified succesfully Email verified! Redirecting to dashboard...",
+        message: "Email verified successfully",
+        data: {
+          accessToken,
+          user: student
+        }
       });
     } else {
       let instructor = await Instructor.findOneAndUpdate(
@@ -112,24 +113,28 @@ export const verifyOTP = asyncHandler(async (req, res) => {
       });
 
       return res.status(200).json({
-        accessToken,
-        user: {
-          _id: instructor._id,
-          email: instructor.email,
-          firstName: instructor.firstName,
-          lastName: instructor.lastName,
-          username: instructor.username,
-          role: instructor.role,
-          profileImageUrl: instructor.profileImageUrl,
-        },
         success: true,
-        message: "user verified succesfully Email verified! Redirecting to dashboard...",
+        message: "Email verified successfully",
+        data: {
+          accessToken,
+          user: {
+            _id: instructor._id,
+            email: instructor.email,
+            firstName: instructor.firstName,
+            lastName: instructor.lastName,
+            username: instructor.username,
+            role: instructor.role,
+            profileImageUrl: instructor.profileImageUrl,
+          }
+        }
       });
     }
   } else {
     res.status(400).json({
       success: false,
       message: "Incorrect OTP",
+      data: null
     });
   }
 });
+

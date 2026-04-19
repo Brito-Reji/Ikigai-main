@@ -1,10 +1,8 @@
 import axios from "axios";
 
-const isDev = import.meta.env.VITE_DEV;
-
 const api = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "http://localhost:3000") + "/api",
-  withCredentials: !isDev,
+  withCredentials: true,
 });
 console.log("api", import.meta.env.VITE_API_URL);
 api.interceptors.request.use(config => {
@@ -100,14 +98,7 @@ api.interceptors.response.use(
       console.log("Attempting to refresh token");
 
       try {
-        let refreshData = {};
-        if (isDev) {
-          const refreshToken = localStorage.getItem("refreshToken");
-          if (refreshToken) {
-            refreshData.refreshToken = refreshToken;
-          }
-        }
-        const response = await api.post("/auth/student/refresh", refreshData);
+        const response = await api.post("/auth/student/refresh");
         if (response.data.success && response.data.accessToken) {
           const { accessToken } = response.data;
           localStorage.setItem("studentAccessToken", accessToken);

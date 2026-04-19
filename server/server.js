@@ -32,15 +32,12 @@ releaseEscrowJob();
 // create http server
 const httpServer = createServer(app);
 
-// setup socket.io
-const isDev = process.env.NODE_ENV === "development";
-const io = new Server(httpServer, {
-  cors: {
-    origin: isDev ? "*" : process.env.FRONTEND_URL,
-    credentials: !isDev,
-  },
-});
+const { corsOptions } = await import("./config/corsOptions.js");
 
+// setup socket.io
+const io = new Server(httpServer, {
+  cors: corsOptions,
+});
 // init chat socket
 initChatSocket(io);
 
