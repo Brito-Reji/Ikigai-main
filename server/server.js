@@ -32,24 +32,11 @@ releaseEscrowJob();
 // create http server
 const httpServer = createServer(app);
 
-// setup socket.io
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  process.env.FRONTEND_URL
-];
+const { corsOptions } = await import("./config/corsOptions.js");
 
+// setup socket.io
 const io = new Server(httpServer, {
-  cors: {
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 // init chat socket
 initChatSocket(io);
