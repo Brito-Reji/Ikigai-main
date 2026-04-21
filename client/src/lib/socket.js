@@ -6,7 +6,7 @@ const getSocketUrl = () => {
   if (!url) return "http://localhost:3000";
   
   try {
-    return new URL(url).origin;
+    return new URL(url, window.location.origin).origin;
   } catch (error) {
     return url.replace(/\/api\/?$/, ""); 
   }
