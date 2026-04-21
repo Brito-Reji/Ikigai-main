@@ -195,7 +195,7 @@ const CourseDetailPage = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
+            <div className="space-y-6">
               {/* Course Features */}
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">

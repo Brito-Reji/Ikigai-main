@@ -32,7 +32,7 @@ export default function CourseCard({ course }) {
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-      <div className="relative">
+      <div className="relative aspect-video w-full overflow-hidden">
         <div className="absolute top-2 left-2 flex gap-2">
           <span
             className={`px-2 py-1 rounded text-xs font-medium ${
@@ -54,7 +54,7 @@ export default function CourseCard({ course }) {
         <img
           src={course.thumbnail || "https://via.placeholder.com/400x200"}
           alt={course.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-full object-cover"
         />
       </div>
       <div className="p-4">

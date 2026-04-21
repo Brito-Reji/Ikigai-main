@@ -66,7 +66,7 @@ export default function CourseCard({ course }) {
         </div>
       )}
 
-      <div className="relative h-40 sm:h-48 bg-gradient-to-br from-orange-300 to-orange-400 overflow-hidden">
+      <div className="relative aspect-video w-full bg-gradient-to-br from-orange-300 to-orange-400 overflow-hidden">
         <img
           src={course.thumbnail || course.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"}
           alt={course.title}

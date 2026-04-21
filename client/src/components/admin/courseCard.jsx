@@ -49,11 +49,11 @@ const CourseCard = ({ course, onView }) => {
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
       {/* Thumbnail */}
-      <div className="relative">
+      <div className="relative aspect-video w-full overflow-hidden">
         <img
           src={course.thumbnail || "/placeholder-course.jpg"}
           alt={course.title}
-          className="w-full h-40 object-cover bg-gray-100"
+          className="w-full h-full object-cover bg-gray-100"
         />
         <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
           {getStatusBadge()}
