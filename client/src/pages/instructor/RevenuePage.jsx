@@ -49,19 +49,19 @@ export default function RevenuePage() {
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   return (
-    <div className="flex-1 bg-gray-50 min-h-screen">
-      <div className="p-8">
+    <div className="flex-1 bg-gray-50 min-h-screen w-full overflow-x-hidden">
+      <div className="p-4 sm:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
               <TrendingUp className="w-6 h-6 text-indigo-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Revenue</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Revenue</h1>
           </div>
           
           {/* Year Selector + Download */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -86,7 +86,7 @@ export default function RevenuePage() {
                 }
               }}
               disabled={statsLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               Download Report
