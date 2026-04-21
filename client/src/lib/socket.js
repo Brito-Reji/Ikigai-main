@@ -29,7 +29,7 @@ export const connectSocket = token => {
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
   });
-
+// connect
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
   });
