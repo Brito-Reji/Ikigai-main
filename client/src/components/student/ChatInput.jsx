@@ -56,14 +56,14 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversat
 			<div className="flex items-end gap-2">
 				<button
 					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
+					className="hidden lg:flex p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
 				>
 					<Smile className="w-6 h-6" />
 				</button>
 				
 				<button
 					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
+					className="hidden lg:flex p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
 				>
 					<Paperclip className="w-6 h-6" />
 				</button>

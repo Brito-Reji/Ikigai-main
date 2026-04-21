@@ -83,38 +83,38 @@ const InstructorChatPage = () => {
 	const isLoading = activeTab === 'direct' ? loadingConversations : loadingRooms;
 
 	return (
-		<div className="h-[calc(100vh-64px)] flex flex-col bg-white overflow-hidden">
+		<div className="h-full flex flex-col bg-white overflow-hidden w-full max-w-full">
 			{/* tabs */}
-			<div className="flex-shrink-0 bg-white border-b border-gray-200 px-4">
-				<div className="flex gap-4">
+			<div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 w-full">
+				<div className="flex gap-4 overflow-x-auto no-scrollbar w-full">
 					<button
 						onClick={() => { setActiveTab('direct'); setSelectedConversation(null); setSelectedRoom(null); navigate('/instructor/communication'); }}
-						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
 							activeTab === 'direct' 
 								? 'border-blue-600 text-blue-600' 
 								: 'border-transparent text-gray-500 hover:text-gray-700'
 						}`}
 					>
-						<MessageSquare className="w-4 h-4" />
+						<MessageSquare className="w-4 h-4 flex-shrink-0" />
 						Student Messages
 						{directUnread > 0 && (
-							<span className="bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
+							<span className="bg-blue-600 text-white text-[10px] rounded-full px-2 py-0.5 flex-shrink-0">
 								{directUnread}
 							</span>
 						)}
 					</button>
 					<button
 						onClick={() => { setActiveTab('rooms'); setSelectedConversation(null); setSelectedRoom(null); navigate('/instructor/communication'); }}
-						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+						className={`py-3 px-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
 							activeTab === 'rooms' 
 								? 'border-blue-600 text-blue-600' 
 								: 'border-transparent text-gray-500 hover:text-gray-700'
 						}`}
 					>
-						<Users className="w-4 h-4" />
+						<Users className="w-4 h-4 flex-shrink-0" />
 						Course Rooms
 						{roomsUnread > 0 && (
-							<span className="bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
+							<span className="bg-blue-600 text-white text-[10px] rounded-full px-2 py-0.5 flex-shrink-0">
 								{roomsUnread}
 							</span>
 						)}
@@ -122,10 +122,10 @@ const InstructorChatPage = () => {
 				</div>
 			</div>
 
-			<div className="flex-1 flex overflow-hidden">
+			<div className="flex-1 flex overflow-hidden min-h-0 w-full">
 				{/* list panel */}
-				<div className={`${showChatOnMobile ? 'hidden' : 'block'} lg:block w-full lg:w-96 h-full bg-white border-r border-gray-200`}>
-					<div className="p-4 border-b border-gray-200">
+				<div className={`${showChatOnMobile ? 'hidden' : 'block'} lg:block w-full lg:w-96 h-full bg-white border-r border-gray-200 flex flex-col`}>
+					<div className="p-4 border-b border-gray-200 flex-shrink-0">
 						<h2 className="text-lg font-bold text-gray-900 mb-3">
 							{activeTab === 'direct' ? 'Student Conversations' : 'Your Course Rooms'}
 						</h2>
@@ -144,7 +144,7 @@ const InstructorChatPage = () => {
 							<div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
 						</div>
 					) : (
-						<div className="overflow-y-auto h-[calc(100%-100px)]">
+						<div className="flex-1 overflow-y-auto no-scrollbar">
 							{activeTab === 'direct' ? (
 								conversations.length === 0 ? (
 									<div className="p-8 text-center text-gray-500">
@@ -157,28 +157,26 @@ const InstructorChatPage = () => {
 											key={conv._id}
 											onClick={() => handleSelectConversation(conv)}
 											className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-												selectedConversation?._id === conv._id ? 'bg-blue-50' : ''
+												selectedConversation?._id === conv._id ? 'bg-blue-50/50' : ''
 											}`}
 										>
 											<img
 												src={conv.studentAvatar || 'https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png'}
 												alt={conv.studentName}
-												className="w-10 h-10 rounded-full object-cover"
+												className="w-10 h-10 rounded-full object-cover shadow-sm"
 											/>
-											<div className="flex-1 min-w-0 text-left">
-												<div className="flex items-baseline justify-between mb-1">
-													<h3 className="font-medium text-gray-900 truncate text-sm">{conv.studentName}</h3>
-													<span className="text-xs text-gray-500 ml-2">{formatTime(conv.lastMessageTime)}</span>
+											<div className="flex-1 min-w-0 text-left text-sm">
+												<div className="flex items-baseline justify-between mb-0.5">
+													<h3 className="font-semibold text-gray-900 truncate">{conv.studentName}</h3>
+													<span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">{formatTime(conv.lastMessageTime)}</span>
 												</div>
-												<p className="text-xs text-gray-500 truncate">
-													{conv.courses?.length > 1 
-														? `${conv.courses.length} Courses: ${conv.courses.map(c => c.title).join(', ')}`
-														: conv.courses?.[0]?.title || 'No courses'}
+												<p className="text-[11px] text-gray-500 truncate mb-1">
+													{conv.courses?.[0]?.title || 'No courses'}
 												</p>
-												<div className="flex items-center justify-between mt-1">
-													<p className="text-sm text-gray-600 truncate">{conv.lastMessage || 'No messages'}</p>
+												<div className="flex items-center justify-between">
+													<p className="text-gray-600 truncate max-w-[85%]">{conv.lastMessage || 'No messages'}</p>
 													{conv.unreadCount > 0 && (
-														<span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-2">
+														<span className="bg-blue-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center ml-2">
 															{conv.unreadCount}
 														</span>
 													)}
@@ -200,27 +198,27 @@ const InstructorChatPage = () => {
 											key={room._id}
 											onClick={() => handleSelectRoom(room)}
 											className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-												selectedRoom?._id === room._id ? 'bg-blue-50' : ''
+												selectedRoom?._id === room._id ? 'bg-blue-50/50' : ''
 											}`}
 										>
 											<img
 												src={room.courseThumbnail}
 												alt={room.courseTitle}
-												className="w-10 h-10 rounded-lg object-cover"
+												className="w-10 h-10 rounded-lg object-cover shadow-sm"
 											/>
-											<div className="flex-1 min-w-0 text-left">
-												<div className="flex items-baseline justify-between mb-1">
-													<h3 className="font-medium text-gray-900 truncate text-sm">{room.courseTitle}</h3>
-													<span className="text-xs text-gray-500 ml-2">{formatTime(room.lastMessageTime)}</span>
+											<div className="flex-1 min-w-0 text-left text-sm">
+												<div className="flex items-baseline justify-between mb-0.5">
+													<h3 className="font-semibold text-gray-900 truncate">{room.courseTitle}</h3>
+													<span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">{formatTime(room.lastMessageTime)}</span>
 												</div>
-												<p className="text-xs text-gray-500 flex items-center gap-1">
+												<p className="text-[11px] text-gray-500 flex items-center gap-1 mb-1 font-medium">
 													<Users className="w-3 h-3" />
 													{room.participantCount} students
 												</p>
-												<div className="flex items-center justify-between mt-1">
-													<p className="text-sm text-gray-600 truncate">{room.lastMessage}</p>
+												<div className="flex items-center justify-between">
+													<p className="text-gray-600 truncate max-w-[85%]">{room.lastMessage}</p>
 													{room.unreadCount > 0 && (
-														<span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-2">
+														<span className="bg-blue-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center ml-2">
 															{room.unreadCount}
 														</span>
 													)}
@@ -235,24 +233,26 @@ const InstructorChatPage = () => {
 				</div>
 
 				{/* chat panel */}
-				<div className={`${showChatOnMobile ? 'block' : 'hidden'} lg:block flex-1 h-full`}>
+				<div className={`${showChatOnMobile ? 'flex' : 'hidden'} lg:flex flex-col flex-1 h-full min-w-0`}>
 					{showChatOnMobile && (
-						<div className="lg:hidden bg-white border-b border-gray-200 p-4">
+						<div className="lg:hidden bg-white border-b border-gray-200 p-3 flex-shrink-0">
 							<button
 								onClick={handleBackToList}
-								className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+								className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors"
 							>
 								<ArrowLeft className="w-5 h-5" />
-								<span>Back</span>
+								<span>Back to messages</span>
 							</button>
 						</div>
 					)}
 					
-					{activeTab === 'direct' ? (
-						<InstructorChatWindow conversation={selectedConversation} />
-					) : (
-						<InstructorRoomWindow room={selectedRoom} />
-					)}
+					<div className="flex-1 min-h-0">
+						{activeTab === 'direct' ? (
+							<InstructorChatWindow conversation={selectedConversation} />
+						) : (
+							<InstructorRoomWindow room={selectedRoom} />
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

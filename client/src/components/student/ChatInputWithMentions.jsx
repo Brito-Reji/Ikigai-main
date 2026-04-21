@@ -86,21 +86,35 @@ console.log(participants);
 	};
 
 	const insertMention = (participant) => {
-		const textBeforeCursor = message.slice(0, cursorPosition);
+		// use real-time cursor position if available to prevent stale state issues
+		const currentCursor = inputRef.current ? inputRef.current.selectionStart : cursorPosition;
+		const textBeforeCursor = message.slice(0, currentCursor);
 		const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-		const textAfterCursor = message.slice(cursorPosition);
 		
-		const newText = 
-			message.slice(0, lastAtIndex) + 
-			`@${participant.name} ` + 
-			textAfterCursor;
+		let newTextBeforeCursor;
+		if (lastAtIndex === -1) {
+			// Fallback if @ isn't found
+			newTextBeforeCursor = textBeforeCursor + `@${participant.name} `;
+		} else {
+			newTextBeforeCursor = message.slice(0, lastAtIndex) + `@${participant.name} `;
+		}
+		
+		const textAfterCursor = message.slice(currentCursor);
+		const newText = newTextBeforeCursor + textAfterCursor;
 		
 		setMessage(newText);
 		setShowSuggestions(false);
 		setMentionSearch('');
 		
-		// focus back on input
-		setTimeout(() => inputRef.current?.focus(), 0);
+		// focus back on input and place cursor right after the newly inserted name
+		const newCursorPos = newTextBeforeCursor.length;
+		setCursorPosition(newCursorPos);
+		setTimeout(() => {
+			if (inputRef.current) {
+				inputRef.current.focus();
+				inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+			}
+		}, 0);
 	};
 
 	const handleKeyDown = (e) => {
@@ -222,21 +236,22 @@ console.log(participants);
 			)}
 
 			<div className="flex items-end gap-2">
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Smile className="w-6 h-6" />
-				</button>
-				
 				{showMentions && (
 					<button
 						type="button"
 						onClick={() => {
-							setMessage(prev => prev + '@');
+							const newMsg = message + '@';
+							setMessage(newMsg);
 							setShowSuggestions(true);
 							setMentionSearch('');
-							inputRef.current?.focus();
+							const newPos = newMsg.length;
+							setCursorPosition(newPos);
+							setTimeout(() => {
+								if (inputRef.current) {
+									inputRef.current.focus();
+									inputRef.current.setSelectionRange(newPos, newPos);
+								}
+							}, 0);
 						}}
 						className="p-2 text-gray-500 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50"
 						title="Mention someone"
@@ -244,13 +259,6 @@ console.log(participants);
 						<AtSign className="w-6 h-6" />
 					</button>
 				)}
-
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Paperclip className="w-6 h-6" />
-				</button>
 
 				<div className="flex-1 relative">
 					<textarea
