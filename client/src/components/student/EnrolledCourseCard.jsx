@@ -26,7 +26,7 @@ const EnrolledCourseCard = ({ course }) => {
 
 	return (
 		<div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-			<div className="relative overflow-hidden h-48">
+			<div className="relative overflow-hidden aspect-video w-full">
 				<img
 					src={course.thumbnail}
 					alt={course.title}
