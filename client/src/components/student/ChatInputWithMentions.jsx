@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Smile, Paperclip, AtSign, X } from 'lucide-react';
+import { Send, Smile, AtSign } from 'lucide-react';
 import { startTyping, stopTyping } from '@/lib/socket';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatInputWithMentions = ({ 
 	onSendMessage, 
@@ -16,8 +17,25 @@ const ChatInputWithMentions = ({
 	const [cursorPosition, setCursorPosition] = useState(0);
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [isTyping, setIsTyping] = useState(false);
+	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const inputRef = useRef(null);
 	const typingTimeoutRef = useRef(null);
+	const emojiPickerRef = useRef(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+				setShowEmojiPicker(false);
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
+
+	const onEmojiClick = (emojiObject) => {
+		setMessage(prev => prev + emojiObject.emoji);
+		if (!isTyping) handleTypingStart();
+	};
 
 	// filter participants based on search
 	const filteredParticipants = participants.filter(p => 
@@ -222,12 +240,22 @@ console.log(participants);
 			)}
 
 			<div className="flex items-end gap-2">
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Smile className="w-6 h-6" />
-				</button>
+				<div className="relative" ref={emojiPickerRef}>
+					<button
+						type="button"
+						onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+						className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100 focus:outline-none"
+						title="Add emoji"
+					>
+						<Smile className="w-6 h-6" />
+					</button>
+
+					{showEmojiPicker && (
+						<div className="absolute bottom-full left-0 mb-2 z-50">
+							<EmojiPicker onEmojiClick={onEmojiClick} theme="light" />
+						</div>
+					)}
+				</div>
 				
 				{showMentions && (
 					<button
@@ -244,13 +272,6 @@ console.log(participants);
 						<AtSign className="w-6 h-6" />
 					</button>
 				)}
-
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Paperclip className="w-6 h-6" />
-				</button>
 
 				<div className="flex-1 relative">
 					<textarea

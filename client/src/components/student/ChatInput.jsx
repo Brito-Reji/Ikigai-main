@@ -1,11 +1,29 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Send, Smile, Paperclip } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Send, Smile } from 'lucide-react';
 import { startTyping, stopTyping } from '@/lib/socket';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversationId = null }) => {
 	const [message, setMessage] = useState('');
 	const [isTyping, setIsTyping] = useState(false);
+	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const typingTimeoutRef = useRef(null);
+	const emojiPickerRef = useRef(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+				setShowEmojiPicker(false);
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
+
+	const onEmojiClick = (emojiObject) => {
+		setMessage(prev => prev + emojiObject.emoji);
+		if (!isTyping && conversationId) handleTypingStart();
+	};
 
 	const handleTypingStart = useCallback(() => {
 		if (!conversationId) return;
@@ -54,19 +72,22 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversat
 	return (
 		<form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white p-4">
 			<div className="flex items-end gap-2">
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Smile className="w-6 h-6" />
-				</button>
-				
-				<button
-					type="button"
-					className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100"
-				>
-					<Paperclip className="w-6 h-6" />
-				</button>
+				<div className="relative" ref={emojiPickerRef}>
+					<button
+						type="button"
+						onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+						className="p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-100 focus:outline-none"
+						title="Add emoji"
+					>
+						<Smile className="w-6 h-6" />
+					</button>
+
+					{showEmojiPicker && (
+						<div className="absolute bottom-full left-0 mb-2 z-50">
+							<EmojiPicker onEmojiClick={onEmojiClick} theme="light" />
+						</div>
+					)}
+				</div>
 
 				<div className="flex-1 relative">
 					<textarea
