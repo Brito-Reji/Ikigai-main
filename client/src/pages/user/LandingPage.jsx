@@ -175,7 +175,7 @@ export default function LandingPage() {
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </Link>
-                  <Link to="/courses">
+                  <Link to="/courses" target="_blank">
                     <button className="px-7 py-3.5 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition font-semibold text-base flex items-center gap-2">
                       <Play className="w-4 h-4 fill-current" />
                       Browse Courses
@@ -250,7 +250,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Explore Top Categories</h2>
                 <p className="text-gray-500">Find courses in your favourite field</p>
               </div>
-              <Link to="/courses" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium group">
+              <Link to="/courses" target="_blank" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium group">
                 See All
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -266,6 +266,7 @@ export default function LandingPage() {
                   <Link
                     key={cat._id}
                     to={`/courses?category=${cat._id}`}
+                    target="_blank"
                     className="card-hover group relative overflow-hidden bg-white rounded-2xl p-6 border border-gray-100 cursor-pointer"
                   >
                     <div className={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
@@ -298,7 +299,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Courses</h2>
                 <p className="text-gray-500">Handpicked by our team</p>
               </div>
-              <Link to="/courses" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium group">
+              <Link to="/courses" target="_blank" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium group">
                 See All
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -311,7 +312,7 @@ export default function LandingPage() {
             ) : courses.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {courses.map((course, idx) => (
-                  <Link to={`/course/${course.id}`} key={course.id || idx} className="card-hover block">
+                  <Link to={`/course/${course.id}`} target="_blank" key={course.id || idx} className="card-hover block">
                     <CourseCard course={course} />
                   </Link>
                 ))}
@@ -398,7 +399,7 @@ export default function LandingPage() {
             <p className="text-gray-500 mb-8 text-lg">
               Learners around the world are launching new careers and advancing in their fields.
             </p>
-            <Link to="/courses">
+            <Link to="/courses" target="_blank">
               <button className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-semibold text-base shadow-lg shadow-indigo-200 flex items-center gap-2 mx-auto">
                 Explore All Courses
                 <ArrowRight className="w-5 h-5" />
