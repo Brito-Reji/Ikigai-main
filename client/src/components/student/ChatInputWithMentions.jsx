@@ -33,7 +33,13 @@ const ChatInputWithMentions = ({
 	}, []);
 
 	const onEmojiClick = (emojiObject) => {
-		setMessage(prev => prev + emojiObject.emoji);
+		const before = message.slice(0, cursorPosition);
+		const after = message.slice(cursorPosition);
+		const nextMessage = `${before}${emojiObject.emoji}${after}`;
+
+		setMessage(nextMessage);
+		setCursorPosition(cursorPosition + emojiObject.emoji.length);
+
 		if (!isTyping) handleTypingStart();
 	};
 
