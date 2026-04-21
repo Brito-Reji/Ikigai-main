@@ -57,6 +57,8 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversat
 
 	const handleKeyPress = (e) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
+			// On mobile, Enter adds a new line. On desktop, Enter sends the message.
+			if (window.innerWidth < 768) return;
 			e.preventDefault();
 			handleSubmit(e);
 		}
@@ -72,7 +74,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversat
 	return (
 		<form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white p-4">
 			<div className="flex items-end gap-2">
-				<div className="relative" ref={emojiPickerRef}>
+				<div className="relative hidden sm:block" ref={emojiPickerRef}>
 					<button
 						type="button"
 						onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -83,8 +85,11 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", conversat
 					</button>
 
 					{showEmojiPicker && (
-						<div className="absolute bottom-full left-0 mb-2 z-50">
-							<EmojiPicker onEmojiClick={onEmojiClick} theme="light" />
+						<div 
+							className="absolute bottom-full left-0 mb-2 z-50 shadow-xl rounded-lg bg-white" 
+							style={{ width: 'min(350px, calc(100vw - 32px))' }}
+						>
+							<EmojiPicker onEmojiClick={onEmojiClick} theme="light" width="100%" height={350} />
 						</div>
 					)}
 				</div>
