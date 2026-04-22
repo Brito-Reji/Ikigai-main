@@ -9,10 +9,14 @@ import { queryClient } from "./lib/queryClient.js";
 import "./index.css";
 import App from "./App.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_ID;
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    <Analytics />
+    <SpeedInsights />
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <BrowserRouter>
