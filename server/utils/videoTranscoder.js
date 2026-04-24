@@ -2,7 +2,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import logger from "./logger.js";
-
+ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
 // Convert MP4 to HLS format
 export const convertVideoToHls = (inputFilePath, outputDir) => {
     return new Promise((resolve, reject) => {
