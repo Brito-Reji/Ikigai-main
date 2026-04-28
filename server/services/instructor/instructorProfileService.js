@@ -16,16 +16,31 @@ export const getProfileService = async (userId) => {
 };
 
 export const updateProfileService = async (userId, updateData) => {
-    const user = await Instructor.findByIdAndUpdate(userId, updateData, {
-        new: true,
-        runValidators: true,
-    }).select("-password -refreshToken");
+  const { firstName, lastName } = updateData;
+  const nameRegex = /^[a-zA-Z\s]+$/;
 
-    if (!user) {
-        throw new AppError("User not found",HTTP_STATUS.NOT_FOUND);
+  if (firstName !== undefined) {
+    if (!firstName.trim() || !nameRegex.test(firstName.trim()) || firstName.trim().length < 2) {
+      throw new AppError("First name must contain only letters and at least 2 characters", HTTP_STATUS.BAD_REQUEST);
     }
+  }
 
-    return user;
+  if (lastName !== undefined && lastName.trim()) {
+    if (!nameRegex.test(lastName.trim())) {
+      throw new AppError("Last name can only contain letters", HTTP_STATUS.BAD_REQUEST);
+    }
+  }
+
+  const user = await Instructor.findByIdAndUpdate(userId, updateData, {
+    new: true,
+    runValidators: true,
+  }).select("-password -refreshToken");
+
+  if (!user) {
+    throw new AppError("User not found", HTTP_STATUS.NOT_FOUND);
+  }
+
+  return user;
 };
 
 export const requestEmailChangeOTPService = async (userId, newEmail, password) => {

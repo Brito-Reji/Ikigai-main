@@ -25,6 +25,8 @@ export default function EditInstructorProfilePage() {
     },
   });
 
+  const [errors, setErrors] = useState({ firstName: "", lastName: "" });
+
   useEffect(() => {
     if (profileData?.data) {
       setFormData({
@@ -61,8 +63,29 @@ export default function EditInstructorProfilePage() {
     setFormData({ ...formData, profileImageUrl: url });
   };
 
+  const validateForm = () => {
+    const newErrors = { firstName: "", lastName: "" };
+    const nameRegex = /^[a-zA-Z\s]+$/;
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (!nameRegex.test(formData.firstName.trim())) {
+      newErrors.firstName = "First name can only contain letters";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
+    }
+
+    if (formData.lastName.trim() && !nameRegex.test(formData.lastName.trim())) {
+      newErrors.lastName = "Last name can only contain letters";
+    }
+
+    setErrors(newErrors);
+    return !newErrors.firstName && !newErrors.lastName;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     try {
       await updateMutation.mutateAsync(formData);
       Swal.fire({
@@ -155,8 +178,13 @@ export default function EditInstructorProfilePage() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.firstName ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -167,8 +195,13 @@ export default function EditInstructorProfilePage() {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.lastName ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
+                  )}
                 </div>
               </div>
             </div>
