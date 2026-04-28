@@ -53,29 +53,35 @@ export default function SignUpPage() {
   // Validation function
   const validateForm = () => {
     const newErrors = {};
+    const nameRegex = /^[a-zA-Z\s]+$/;
 
     // First Name validation
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
-    } else if (formData.firstName.length < 2) {
+    } else if (!nameRegex.test(formData.firstName.trim())) {
+      newErrors.firstName = "First name can only contain letters";
+    } else if (formData.firstName.trim().length < 2) {
       newErrors.firstName = "First name must be at least 2 characters";
     }
 
     // Last Name validation
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required";
-    } else if (formData.lastName.length < 2) {
+    } else if (!nameRegex.test(formData.lastName.trim())) {
+      newErrors.lastName = "Last name can only contain letters";
+    } else if (formData.lastName.trim().length < 2) {
       newErrors.lastName = "Last name must be at least 2 characters";
     }
 
     // Username validation
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      newErrors.username = "Username can only contain letters, numbers, and underscores";
+    } else if (!/[a-zA-Z]/.test(formData.username)) {
+      newErrors.username = "Username must contain at least one letter";
     } else if (formData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username =
-        "Username can only contain letters, numbers, and underscores";
     }
 
     // Email validation

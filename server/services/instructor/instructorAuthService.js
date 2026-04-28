@@ -12,12 +12,26 @@ export const instructorRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
 
   if (!email || !username || !firstName || !lastName || !password) {
-    throw new AppError("Please provide all required fields",HTTP_STATUS.BAD_REQUEST)
+    throw new AppError("Please provide all required fields", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  const nameRegex = /^[a-zA-Z\s]+$/;
+
+  if (!nameRegex.test(firstName.trim()) || firstName.trim().length < 2) {
+    throw new AppError("First name must contain only letters and at least 2 characters", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  if (!nameRegex.test(lastName.trim()) || lastName.trim().length < 2) {
+    throw new AppError("Last name must contain only letters and at least 2 characters", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(username) || !/[a-zA-Z]/.test(username)) {
+    throw new AppError("Username must contain at least one letter", HTTP_STATUS.BAD_REQUEST);
   }
 
   const isStudent = await User.findOne({ email });
   if (isStudent) {
-    throw new AppError("This user is registered as student use another email",HTTP_STATUS.BAD_REQUEST)
+    throw new AppError("This user is registered as student use another email", HTTP_STATUS.BAD_REQUEST);
   }
 
   const existingInstructor = await Instructor.findOne({
@@ -25,16 +39,16 @@ export const instructorRegisterService = async data => {
   });
 
   if (existingInstructor) {
-    throw new AppError("Email or username already exist",HTTP_STATUS.BAD_REQUEST)
+    throw new AppError("Email or username already exist", HTTP_STATUS.BAD_REQUEST);
   }
 
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
-    throw new AppError("Please provide a valid email address",HTTP_STATUS.BAD_REQUEST)
+    throw new AppError("Please provide a valid email address", HTTP_STATUS.BAD_REQUEST);
   }
 
   if (password.length < 6) {
-    throw new AppError("Password must be at least 6 characters long",HTTP_STATUS.BAD_REQUEST)
+    throw new AppError("Password must be at least 6 characters long", HTTP_STATUS.BAD_REQUEST);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
