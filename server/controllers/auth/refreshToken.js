@@ -9,10 +9,14 @@ export const studentRefreshToken = asyncHandler(async (req, res) => {
     req.query.refreshToken ||
     req.body.refreshToken;
 
-  const { accessToken, refreshToken: newRefreshToken } =
-    await refreshTokenService(incomingToken);
+  if (!incomingToken) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "No refresh token" });
+    return;
+  }
 
-  res.cookie("studentRefreshToken", newRefreshToken, {
+  const result = await refreshTokenService(incomingToken);
+
+  res.cookie("studentRefreshToken", result.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -21,7 +25,7 @@ export const studentRefreshToken = asyncHandler(async (req, res) => {
 
   res.status(HTTP_STATUS.OK).json({
     success: true,
-    accessToken,
+    accessToken: result.accessToken,
   });
 });
 

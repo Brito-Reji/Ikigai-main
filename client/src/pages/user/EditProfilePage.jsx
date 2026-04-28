@@ -23,6 +23,7 @@ export default function EditStudentProfilePage() {
 
   const [errors, setErrors] = useState({
     firstName: "",
+    lastName: "",
     phone: "",
   });
 
@@ -53,18 +54,22 @@ export default function EditStudentProfilePage() {
   };
 
   const validateForm = () => {
-    const newErrors = {
-      firstName: "",
-      phone: "",
-    };
+    const newErrors = { firstName: "", lastName: "", phone: "" };
+    const nameRegex = /^[a-zA-Z\s]+$/;
 
-    // Validate first name
-    if (!formData.firstName || !formData.firstName.trim()) {
+    if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
+    } else if (!nameRegex.test(formData.firstName.trim())) {
+      newErrors.firstName = "First name can only contain letters";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
     }
 
-    // Validate phone (optional but if provided should be valid)
-    if (formData.phone && formData.phone.trim()) {
+    if (formData.lastName.trim() && !nameRegex.test(formData.lastName.trim())) {
+      newErrors.lastName = "Last name can only contain letters";
+    }
+
+    if (formData.phone.trim()) {
       const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
       if (!phoneRegex.test(formData.phone)) {
         newErrors.phone = "Please enter a valid phone number";
@@ -72,7 +77,7 @@ export default function EditStudentProfilePage() {
     }
 
     setErrors(newErrors);
-    return !newErrors.firstName && !newErrors.phone;
+    return !newErrors.firstName && !newErrors.lastName && !newErrors.phone;
   };
 
   const handleSubmit = async (e) => {
@@ -199,9 +204,14 @@ export default function EditStudentProfilePage() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white ${
+                    errors.lastName ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholder="Doe"
                 />
+                {errors.lastName && (
+                  <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
+                )}
               </div>
 
               {/* Phone */}
