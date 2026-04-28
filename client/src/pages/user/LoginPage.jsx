@@ -198,8 +198,12 @@ function LoginPage() {
         } else if (loginStudent.rejected.match(resultAction)) {
           localStorage.removeItem("studentAccessToken");
 
-          // Check if user is blocked
-          if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes("blocked")) {
+          // unverified account — redirect to OTP
+          if (resultAction.payload?.requiresVerification) {
+            navigate("/verify-otp", {
+              state: { email: formData.email },
+            });
+          } else if (resultAction.payload?.isBlocked || resultAction.payload?.message?.toLowerCase().includes("blocked")) {
             Swal.fire({
               icon: "error",
               title: "Account Blocked",
@@ -208,7 +212,6 @@ function LoginPage() {
               confirmButtonText: "OK",
             });
           } else if (resultAction.payload?.message?.toLowerCase().includes("google")) {
-            // Special handling for Google auth error
             Swal.fire({
               icon: "info",
               title: "Google Account Detected",
@@ -219,9 +222,7 @@ function LoginPage() {
           } else {
             setErrors({
               ...errors,
-              general:
-                resultAction.payload?.message ||
-                "Login failed. Please try again.",
+              general: resultAction.payload?.message || "Login failed. Please try again.",
             });
           }
         }

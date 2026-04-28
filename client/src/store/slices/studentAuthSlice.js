@@ -7,12 +7,24 @@ export const loginStudent = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await api.post("/auth/student/login", { email, password });
+
       if (response.data.success) {
-        const { accessToken } = response.data;
+        const { accessToken, user } = response.data;
+
+        // unverified user — server sends OTP, no token
+        if (!accessToken) {
+          return rejectWithValue({
+            message: response.data.message || "Please verify your email",
+            requiresVerification: true,
+            email,
+          });
+        }
+
         localStorage.setItem("studentAccessToken", accessToken);
         sessionStorage.removeItem("studentRefreshFailed");
-        return { user: response.data.user || { email, role: "student" }, accessToken };
+        return { user: user || { email, role: "student" }, accessToken };
       }
+
       return rejectWithValue({ message: response.data?.message || "Login failed" });
     } catch (error) {
       if (error.response?.status === 403 && error.response?.data?.requiresVerification) {
