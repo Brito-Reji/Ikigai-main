@@ -2,12 +2,13 @@ import { AppError } from "../../errors/AppError.js";
 import { Coupon } from "../../models/Coupon.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 
-// Validate discount vs min amount
 const validateCouponAmounts = ({ discountType, discountValue, minAmount }) => {
-  if (discountType == "fixed" && discountValue >minAmount) {
-    throw new AppError("min amoutn should be greater ",HTTP_STATUS.FORBIDDEN)
+  if (discountType === "fixed" && Number(discountValue) > Number(minAmount)) {
+    throw new AppError(
+      "Discount value cannot exceed the minimum purchase amount",
+      HTTP_STATUS.BAD_REQUEST
+    );
   }
-
 
   if (discountType === "fixed" && Number(discountValue) === Number(minAmount)) {
     throw new AppError(
@@ -17,8 +18,23 @@ const validateCouponAmounts = ({ discountType, discountValue, minAmount }) => {
   }
 };
 
+// Validate expiry date
+const validateExpiryDate = (expiryDate) => {
+  if (!expiryDate) {
+    throw new AppError("Expiry date is required", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (new Date(expiryDate) < today) {
+    throw new AppError("Expiry date cannot be in the past", HTTP_STATUS.BAD_REQUEST);
+  }
+};
+
 export const createCouponService = async (coupon) => {
   validateCouponAmounts(coupon);
+  validateExpiryDate(coupon.expiryDate);
 
   const exists = await Coupon.findOne({ 
     code: { $regex: `^${coupon.code.trim()}$`, $options: "i" } 
@@ -36,7 +52,8 @@ export const getAllCouponsService = () => {
 
 export const updateCouponService = async (couponId, coupon) => {
   validateCouponAmounts(coupon);
-  
+  validateExpiryDate(coupon.expiryDate);
+
   const exists = await Coupon.findOne({ 
     code: { $regex: `^${coupon.code.trim()}$`, $options: "i" },
     _id: { $ne: couponId }

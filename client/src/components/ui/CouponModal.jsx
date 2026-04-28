@@ -88,8 +88,11 @@ const CouponModal = ({ isOpen, onClose, onSubmit, coupon, mode }) => {
 
     if (!formData.expiryDate) {
       newErrors.expiryDate = "Expiry date is required";
-    } else if (new Date(formData.expiryDate) < new Date()) {
-      newErrors.expiryDate = "Expiry date must be in the future";
+    } else {
+      const today = new Date().toISOString().split("T")[0];
+      if (formData.expiryDate < today) {
+        newErrors.expiryDate = "Expiry date cannot be in the past";
+      }
     }
 
     if (formData.usageLimit && formData.usageLimit <= 0) {
