@@ -12,15 +12,8 @@ const PurchaseHistoryPage = () => {
 
   const { data: orders = [], isLoading } = useOrderHistory();
   const { mutate: partialRefund } = usePartialRefund();
-  const handleRefundCourse = async (order, courseId, courseTitle, originalPrice) => {
-    // total user paid = razorpay + wallet
-    const totalPaid = Math.round(order.amount) + Math.round(order.walletAmountUsed || 0);
-    let baseRefundAmount;
-    if (order.originalAmount && order.originalAmount > 0) {
-      baseRefundAmount = Math.round((originalPrice / order.originalAmount) * totalPaid);
-    } else {
-      baseRefundAmount = originalPrice;
-    }
+  const handleRefundCourse = async (order, courseId, courseTitle, paidAmount) => {
+    const baseRefundAmount = paidAmount;
     const bankRefundAmount = Math.round(baseRefundAmount * 0.8);
 
     const result = await Swal.fire({
@@ -79,9 +72,10 @@ const PurchaseHistoryPage = () => {
         { courseId, razorpayOrderId: order.razorpayOrderId, reason: "Customer request", refundMethod },
         {
           onSuccess: (response) => {
+            const amountInRupees = response.data.refundAmount / 100;
             const msg = refundMethod === "wallet"
-              ? `₹${response.data.refundAmount} credited to wallet!`
-              : `₹${response.data.refundAmount} refund to bank (5-7 days)`;
+              ? `₹${amountInRupees} credited to wallet!`
+              : `₹${amountInRupees} refund to bank (5-7 days)`;
             toast.success(msg);
             setRefundLoading(null);
           },
@@ -232,13 +226,13 @@ const PurchaseHistoryPage = () => {
                             <h4 className={`font-medium truncate ${isRefunded ? "text-gray-500 line-through" : "text-gray-900"}`}>
                               {course.title}
                             </h4>
-                            <p className="text-sm text-gray-500">₹{course.price}</p>
+                            <p className="text-sm text-gray-500">₹{payment?.amount || course.price}</p>
                           </div>
                           <div className="flex items-center gap-3">
                             {getPaymentStatus(payment || { status: "PAID" })}
                             {!isRefunded && order.status === "PAID" && (
                               <button
-                                onClick={() => handleRefundCourse(order, course._id, course.title, course.price)}
+                                onClick={() => handleRefundCourse(order, course._id, course.title, payment?.amount || course.price)}
                                 disabled={refundLoading === course._id}
                                 className="px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1"
                               >

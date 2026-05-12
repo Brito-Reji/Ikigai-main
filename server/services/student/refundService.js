@@ -160,21 +160,10 @@ export const processPartialRefund = async ({
     refundMethod = "wallet";
   }
 
-  // total amount user actually paid (razorpay + wallet, excludes coupon)
-  const totalUserPaid =
-    Math.round(order.amount) + Math.round(order.walletAmountUsed || 0);
   const coursePrice = payment.amount;
 
-  // proportional refund based on total user paid amount
-  let baseRefundAmount;
-  if (order.originalAmount && order.originalAmount > 0) {
-    baseRefundAmount = Math.round(
-      (coursePrice / order.originalAmount) * totalUserPaid
-    );
-  } else {
-    baseRefundAmount = coursePrice;
-  }
-
+  // the amount the user actually paid for this course (after coupons)
+  let baseRefundAmount = payment.amount;
   baseRefundAmount = Math.max(1, baseRefundAmount);
 
   // wallet = 100%, bank = 80%

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import GoogleAuth from "@/components/common/GoogleAuth.jsx";
 import { useInstructorAuth } from "@/hooks/useRedux.js";
 import { loginInstructor, clearInstructorError } from "@/store/slices/instructorAuthSlice.js";
@@ -276,20 +276,20 @@ function LoginPage() {
 
               {/* Forgot Password & Sign Up Link */}
               <div className="flex items-center justify-between text-sm">
-                <a
-                  href="/instructor/forget-password"
+                <Link
+                  to="/instructor/forget-password"
                   className="text-indigo-600 hover:text-indigo-700 font-medium"
                 >
                   Forgot password?
-                </a>
+                </Link>
                 <div className="text-gray-600">
                   New instructor?{" "}
-                  <a
-                    href="/instructor/signup"
+                  <Link
+                    to="/instructor/signup"
                     className="text-indigo-600 hover:text-indigo-700 font-medium"
                   >
                     Sign up
-                  </a>
+                  </Link>
                 </div>
               </div>
 

@@ -390,16 +390,11 @@ export default function SignUpPage() {
                   </span>
                   {!loading && <ArrowRight className="w-5 h-5" />}
                 </button>
-                <div>
-                  <a
-                    href="#"
-                    className="text-gray-900  font-medium text-xs flex justify-center"
-                  >
-                    Already have an account?
-                    <a href="" className=" text-blue-500 underline">
-                      <Link to={"/login"}>Login</Link>
-                    </a>
-                  </a>
+                <div className="text-center text-sm text-gray-600">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-blue-500 underline">
+                    Login
+                  </Link>
                 </div>
 
                 {/* Divider */}
