@@ -37,7 +37,14 @@ export const getStudents = asyncHandler(async (req, res) => {
 
 //  Block Student
 export const blockStudent = asyncHandler(async (req, res) => {
-  await toggleStudentBlockService(req.params.studentId);
+  const student = await toggleStudentBlockService(req.params.studentId);
+  const io = req.app.get("io");
+
+  if (student.isBlocked && io) {
+    io.to(`user:${student._id}`).emit("user:blocked", {
+      message: "Your account has been blocked by the administrator.",
+    });
+  }
 
   res.status(HTTP_STATUS.OK).json({ success: true });
 });
@@ -54,7 +61,14 @@ export const getInstructors = asyncHandler(async (req, res) => {
 
 //  Block Instructor
 export const blockInstructor = asyncHandler(async (req, res) => {
-  await toggleInstructorBlockService(req.params.instructorId);
+  const instructor = await toggleInstructorBlockService(req.params.instructorId);
+  const io = req.app.get("io");
+
+  if (instructor.isBlocked && io) {
+    io.to(`user:${instructor._id}`).emit("user:blocked", {
+      message: "Your account has been blocked by the administrator.",
+    });
+  }
 
   res.status(HTTP_STATUS.OK).json({ success: true });
 });

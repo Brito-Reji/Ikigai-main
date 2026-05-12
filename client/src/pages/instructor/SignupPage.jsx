@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, CheckCircle, XCircle, Loader } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useInstructorAuth } from "@/hooks/useRedux.js";
 import { registerInstructor, clearInstructorError } from "@/store/slices/instructorAuthSlice.js";
 import Swal from "sweetalert2";
@@ -404,12 +404,12 @@ export default function SignUpPage() {
             {/* Login Link */}
             <div className="text-center text-sm text-gray-600">
               Already have an account?{" "}
-              <a
-                href="/instructor/login"
+              <Link
+                to="/instructor/login"
                 className="text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 Sign in
-              </a>
+              </Link>
             </div>
 
             {/* Divider */}

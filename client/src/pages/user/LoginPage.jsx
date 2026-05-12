@@ -268,7 +268,7 @@ function LoginPage() {
             </div>
           )}
 
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -328,7 +328,7 @@ function LoginPage() {
 
             {/* Sign In Button */}
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
               className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition flex items-center justify-center space-x-2 disabled:opacity-50"
             >
@@ -368,7 +368,7 @@ function LoginPage() {
 
             {/* Google Sign In */}
             <GoogleAuth role={"student"} />
-          </div>
+          </form>
         </div>
       </div>
 

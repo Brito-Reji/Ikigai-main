@@ -17,8 +17,10 @@ export const useOrderHistory = () => {
         amount: order.amount / 100,
         originalAmount: order.originalAmount / 100,
         discountAmount: order.discountAmount / 100,
+        walletAmountUsed: (order.walletAmountUsed || 0) / 100,
         payments: order.payments.map(p => ({
           ...p,
+          amount: p.amount / 100,
           refundAmount: p.refundAmount ? p.refundAmount / 100 : p.refundAmount,
         })),
       }));
