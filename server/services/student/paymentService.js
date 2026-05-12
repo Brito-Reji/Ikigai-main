@@ -399,7 +399,7 @@ export const getOrderHistoryService = async userId => {
       const payments = await Payment.find({
         razorpayOrderId: order.razorpayOrderId,
         userId,
-      }).select("courseId status refundAmount refundedAt");
+      }).select("courseId status amount refundAmount refundedAt");
 
       return {
         ...order.toObject(),
