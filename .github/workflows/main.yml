@@ -8,7 +8,7 @@ on:
         default: 'javascript'
       target-url:
         type: string
-        default: 'https://ikigaiedu.online'
+        default: 'https://example.com'
       email-recipient:
         type: string
         required: true
@@ -21,14 +21,14 @@ on:
       target-url:
         description: 'OWASP ZAP Scan Target URL'
         required: true
-        default: 'https://ikigaiedu.online'
+        default: 'https://example.com'
       email-recipient:
         description: 'Send test email to:'
         required: true
         default: 'aslahea068@gmail.com'
 
 jobs:
-  # 1. CodeQL SAST Scan (Job-level continue-on-error removed for schema compliance)
+  # 1. CodeQL SAST Scan
   sast-codeql:
     permissions:
       security-events: write
@@ -38,19 +38,24 @@ jobs:
     with:
       language: ${{ github.event.inputs.language || inputs.language }}
 
-  # 2. Trivy SCA Scan
+  # 2. SonarCloud Code Quality Scan (Completely Automated & Multi-Tenant Friendly)
+  sast-sonar:
+    uses: aslahea/zero-friction-devsecops/.github/workflows/sonarqube.yml@main
+    secrets: inherit
+
+  # 3. Trivy SCA Scan
   sca-trivy:
     uses: aslahea/zero-friction-devsecops/.github/workflows/trivy-fs.yml@main
 
-  # 3. OWASP ZAP DAST Scan
+  # 4. OWASP ZAP DAST Scan
   dast-zap:
     uses: aslahea/zero-friction-devsecops/.github/workflows/zap.yml@main
     with:
       target-url: ${{ github.event.inputs.target-url || inputs.target-url }}
 
-  # 4. Aggregator & Notifier
+  # 5. Aggregator & Notifier
   notify:
-    needs: [sast-codeql, sca-trivy, dast-zap]
+    needs: [sast-codeql, sast-sonar, sca-trivy, dast-zap]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -75,19 +80,16 @@ jobs:
       - name: Send Email Report
         env:
           MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         if: ${{ env.MAIL_SERVER != '' }}
         uses: dawidd6/action-send-mail@v4
         with:
-          server_address: ${{ env.MAIL_SERVER }}
-          server_port: ${{ env.MAIL_PORT }}
-          username: ${{ env.MAIL_USERNAME }}
-          password: ${{ env.MAIL_PASSWORD }}
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
           subject: "[DevSecOps Alert] Pipeline Security Reports for ${{ github.repository }}"
           to: ${{ github.event.inputs.email-recipient || inputs.email-recipient }}
-          from: "DevSecOps Engine <${{ env.MAIL_USERNAME }}>"
+          from: "DevSecOps Engine <${{ secrets.MAIL_USERNAME }}>"
           body: |
             Hello Team,
 
@@ -95,8 +97,9 @@ jobs:
 
             Summary of Scans:
             1. SAST (CodeQL): Completed. Findings are visual and available on your GitHub dashboard under "Security > Code scanning".
-            2. SCA (Trivy): Completed. (Trivy text report is attached).
-            3. DAST (OWASP ZAP): Completed. (ZAP HTML report is attached).
+            2. SAST (SonarCloud): Quality Gate Analysis completed. View detailed code quality metrics directly on your SonarCloud Dashboard: https://sonarcloud.io/dashboard?id=${{ secrets.SONAR_ORGANIZATION || github.repository_owner }}_${{ github.event.repository.name }}
+            3. SCA (Trivy): Completed. (Trivy text report is attached).
+            4. DAST (OWASP ZAP): Completed. (ZAP HTML report is attached).
 
             Please find the reports attached to this email.
 
