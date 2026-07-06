@@ -1,0 +1,116 @@
+name: DevSecOps Master Orchestrator
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        type: string
+        default: 'javascript'
+      target-url:
+        type: string
+        default: 'https://ikigaiedu.online'
+      email-recipient:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      language:
+        description: 'CodeQL Target Language'
+        required: true
+        default: 'javascript'
+      target-url:
+        description: 'OWASP ZAP Scan Target URL'
+        required: true
+        default: 'https://ikigaiedu.online'
+      email-recipient:
+        description: 'Send test email to:'
+        required: true
+        default: 'aslahea068@gmail.com'
+
+jobs:
+  # 1. CodeQL SAST Scan (Job-level continue-on-error removed for schema compliance)
+  sast-codeql:
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    uses: aslahea/zero-friction-devsecops/.github/workflows/codeql.yml@main
+    with:
+      language: ${{ github.event.inputs.language || inputs.language }}
+
+  # 2. Trivy SCA Scan
+  sca-trivy:
+    uses: aslahea/zero-friction-devsecops/.github/workflows/trivy-fs.yml@main
+
+  # 3. OWASP ZAP DAST Scan
+  dast-zap:
+    uses: aslahea/zero-friction-devsecops/.github/workflows/zap.yml@main
+    with:
+      target-url: ${{ github.event.inputs.target-url || inputs.target-url }}
+
+  # 4. Aggregator & Notifier
+  notify:
+    needs: [sast-codeql, sca-trivy, dast-zap]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Reports Directory
+        run: mkdir -p reports
+
+      - name: Download Trivy Report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: trivy-report
+          path: reports/
+
+      - name: Download ZAP Report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: zap-report
+          path: reports/
+
+      # Send Email ONLY if SMTP credentials exist in the executing repository
+      - name: Send Email Report
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        if: ${{ env.MAIL_SERVER != '' }}
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: ${{ env.MAIL_SERVER }}
+          server_port: ${{ env.MAIL_PORT }}
+          username: ${{ env.MAIL_USERNAME }}
+          password: ${{ env.MAIL_PASSWORD }}
+          subject: "[DevSecOps Alert] Pipeline Security Reports for ${{ github.repository }}"
+          to: ${{ github.event.inputs.email-recipient || inputs.email-recipient }}
+          from: "DevSecOps Engine <${{ env.MAIL_USERNAME }}>"
+          body: |
+            Hello Team,
+
+            The centralized security scanning pipeline has completed execution for: ${{ github.repository }} (Branch: ${{ github.ref_name }}).
+
+            Summary of Scans:
+            1. SAST (CodeQL): Completed. Findings are visual and available on your GitHub dashboard under "Security > Code scanning".
+            2. SCA (Trivy): Completed. (Trivy text report is attached).
+            3. DAST (OWASP ZAP): Completed. (ZAP HTML report is attached).
+
+            Please find the reports attached to this email.
+
+            Regards,
+            DevSecOps Governance Engine
+          attachments: reports/*
+
+      # Fallback notice if SMTP secrets are missing in the app repo
+      - name: Log Notice (SMTP Not Configured in Caller Repository)
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        if: ${{ env.MAIL_SERVER == '' }}
+        run: |
+          echo "========================================================="
+          echo "   SMTP credentials not configured in this repository.   "
+          echo "   Skipping email transmission to protect workflow runtime. "
+          echo "========================================================="
