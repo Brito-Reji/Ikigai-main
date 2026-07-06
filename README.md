@@ -243,7 +243,7 @@ ikigai/
 |---|---|
 | `npm run dev` | Start Vite dev server |
 | `npm run build` | Build for production |
-| `npm run preview` | Preview the production build |
+| `npm run preview` | Preview the production build. |
 
 ---
 
