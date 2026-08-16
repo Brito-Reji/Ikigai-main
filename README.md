@@ -130,7 +130,9 @@ GOOGLE_GENAI_API_KEY=your_google_genai_api_key
 
 # Telegram alerts (optional — skip to disable)
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_CHAT_ID=your_telegram_chat_id
+TELEGRAM_CHAT_ID=your_telegram_chat_id_numeric_id_not_username
+
+The bot replies to `/start` and `/status` in Telegram, and sends a short "online" message when the server starts.
 
 # Frontend URL (for CORS)
 CLIENT_URL=http://localhost:5173

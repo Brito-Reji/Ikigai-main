@@ -1,12 +1,16 @@
 import axios from "axios";
 import logger from "./logger.js";
 
-export const sendTelegram = async (text) => {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+const API_TIMEOUT_MS = 8000;
 
+export const getTelegramToken = () => process.env.TELEGRAM_BOT_TOKEN?.trim();
+
+export const getTelegramAdminChatId = () => process.env.TELEGRAM_CHAT_ID?.trim();
+
+export const sendTelegramToChat = async (chatId, text) => {
+  const token = getTelegramToken();
   if (!token || !chatId) {
-    return;
+    return false;
   }
 
   try {
@@ -17,9 +21,19 @@ export const sendTelegram = async (text) => {
         text,
         disable_web_page_preview: true,
       },
-      { timeout: 8000 }
+      { timeout: API_TIMEOUT_MS }
     );
+    return true;
   } catch (error) {
     logger.error("Failed to send Telegram message: %s", error.message);
+    return false;
   }
+};
+
+export const sendTelegram = async (text) => {
+  const chatId = getTelegramAdminChatId();
+  if (!chatId) {
+    return false;
+  }
+  return sendTelegramToChat(chatId, text);
 };

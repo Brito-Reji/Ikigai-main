@@ -21,6 +21,7 @@ const { connectDB } = await import("./config/db.js");
 const { default: logger } = await import("./utils/logger.js");
 const { releaseEscrowJob } = await import("./cron/releaseEscrow.js");
 const { initChatSocket } = await import("./socket/chatSocket.js");
+const { startTelegramBot } = await import("./utils/telegramBot.js");
 
 const PORT = process.env.PORT || 3000;
 
@@ -47,4 +48,5 @@ app.set("io", io);
 httpServer.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
   logger.info(`Socket.IO enabled`);
+  void startTelegramBot();
 });
