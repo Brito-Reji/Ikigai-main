@@ -7,6 +7,7 @@ import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { generateUniqueUsername } from "../../utils/generateUniqueUsername.js";
 import { AppError } from "../../errors/AppError.js";
+import { sendTelegram } from "../../utils/telegram.js";
 
 export const instructorRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
@@ -65,6 +66,15 @@ export const instructorRegisterService = async data => {
     role: "instructor",
     profileImageUrl: defaultAvatar,
   });
+
+  void sendTelegram(
+    [
+      "New instructor signup",
+      `Name: ${firstName} ${lastName}`,
+      `Username: ${username}`,
+      `Email: ${email.toLowerCase()}`,
+    ].join("\n")
+  );
 
   const response = await api.post("/auth/send-otp", { email });
 
@@ -150,6 +160,15 @@ const isStudent = await User.findOne({ email });
       authType: "google",
       role: "instructor",
     });
+
+    void sendTelegram(
+      [
+        "New instructor signup (Google)",
+        `Name: ${instructor.firstName} ${instructor.lastName}`,
+        `Username: ${instructor.username}`,
+        `Email: ${instructor.email}`,
+      ].join("\n")
+    );
   }
 
   const tokens = generateTokens({

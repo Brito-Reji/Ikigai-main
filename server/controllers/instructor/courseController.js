@@ -8,6 +8,7 @@ import {
 } from "../../services/instructor/courseService.js";
 import { Course } from "../../models/Course.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
+import { sendTelegram } from "../../utils/telegram.js";
 
 // GET ALL COURSES OF INSTRUCTOR
 export const getAllCourseByInstructor = asyncHandler(async (req, res) => {
@@ -109,6 +110,15 @@ export const applyForVerification = asyncHandler(async (req, res) => {
   course.verificationStatus = "inprocess";
   course.rejectionReason = null;
   await course.save();
+
+  void sendTelegram(
+    [
+      "Course awaiting review",
+      `Title: ${course.title}`,
+      `Course ID: ${course._id}`,
+      `Instructor ID: ${course.instructor}`,
+    ].join("\n")
+  );
 
   res.status(HTTP_STATUS.OK).json({
     success: true,

@@ -128,6 +128,10 @@ EMAIL_PASS=your_email_app_password
 # Google GenAI
 GOOGLE_GENAI_API_KEY=your_google_genai_api_key
 
+# Telegram alerts (optional — skip to disable)
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
+
 # Frontend URL (for CORS)
 CLIENT_URL=http://localhost:5173
 ```

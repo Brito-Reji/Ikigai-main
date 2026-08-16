@@ -13,6 +13,29 @@ import {
 import { getWalletBalance, debitWallet } from "./walletService.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { AppError } from "../../errors/AppError.js";
+import { sendTelegram } from "../../utils/telegram.js";
+
+const formatAmount = (paise = 0) => `₹${(Number(paise) / 100).toFixed(2)}`;
+
+const notifyPurchase = (order) => {
+  if (!order) return;
+
+  const titles = (order.courseIds || [])
+    .map((course) => course.title)
+    .filter(Boolean)
+    .join(", ") || "unknown";
+  const paidPaise = (order.originalAmount || 0) - (order.discountAmount || 0);
+
+  void sendTelegram(
+    [
+      "Successful purchase",
+      `Courses: ${titles}`,
+      `Amount: ${formatAmount(paidPaise)}`,
+      `Method: ${order.paymentMethod || "razorpay"}`,
+      `User ID: ${order.userId}`,
+    ].join("\n")
+  );
+};
 
 export const createOrderService = async ({
   courseIds,
@@ -274,6 +297,8 @@ const processWalletOnlyPayment = async ({
     },
   });
 
+  notifyPurchase(populatedOrder);
+
   return {
     razorpayOrderId: walletOrderId,
     amount: 0,
@@ -373,6 +398,8 @@ export const updatePaymentStatusService = async ({
       select: "firstName lastName",
     },
   });
+
+  notifyPurchase(enrolledDetails);
 
   return { paymentId: razorpay_payment_id, enrolledDetails };
 };

@@ -12,8 +12,11 @@ import {
 import { getCategories } from "../controllers/admin/categoryController.js";
 import { getSecureStreamUrl } from "../controllers/instructor/streamController.js";
 import getPublicCouponsController from "../controllers/public/publicCoponConroller.js";
+import { recordVisit } from "../controllers/public/visitController.js";
 
 const router = Router();
+
+router.post("/visit", recordVisit);
 
 router.get("/courses", authenticate, getPublishedCourses);
 

@@ -8,6 +8,7 @@ import { generateTokens } from "../../utils/generateTokens.js";
 import { HTTP_STATUS } from "../../utils/httpStatus.js";
 import { generateUniqueUsername } from "../../utils/generateUniqueUsername.js";
 import { AppError } from "../../errors/AppError.js";
+import { sendTelegram } from "../../utils/telegram.js";
 
 export const studentRegisterService = async data => {
   const { email, username, firstName, lastName, password } = data;
@@ -80,6 +81,15 @@ export const studentRegisterService = async data => {
 
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
+
+  void sendTelegram(
+    [
+      "New student signup",
+      `Name: ${user.firstName} ${user.lastName}`,
+      `Username: ${user.username}`,
+      `Email: ${user.email}`,
+    ].join("\n")
+  );
 
   return {
     refreshToken,
@@ -188,6 +198,15 @@ export const studentGoogleAuthService = async token => {
       authType: "google",
       role: "student",
     });
+
+    void sendTelegram(
+      [
+        "New student signup (Google)",
+        `Name: ${user.firstName} ${user.lastName}`,
+        `Username: ${user.username}`,
+        `Email: ${user.email}`,
+      ].join("\n")
+    );
   }
 
   const tokens = generateTokens({
